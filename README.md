@@ -22,6 +22,7 @@ Independent follow-up studies:
 - [Host transport](docs/host-transport-study.md): the normal application's gadget-serial IPC and correction to the older spare-port assumption.
 - [Supported code generation](docs/supported-code-generation.md): mix/gain and four-stage allpass fragments, with original examples.
 - [Native arithmetic primitives](docs/native-arithmetic-primitives.md): bounded native shaping, feedback and voice-end reference semantics.
+- [Operand variants and macro boundaries](docs/operand-variants-and-macro-boundaries.md): exact mono-sum and cross-destination allpass comparisons, with oscillator-layout and exceptional-macro limits.
 
 This directory contains offline tools and derived research. It does not contain
 a working custom synth engine, general assembler, flasher or hardware driver. A constrained
