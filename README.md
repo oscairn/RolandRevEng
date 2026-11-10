@@ -19,6 +19,7 @@ Independent follow-up studies:
 - [Dry/wet MAC controls](docs/dry-wet-mac-study.md): symbolic mixing expressions for the established subset.
 - [MAC, allpass and store timing](docs/mac-controls-and-issue-study.md): additional exact arithmetic forms and pre-arithmetic stores.
 - [Stereo tap accumulation](docs/stereo-tap-accumulation-study.md): six independently matched native stages and exact state-record aliases for four additional long controls.
+- [Tap feedback variations](docs/tap-feedback-variation-study.md): auxiliary products, unchanged input stores and accumulated feedback distinguished in two further native contexts.
 - [Transfer spaces](docs/transfer-spaces-study.md): pointer provenance and the contextual meaning of address tags.
 - [Header fields](docs/header-fields-study.md): bounded operation-family and payload-layout findings.
 - [Exceptional operations](docs/special-ops-and-exp-study.md): exponential reference windows and deliberately unsupported short controls.
