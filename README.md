@@ -21,6 +21,7 @@ Independent follow-up studies:
 - [Receive path and test controls](docs/core1-receive-and-test-controls.md): CORE-local queues, boot modes and stock diagnostic controls.
 - [Host transport](docs/host-transport-study.md): the normal application's gadget-serial IPC and correction to the older spare-port assumption.
 - [Supported code generation](docs/supported-code-generation.md): mix/gain and four-stage allpass fragments, with original examples.
+- [Kernel and audio ABI](docs/kernel-audio-abi-study.md): stock mute controls, manager reservations, shared routing and a gated probe design.
 - [Native arithmetic primitives](docs/native-arithmetic-primitives.md): bounded native shaping, feedback and voice-end reference semantics.
 
 This directory contains offline tools and derived research. It does not contain
