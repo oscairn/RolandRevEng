@@ -577,3 +577,26 @@ complete-program inventory. Current manifest is
 `local/obsidian-applied-seventh-2026-11-10.json`. Code, WAVs, reports and vendor
 bytes remain in the project. No live action, updater, flash or prepared shell
 package was executed or modified.
+
+
+## Roland vault organization — 2026-11-10
+
+At Jacob's request, moved all 52 Roland research and related planning Markdown
+notes from `Projects/Oscairn` into `Projects/Oscairn/Roland`. This includes the
+49 previously managed notes, the engine overview and two related planning/draft
+notes. All prior managed hashes matched; every source was backed up and all 52
+moved files verified unchanged. A no-clobber hard-link/unlink move preserved the
+contents and refused destination collisions. No non-Markdown file was moved.
+
+All moved titles are unique across the 553-note vault. The 67 title-based links
+to these notes remain resolvable, and no explicit old-path note link required
+rewriting. No canvas/base reference to the old note paths was found. Original
+research, code, generated audio and vendor bytes remain in the project. Latest
+location/manifest: `local/obsidian-location.json` and
+`local/obsidian-applied-roland-move-2026-11-10.json`; old sync scripts/manifests
+are historical and must not be reapplied to the old folder.
+
+Continued complete-effect work in three independent scopes: LINE parameter
+literal ownership/grouped writes, native shaping/quantization, and circular
+state/history cadence. Strict interpreter admissions remain unchanged until each
+new context has independent evidence.

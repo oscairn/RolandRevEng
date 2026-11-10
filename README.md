@@ -136,7 +136,14 @@ symbol adjacency does not prove ownership by a program class.
 Local documentation prepared for the existing vault is under ignored `docs/obsidian/`;
 code stays here. These working copies are not part of the GitHub repository.
 The initial 19-note update was applied to the vault on 2026-11-10 through reviewed file access.
-Subsequent passes now cover 49 verified notes, including the functional fragment emulator, official cross-model
+The Roland research and related planning notes are organized in
+`/Users/jacob/Documents/ObsidianVault/Projects/Oscairn/Roland`. All 52 moved notes
+were verified byte for byte; their unique title links remain valid. Future vault
+updates target this subdirectory. The move manifest and current location are
+recorded locally in `local/obsidian-applied-roland-move-2026-11-10.json` and
+`local/obsidian-location.json`. Earlier manifests describe historical paths.
+
+The research notes include the functional fragment emulator, official cross-model
 comparisons, key/access studies and corrections to older recovery claims.
 The latest pass wrote seven Markdown notes and verified all 49 against the staged
 hashes. Firmware downloads remain local/ignored.
