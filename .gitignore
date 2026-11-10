@@ -1,0 +1,25 @@
+/local/
+/vendor/
+/dumps/
+/build/
+__pycache__/
+.venv/
+.DS_Store
+*.bin
+*.BIN
+*.pkl
+*.zip
+*.tar
+*.tar.gz
+*.rom
+*.img
+*.vst3/
+# Keep generated coefficient tables, disassembly and raw evidence local.
+/evidence/*
+!/evidence/README.md
+!/evidence/summary.json
+!/evidence/core0_headers.json
+!/evidence/core1_bmc0_api.json
+# Working copies of personal vault notes are not repository deliverables.
+/docs/obsidian/
+/docs/obsidian-update.patch

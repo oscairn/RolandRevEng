@@ -1,0 +1,63 @@
+{
+  "artifacts": {
+    "zenology": {
+      "sha256": "b8ba7f41e26bef91e2cc38e99452e7795cd132e9f2a59695a68a77f18b8a2c30",
+      "counts": {
+        "segments": 177,
+        "bytes": 189994,
+        "packets": 12365,
+        "long_packets": 150,
+        "compact_001f": 3,
+        "compact_0001": 238,
+        "indexed_transfers": 17957
+      },
+      "distinct_headers": 568,
+      "failed_segments": 0
+    },
+    "b0c1a.bin": {
+      "sha256": "6d95449ae2a2df48fb60f8b69da6bf8c7198611255b63d59081ba5bdf5263154",
+      "counts": {
+        "segments": 377,
+        "bytes": 448978,
+        "packets": 36793,
+        "long_packets": 149,
+        "compact_001f": 14,
+        "compact_0001": 3705,
+        "indexed_transfers": 37626
+      },
+      "distinct_headers": 664,
+      "failed_segments": 0
+    },
+    "b1c1a.bin": {
+      "sha256": "c8d150b9cfe13d8e091ed5f3d79786d084bdb7a6ae6d360582f32d5d223268bd",
+      "counts": {
+        "segments": 34,
+        "bytes": 125634,
+        "packets": 12176,
+        "long_packets": 99,
+        "compact_001f": 13,
+        "compact_0001": 869,
+        "indexed_transfers": 9375
+      },
+      "distinct_headers": 427,
+      "failed_segments": 0
+    }
+  },
+  "paired_render_classes": 75,
+  "paired_layout": {
+    "packets": 5101,
+    "relocating_words": 5412,
+    "indexed_transfers": 7103,
+    "native_literal_anchors": 3474
+  },
+  "coefficient_checks": {
+    "unresolved_width": 790,
+    "width_3": 2174,
+    "within_lsb": 549,
+    "exact": 2134,
+    "width_4": 438,
+    "non_literal_default_records": 9,
+    "width_2": 72,
+    "different": 1
+  }
+}

@@ -1,0 +1,2 @@
+# Existing analysis dependency; vendor binaries are supplied locally by the user.
+capstone==5.0.7

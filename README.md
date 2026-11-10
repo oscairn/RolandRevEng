@@ -1,0 +1,94 @@
+# RolandRevEng
+
+Independent Roland BMC interoperability research, starting with Fantom-0 v1.08 and
+the installed ZENOLOGY plugin. Intended remote: `https://github.com/jbschooley/RolandRevEng.git`.
+Keep the repository private as requested. This is not an official Roland project.
+
+Read [the packet and loader map](docs/BMC%20DSP%20packet%20and%20loader%20map.md) for findings,
+confidence, build-specific addresses and the remaining requirements for custom engines.
+
+Independent follow-up studies:
+
+- [Gain controls](docs/alu-controls-study.md): native def/use comparison of selected gain chains.
+- [Dry/wet MAC controls](docs/dry-wet-mac-study.md): symbolic mixing expressions for the established subset.
+- [Transfer spaces](docs/transfer-spaces-study.md): pointer provenance and the contextual meaning of address tags.
+- [Header fields](docs/header-fields-study.md): bounded operation-family and payload-layout findings.
+- [CORE1 command entry](docs/core1-command-entry-study.md): actual callbacks versus logging strings.
+
+This directory contains offline tools and derived research. It does not contain
+a working custom synth engine, semantic assembler, flasher or hardware driver. Nothing
+here opens a device or executes Roland's plugin. Production Oscairn code was not changed.
+
+## Reproduce
+
+Python 3 and Capstone 5.0.7 are sufficient for the analysis; `requirements.txt` records
+the existing analysis dependency. Preparing exports also uses Xcode's `dyld_info` and
+`c++filt`. Use an interpreter with Capstone installed. To prepare a fresh environment:
+
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+. .venv/bin/activate
+```
+
+From this directory, with that environment active:
+
+```sh
+python3 tools/prepare_zenology.py '/Library/Audio/Plug-Ins/VST3/Roland/ZENOLOGY.vst3/Contents/MacOS/ZENOLOGY' --out local
+python3 tools/extract_zenology.py
+python3 tools/analyze.py
+python3 -m unittest discover -s tests -v
+```
+
+The first two commands regenerate the effect metadata without the old scratchpad or its
+pickle files. `analyze.py` additionally expects `local/b0c1a.bin` and `local/b1c1a.bin`:
+the respective `bmc*_MI078_C1A_up.bin` files with their first 32 container bytes removed.
+These inputs are already prepared locally for this investigation. The unmodified files
+are inside `FNTM0_UPA.BIN` in the user's v1.08 update. Artifact SHA-256 identities are
+recorded in `evidence/analysis.json`; other plugin versions require a fresh analysis.
+
+`local/`, detailed generated evidence and working vault copies are ignored. Keep vendor
+images, generated exports, disassembly and extracted coefficient/program data local.
+Only aggregate results, artifact identities and recovered interfaces are tracked.
+The existing `parse.py`, `lift.py` and `coeftab.py` were preserved from Jacob's earlier
+scratchpad and adapted for durable paths and the corrected segment layout. Their ARM
+readers are bounded heuristics, not general interpreters. Native operand dumps remain
+supporting evidence rather than a semantic proof.
+
+## Inspect
+
+```sh
+# Native DSP0 program in the header-stripped bmc0 CORE1 payload:
+python3 tools/bmc_dsp.py local/b0c1a.bin --stored --offset 0xc49b0 --length 0x13e4
+
+# Recover a CORE1 scatter map, or inspect the DSP upload function:
+python3 tools/core1.py local/b0c1a.bin
+python3 tools/core1.py local/b0c1a.bin --address 0x112f582 --size 0x122
+python3 tools/core1.py local/b0c1a.bin --find 'CBmcDspDrv::GetDspProgAdrs('
+
+# Inspect a complete CORE0 container header without decrypting it:
+python3 tools/c0_header.py local/bmc0_MI078_C0A_up.bin
+```
+
+Packet output is `offset: header | base control words | operand pool as words`.
+The pool can contain operation extension words as well as addresses and literals.
+`bmc_dsp.assemble()` reconstructs raw packets and checks lengths. It does not assemble
+named arithmetic instructions. The decoder rejects unobserved header bit 5 and unknown
+compact forms instead of skipping bytes to manufacture a successful parse.
+
+The locally generated `evidence/analysis.json` contains packet inventories, complete scatter records and the
+firmware program-list candidates. `coefficient_widths.json` records exact symbol offsets
+and the one unresolved value mismatch among explicitly sized decoded coefficients.
+`core1_bmc0_api.json` and `core1_bmc0_functions.txt` retain the build-specific load path.
+
+Local documentation prepared for the existing vault is under ignored `docs/obsidian/`;
+code stays here. These working copies are not part of the GitHub repository.
+The current session could read the vault but its filesystem sandbox rejected writes.
+The original vault files were checked afterward and are unchanged. The local
+`docs/obsidian-update.patch` was applied in a temporary project directory and its results
+compared byte for byte with the staged documents. To apply it from a writable session:
+
+```sh
+cd /Users/jacob/Documents/ObsidianVault/Projects/Oscairn
+patch -p1 < '/Users/jacob/Projects/Open Synth Platform/bmc-research/docs/obsidian-update.patch'
+```

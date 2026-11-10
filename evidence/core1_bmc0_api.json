@@ -1,0 +1,134 @@
+{
+  "build": "bmc0 MI078 C1A v1.08 commit 947de6711",
+  "payload_sha256": "6d95449ae2a2df48fb60f8b69da6bf8c7198611255b63d59081ba5bdf5263154",
+  "functions": {
+    "StackWriteDspProg": {
+      "address": 18019714,
+      "thumb_pointer": 18019715
+    },
+    "GetDspProgAdrs": {
+      "address": 18020650,
+      "thumb_pointer": 18020651
+    },
+    "WriteLiteralRaw": {
+      "address": 18019624,
+      "thumb_pointer": 18019625
+    },
+    "WriteLiteralFloat": {
+      "address": 18022222,
+      "thumb_pointer": 18022223
+    },
+    "FinishDspDMA_candidate": {
+      "address": 18020004,
+      "thumb_pointer": 18020005
+    },
+    "WriteDspProgAllImpl": {
+      "address": 18029646,
+      "thumb_pointer": 18029647
+    },
+    "SetExeMode": {
+      "address": 18025324,
+      "thumb_pointer": 18025325
+    },
+    "GetExeMode": {
+      "address": 18025446,
+      "thumb_pointer": 18025447
+    },
+    "DSP_listed_memcpy": {
+      "address": 18018960,
+      "thumb_pointer": 18018961
+    },
+    "Reset": {
+      "address": 17829460,
+      "thumb_pointer": 17829461
+    },
+    "Scatter_bootstrap": {
+      "address": 1627389952,
+      "thumb_pointer": 1627389953
+    }
+  },
+  "tables": {
+    "program": {
+      "address": 18065748,
+      "values": [
+        1095237632,
+        1096286208,
+        1097334784,
+        1098383360,
+        1099431936,
+        1100480512,
+        1093009408
+      ]
+    },
+    "dramio_bank0": {
+      "address": 18065776,
+      "values": [
+        1094975488,
+        1096024064,
+        1097072640,
+        1098121216,
+        1099169792,
+        1100218368
+      ]
+    },
+    "dramio_bank1": {
+      "address": 18065800,
+      "values": [
+        1094991872,
+        1096040448,
+        1097089024,
+        1098137600,
+        1099186176,
+        1100234752
+      ]
+    },
+    "literal_float": {
+      "address": 18065980,
+      "values": [
+        1091585024,
+        1091589120,
+        1091593216,
+        1091597312,
+        1091601408,
+        1091605504,
+        1091576832
+      ]
+    },
+    "literal_fixed": {
+      "address": 18066008,
+      "values": [
+        1091585536,
+        1091589632,
+        1091593728,
+        1091597824,
+        1091601920,
+        1091606016,
+        1091577344
+      ]
+    },
+    "literal_raw": {
+      "address": 18066036,
+      "values": [
+        1091585792,
+        1091589888,
+        1091593984,
+        1091598080,
+        1091602176,
+        1091606272,
+        1091577600
+      ]
+    },
+    "execution_control": {
+      "address": 18065900,
+      "values": [
+        1091584784,
+        1091588880,
+        1091592976,
+        1091597072,
+        1091601168,
+        1091605264,
+        1091576592
+      ]
+    }
+  }
+}

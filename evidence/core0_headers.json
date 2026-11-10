@@ -1,0 +1,26 @@
+{
+  "bmc0_MI078_C0A_up.bin": {
+    "sha256": "0ecb9c16adf67349c0f1efd6e8c257465972690a3ca1b5e5af29dbb1f2c480c9",
+    "payload_offset": 96,
+    "payload_length": 1527472,
+    "flash_source": 393312,
+    "load_destination": 1610612736,
+    "checksum": 3249440197,
+    "crypto_control": 3053584385,
+    "enabled": 1,
+    "mode": 2,
+    "key_index": 182
+  },
+  "bmc1_MI078_C0A_up.bin": {
+    "sha256": "2929219309206f7f9ac0abab429a6a20e5eff45c6caf7c417af197f2275911f5",
+    "payload_offset": 96,
+    "payload_length": 1503344,
+    "flash_source": 393312,
+    "load_destination": 1610612736,
+    "checksum": 1175022239,
+    "crypto_control": 3053584385,
+    "enabled": 1,
+    "mode": 2,
+    "key_index": 182
+  }
+}
