@@ -400,3 +400,23 @@ assembler/interpreter. Further aliases of equal values cannot settle the bits.
 Bulk-clear units still need an actual count-to-indexed-range relation. Usable
 entry/recovery, a readable peer/ROM artifact and hardware state/timing observations
 remain dependencies for an executable engine, not tasks solved by passing offline tests.
+
+
+## Active emulator milestone
+
+The [functional interpreter](fragment-emulator.md) now executes the exact 60-byte
+dry/wet and 82-byte allpass families. Its first audio demonstrations use original
+signals and explicit host state wiring. [Independent corpus checks](fragment-emulator-validation.md)
+compare every packet and store and compose the two actual LINEDRIVE chains into
+its real tail; this does not supply the unproved stock prefix or circular cadence.
+
+The [five-program inventory](emulator-next-program-targets.md) selects LINEDRIVE
+as the next complete-effect target: 42 remaining packets, prefix numeric/state
+behavior, coefficient bindings and entry/return wrappers still need proof. The
+shorter CHO/GATE files have more unresolved structure and control flow. Prioritize
+the LINE input-mix/store window `004..038` against native `2df884..2df8d8`, retaining
+constructor-field identity and independent L/R expressions; equal defaults cannot
+settle duplicated literal fields. Then recover quantized shaping and history.
+No automatic unknown-as-zero, whole-effect substitution or guessed return semantics
+is authorized by a successful fragment render. Hardware access/recovery and numeric
+calibration remain separate dependencies for deployment.

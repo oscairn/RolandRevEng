@@ -85,3 +85,16 @@ wrapper, allocator, general register decoder or custom synth engine follows from
 the ledger. Live coefficient smoothing is a separate
 [CORE1 manager interface](coefficient-envelope-and-completion-study.md), not a
 DSP arithmetic opcode or a program-literal write.
+
+
+## Executable offline subset
+
+The [functional fragment interpreter](fragment-emulator.md) now executes only the
+same exact dry/wet and allpass contexts accepted by the inverse decoder. It steps
+packet bytes with old-port arithmetic/stores, next-packet loads and copied trace
+snapshots. [Corpus validation](fragment-emulator-validation.md) checks the actual
+four stock spans and native proofs independently. Other arithmetic entries above
+remain study results, without executable admission. Binary64 reference behavior
+is not calibrated silicon precision or timing. The
+[next-program inventory](emulator-next-program-targets.md) keeps complete-program
+prefix, suffix, history and wrapper gaps explicit.

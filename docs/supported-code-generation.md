@@ -116,3 +116,10 @@ before adding it. Especially avoid interpreting a packet's written control order
 a sequential execution schedule. A useful eventual tiny-engine backend needs proven
 entry/exit behavior, resource allocation, state initialization and cycle constraints in
 addition to emitting these bytes.
+
+
+The [offline interpreter](fragment-emulator.md) can now execute these exact
+logical-byte fragments with explicit memory/coefficient/input dictionaries and
+per-packet traces. It retains all emitter restrictions and supplies no wrapper or
+resource allocator. Original WAV demonstrations and independent stock-byte tests
+are documented there.

@@ -19,6 +19,12 @@ The vendor files stay in its ignored `local/` directory. Counts below are genera
 
 The subsequent unattended studies refine this first-pass map:
 
+- [Offline fragment emulator](fragment-emulator.md) executes the two exact
+  proved templates and renders original audio. [Independent validation](fragment-emulator-validation.md)
+  checks actual bytes and every packet/store. The [next-program inventory](emulator-next-program-targets.md)
+  selects LINEDRIVE while retaining 42 unadmitted packets plus history/wrapper
+  requirements; no complete stock effect or hardware engine is executable yet.
+
 - [Control-semantics ledger](opcode-semantics-ledger.md) collects independently
   checked arithmetic forms, context requirements and unsupported controls in one
   place. [Tap-feedback variation](tap-feedback-variation-study.md) adds two exact

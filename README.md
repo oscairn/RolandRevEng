@@ -15,6 +15,12 @@ ownership/mute controls are mapped. The external peer, safe task entry, state se
 and hardware timing still block a runnable custom engine. The MMIO read-reply builder
 also has a static stack-size discrepancy; it is not a demonstrated safe loader.
 
+A strict [offline fragment interpreter](docs/fragment-emulator.md) now steps the two
+proved packet families, with per-packet traces and independent actual-corpus checks.
+It can render original impulse and stereo mix WAV demonstrations without vendor
+artifacts. The [complete-program inventory](docs/emulator-next-program-targets.md)
+selects LINEDRIVE next; its remaining packets and wrappers are still unadmitted.
+
 Independent follow-up studies:
 
 - [Gain controls](docs/alu-controls-study.md): native def/use comparison of selected gain chains.
@@ -31,6 +37,7 @@ Independent follow-up studies:
 - [Host/CORE1 bridge](docs/host-core1-bridge-followup.md): routes, service replies, CORE-local MMIO and the precise missing peer boundary.
 - [CORE1 service startup](docs/core1-service-startup-mmio.md): normal initializer-table activation in both builds and exact MMIO reply-frame bounds.
 - [Host version identities](docs/host-version-and-upstream-crosscheck.md): five component slots, checked version strings and bounded public-source comparisons.
+- [Fragment emulator validation](docs/fragment-emulator-validation.md): pinned stock bytes, complete traces, stores and adjacent-fragment composition.
 - [Supported code generation](docs/supported-code-generation.md): mix/gain and four-stage allpass fragments, with original examples.
 - [Kernel and audio ABI](docs/kernel-audio-abi-study.md): stock mute controls, manager reservations, shared routing and a gated probe design.
 - [Effect lifecycle and parent entries](docs/effect-lifecycle-and-parent-entry-study.md): factory replacement ordering, coefficient clearing and four effect-entry candidates.
@@ -58,7 +65,7 @@ Independent follow-up studies:
 - [Oscillator layout candidates](docs/oscillator-layout-candidates.md): competing arities consistent with six independently owned coefficient anchors.
 
 This directory contains offline tools and derived research. It does not contain
-a working custom synth engine, general assembler, flasher or hardware driver. A constrained
+a working custom synth engine, full stock-effect emulator, general assembler, flasher or hardware driver. A constrained
 emitter reproduces two verified fragment families; it does not schedule arbitrary operations. Nothing
 here opens a device or executes Roland's plugin. Production Oscairn code was not changed.
 
