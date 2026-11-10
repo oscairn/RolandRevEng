@@ -11,25 +11,36 @@ import sys
 from bmc_dsp import assemble, packets, swap_words
 
 
-STEREO_INPUT_ADDRESSES = ((0x2016, 0x2017), (0x2459, 0x245a))
+DEFAULT_INPUT_ADDRESSES = (0x2016, 0x2017)
+STEREO_INPUT_ADDRESSES = (
+    DEFAULT_INPUT_ADDRESSES, (0x2459, 0x245a),
+    (0x2000, 0x2001), (0x2005, 0x2006), (0x2009, 0x200a),
+    (0x200d, 0x200e), (0x20ee, 0x20ef),
+)
+
+
+def input_pair(addresses):
+    if (not isinstance(addresses, list) or len(addresses) != 2
+            or any(type(address) is not int for address in addresses)
+            or tuple(addresses) not in STEREO_INPUT_ADDRESSES):
+        raise ValueError('Expected one checked stereo input pair in channel order')
+    return addresses
 
 
 def assemble_stereo_input(spec):
     if (not isinstance(spec, dict) or set(spec) != {'kind', 'input_addresses'}
             or spec['kind'] != 'stereo_input'):
         raise ValueError('Expected stereo_input and input_addresses')
-    addresses = spec['input_addresses']
-    if (not isinstance(addresses, list) or any(type(address) is not int for address in addresses)
-            or tuple(addresses) not in STEREO_INPUT_ADDRESSES):
-        raise ValueError('Expected one checked stereo input pair in channel order')
-    return assemble([[0x1e05, 0x0fe0, 0x1fe2, *addresses]])
+    return assemble([[0x1e05, 0x0fe0, 0x1fe2, *input_pair(spec['input_addresses'])]])
 
 
 def validate(spec):
-    if not isinstance(spec, dict) or set(spec) != {'kind', 'wet_addresses', 'coefficient_slots'}:
-        raise ValueError('Expected kind, wet_addresses and coefficient_slots only')
+    if not isinstance(spec, dict) or set(spec) - {'input_addresses'} != {'kind', 'wet_addresses', 'coefficient_slots'}:
+        raise ValueError('Expected kind, wet_addresses, coefficient_slots and optional input_addresses')
     if spec['kind'] != 'dry_wet_tail':
         raise ValueError('Only the verified dry_wet_tail template is supported')
+    if 'input_addresses' in spec:
+        input_pair(spec['input_addresses'])
     for name, count, maximum in [('wet_addresses', 2, 0x7ff), ('coefficient_slots', 4, 0xfff)]:
         values = spec[name]
         if (not isinstance(values, list) or len(values) != count or
@@ -42,16 +53,17 @@ def validate(spec):
 def assemble_tail(spec):
     """Emit only the observed packet order, with explicitly assigned resources.
 
-    Inputs remain the contextual stock slots 2016/2017. Outputs remain main A/B;
-    no entry, exit, IO setup, state initialization or resource allocation is emitted.
+    Inputs use a checked stereo pair and outputs use main A/B.
+    The caller supplies entry, exit, IO setup, state and resource assignments.
     """
     validate(spec)
     left, right = spec['wet_addresses']
+    input_left, input_right = spec.get('input_addresses', DEFAULT_INPUT_ADDRESSES)
     dry, wet, post, master = [0xc000 | index for index in spec['coefficient_slots']]
     return assemble([
-        [0x1e05, 0x0fe0, 0x3fe2, 0x2016, dry],
+        [0x1e05, 0x0fe0, 0x3fe2, input_left, dry],
         [0x1e05, 0x1fe0, 0x7fe2, left, wet],
-        [0x2b07, 0x080b, 0x4fe2, 0x5fe4, 0x13c0, 0x2017, right],
+        [0x2b07, 0x080b, 0x4fe2, 0x5fe4, 0x13c0, input_right, right],
         [0x1405, 0x490b, 0x3fe2, 0x53c0, post],
         [0x2e05, 0x0403, 0x4503, 0x3fe0, master],
         [0x1503, 0x0403, 0x4503],
@@ -66,6 +78,9 @@ def disassemble_tail(stream):
     a, b, c, d, e, _ = [words for _, words in decoded]
     spec = dict(kind='dry_wet_tail', wet_addresses=[b[3], c[6]],
                 coefficient_slots=[a[4] & 0xfff, b[4] & 0xfff, d[4] & 0xfff, e[4] & 0xfff])
+    addresses = a[3], c[5]
+    if addresses != DEFAULT_INPUT_ADDRESSES:
+        spec['input_addresses'] = list(addresses)
     if assemble_tail(spec) != stream:
         raise ValueError('Unsupported controls, extensions or address tags')
     return spec
@@ -74,10 +89,10 @@ def disassemble_tail(stream):
 def assemble_tail_with_scratch(spec):
     if (not isinstance(spec, dict)
             or spec.get('kind') != 'dry_wet_tail_with_scratch'
-            or set(spec) != {'kind', 'wet_addresses', 'coefficient_slots', 'scratch_addresses'}):
+            or set(spec) - {'input_addresses'} != {'kind', 'wet_addresses', 'coefficient_slots', 'scratch_addresses'}):
         raise ValueError('Expected dry/wet resources and scratch_addresses')
-    base = {key: spec[key] for key in ('wet_addresses', 'coefficient_slots')}
-    tail = assemble_tail(dict(kind='dry_wet_tail', **base))
+    base = {key: value for key, value in spec.items() if key != 'scratch_addresses'}
+    tail = assemble_tail(dict(base, kind='dry_wet_tail'))
     scratch = spec['scratch_addresses']
     if (not isinstance(scratch, list) or len(scratch) != 2
             or any(type(value) is not int or not 0 <= value <= 0x7ff for value in scratch)

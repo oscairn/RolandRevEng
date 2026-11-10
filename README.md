@@ -24,7 +24,8 @@ selects LINEDRIVE next and tracks its remaining packets and wrappers.
 The [conditional LINE reference](docs/fragment-emulator.md#conditional-line-reference-pipeline)
 now combines a checked native shaping oracle, explicit native ring steps and the
 proved fragment bytes. This supplies a broader offline test fixture without
-executing the unknown DSP prefix or wrappers. Its FMA oracle requires Python 3.13+.
+executing the unknown DSP prefix or wrappers. It can use the original fragments
+from any of the five recorded Fantom placements. Its FMA oracle requires Python 3.13+.
 
 Independent follow-up studies:
 
@@ -152,12 +153,12 @@ were verified byte for byte; their unique title links remain valid. Continued
 research now covers 57 verified notes in this folder. Future vault
 updates target this subdirectory. The move manifest is
 `local/obsidian-applied-roland-move-2026-11-10.json`; the latest update manifest
-is `local/obsidian-applied-tenth-2026-11-10.json`. Current folder and manifest
+is `local/obsidian-applied-eleventh-2026-11-10.json`. Current folder and manifest
 are recorded in `local/obsidian-location.json`. Earlier manifests describe historical paths.
 
 The research notes include the functional fragment emulator, official cross-model
 comparisons, key/access studies and corrections to older recovery claims.
-The latest pass updated seven Markdown notes and verified all 57 against the staged
+The latest pass updated four Markdown notes and verified all 57 against the staged
 hashes. Firmware downloads remain local/ignored.
 Saved hashes were checked before each update; every note was verified byte for byte.
 Original backups, the initial validated patch and the applied hash manifests remain

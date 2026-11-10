@@ -42,6 +42,20 @@ class FragmentNumericsTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 execute_fragment(program[:4]+bytes.fromhex('4fe2')+program[6:], {}, {}, inputs)
 
+    def test_mix_relocation_requires_one_complete_observed_pair(self):
+        program, data, coefficients, io = tail_inputs()
+        spec = dict(disassemble_fragment(program), input_addresses=[0x2009, 0x200a])
+        relocated = assemble_fragment(spec)
+        self.assertEqual(disassemble_fragment(relocated), spec)
+        original = execute_fragment(program, data, coefficients, io)
+        actual = execute_fragment(relocated, data, coefficients,
+                                  {0x2009: io[0x2016], 0x200a: io[0x2017]})
+        self.assertEqual(actual, original)
+        with self.assertRaises(ValueError):
+            assemble_fragment(dict(spec, input_addresses=[0x2009, 0x2017]))
+        with self.assertRaises(ValueError):
+            execute_fragment(relocated, data, coefficients, io)
+
     def test_scratch_round_trip_executes_writes_and_rejects_changed_suffix(self):
         tail, data, coefficients, io = tail_inputs()
         spec = dict(disassemble_fragment(tail), kind='dry_wet_tail_with_scratch',

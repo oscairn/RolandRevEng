@@ -25,17 +25,17 @@ The dry/wet fragment is 60 logical bytes, with packet starts at relative offsets
 `0, 10, 20, 34, 44, 54`. The two wet indices must be distinct and in `0..0x7ff`, avoiding
 aliases from the native circular-data mask. The four coefficient indices must be
 distinct and in `0..0xfff`. Distinctness retains the independently checked subset;
-it is not a claim that hardware prohibits shared sources. Coefficients use tag C,
-and the contextual input addresses stay fixed. Unknown controls, extension variants,
-tags, extra packets and schema fields are rejected.
+hardware alias behavior remains unmeasured. Coefficients use tag C. Input
+addresses default to the desktop pair and can select one of the checked pairs
+listed below. Unknown controls, extension variants, tags, extra packets and
+schema fields are rejected.
 
 Entry/exit instructions, output stores, routing, data initialization, coefficients'
 values, program placement and stop/start management are intentionally absent. A
 fragment cannot be loaded as a complete program. The [kernel ABI follow-up](kernel-audio-abi-study.md)
 recovers the stock `ff70/ff71` mute-mode update, manager reservations and shared routing.
-It does not establish a safe executable wrapper or the meaning of `00f8`. The fixed
-`2016/2017` inputs above are one desktop instance; other instances and firmware use
-different operands. This template performs no resource or routing relocation.
+The executable wrapper and the meaning of `00f8` remain open. Callers
+provide the resource assignments and routing for their selected instance.
 
 ## Use without vendor artifacts
 
@@ -147,10 +147,11 @@ The accepted profile ends before both packets.
 
 ## Stereo input
 
-The `stereo_input` profile accepts `input_addresses` of `[8214,8215]`
-or `[9305,9306]` in JSON. These are `2016/2017` and `2459/245a`
-in hex. The ten-byte packet has header `1e05` and loads the two input
-slots into ports 0 and 1 with `0fe0/1fe2`. Both LINE and FETDRIVE use
+The `stereo_input` profile accepts `input_addresses` for the desktop pairs
+`2016/2017` and `2459/245a` and the five recorded Fantom pairs. Use
+decimal integers in JSON. The dry/wet profiles accept the same optional
+`input_addresses`. Omitting the field selects `2016/2017`. The ten-byte packet has header `1e05` and loads
+the two input slots into ports 0 and 1 with `0fe0/1fe2`. Both LINE and FETDRIVE use
 the first pair in the `4020` bank and the second in the `8000` bank.
 Native input-pointer loads and all four actual packet slices were checked.
 The executor accepts the matching pair as its IO map for this profile.
@@ -159,3 +160,10 @@ The following input-mix packets still need independent evidence for the
 duplicated literal fields and outgoing store sources. The conditional LINE
 render uses the admitted stereo input packet before applying its host
 shaping equations.
+
+
+The additional Fantom input pairs are `2000/2001`, `2005/2006`,
+`2009/200a`, `200d/200e` and `20ee/20ef`. Each pair is admitted
+in its recorded channel order. The dry/wet decoder omits
+`input_addresses` when it sees the original default pair.
+[Checked placement and fragment extraction](fragment-emulator.md#linedrive-from-the-fantom-image)

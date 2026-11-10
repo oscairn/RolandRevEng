@@ -724,3 +724,29 @@ scan is retained locally as `local/tenth-prefix-corpus.py`.
 The full local suite passed 250 tests. The focused selector tests also
 passed with the final SetAlg and native output-use anchors. Seven Roland
 notes were updated and all 57 verified.
+
+## Fantom LINE placements and original one-pole execution
+
+The pinned bmc0 render list provides all five LINE owner placements.
+The reader checks program hashes, packet boundaries and the recorded
+DM and coefficient reservations. It uses actual transfer operands to
+bind input slots, smoother history, allpass state, wet inputs and scratch
+stores. In particular the firmware right smoother reads base plus 6
+and writes plus 5, unlike the desktop fixture's 7/6 pair. The five
+placements match the desktop fixture through wrap. The 12,000-frame
+DSP4 render is byte-identical to the previous WAV.
+
+The original one-pole fixture assembles two 80-byte variants. The host
+alternates them and each variant reads the previous output and stores
+the next. An asymmetric impulse sequence checks the state carried by
+the packets. Separately, the stock readback comparator checks one
+578-byte logical segment and identifies the opening mute-bit-only case.
+The runtime owner and physical capture route still require independent
+hardware evidence.
+
+Qwen's review was checked. It confused IO addresses with wet memory,
+assumed global relocation arithmetic, and suggested the opposite
+history relation. The implementation uses exact half-open slices,
+literal operand identities, and read=write+1 in the reference model.
+All 255 tests passed with the local corpus. Four Roland Markdown notes
+were updated and all 57 verified.

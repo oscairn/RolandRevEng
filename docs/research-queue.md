@@ -477,3 +477,19 @@ The alternate-bank comparison keeps the duplicated input-mix literals
 equal, so resolving their independent roles and the auxiliary store
 sources still needs a discriminating case.
 [Stereo input and bank comparison](emulator-next-program-targets.md#input-packet-and-bank-comparison)
+
+## Fantom LINE placements and original stateful kernel
+
+The conditional renderer now executes original input, allpass and
+mix/scratch slices from all five pinned Fantom LINE placements. Each
+matches the desktop fixture through ring wrap. A separate original
+one-pole fixture carries its previous outputs through DSP stores and
+alternates two preassembled variants on the host.
+[Offline render and kernel](fragment-emulator.md#linedrive-from-the-fantom-image)
+
+For the hardware track, the first missing observation is normalized
+program readback from a verified active owner. The offline comparator
+can now distinguish an exact match, the recorded opening mute-bit
+difference and other differences. Prefix arithmetic and return
+continuation remain open on the DSP track.
+[Placement and readback comparison](kernel-audio-abi-study.md#offline-line-placement-and-readback-comparison)

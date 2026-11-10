@@ -6,7 +6,7 @@ Only complete profiles accepted by bmc_subset may enter the packet interpreter.
 import math
 
 from bmc_dsp import command_count, packets
-from bmc_subset import disassemble_fragment
+from bmc_subset import DEFAULT_INPUT_ADDRESSES, disassemble_fragment
 
 
 def _finite(value, label):
@@ -38,7 +38,7 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
     if not isinstance(program, bytes):
         raise ValueError('Program must be logical bytes')
     spec = disassemble_fragment(program)
-    io_addresses = spec.get('input_addresses', (0x2016, 0x2017))
+    io_addresses = spec.get('input_addresses', DEFAULT_INPUT_ADDRESSES)
     memory = _values(data, 'data', range(0x800))
     coefs = _values(coefficients, 'coefficients', range(0x1000))
     inputs = _values({} if io is None else io, 'io', io_addresses)

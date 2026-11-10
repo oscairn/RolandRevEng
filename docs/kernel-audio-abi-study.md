@@ -317,3 +317,28 @@ an instance before `SetAlg`, and resolve scheduling from the parent routing prog
 to its render reservations. Next hardware experiment, once its gates are met: retain
 the complete graph and measure the master-zero/pass/gain sequence above, including
 program/parameter readback and adjacent-instance isolation.
+
+## Offline LINE placement and readback comparison
+
+The context reader uses the pinned `b0c1a.bin` to join the LINEDRIVE
+list at `611084fc` to its five recorded owner descriptors. For the default
+DSP4 placement it reports the expected 578 logical program bytes at
+`4020`, their hash, the memory reservations, input pair `2000/2001`
+and output operand candidates `2002/2003`. Allpass data, scratch, and
+coefficient operands are checked against the relevant reservations.
+The reported destination describes a stock placement available in the
+image. Active selection must be established from the instrument.
+
+```sh
+python3 tools/fantom_line_context.py local/b0c1a.bin --owner 0x610a1674
+```
+
+The same command can compare an independently acquired, normalized
+logical-byte capture with `--readback path`. It expects exactly one
+578-byte LINE segment for the selected owner. It reports exact matches,
+offsets of differences, and the special case where the opening
+`ff71` differs only by the observed mute bit. Other changes are reported
+as differences, including potential live parameter edits. The tool
+has no connection to the instrument. The first hardware evidence needed
+is a capture whose build, active effect, owner and DSP destination are
+independently identified. [Host peer evidence](core1-task-context-and-host-peer.md)

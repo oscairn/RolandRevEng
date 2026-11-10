@@ -18,9 +18,9 @@ controls, altered extensions and partial templates are rejected. The interpreter
 then steps the actual packets, rather than returning a whole-template expression.
 
 `data` maps indices `0..0x7ff` to finite real numbers. `coefficients` maps slots
-`0..0xfff`; optional `io` uses contextual addresses `0x2016/0x2017`. The stereo input
-profile also accepts the observed alternate pair `0x2459/0x245a` when encoded
-in its packet.
+`0..0xfff`. The optional `io` map uses contextual addresses `0x2016/0x2017`
+by default. Stereo input and dry/wet profiles also accept the checked
+alternate pairs when encoded in their packets.
 These are separate explicit dictionaries. Keys must be integers, excluding booleans;
 values must be finite integers or floats, excluding booleans. Every supplied entry
 is validated, including unused entries. Missing reads fail. No memory is silently
@@ -128,3 +128,44 @@ the prefix uses the declared FMA policy while the fragment interpreter retains i
 binary64 operation policy. Actual parent cadence, warm state, hardware numeric/
 timing behavior and native-plugin audio equivalence remain unverified. The 48 kHz
 WAV grid is still a software output choice.
+
+## LINEDRIVE from the Fantom image
+
+Supply the pinned CORE1 file to render the same conditional fixture with
+the original firmware slices:
+
+```sh
+python3.13 tools/render_line_reference.py local/fantom-line.wav --core1 local/b0c1a.bin
+```
+
+The default owner descriptor is `610a1674`. The `--owner` option selects
+one of the other four recorded placements. The context reader checks the
+image, owner reservation and packet boundaries. The interpreter consumes
+254 logical bytes per placement across the stereo input, both allpass
+chains and the mix with scratch transfers. The board image supplies the
+actual operand assignments. For example, its right smoother history
+reads at enum-0 base plus 6 and writes at plus 5. The desktop fixture
+uses 7 and 6. The reader checks the history pairs individually.
+
+The existing host prefix and reference ring model supply values for
+the unadmitted packets. The same fixture gives exact output equality
+through origin wrap in all five placements. Runtime selection,
+on-device state and silicon issue timing remain open.
+[Recorded placements and readback](kernel-audio-abi-study.md#offline-line-placement-and-readback-comparison)
+
+## Original one-pole kernel
+
+`bmc_one_pole.programs()` assembles two 80-byte variants of the checked
+mix and scratch profile. The current sample and previous output form
+
+```text
+y = x * (1 - feedback) + previous_y * feedback
+```
+
+The scratch packets write the next state. The next call uses the opposite
+address pair. `filter_frames(frames, feedback)` initializes the first
+pair to zero and alternates variants once per stereo frame. Each channel
+has one logical state value and two alternating fixture cells. The test
+checks independent channel responses, nonzero state across switches,
+and the zero-feedback case. The fixture addresses and host alternation
+need an owned reservation and a validated schedule for hardware use.
