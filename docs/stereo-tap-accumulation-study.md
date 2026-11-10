@@ -1,5 +1,9 @@
 # Live-coefficient stereo tap accumulation
 
+Follow-up: [tap-feedback variations](tap-feedback-variation-study.md) distinguish
+auxiliary products from unchanged main values and later accumulated feedback in
+two further contexts. Equal source-port coefficients preserve an explicit ambiguity.
+
 2026-11-10. Static follow-up to the [MAC/issue study](mac-controls-and-issue-study.md)
 and [operand variants](operand-variants-and-macro-boundaries.md). Source artifact:
 prepared ZENOLOGY arm64 SHA-256

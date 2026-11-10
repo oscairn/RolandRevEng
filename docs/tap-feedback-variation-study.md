@@ -95,6 +95,7 @@ The checker does not relax the previous late-cut rejection by expression equalit
 alone. For each channel it additionally verifies:
 
 1. The actual multiply source register is the later store's D-register source.
+   The multiply's destination must not overwrite that retained source either.
 2. Every intervening native instruction is decoded, with no address gap.
 3. No intervening instruction overwrites that source or any scalar/vector alias.
 4. The W store precedes both MACs and the result store follows them.
@@ -130,6 +131,8 @@ Each live slot has two separately traced float loads through a constructor-prove
 0x48-byte coefficient record at record+0x28, followed by conversion to double. The
 first region checks slots 10/11/12; the second checks 7/8/9. All 12 loads are source-bound.
 Their current numeric defaults are not used to establish arithmetic or identity.
+The symbolic comparison assigns one value per live slot; interleaved parameter
+updates between its repeated loads are not modeled or ruled out on hardware.
 
 ## Limits and the smallest remaining discriminator
 

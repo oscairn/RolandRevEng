@@ -450,3 +450,64 @@ evidence, general ISA/register semantics, clear-count/domain rules, owner-safe
 state transitions, physical audio routing and hardware timing/precision. No
 instrument, plugin, updater, shell package, probe or flash operation was executed
 or changed; these findings do not constitute a runnable custom synth engine.
+
+## Envelope selectors, memory naming, feedback variation and a semantics ledger
+
+Continued from `c56b1ed`. The main checkout integrated and reviewed three isolated
+worker commits plus an independent coefficient-envelope study:
+
+- Official build `03769cc`: a fresh direct Roland v1.08 ZIP is byte-identical to
+  the retained corpus. Its two nested tar inventories and selected member hashes
+  close source-to-qctest provenance. Current support HTML says JUL2026; checked
+  older detail links returned not-found and supplied no alternate build. The known
+  37-record QSPI resource master matches all 29 bmc1 C1C payloads plus eight extras;
+  it is not a newly found Linux recovery image. Four existing factory tests passed
+  on the fresh extraction. Integration independently checked ZIP/qctest/manifest
+  hashes and the actual support text.
+- Domain names `988ab16`: the diagnostic's monitor labels join false/IDM and
+  true/EDM at software level. Its duplicated control-register read remains visible
+  and appears in peer firmware too. Native access/clear stubs and the separate CPU
+  ITCM checksum diagnostic do not resolve physical domains or bulk-clear units.
+  Integration excludes candidate loads spanning the unmapped ITCM/ERAM gap.
+- Feedback variation `cb5fd40`: two later TS808 contexts match 12 native arithmetic
+  definitions, 16 state accesses and 12 coefficient loads. Products precede stores
+  of unchanged inputs; the two first/second MAC stages keep different contributions.
+  Equal coefficients on ports3/7 explicitly leave source selection unresolved.
+  Integration found and fixed a retained-source checker edge: a destructive FMUL
+  destination could overwrite the supposedly preserved input. The checker now
+  includes that instruction in its alias-preservation check, with a counterexample.
+
+Root study `27bc6d8` traces live coefficient envelopes separately from program
+literals: bank capacities/stride, kind6 symbols, generic dispatch that can bypass
+the envelope, EnvTC's 16 selectors, manager wait/exclusion and six IRQ65..70 paths
+sharing completion bit1. Selector10 means nominal12 ms in the native table's
+44100-based calculation, not a calibrated Fantom duration. The native manager's
+normal operating-query path returns false and cannot validate hardware completion.
+The control-semantics ledger consolidates existing exact arithmetic proofs and
+unsupported forms without extending the decoder or emitter.
+
+One bounded no-tool OMP/Qwen review returned in 61.3 seconds. Integration checked
+its ABI/selector observations and added explicit flag-base/load/store anchors in
+response to a real coverage gap. Its assertion that the event-reference2 setup was
+absent overlooked existing checked instructions and was rejected. Source table
+values were inspected directly; no generated code or model-only hardware claim
+was accepted. Prompts and responses remain ignored/local.
+
+Validation: **191 tests pass with no skips** against the full local corpus. A
+clean tracked-text export discovers the same 191: **152 pass, 39 artifact checks
+skip explicitly**. Focused counterexamples, report CLIs, native windows, syntax,
+relative links, tracked-text boundaries and whitespace were reviewed. Detailed
+outputs are ignored under `local/sixth-*` and named study reports.
+
+The vault preflight matched all 41 previous hashes. Five new studies/ledger and
+eight refreshed notes were applied as Markdown only, with backups and **46 notes**
+verified byte for byte. The original ISA note's accumulated status prefaces were
+consolidated into a short current index; its historical findings remain. Current
+manifest: `local/obsidian-applied-sixth-2026-11-10.json`. Code and all vendor
+artifacts remain in the project; prior manifests/patches are historical.
+
+No key, alternate factory activation or readable recovery/CORE0 peer was recovered.
+Hardware timing, precision, ownership-safe transitions, bulk-clear units and a
+verified live entry/recovery route remain open. No target/plugin/device/update,
+flash operation or prepared shell package was executed or modified. This checkpoint
+adds reproducible offline semantics and interfaces, not a runnable custom engine.

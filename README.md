@@ -6,6 +6,8 @@ Private visibility was verified on 2026-11-10; keep it private as requested. Thi
 
 Read [the packet and loader map](docs/BMC%20DSP%20packet%20and%20loader%20map.md) for findings,
 confidence, build-specific addresses and the remaining requirements for custom engines.
+The [control-semantics ledger](docs/opcode-semantics-ledger.md) collects exact
+supported arithmetic contexts and the explicit boundaries on unresolved forms.
 The [queued research](docs/research-queue.md) prioritizes the host bridge, instruction
 semantics and kernel/audio ABI. Follow-up passes are reviewed below.
 CORE1 has a raw MMIO SysEx handler overlapping DSP program RAM, and stock effect
@@ -127,9 +129,9 @@ symbol adjacency does not prove ownership by a program class.
 Local documentation prepared for the existing vault is under ignored `docs/obsidian/`;
 code stays here. These working copies are not part of the GitHub repository.
 The initial 19-note update was applied to the vault on 2026-11-10 through reviewed file access.
-Subsequent passes now cover 41 verified notes, including official cross-model
+Subsequent passes now cover 46 verified notes, including official cross-model
 comparisons, key/access studies and corrections to older recovery claims.
-The latest pass wrote 14 Markdown notes and verified all 41 against the staged
+The latest pass wrote 13 Markdown notes and verified all 46 against the staged
 hashes. Firmware downloads remain local/ignored.
 Saved hashes were checked before each update; every note was verified byte for byte.
 Original backups, the initial validated patch and the applied hash manifests remain

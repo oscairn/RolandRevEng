@@ -132,7 +132,7 @@ def check_auxiliary_cut(code, product_pc, cut_pc):
     if [ins.address for ins in middle] != list(range(product_pc + 4, cut_pc, 4)):
         return dict(verified=False, reason='Gap in source-preservation window')
     try:
-        preserved(middle, source)
+        preserved([product, *middle], source)
     except ValueError:
         return dict(verified=False, reason='Multiply input overwritten before its cut store')
     return dict(verified=True, source=source, product_pc=product_pc, cut_pc=cut_pc)

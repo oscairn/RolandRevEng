@@ -369,3 +369,34 @@ through named allocation/access callers; and an owned applicable peer/ROM artifa
 or verified access route. Preserve the separation between queue acceptance,
 peer receipt, hardware clear/DMA completion and DSP execution in any future ABI.
 No flash, shell activation or live MMIO probe is scheduled by this queue.
+
+## Current checkpoint: envelope API and independently varied feedback
+
+Continued from `c56b1ed`. The [control-semantics ledger](opcode-semantics-ledger.md)
+now consolidates the exact arithmetic forms, scope and unsupported controls.
+
+- [Tap-feedback variation](tap-feedback-variation-study.md) checks two later
+  contexts, including compiler-hoisted products, exact distinct read/write
+  records and auxiliary versus accumulated contributions. Equal coefficients on
+  ports3/7 leave source selection underdetermined; isolated bit causality is not
+  admitted. Integration rejects destructive multiply destinations in the retained
+  source proof, with a new counterexample in the existing regression.
+- [Coefficient envelopes](coefficient-envelope-and-completion-study.md) recover
+  selector packing, bank capacities, manager dispatch/wait behavior and shared
+  completion bit1 through IRQ65..70. EnvTC is a selector; native nominal timing
+  is not Fantom calibration. The native manager's operating query returns false
+  on its normal path and cannot validate live hardware completion.
+- [Memory-domain names](memory-domain-labels-and-clear-count-boundary.md) join
+  false/IDM and true/EDM at software-diagnostic level. A retained control-label
+  defect and native no-op stubs leave physical and bulk-count claims unresolved.
+- [Official build check](fantom-official-build-provenance.md) downloaded v1.08
+  directly from Roland and verified equality to the retained archive. Checked
+  older links supplied no alternate qctest/recovery consumer. The QSPI resource
+  master was corroborated as the known37-record superset, not a Linux image.
+
+The next discriminating evidence for register syntax is a context with different
+source-port coefficients while other controls stay fixed, or an authoritative
+assembler/interpreter. Further aliases of equal values cannot settle the bits.
+Bulk-clear units still need an actual count-to-indexed-range relation. Usable
+entry/recovery, a readable peer/ROM artifact and hardware state/timing observations
+remain dependencies for an executable engine, not tasks solved by passing offline tests.

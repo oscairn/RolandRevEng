@@ -137,6 +137,8 @@ class NativePreservationTests(unittest.TestCase):
 
     def test_later_cut_requires_the_unchanged_actual_multiply_source(self):
         self.assertTrue(check_auxiliary_cut(self.code(self.CODE), 0x1000, 0x1008)['verified'])
+        destructive_product = bytes.fromhex('0008631e') + self.CODE[4:]  # FMUL D0,D0,D3.
+        self.assertFalse(check_auxiliary_cut(self.code(destructive_product), 0x1000, 0x1008)['verified'])
         for middle in ('a028661e', '00e4004f'):  # D0 write or overlapping V0 write.
             changed = self.CODE[:4] + bytes.fromhex(middle) + self.CODE[8:]
             self.assertFalse(check_auxiliary_cut(self.code(changed), 0x1000, 0x1008)['verified'])

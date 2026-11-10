@@ -19,6 +19,10 @@ The vendor files stay in its ignored `local/` directory. Counts below are genera
 
 The subsequent unattended studies refine this first-pass map:
 
+- [Control-semantics ledger](opcode-semantics-ledger.md) collects independently
+  checked arithmetic forms, context requirements and unsupported controls in one
+  place. [Tap-feedback variation](tap-feedback-variation-study.md) adds two exact
+  native comparisons while retaining source-port and extension-bit ambiguity.
 - [Coefficient envelopes](coefficient-envelope-and-completion-study.md): live
   coefficient banks, 16-value time selectors, conditional ramp dispatch and
   IRQ65..70 completion. Native nominal times are not hardware calibration.
