@@ -98,3 +98,22 @@ remain study results, without executable admission. Binary64 reference behavior
 is not calibrated silicon precision or timing. The
 [next-program inventory](emulator-next-program-targets.md) keeps complete-program
 prefix, suffix, history and wrapper gaps explicit.
+
+
+## Native prefix oracle and state context
+
+The [LINE shaping study](line-prefix-shaping-study.md) checks exact native
+signed64/fixed32 conversion, shift9 wrapping, sign/clamp, fused smoothing and
+rational arithmetic. These are native reference kernels, **not isolated DSP
+opcode assignments** for the containing packets. The executable ISA admissions
+above remain unchanged. The [state study](line-state-and-history-study.md)
+recovers a native ring origin and conditional cross-call history relationships,
+not a hardware circular-addressing rule.
+
+[Counted literal groups](line-prefix-parameter-study.md) explain actual rational
+parameter duplicates through a declared operation; the missing input-mix group
+relation remains unproved after a [bounded static inventory](line-prefix-global-groups.md).
+The [conditional LINE render](fragment-emulator.md#conditional-line-reference-pipeline)
+is a host oracle plus supported fragments, with explicit fixture state and
+software timing. It does not skip unknown words to manufacture complete program
+execution.

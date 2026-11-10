@@ -420,3 +420,34 @@ settle duplicated literal fields. Then recover quantized shaping and history.
 No automatic unknown-as-zero, whole-effect substitution or guessed return semantics
 is authorized by a successful fragment render. Hardware access/recovery and numeric
 calibration remain separate dependencies for deployment.
+
+
+## Continued LINE reference and state checkpoint
+
+The native prefix now has [checked numerical kernels](line-prefix-shaping-study.md),
+including exact signed shift wrap, strict sign-mode boundary, binary32 live
+coefficients and explicit FMA evaluation. The [ring/context study](line-state-and-history-study.md)
+checks one origin step after native routing, twelve conditional prior-write/read
+relationships and all46 indexed accesses. Pre-rational history3/6 must stay
+separate from the current allpass factors27/28. Warm initialization and actual
+callback count/P assignment are still not supplied by a fresh effect record.
+
+A [conditional original-signal pipeline](fragment-emulator.md#conditional-line-reference-pipeline)
+now composes the host oracle and supported bytes. Its circular implementation
+matches direct delay equations through origin wrap. This is a useful numerical
+fixture, not complete DSP byte execution or native-plugin/hardware audio validation.
+
+The [parameter study](line-prefix-parameter-study.md) establishes real rational
+count-4 operations and the one-representative native mechanism. A checked
+[global inventory](line-prefix-global-groups.md) has no matching static count-2+
+group for14/17 or24/27; separate/runtime writers and other layouts remain open.
+The next discriminating evidence is the rule governing those fields and full
+outgoing DSP port/store state, followed by contextual instruction comparisons
+against the new numerical kernels. Implicit return/mute execution, parent cadence,
+resource transitions and hardware calibration remain independent gaps.
+
+Two [new official firmware packages](ax-edge-and-juno-x-firmware-study.md) add
+readable CORE1/ciphertext comparisons but no applicable ROM/key candidate or
+access/recovery route. Repeating unchanged code windows and literal-address
+scans is unlikely to resolve the missing peer or silicon state. Future vault
+updates go to `Projects/Oscairn/Roland`; code and generated audio stay in the project.

@@ -19,6 +19,20 @@ The vendor files stay in its ignored `local/` directory. Counts below are genera
 
 The subsequent unattended studies refine this first-pass map:
 
+- [Native LINE state/history](line-state-and-history-study.md) recovers the
+  conditional shared-ring step; [shaping](line-prefix-shaping-study.md) checks
+  the native fixed-conversion, clamp, smoothing and rational equations. The
+  [conditional reference pipeline](fragment-emulator.md#conditional-line-reference-pipeline)
+  combines these host equations with admitted fragment bytes, without running
+  the unknown DSP prefix or return/mute controls.
+- [Counted LINE groups](line-prefix-parameter-study.md) relate rational duplicates
+  to actual descriptor operations. The [global inventory](line-prefix-global-groups.md)
+  finds no static matching group for input-mix pairs14/17 or24/27 in its bounded
+  candidate set; runtime/separate writes and a fixed-constant rule remain open.
+- [AX-Edge/JUNO-X comparison](ax-edge-and-juno-x-firmware-study.md) adds two
+  official builds, three exact JUNO-X code windows, ciphertext overlap and
+  bounded negative ROM/key scans. Different AX-Edge bytes are not absent features.
+
 - [Offline fragment emulator](fragment-emulator.md) executes the two exact
   proved templates and renders original audio. [Independent validation](fragment-emulator-validation.md)
   checks actual bytes and every packet/store. The [next-program inventory](emulator-next-program-targets.md)

@@ -84,3 +84,46 @@ separate requirement for fidelity.
 The [next-program inventory](emulator-next-program-targets.md) selects LINEDRIVE
 for the next complete-effect effort and names every remaining region. A successful
 fragment render does not establish that a complete stock engine can yet execute.
+
+## Conditional LINE reference pipeline
+
+Python 3.13+ supplies `math.fma` for the separate
+[native shaping oracle](line-prefix-shaping-study.md). A second original-signal
+experiment combines that oracle with the two strict allpass fragments and the
+strict dry/wet fragment:
+
+```sh
+python3.13 tools/render_line_reference.py local/line-reference.wav
+```
+
+This tool **does not execute the unknown DSP prefix**. It calls the recovered
+native channel equations on the host, then steps the admitted fragment bytes.
+It uses explicit unit stereo input mixing and original experimental controls:
+drive scale 1/512, drive 1/2, rectified mode, smoothing 3/4, rational scale 1/2,
+A=1/B=0 and equal dry/wet gains. These are fixture choices, not an extracted stock
+preset or a recovered control mapping for the unresolved input-mix literals.
+The later rational parameters have a separately checked
+[grouped-write relation](line-prefix-parameter-study.md).
+
+The host supplies a cold zero ring, fixed P=0, no other owner writes, and one
+[native origin step](line-state-and-history-study.md) per generated frame. It
+retains the pre-rational smoother values at logical3/6 separately from the
+current factors27/28, executes the two actual allpass address assignments, and
+feeds their current outputs29/2a into the real tail assignment. Output scratch
+2b/2c is written explicitly from the native dataflow; unknown entry/return and
+mute controls are not run.
+
+An independent integration test uses direct five-value delay histories and
+unrolled allpass equations instead of circular addressing or packet execution.
+All 2,056 stereo frames agree exactly, crossing origin wrap. Separate source/
+primitive tests supply the prefix evidence; this integration test alone is not
+an independent proof of that prefix's arithmetic. A 12,000-frame render produced
+peak 0.0998168982 and maximum factor magnitude 0.0248665508 without PCM clipping.
+The WAV path must be new; the numerical summary prints as JSON.
+
+This is a conditional functional reference fixture for further reverse engineering.
+It is not a complete stock-program execution or a bit-exact native plugin model:
+the prefix uses the declared FMA policy while the fragment interpreter retains its
+binary64 operation policy. Actual parent cadence, warm state, hardware numeric/
+timing behavior and native-plugin audio equivalence remain unverified. The 48 kHz
+WAV grid is still a software output choice.

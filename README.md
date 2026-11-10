@@ -21,6 +21,11 @@ It can render original impulse and stereo mix WAV demonstrations without vendor
 artifacts. The [complete-program inventory](docs/emulator-next-program-targets.md)
 selects LINEDRIVE next; its remaining packets and wrappers are still unadmitted.
 
+The [conditional LINE reference](docs/fragment-emulator.md#conditional-line-reference-pipeline)
+now combines a checked native shaping oracle, explicit native ring steps and the
+proved fragment bytes. This supplies a broader offline test fixture without
+executing the unknown DSP prefix or wrappers. Its FMA oracle requires Python 3.13+.
+
 Independent follow-up studies:
 
 - [Gain controls](docs/alu-controls-study.md): native def/use comparison of selected gain chains.
@@ -37,6 +42,11 @@ Independent follow-up studies:
 - [Host/CORE1 bridge](docs/host-core1-bridge-followup.md): routes, service replies, CORE-local MMIO and the precise missing peer boundary.
 - [CORE1 service startup](docs/core1-service-startup-mmio.md): normal initializer-table activation in both builds and exact MMIO reply-frame bounds.
 - [Host version identities](docs/host-version-and-upstream-crosscheck.md): five component slots, checked version strings and bounded public-source comparisons.
+- [Native LINE state/history](docs/line-state-and-history-study.md): ring origins, twelve delayed-state relationships and the shared-init boundary.
+- [Native LINE shaping](docs/line-prefix-shaping-study.md): fixed conversion/wrap, sign/clamp, smoothing and rational-reference arithmetic.
+- [LINE parameter groups](docs/line-prefix-parameter-study.md): counted literal writes versus native representative updates.
+- [Global prefix-group inventory](docs/line-prefix-global-groups.md): bounded negative inventory with positive controls; two input-mix identities remain unresolved.
+- [AX-Edge/JUNO-X updates](docs/ax-edge-and-juno-x-firmware-study.md): two further official images, shared code/ciphertext and bounded negative ROM/key scans.
 - [Fragment emulator validation](docs/fragment-emulator-validation.md): pinned stock bytes, complete traces, stores and adjacent-fragment composition.
 - [Supported code generation](docs/supported-code-generation.md): mix/gain and four-stage allpass fragments, with original examples.
 - [Kernel and audio ABI](docs/kernel-audio-abi-study.md): stock mute controls, manager reservations, shared routing and a gated probe design.
