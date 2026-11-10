@@ -148,14 +148,16 @@ code stays here. These working copies are not part of the GitHub repository.
 The initial 19-note update was applied to the vault on 2026-11-10 through reviewed file access.
 The Roland research and related planning notes are organized in
 `/Users/jacob/Documents/ObsidianVault/Projects/Oscairn/Roland`. All 52 moved notes
-were verified byte for byte; their unique title links remain valid. Future vault
-updates target this subdirectory. The move manifest and current location are
-recorded locally in `local/obsidian-applied-roland-move-2026-11-10.json` and
-`local/obsidian-location.json`. Earlier manifests describe historical paths.
+were verified byte for byte; their unique title links remain valid. Continued
+research now covers 57 verified notes in this folder. Future vault
+updates target this subdirectory. The move manifest is
+`local/obsidian-applied-roland-move-2026-11-10.json`; the latest update manifest
+is `local/obsidian-applied-eighth-2026-11-10.json`. Current folder and manifest
+are recorded in `local/obsidian-location.json`. Earlier manifests describe historical paths.
 
 The research notes include the functional fragment emulator, official cross-model
 comparisons, key/access studies and corrections to older recovery claims.
-The latest pass wrote seven Markdown notes and verified all 49 against the staged
+The latest pass wrote ten Markdown notes and verified all 57 against the staged
 hashes. Firmware downloads remain local/ignored.
 Saved hashes were checked before each update; every note was verified byte for byte.
 Original backups, the initial validated patch and the applied hash manifests remain

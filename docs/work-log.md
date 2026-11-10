@@ -600,3 +600,74 @@ Continued complete-effect work in three independent scopes: LINE parameter
 literal ownership/grouped writes, native shaping/quantization, and circular
 state/history cadence. Strict interpreter admissions remain unchanged until each
 new context has independent evidence.
+
+## Conditional LINE reference and broader firmware check — 2026-11-10
+
+Continued from `18cf845` after the Roland folder move. Three isolated workers
+checked parameter groups, native numeric kernels and native state. Root reviewed
+the source, integrated the changes and built a conditional original-signal pipeline.
+
+- The native parameter manager updates one first-record representative while the
+  firmware loops a descriptor's count with 12-byte records and one saved float.
+  Actual SetAlg groups connect EC/F0/118/11C and E6/E9/112/115. The early input
+  pairs14/17 and24/27 remain unresolved. A bounded static inventory includes 665
+  native and 616 firmware candidates, with known rational positive controls but
+  no matching early-prefix group. Runtime/separate writes and other layouts remain
+  outside that negative result. Integration corrected literal-call tracing to reject
+  intervening branches/returns, with original synthetic regression instructions.
+- The native ring is 2048 doubles with physical index `(address+P-O)&7ff`; a separate
+  core sync advances O after routing/DRAM-IO. All 46 callback indexed accesses are
+  accounted for, including two pre-scaled-index accesses the older tracer missed.
+  Twelve prior-write/read relationships hold with fixed P, one step and no overwrite.
+  Shared core zeroing is not an instance reset. Prior smoother q at 3/6 must remain
+  separate from the post-rational current factors 27/28.
+- A pure channel oracle checks native signed64/fixed32 conversion, wrapping shift9,
+  strict mode/sign selection, clamp constants, float32 live coefficients, fused
+  smoothing and rational arithmetic. Original counterexamples distinguish a changed
+  quantizer bin under reassociation, one-ULP fused/unfused results and signed shift
+  wrap. It requires Python 3.13+ math.fma and declares an IEEE policy, excluding
+  conversion exceptions/unknown FPCR behavior. Review also added destructive-alias
+  guards to the synthetic sign/smoothing recognizers. No DSP admission was added.
+- `render_line_reference.py` calls that host oracle, executes the two strict allpass
+  chains and mix tail, and performs explicit conditional native ring steps. Its
+  2056-frame sequence matches separate direct delay equations exactly through wrap.
+  The 12000-frame WAV has peak 0.0998168982 and max factor 0.0248665508. Header,
+  payload and JSON were checked; independent state review found no issue. The
+  unknown prefix/return/mute bytes are not executed. Experimental controls, fixed P,
+  cold ring and one step/frame are explicit fixtures, not measured parent cadence.
+- Downloaded official AX-Edge 1.11 and JUNO-X 1.12 archives, pinned parent/member
+  hashes, checked both C1A CRCs and scanned all 10 tar members within documented
+  bounds. JUNO-X has all three exact Fantom comparison windows; AX-Edge has none
+  of those exact windows. Their CORE0 payloads share 13659/15780 nontrivial blocks
+  with Fantom bmc0. No reported ROM identity, key-table/B6 address literal or key
+  candidate was obtained. Unknown compression/ROM revisions and transformed key
+  material remain outside this raw scan. No decryption or access-route claim.
+
+Three bounded no-tool Qwen reviews returned through the existing Mac Studio
+profile with per-run thinking disabled. Their observations were checked against
+source and independent tests. Wrong constants, missing-right-mode claims,
+invented alias/grouping and four false ring contradictions were rejected. No
+model-only opcode, register identity, state cadence or hardware claim was accepted.
+Prompts, reports, raw bytes and audio stay ignored/local.
+
+The current vault update targets `Projects/Oscairn/Roland`. All 52 moved-note hashes
+matched, five new studies were added and ten Markdown files written with backups
+and concurrent-edit checks. All 57 notes verified byte for byte; new-note creation
+also refuses collisions atomically. The keyboard-planning note gained a short
+historical-status preface pointing at later access/recovery corrections, preserving
+its original text. Current location/manifest is `local/obsidian-location.json` /
+`local/obsidian-applied-eighth-2026-11-10.json`. No code or audio went to the vault.
+
+
+Validation: **243 tests pass with no skips** against the complete local corpus
+(65.093 seconds). A clean tracked-text export runs the same 243 tests: **191 pass,
+52 artifact-dependent checks skip explicitly**. Pure/reference tests run without
+vendor bytes; the FMA oracle requires Python 3.13+. All relative tracked Markdown
+links and whitespace checks pass. WAV headers/frame payloads, fixture summaries
+and tracked-text/vendor boundaries were inspected. Detailed results are under
+`local/eighth-*`; no broader repeat is needed after documentation-only edits.
+
+A complete stock DSP byte stream, arbitrary synth compiler, CORE0 decryption,
+verified access/recovery route and silicon timing/precision remain unimplemented
+or unverified. No plugin, target, updater, flash, MMIO probe or prepared shell
+package was executed or modified.

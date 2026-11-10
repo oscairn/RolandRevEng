@@ -428,7 +428,7 @@ The native prefix now has [checked numerical kernels](line-prefix-shaping-study.
 including exact signed shift wrap, strict sign-mode boundary, binary32 live
 coefficients and explicit FMA evaluation. The [ring/context study](line-state-and-history-study.md)
 checks one origin step after native routing, twelve conditional prior-write/read
-relationships and all46 indexed accesses. Pre-rational history3/6 must stay
+relationships and all 46 indexed accesses. Pre-rational history3/6 must stay
 separate from the current allpass factors27/28. Warm initialization and actual
 callback count/P assignment are still not supplied by a fresh effect record.
 
