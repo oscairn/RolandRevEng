@@ -14,11 +14,21 @@ settings, common key use and actual recovery of a key.
 ## What would count as a located ROM
 
 The pinned public [MC-101 Boot ROM study](https://github.com/edco/mc-101-re/blob/b6607ade1417e90afd7a0eab51aa371b21d2b3d4/docs/boot_rom_analysis.md)
-reports a 16,384-byte ROM at `01200000`, SHA-256
-`742b1dd61d07509d8c72a1c7bcf3a44b9707e72d31543e3256415eb4307e60d5`,
-with initial vector values SP=`01060000`, reset=`012000d1`.
+reports a 16,384-byte ROM at `01200000`, with initial vector values
+SP=`01060000`, reset=`012000d1`. A later source cross-check found **conflicting
+hashes for the same named dump in that same revision**:
+
+| Pinned upstream source | Reported SHA-256 |
+|---|---|
+| `docs/boot_rom_analysis.md` | `742b1dd61d07509d8c72a1c7bcf3a44b9707e72d31543e3256415eb4307e60d5` |
+| [README](https://github.com/edco/mc-101-re/blob/b6607ade1417e90afd7a0eab51aa371b21d2b3d4/README.md) | `2ac61a90d721a87753917c49fde45df2703e03fdaf6301adb00456093759d0b2` |
+
+Neither is independently authenticated here. The scanner now considers both as
+reported identity candidates and emits `rom_identity_verified: false` even if a
+candidate hash matches. This does not change the result for the retained corpus.
 Those two u32 values form the search anchor. A hit is not accepted as the documented
-ROM unless the complete following `4000`-byte window has that exact hash. A whole
+ROM candidate unless the complete following `4000`-byte window has one of those
+reported hashes. A whole
 16 KiB artifact also receives the identity check independently of the vector anchor.
 The scan does not hash every possible unanchored 16 KiB window of larger files.
 
@@ -93,7 +103,7 @@ committed or labeled as original vendor firmware.
 Across the 27 objects:
 
 - The documented eight-byte MC-101 vector prefix has **zero occurrences**. Thus no
-  complete vector-anchored window with the documented ROM hash was recovered.
+  complete vector-anchored window with either reported ROM hash was recovered.
 - Little-endian literal words `012023b0`, `012034c0` and `40020400` each have zero
   occurrences. This is only a literal-byte result. MOVW/MOVT construction, relative
   arithmetic, indirect calls and references to a different ROM revision are separate
@@ -122,8 +132,9 @@ BMC_CORPUS_DIR='/Users/jacob/Projects/Open Synth Platform/bmc-research/local' \
 ```
 
 The report contains identities, provenance, counts, offset samples and window hashes;
-it contains no key bytes or firmware excerpts. Five tests cover authored complete and
+it contains no key bytes or firmware excerpts. Six tests cover authored complete and
 truncated vector windows, exact-hash gating, metadata-only reporting, literal-address
-counterexamples, bounded offset samples and the actual scoped corpus. All five pass
-with the prepared inputs; four pure tests run without artifacts or Capstone.
+counterexamples, both reported identity candidates, bounded offset samples and the
+actual scoped corpus. All six pass with the prepared inputs; five pure tests run
+without artifacts or Capstone.
 No Qwen draft was needed for this deterministic search.

@@ -1,5 +1,9 @@
 # More MAC controls and same-packet store ordering
 
+Follow-up: [stereo tap accumulation](stereo-tap-accumulation-study.md) verifies four
+more long-control/extension pairs through six native stages, fresh live coefficients
+and exact state-record aliases. No global register decoder or new emitter is admitted.
+
 2026-11-10. Offline follow-up using the artifact identities in the main packet/loader
 map. This extends the earlier gain and dry/wet MAC studies with independently matched
 long controls and a correction to the symbolic model's transfer ordering. No plugin,

@@ -1,5 +1,9 @@
 # CORE1 service initialization and MMIO reply frame
 
+Follow-up: [transmit/backpressure](core1-transmit-and-backpressure-study.md) follows
+the reply's far call into type-3 word packetization, TXDT and its shared-ring
+writer. This closes a CORE1-local edge, not the Linux bridge or safe request bounds.
+
 2026-11-10. Offline follow-up to [the host/CORE1 bridge study](host-core1-bridge-followup.md).
 The two bmc0 SysEx receivers are installed by an initializer actually visited by
 the reset/startup table walker. The previous relative-pointer candidate is now

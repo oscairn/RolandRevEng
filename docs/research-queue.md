@@ -334,3 +334,38 @@ The next concrete work, ordered by what it unlocks:
    host/peer traffic and stock RAM/state before designing a tiny muted probe.
    Timing, numerical precision, audio routing and a complete executable ABI still
    require hardware validation. No live probe or flashing is queued automatically.
+
+## Next checkpoint: transmit, clear interrupt and stereo taps
+
+Continued from `9ea3262` with three isolated workers and an independent outbound
+queue study. New evidence is in [factory UI dispatch](factory-gate-and-ui-dispatch-study.md),
+[clear completion](clear-completion-interrupt-study.md),
+[stereo taps](stereo-tap-accumulation-study.md) and
+[transmit/backpressure](core1-transmit-and-backpressure-study.md).
+
+- The factory intro page is connected to actual dispatch and separate from all
+  33 test rows. Mode 3 preserves it while 0/1/2 select test groups. No enabling
+  mode-3 caller was recovered; more literal scans of the same build are unlikely
+  to resolve arbitrary aliases. Another build/source or controlled state evidence
+  would discriminate dormant code from an omitted activation path.
+- Clear event17 maps to IRQ80. Registration, zero state, priority/enable/mask and
+  status/callback flow are now joined. Bulk-clear units/domain naming, ownership
+  and hardware event generation remain open.
+- Four exact long-control/extension pairs implement stereo tap accumulation in
+  one TS808 context. Six independent native stages, live coefficient records and
+  explicit read/write aliases agree. General register syntax, numerics, other
+  occurrences and new scheduling are not admitted.
+- The MMIO reply reaches type-3 word packetization and TXDT/shared-ring enqueue.
+  Rings reserve a slot; shared free-count includes it; software full paths can
+  reject words and TXDT can spin on shared-ring fullness. No remote acknowledgement
+  or universally lossless/reentrant interface follows.
+- The pinned MC-101 README and ROM study disagree on the dump hash. Both are now
+  searched as author-reported candidates; neither is authenticated. The bounded
+  corpus still supplies no actual ROM/key candidate or decrypted CORE0.
+
+Next useful work is independent variation of tap/control fields or another native
+primitive with complete input/state provenance; bulk-clear count/domain semantics
+through named allocation/access callers; and an owned applicable peer/ROM artifact
+or verified access route. Preserve the separation between queue acceptance,
+peer receipt, hardware clear/DMA completion and DSP execution in any future ABI.
+No flash, shell activation or live MMIO probe is scheduled by this queue.

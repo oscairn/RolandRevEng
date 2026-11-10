@@ -25,6 +25,13 @@ SHA-256 `742b1dd61d07509d8c72a1c7bcf3a44b9707e72d31543e3256415eb4307e60d5`.
 No such ROM file was found in the retained project artifacts. External NOR
 contents are a different artifact from the on-chip mask ROM.
 
+The same pinned upstream README reports **a different hash** for that named ROM:
+`2ac61a90d721a87753917c49fde45df2703e03fdaf6301adb00456093759d0b2`.
+The [material-scan study](embedded-rom-key-material-scan.md) records both source
+claims. Neither identity has been authenticated locally; both are now searched
+as candidates. The reported table address is consistent across these sources,
+but this conflict is another reason to require actual ROM and plaintext validation.
+
 ## The six CORE0 images share substantial ciphertext
 
 All six inspected `App1_Main` containers have crypto control `b6020001`.

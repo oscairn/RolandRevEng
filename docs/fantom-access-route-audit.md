@@ -1,5 +1,9 @@
 # Fantom access routes: stock endpoint, source gates and artifact limits
 
+Follow-up: [factory intro/dispatch](factory-gate-and-ui-dispatch-study.md) traces
+the actual UI loop and separate test groups. Mode 3 preserves the intro page;
+known 0/1/2 transitions leave it. No activation route into mode 3 is established.
+
 2026-11-10. Offline inspection only: no target binaries/scripts executed, device
 opened, network scanned, update changed or firmware installed. Addresses below are
 ELF virtual addresses in the pinned v1.08 executables. REA providers were unavailable;

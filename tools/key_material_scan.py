@@ -1,4 +1,4 @@
-"""Search owned local firmware for the documented MC-101 ROM identity; no key output."""
+"""Search local firmware for two conflicting reported MC-101 ROM identities; no key output."""
 import hashlib
 import json
 import os
@@ -8,7 +8,10 @@ import tarfile
 import tempfile
 
 ROM_SIZE = 0x4000
-ROM_SHA256 = '742b1dd61d07509d8c72a1c7bcf3a44b9707e72d31543e3256415eb4307e60d5'
+ROM_IDENTITIES = {
+    '742b1dd61d07509d8c72a1c7bcf3a44b9707e72d31543e3256415eb4307e60d5': 'docs/boot_rom_analysis.md',
+    '2ac61a90d721a87753917c49fde45df2703e03fdaf6301adb00456093759d0b2': 'README.md',
+}
 ROM_VECTOR_PREFIX = struct.pack('<II', 0x01060000, 0x012000d1)
 ANCHORS = {'rom_base': 0x01200000, 'rom_key_table': 0x012023b0,
            'selected_b6_entry': 0x012034c0, 'des_key_registers': 0x40020400,
@@ -32,20 +35,21 @@ def scan(data):
     while (cursor := data.find(ROM_VECTOR_PREFIX, cursor)) >= 0:
         complete = cursor + ROM_SIZE <= len(data)
         digest = hashlib.sha256(data[cursor:cursor+ROM_SIZE]).hexdigest() if complete else None
-        if digest == ROM_SHA256:
+        if digest in ROM_IDENTITIES:
             exact.append(cursor)
         if len(windows) < 16:
             windows.append(dict(offset=cursor, complete_16k_window=complete, sha256=digest,
-                                matches_documented_rom=digest == ROM_SHA256))
+                                matches_documented_rom=digest in ROM_IDENTITIES))
         cursor += 1
     digest = hashlib.sha256(data).hexdigest()
-    if len(data) == ROM_SIZE and digest == ROM_SHA256 and 0 not in exact:
+    if len(data) == ROM_SIZE and digest in ROM_IDENTITIES and 0 not in exact:
         exact.append(0)
     return dict(size=len(data), sha256=digest, vector_prefix=vector, vector_windows=windows,
                 exact_documented_rom_offsets=exact,
                 literal_address_anchors={name: offsets(data, struct.pack('<I', value))
                                          for name, value in ANCHORS.items()},
-                documented_rom_found=bool(exact), key_bytes_emitted=False)
+                documented_rom_found=bool(exact), rom_identity_verified=False,
+                key_bytes_emitted=False)
 
 
 def study(corpus):
@@ -126,7 +130,8 @@ def study(corpus):
                                         member_name=member.name, component_size=member.size))
                 if member.name.endswith('_C1A_up.bin') and data[0x20:0x24] == b'QSPI':
                     initial_data(label, data, qspi=True)
-    return dict(known_rom_sha256=ROM_SHA256, known_rom_size=ROM_SIZE,
+    return dict(reported_rom_identities=ROM_IDENTITIES, known_rom_size=ROM_SIZE,
+                rom_identity_verified=False,
                 known_key_entry_offset=0x34c0, objects=rows, initial_data_expansions=expansions,
                 unique_objects=len(rows), total_scanned_bytes=sum(r['size'] for r in rows),
                 exact_rom_copies=sum(len(r['exact_documented_rom_offsets']) for r in rows),

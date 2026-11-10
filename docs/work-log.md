@@ -389,3 +389,64 @@ console route, alongside further condition/return and clear-engine semantics.
 No live device, target code, updater, shell package, flash writer or exploit was
 run or changed. Recovery, secure-boot state, physical routing and render timing/
 numerics remain unverified; there is still no runnable custom BMC engine.
+
+## Outbound flow, clear IRQ identity, factory dispatch and stereo tap semantics
+
+Continued from `9ea3262` at Jacob's request. Three isolated workers returned
+commits; the main checkout reviewed their code, ran focused tests and inspected
+the relevant native/firmware windows independently:
+
+- Factory UI `e6b6270`: 34 initialization copies resolve the intro pointer and
+  33 test rows / 28 unique objects. Actual vtable dispatch is connected to the UI
+  loop. Modes 0/1/2 clear the intro and select groups; case3 deliberately does
+  neither. No enabling mode3 path is recovered. Mode0's additional installed
+  daemon side effect is documented, with no activation procedure recommended.
+- Clear completion `c1a942c`: event17 hex joins callback slot `200a1900` to
+  vector `01100180` / IRQ80. Registration precedes priority/enable/mask setup;
+  the handler reads/zeros status, snapshots it, increments a counter and invokes
+  the installed callback. Raw portal access gives per-element selector evidence,
+  not a proof of bulk-clear units or named IDM/EDM Boolean mapping. Integration
+  additionally rejects external-vector identities beyond the supported IRQ range.
+- Stereo taps `bee7f67`: exact TS808 controls/extensions `044f/0000`, `454f/0004`,
+  `048f/0000`, `458f/0004` match six native arithmetic stages with live coefficients
+  and exact state-record provenance. Integration corrected one documentation PC
+  from `20866c` to the actual D-register load `208668`. No decoder/emitter change,
+  global register mapping, numerical or scheduling claim was accepted.
+
+The root outbound study follows the service-reply veneer to type3 packet words,
+the 511-usable-word software queue, TXDT task2/IRQ230 and the 63-usable-word shared
+ring. Its reported free-count includes the sentinel slot. Failed-attempt counters
+are not dropped-message counts; queue-full rejection and four tight full-ring
+retry loops prevent treating local completion as a universally lossless protocol.
+External conversion, peer identity and safe manager ownership remain missing.
+
+The same pinned MC-101 revision reports different boot-ROM hashes in its README
+and ROM study. Both identities are now searched as author-reported candidates;
+the scanner explicitly refuses to authenticate either. Rerunning the 27-object /
+146,004,684-byte scope still finds no documented ROM copy or actual key candidate.
+No decryption or arbitrary key guessing occurred.
+
+One no-tool OMP/Qwen review returned in 98 seconds. It raised useful coverage gaps
+in the queue checker; integration added explicit success-counter/peak and complete
+free-count instruction anchors, then repeated the affected tests. Its claim that
+the prose had already acknowledged those checker gaps was unsupported and was not
+accepted. No generated code or unverified model-derived address was used.
+
+Validation: the integrated **174-test suite passes with no skips**. A clean
+tracked-text export discovers the same 174: **140 pass, 34 artifact checks skip**.
+After the checker-anchor refinement, its three tests passed again locally, with
+two pass/one skip in the refreshed clean export. Report CLIs, Python syntax,
+relative links, tracked-text boundaries and whitespace were checked. Detailed
+logs, native traces, model input/output and reports stay under ignored `local/`.
+
+The vault preflight matched all 37 saved note hashes. Four new studies and ten
+refreshed notes were applied as Markdown only, with backups and **41 notes**
+verified byte for byte. The current manifest is
+`local/obsidian-applied-fifth-2026-11-10.json`. Code and all vendor bytes remain
+in the project. Earlier manifests and patches are historical.
+
+Still open: a verified Fantom execution/recovery route, actual CORE0/ROM/peer
+evidence, general ISA/register semantics, clear-count/domain rules, owner-safe
+state transitions, physical audio routing and hardware timing/precision. No
+instrument, plugin, updater, shell package, probe or flash operation was executed
+or changed; these findings do not constitute a runnable custom synth engine.

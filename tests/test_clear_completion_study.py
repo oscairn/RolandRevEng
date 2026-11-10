@@ -13,7 +13,9 @@ from clear_completion_study import external_irq, report
 class IdentityTests(unittest.TestCase):
     def test_vector_identity_does_not_use_event_number(self):
         self.assertEqual(external_irq(0x01100180, 0x01131621), 80)
+        self.assertEqual(external_irq(0x011003fc, 1), 239)
         for address, handler in ((0x0110003c, 1), (0x01100181, 1),
+                                 (0x01100400, 1),
                                  (0x01100180, 0x01131620)):
             with self.assertRaises(ValueError):
                 external_irq(address, handler)

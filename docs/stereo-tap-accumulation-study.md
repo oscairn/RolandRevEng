@@ -82,7 +82,7 @@ or writeback. Different arrays, scales, widths, masks and ambiguous records fail
 | Program-relative field | Native object address field | Access / native instruction |
 |---|---|---|
 | `38` | `+94` | read DM[6] at `208654` |
-| `3a` | `+ac` | read DM[9] at `20866c` |
+| `3a` | `+ac` | read DM[9] at `208668` |
 | `3c` | `+8c` | write incoming A to DM[5] at `208678` |
 | `3e` | `+a4` | write incoming B to DM[8] at `208688` |
 | `52` | `+9c` | read DM[7] at `2086a8` |

@@ -22,11 +22,24 @@ class ScanTests(unittest.TestCase):
         self.assertTrue(result['vector_windows'][0]['complete_16k_window'])
         self.assertFalse(result['documented_rom_found'])
         self.assertNotIn('authored-test-material', json.dumps(result))
-        with patch.object(scanner, 'ROM_SHA256', hashlib.sha256(authored).hexdigest()):
+        with patch.object(scanner, 'ROM_IDENTITIES', {hashlib.sha256(authored).hexdigest(): 'authored fixture'}):
             result = scanner.scan(data)
             self.assertEqual(result['exact_documented_rom_offsets'], [6])
             self.assertTrue(result['documented_rom_found'])
+            self.assertFalse(result['rom_identity_verified'])
             self.assertFalse(result['key_bytes_emitted'])
+
+    def test_both_reported_identities_are_candidates_not_authentication(self):
+        first = (scanner.ROM_VECTOR_PREFIX+b'first').ljust(scanner.ROM_SIZE, b'\x51')
+        second = b'no-vector-prefix'.ljust(scanner.ROM_SIZE, b'\x72')
+        identities = {hashlib.sha256(first).hexdigest(): 'first report',
+                      hashlib.sha256(second).hexdigest(): 'conflicting report'}
+        self.assertEqual(len(scanner.ROM_IDENTITIES), 2)
+        with patch.object(scanner, 'ROM_IDENTITIES', identities):
+            for data in (first, second):
+                result = scanner.scan(data)
+                self.assertEqual(result['exact_documented_rom_offsets'], [0])
+                self.assertFalse(result['rom_identity_verified'])
 
     def test_truncated_prefix_is_not_a_complete_rom(self):
         result = scanner.scan(b'\0'+scanner.ROM_VECTOR_PREFIX+b'\xff'*10)

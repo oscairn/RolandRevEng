@@ -19,6 +19,18 @@ The vendor files stay in its ignored `local/` directory. Counts below are genera
 
 The subsequent unattended studies refine this first-pass map:
 
+- [Stereo tap accumulation](stereo-tap-accumulation-study.md): four exact-context
+  long-control meanings match six native arithmetic stages and eight memory
+  accesses. General register decoding and hardware numerics remain open.
+- [Clear completion](clear-completion-interrupt-study.md): event `17` hex maps to
+  NVIC IRQ80 with stock registration, status acknowledgement and enable setup.
+  Bulk-clear units and safe concurrent ownership remain unproved.
+- [Transmit/backpressure](core1-transmit-and-backpressure-study.md): the MMIO reply
+  feeds type-3 words into TXDT and the shared ring. A reserved slot and unbounded
+  full-ring retries constrain loader design; the external converter is still missing.
+- [Factory UI dispatch](factory-gate-and-ui-dispatch-study.md): intro-page methods
+  are connected to the UI loop; modes 0/1/2 leave it and mode 3 preserves it, but
+  no enabling caller for mode 3 is established.
 - [CORE0 key location and ciphertext](core0-ciphertext-and-key-location.md): the
   reported MC-101 B6 slot is `012034c0..012034d7`. Thousands of exact payload
   blocks are shared with Fantom across four other models. This makes that key

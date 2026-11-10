@@ -1,5 +1,10 @@
 # Stock CORE1 task context and the remaining external peer
 
+Follow-up: [outbound transmit](core1-transmit-and-backpressure-study.md) maps TXDT
+task 2, its software/shared rings and the CORE1-local service-reply edge. The
+[clear-completion study](clear-completion-interrupt-study.md) identifies IRQ80.
+These additions do not establish the missing external peer or safe arbitrary calls.
+
 2026-11-10. The host-to-CORE1 peer remains missing from the readable artifacts.
 This pass closes a different, necessary edge: the stock receive and assignment
 callbacks are registered to concrete **software-triggered NVIC interrupts**.

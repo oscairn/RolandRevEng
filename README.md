@@ -44,6 +44,9 @@ Independent follow-up studies:
 - [Embedded ROM/key-material scan](docs/embedded-rom-key-material-scan.md): 27 scoped objects, including all retained update components and verified initial-data expansions.
 - [Readable key-provider references](docs/core0-rom-provider-reference-study.md): bounded instruction/literal candidates and rejected cross-MCU address matches.
 - [Fantom access-route audit](docs/fantom-access-route-audit.md): a gated stock factory-shell endpoint, MMC boot autodetection and corrected console/recovery claims.
+- [Factory intro and dispatch](docs/factory-gate-and-ui-dispatch-study.md): actual UI transitions, separate test groups and the still-unresolved mode-3 entry.
+- [Clear completion interrupt](docs/clear-completion-interrupt-study.md): event `0x17` connects to IRQ80, status acknowledgement, registration and startup setup.
+- [CORE1 transmit and backpressure](docs/core1-transmit-and-backpressure-study.md): the service-reply word edge, TXDT context, reserved slots and full-ring retries.
 - [Native arithmetic primitives](docs/native-arithmetic-primitives.md): bounded native shaping, feedback and voice-end reference semantics.
 - [Operand variants and macro boundaries](docs/operand-variants-and-macro-boundaries.md): exact mono-sum and cross-destination allpass comparisons, with oscillator-layout and exceptional-macro limits.
 - [Oscillator layout candidates](docs/oscillator-layout-candidates.md): competing arities consistent with six independently owned coefficient anchors.
@@ -120,9 +123,9 @@ symbol adjacency does not prove ownership by a program class.
 Local documentation prepared for the existing vault is under ignored `docs/obsidian/`;
 code stays here. These working copies are not part of the GitHub repository.
 The initial 19-note update was applied to the vault on 2026-11-10 through reviewed file access.
-Subsequent passes now cover 37 verified notes, including official cross-model
+Subsequent passes now cover 41 verified notes, including official cross-model
 comparisons, key/access studies and corrections to older recovery claims.
-The latest pass wrote 17 Markdown notes and verified all 37 against the staged
+The latest pass wrote 14 Markdown notes and verified all 41 against the staged
 hashes. Firmware downloads remain local/ignored.
 Saved hashes were checked before each update; every note was verified byte for byte.
 Original backups, the initial validated patch and the applied hash manifests remain

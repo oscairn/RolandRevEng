@@ -1,5 +1,10 @@
 # DRAM-IO owners, counter aliases and the global clear interface
 
+Follow-up: [clear completion](clear-completion-interrupt-study.md) joins event17 to
+IRQ80, stock priority/enable/mask setup and the handler's status acknowledgement.
+It adds per-element portal-address evidence while preserving bulk-unit/domain and
+safe-ownership limits below.
+
 2026-11-10. Offline follow-up to [the JUPITER-X comparison](jupiter-crossmodel-c1-study.md)
 and [RAMCLR/native clearing](dramio-clear-records-and-native-state.md). This pass
 connects the eleven JUPITER-X RAMCLR sources to actual constructor-selected manager

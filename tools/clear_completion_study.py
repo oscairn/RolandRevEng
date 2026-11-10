@@ -12,7 +12,7 @@ from kernel_abi import read
 def external_irq(vector_address, thumb_pointer):
     """Decode the vector identity, not the unrelated callback/event number."""
     offset = vector_address - 0x01100000
-    if offset < 64 or offset % 4 or not 0 <= thumb_pointer <= 0xffffffff or not thumb_pointer & 1:
+    if not 64 <= offset < 4*(16+240) or offset % 4 or not 0 <= thumb_pointer <= 0xffffffff or not thumb_pointer & 1:
         raise ValueError('Expected an aligned external vector and a Thumb handler')
     return offset // 4 - 16
 
