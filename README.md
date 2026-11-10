@@ -18,6 +18,7 @@ Independent follow-up studies:
 - [Gain controls](docs/alu-controls-study.md): native def/use comparison of selected gain chains.
 - [Dry/wet MAC controls](docs/dry-wet-mac-study.md): symbolic mixing expressions for the established subset.
 - [MAC, allpass and store timing](docs/mac-controls-and-issue-study.md): additional exact arithmetic forms and pre-arithmetic stores.
+- [Stereo tap accumulation](docs/stereo-tap-accumulation-study.md): six independently matched native stages and exact state-record aliases for four additional long controls.
 - [Transfer spaces](docs/transfer-spaces-study.md): pointer provenance and the contextual meaning of address tags.
 - [Header fields](docs/header-fields-study.md): bounded operation-family and payload-layout findings.
 - [Exceptional operations](docs/special-ops-and-exp-study.md): exponential reference windows and deliberately unsupported short controls.
