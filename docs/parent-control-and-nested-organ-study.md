@@ -1,5 +1,9 @@
 # Parent control references and the nested organ effect graph
 
+Follow-up: [condition fields and implicit returns](condition-fields-and-implicit-return-study.md)
+connects four native predicate inputs to exact DSP literal fields and bounds the
+return packet's payload. It does not assign a saved-PC source or transfer timing.
+
 2026-11-10. Static Capstone/file analysis; no REA provider or target execution.
 CORE1 payload SHA-256:
 `6d95449ae2a2df48fb60f8b69da6bf8c7198611255b63d59081ba5bdf5263154`.

@@ -35,6 +35,14 @@ Independent follow-up studies:
 - [Parent controls and the organ graph](docs/parent-control-and-nested-organ-study.md): nested DSP1 ownership, shifted pool references and native callback IO.
 - [Official MC-101 comparison](docs/mc101-v182-core1-comparison.md): shared MMIO/wait code and a different software scaling constant.
 - [Official JUPITER-X comparison](docs/jupiter-crossmodel-c1-study.md): shared routine windows and eleven RAMCLR segments with two record spacings.
+- [Condition fields and implicit returns](docs/condition-fields-and-implicit-return-study.md): exact native predicate inputs and payload limits on `00f8` interpretations.
+- [Owners and clear interfaces](docs/dramio-owners-and-clear-interface.md): constructor-selected ownership, counter aliases and actual global clear callers.
+- [CORE1 task context](docs/core1-task-context-and-host-peer.md): software IRQ registration, priorities, queue ownership and the remaining host peer.
+- [SH-4d and TR-8S updates](docs/sh4d-and-tr8s-firmware-study.md): another readable shared-code case and an encrypted-only package boundary.
+- [CORE0 ciphertext and key location](docs/core0-ciphertext-and-key-location.md): six-image block comparison and the reported MC-101 ROM slot, with Fantom validation still missing.
+- [Embedded ROM/key-material scan](docs/embedded-rom-key-material-scan.md): 27 scoped objects, including all retained update components and verified initial-data expansions.
+- [Readable key-provider references](docs/core0-rom-provider-reference-study.md): bounded instruction/literal candidates and rejected cross-MCU address matches.
+- [Fantom access-route audit](docs/fantom-access-route-audit.md): a gated stock factory-shell endpoint, MMC boot autodetection and corrected console/recovery claims.
 - [Native arithmetic primitives](docs/native-arithmetic-primitives.md): bounded native shaping, feedback and voice-end reference semantics.
 - [Operand variants and macro boundaries](docs/operand-variants-and-macro-boundaries.md): exact mono-sum and cross-destination allpass comparisons, with oscillator-layout and exceptional-macro limits.
 - [Oscillator layout candidates](docs/oscillator-layout-candidates.md): competing arities consistent with six independently owned coefficient anchors.
@@ -46,8 +54,8 @@ here opens a device or executes Roland's plugin. Production Oscairn code was not
 
 ## Reproduce
 
-Python 3 and Capstone 5.0.7 are sufficient for the analysis; `requirements.txt` records
-the existing analysis dependency. Preparing exports also uses Xcode's `dyld_info` and
+Python 3, Capstone 5.0.7 and pyelftools 0.33 support the analysis; `requirements.txt` records
+these dependencies. Preparing exports also uses Xcode's `dyld_info` and
 `c++filt`; the exceptional-operation study uses `xcrun otool` to identify import stubs.
 Use an interpreter with Capstone installed. To prepare a fresh environment:
 

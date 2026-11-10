@@ -19,6 +19,27 @@ The vendor files stay in its ignored `local/` directory. Counts below are genera
 
 The subsequent unattended studies refine this first-pass map:
 
+- [CORE0 key location and ciphertext](core0-ciphertext-and-key-location.md): the
+  reported MC-101 B6 slot is `012034c0..012034d7`. Thousands of exact payload
+  blocks are shared with Fantom across four other models. This makes that key
+  worth validating if recovered; neither the key nor the Fantom ROM is available.
+- [Embedded material scan](embedded-rom-key-material-scan.md) and
+  [provider references](core0-rom-provider-reference-study.md): no confirmed
+  key/ROM candidate in the scoped files, with explicit limits on this negative result.
+- [Access-route audit](fantom-access-route-audit.md): the stock factory tester has
+  a login-shell endpoint with an unresolved mode-3 gate. UART2/source boot features
+  do not prove a usable console, unsigned removable boot or safe recovery.
+- [Condition fields](condition-fields-and-implicit-return-study.md): four native
+  predicate inputs match exact DSP literal fields; condition bits and implicit
+  return state remain unproved.
+- [Owners and clear interfaces](dramio-owners-and-clear-interface.md): eleven
+  constructor-selected JUPITER-X owners, stock counter aliases and a separate
+  global clear command. Neither its units nor safe per-effect use is established.
+- [Task context](core1-task-context-and-host-peer.md): RXDT/ASGN run through software
+  interrupts with explicit queue gates; they are not established OS threads.
+- [SH-4d/TR-8S](sh4d-and-tr8s-firmware-study.md): two more official inputs, including
+  a third split CORE1 shared-code comparison and a package without a readable C1A.
+
 - [DRAM-IO clearing](dramio-clear-records-and-native-state.md): four owner-matched
   32-bit record streams and native clear-loop bounds. These do not yet establish
   exact hardware history clearing.
@@ -498,6 +519,14 @@ inside the plaintext header. Mode/index match the public MC-101 implementation e
 No local decryption or key-table identity has been verified; a matching index alone
 does not prove identical key material or a common silicon revision.
 
+The later [six-image comparison](core0-ciphertext-and-key-location.md) goes beyond
+matching indices: it finds 14,335 distinct nontrivial eight-byte payload blocks
+shared between Fantom bmc0/bmc1, and 8,124–15,985 shared with each other model.
+These bounded counts replace the earlier 14,351 estimate. The documented MC-101
+ROM table would put entry B6 at `012034c0`, but this is a BMC-side candidate, not
+an i.MX `/dev/mem` address or an established Fantom read route. No actual key
+candidate or decrypted CORE0 image was recovered.
+
 Do not spend effort on blind DES/Blowfish/XTEA guessing before checking the boot-ROM
 route. Repeated ECB blocks and known plaintext do not reveal a strong cipher's key by
 themselves. The old claim "one revealed block is one key reveal" and its cracking-time
@@ -555,8 +584,9 @@ and its parent graph, beginning with master-zero, pass-through and gain calculat
 in verified finite state. It requires proven entry/recovery, manager task/identity,
 quiescence, program/parameter readback and routing capture before any execution.
 Normal ttyGS0 IPC can contend with the prepared shell payloads; neither was changed
-or used. No Qwen output was obtained: command networking blocked the configured
-endpoint, and all accepted work and independent integration review used Codex.
+or used. At the original checkpoint no Qwen output was obtained because command
+networking blocked the configured endpoint. Later reviewed network executions
+returned bounded Qwen drafts; their checks and rejected claims are in the work log.
 
 ## Reproduction and scope
 

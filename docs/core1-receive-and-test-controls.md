@@ -1,5 +1,10 @@
 # CORE1 receive path, lifecycle and named oscillator controls
 
+Follow-up: [stock task context and host peer](core1-task-context-and-host-peer.md)
+connects RXDT/ASGN registration to actual software-triggered NVIC callbacks,
+priority bytes and queue gates. These callbacks are not established OS threads;
+the external ttyGS0-to-CORE1 conversion remains unresolved.
+
 2026-11-10. Static evidence from bmc0 MI078 C1A v1.08 commit `947de6711`, payload
 SHA-256 `6d95449ae2a2df48fb60f8b69da6bf8c7198611255b63d59081ba5bdf5263154`.
 All addresses are CORE1 runtime addresses. No plugin, firmware function or instrument

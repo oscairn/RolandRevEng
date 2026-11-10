@@ -10,8 +10,9 @@ or installed file has been proved key-free.
 This work used offline file reads and Capstone 5.0.7 under Python 3.13.7. No target
 code, updater, device, probe, exploit or decryption attempt was run. No key bytes
 or vendor ROM bytes are emitted by the new reproducer or committed to the repo.
-The root investigation separately examines exact key candidates and ciphertext
-relationships; the evidence here concerns readable-code provider references.
+The accompanying investigation separately examines reported key-slot addresses
+and ciphertext relationships; no actual key candidate was available for validation.
+The evidence here concerns readable-code provider references.
 
 ## What the public decryptor actually needs
 

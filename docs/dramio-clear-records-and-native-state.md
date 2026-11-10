@@ -1,5 +1,9 @@
 # RAMCLR DRAM-IO records and the separate native state-clear loops
 
+Follow-up: [owners, counter aliases and clear interfaces](dramio-owners-and-clear-interface.md)
+assigns the JUPITER-X sources through actual constructors and recovers a distinct
+global clear API. RAMCLR hardware coverage and selective-reset safety remain open.
+
 2026-11-10. Offline follow-up to [effect replacement and RAMCLR](effect-lifecycle-and-parent-entry-study.md).
 This pass recovers a rewriteable address field and four owner-matched record sets
 in the hardware DRAM-IO program. The desktop implementation separately has explicit

@@ -176,7 +176,7 @@ An update failure/hash rejection is not a proven safe rollback. Without the actu
 recovery writer/partition behavior, atomicity and ordering remain unknown. Before
 testing a persistent change, a stock restore image plus a verified recovery/boot
 entry and its write boundaries are needed; neither prepared package supplies that
-proof. This audit does not authorize or perform such testing.
+proof. No such testing was performed in this audit.
 
 ## Source identity and retained provenance
 

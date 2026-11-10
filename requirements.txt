@@ -1,2 +1,3 @@
-# Existing analysis dependency; vendor binaries are supplied locally by the user.
+# Analysis dependencies; vendor binaries are supplied locally by the user.
 capstone==5.0.7
+pyelftools==0.33

@@ -287,3 +287,50 @@ Next useful questions:
    clock assumptions and capacities build-specific.
 4. The encrypted/external peer and recoverable host entry remain dependencies for
    an end-to-end Fantom loader. Neither downloaded factory image closes that edge.
+
+## Current pass: owner contracts, task context, keys and access
+
+Continued from `788a0f1`. The owner/condition/task questions above received bounded
+follow-ups; the general emitter remains unchanged:
+
+- [Owner/clear contracts](dramio-owners-and-clear-interface.md) explain the two
+  JUPITER-X layouts through actual constructor selection and separate counter
+  apertures. The global clear driver has different bounds and shared completion;
+  its units, synchronization and safe per-instance use remain unproved.
+- [Conditions/returns](condition-fields-and-implicit-return-study.md) anchor four
+  predicate inputs but do not identify hardware condition flags or return state.
+- [Task context](core1-task-context-and-host-peer.md) closes software-IRQ startup,
+  priorities and queue gates. Safe custom manager entry/preemption is still open.
+- Official [SH-4d/TR-8S updates](sh4d-and-tr8s-firmware-study.md) extend comparison
+  to another readable CORE1 and an encrypted-only component set.
+- [Ciphertext/key location](core0-ciphertext-and-key-location.md),
+  [material scan](embedded-rom-key-material-scan.md) and
+  [provider references](core0-rom-provider-reference-study.md) distinguish a
+  reported MC-101 ROM entry from an actual recovered key. None was recovered.
+- [Access audit](fantom-access-route-audit.md) identifies a gated stock factory
+  shell endpoint and corrects the removable-SD, USB-console and recovery claims.
+
+One bounded no-tool Qwen review returned for the cross-model checker. Its code
+observations were checked against source and focused tests; its statement that
+tests cover only synthetic inputs was rejected because actual-corpus tests exist.
+No model-generated code or unverified semantic assignment was accepted.
+
+The next concrete work, ordered by what it unlocks:
+
+1. Trace any indirect/aliased writer enabling qctest mode 3. A shell call alone
+   does not supply its UI activation, effective UID or a usable terminal. Keep
+   physical console/security questions separate from source configuration.
+2. Obtain an owned BMC boot-ROM/runtime or applicable peer artifact through a
+   proven access path. Reported MC-101 B6 entry `012034c0..012034d7` is a candidate
+   only. Validate any actual candidate with the documented packing and multiple
+   plaintext structures before claiming Fantom decryption. More identical update
+   headers or arbitrary 24-byte guesses do not resolve this dependency.
+3. Continue native/DSP alignment for condition flags, implicit return state and
+   unresolved oscillator/macro fields. Require independent cutpoints before
+   admitting new opcodes; retain the current four-output callback counterexample.
+4. Establish the clear engine's units, completion sharing and ownership against
+   existing code/captures. Source bounds alone do not prove hardware history reset.
+5. Once entry and recovery are established, correlate existing bidirectional
+   host/peer traffic and stock RAM/state before designing a tiny muted probe.
+   Timing, numerical precision, audio routing and a complete executable ABI still
+   require hardware validation. No live probe or flashing is queued automatically.
