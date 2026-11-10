@@ -16,11 +16,13 @@ def polynomial(value):
     """Normalize a bounded sum/product of independent coefficient/signal symbols."""
     if value[0] in ('coef', 'signal'):
         return Counter({(value,): 1})
-    if value[0] not in ('add', 'mul'):
+    if value[0] not in ('add', 'sub', 'mul'):
         raise ValueError('Opaque or unsupported arithmetic in output expression')
     left, right = polynomial(value[1]), polynomial(value[2])
-    if value[0] == 'add':
-        result = left + right
+    if value[0] in ('add', 'sub'):
+        result = left.copy()
+        result.update({term: count if value[0] == 'add' else -count
+                       for term, count in right.items()})
     else:
         result = Counter()
         for a, ca in left.items():
@@ -28,6 +30,7 @@ def polynomial(value):
                 result[tuple(sorted(a + b))] += ca * cb
                 if len(result) > 32:
                     raise ValueError('Expression exceeds this bounded MAC study')
+    result = Counter({term: count for term, count in result.items() if count})
     if len(result) > 32:
         raise ValueError('Expression exceeds this bounded MAC study')
     return result
@@ -38,7 +41,7 @@ def describe(terms):
         if symbol[0] == 'coef':
             return f'C{symbol[1]}'
         kind, index = symbol[1]
-        return f'input{index}' if kind == 'input' else f'memory{index:#x}'
+        return f'input{index}' if kind == 'input' else f'{kind}{index:#x}'
     return [{'coefficient': count, 'factors': [label(symbol) for symbol in symbols]}
             for symbols, count in sorted(terms.items())]
 

@@ -12,3 +12,8 @@ contents. Addresses apply only to the identified build.
 Run `python3 tools/analyze.py` with the user's local artifacts to regenerate the full
 `analysis.json` and `coefficient_widths.json`. These detailed outputs are ignored by Git.
 Additional studies write their detailed output under ignored `local/`.
+
+The coefficient counts retain the earlier adjacent-symbol search for reproducibility.
+Those are candidate associations, not proof that a symbol belongs to its proposed
+program. The expanded operand study exposes one foreign-table conflict; both the
+record-level output and aggregate JSON now state this limitation explicitly.

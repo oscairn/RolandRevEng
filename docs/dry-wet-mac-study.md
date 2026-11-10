@@ -79,6 +79,10 @@ coefficient assignments or arithmetic formulas is performed.
 
 ## Counterexamples and remaining work
 
+Follow-up, 2026-11-10: the exact LFCOMP `1280/5280` pair is now independently
+matched in [the MAC controls and issue study](mac-controls-and-issue-study.md).
+It remains outside this older six-packet recognizer by design.
+
 LFCOMP contains the same two base words but extensions `1280` and `5280`, and a different
 surrounding operand pattern. Its result is **unsupported encoding family**, not
 "matched" and not a contradiction of the narrower `13c0/53c0` interpretation.

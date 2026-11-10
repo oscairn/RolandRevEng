@@ -1,6 +1,6 @@
 # Six-bit operands and bounded header-family decoding
 
-Offline follow-up, 2026-11-09. This study uses the same local ZENOLOGY arm64 and
+Offline follow-up, 2026-11-09, extended 2026-11-10. This study uses the same local ZENOLOGY arm64 and
 Fantom-0 v1.08 inputs as the packet/loader report. It adds operand-layout information;
 it does not execute Roland code or establish hardware arithmetic or timing.
 
@@ -54,20 +54,33 @@ The bounded layouts implemented by `tools/header_study.py` are:
 
 | Header family (high byte) | Base operation families | Implemented layout |
 |---|---|---|
-| `08` | one long arithmetic operation | One extension word and its three operand references |
-| `09` | one short arithmetic operation | One operand reference, excluding known special operations |
-| `15` | two short arithmetic operations | Two references into the same payload |
-| `0c`, `1e`, `3e`, `78`, selected `e4` forms | transfer operations | Indexed `FE0..FEE` fields or direct forms without added fields |
-| `47` | two long operations and two transfers | Two extension words first in the common payload; both sets of arithmetic references and transfer fields |
+| `08`, `09`, `0c` | one long, one short, or one transfer | The respective reference/extension or address syntax |
+| `10`, `11`, `14`, `15`, `18`, `1e` | `00`, `01`, `04`, `11`, `14`, `44` | Two base operations, sharing one payload |
+| `22`, `25`, `2b`, `2e`, `34`, `3e` | `004`, `014`, `044`, `114`, `144`, `444` | Three base operations, sharing one payload |
+| `47`, `4e`, `58`, `5f`, `69`, `78` | `0044`, `0144`, `0444`, `1144`, `1444`, `4444` | Four base operations, sharing one payload |
+| `8f` | `00` followed by transfers | Five through eight base operations observed |
+| `9c` | `01` followed by transfers | Five or six base operations observed |
+| `ab` | `0` followed by transfers | Five or six base operations observed |
+| `b8` | `11` followed by transfers | Five through eight base operations observed |
+| `c7` | `1` followed by transfers | Five or six base operations observed |
+| `e4` | all transfers | Five or six base operations observed |
 
-Only the known compact single-word forms are additionally accepted. Other mixed
-families, miscellaneous operations, flow controls and unproved transfer-window modes
-raise `UnsupportedLayout`. The helper never fills an unknown input with zero.
+Digits in this table are operation-family numbers: `0` long arithmetic, `1` short
+arithmetic, `4` transfer. They are not DSP input indices or arithmetic opcode values.
+All long-operation extensions occupy the first successive 16-bit words of the common
+payload; the remaining literal and indexed-address positions come from their references.
+The packet's count formula controls how many transfer slots follow the prefix in the
+extended-count forms. The low two count bits are independent of the high-byte family.
+
+Only the known compact single-word forms are additionally accepted. Miscellaneous
+families, flow controls, the exceptional short forms below and unproved transfer-window
+modes raise `UnsupportedLayout`. The helper never fills an unknown input with zero.
 
 The broader `families()` helper records candidate classifications for neighboring
 research, including a constrained rank for three-operation headers. It is **not** a
 complete header grammar. The complete operand decoder admits only the narrower table
-above. Extrapolating the two-operation lexicographic pattern to all larger packets was
+above. This follow-up adds observed mixed forms, rather than asserting an unrestricted
+multiset rank for larger headers. Extrapolating the two-operation lexicographic pattern to all larger packets was
 tested and rejected: unconstrained three-operation ranking would place three transfer
 operations at the wrong code. Remaining header composition and issue-slot meaning are
 still open.
@@ -85,22 +98,29 @@ Results on the complete local inventories:
 
 | Artifact | All observed packets | Packets admitted by the bounded layout | Layout counterexamples |
 |---|---:|---:|---:|
-| ZENOLOGY arm64 | 12,365 | 3,047 | 0 |
-| bmc0 CORE1 | 36,793 | 13,739 | 0 |
-| bmc1 CORE1 | 12,176 | 4,392 | 0 |
-| Total | 61,334 | 21,178 | 0 |
+| ZENOLOGY arm64 | 12,365 | 8,970 | 0 |
+| bmc0 CORE1 | 36,793 | 25,864 | 0 |
+| bmc1 CORE1 | 12,176 | 6,876 | 0 |
+| Total | 61,334 | 41,710 | 0 |
 
 These totals include repeated and relocated observations. They are not counts of
 independent algorithms. Unsupported packets are counted separately rather than consumed
-as invented data. The admitted layouts contain 7,778 literal-reference observations,
-4,859 extension words and 14,817 address-reference observations.
+as invented data. The admitted layouts contain 30,834 literal-reference observations,
+19,855 extension words and 50,433 address-reference observations. The first pass admitted
+21,178 packets; the added 20,532 observations exercise mixed long/short/transfer layouts.
+Structural fit is necessary but not sufficient to prove an individual opcode subtype's
+operand meaning. Newly identified exceptional subtypes are excluded even when a guessed
+reference can alias bytes already explained by another operation.
 
-The stronger independent check uses `_CoefSym` records from the adjacent symbol tables,
-whose explicit widths were previously matched against native coefficient defaults.
-Across the supported primary paired images, **all 387 symbol width-and-position anchors
-match the six-bit field prediction exactly**. This includes 75 anchors in the short
-single/dual forms and a further 312 in long and paired-long forms. Neither field position
-nor width is selected by trying different fits to the native numeric value.
+An additional check uses candidate `_CoefSym` records from the bounded adjacent-data
+scan in `analyze.coefficient_widths()`. Its 2,234 candidate width-and-position anchors
+inside supported packets produce **2,233 matches and one conflict**, described below.
+The original narrower pass found 387 matches and no conflicts. Neither field position
+nor width is selected by trying different fits to the native numeric value, but
+**adjacency and an equal relative address do not prove table ownership**. These are
+therefore matching metadata candidates, not 2,234 independently owner-proven symbols.
+The legacy JSON key `independent_symbols` remains for compatibility; the study retains
+the conflict with both predicted and candidate widths instead of silently excluding it.
 
 That is structural evidence for operand encoding. It does not show that an arithmetic
 opcode computes a multiply or that the operation can safely issue next to another one.
@@ -117,6 +137,49 @@ six-bit literal selector in family `09` owns a payload literal:
 They appear without the predicted payload, in 37 observations in each CORE1 artifact.
 They are explicitly unsupported, not interpreted as literals and not converted to zero.
 Their operand syntax or opcode subfamily needs separate recovery.
+
+Sixty-six additional mixed-packet observations use short controls `20a0`, `20a4`,
+`20a5`, `30a0` or `30a2`. For `20a0`/`30a0`, the regular six-bit interpretation makes
+its supposed literal overlap a preceding long-operation extension. The other observed
+variants merely alias bytes already covered by known literals, so complete byte coverage
+cannot independently justify treating them as ordinary literal references. All five
+controls now remain unsupported, including 46 observations that initially passed the
+broader structural check. They occur in `11` and `25` header families and are not
+generalized to every word with the same low byte. Native `_exp` cutpoints give a better
+research target, described in [the exceptional-operation study](special-ops-and-exp-study.md),
+but do not prove the individual controls' arithmetic or operand syntax.
+
+## A neighboring symbol table can impersonate a coefficient width
+
+The expanded layout exposes the previous GASSPH default mismatch at relative `0x2a8`:
+
+- The primary GASSPH packet starts at `0x29e`, in long-plus-transfer family `14`.
+  Its base's six-bit reference predicts a three-byte literal at `0x2a8`; its extension
+  predicts a second three-byte literal at `0x2ab`.
+- Decoding the first predicted literal at width three yields `0.998046875`, exactly
+  the native constructor default. This is a consequence of the reference encoding;
+  the decoder does not choose a width by minimizing the numerical error.
+- The old adjacent scan found candidate `_CoefSym` at plugin offset `0x827cac`, with
+  `(absolute=0x42c8, relative=0x2a8, width=4)`. Width four consumes the first byte of
+  the next predicted literal and produces the previously reported 175-LSB error.
+- That candidate lies immediately before the **MS_COMP** program at `0x827cdc`.
+  MS_COMP's native default at the same relative `0x2a8` is zero, and its own packet
+  predicts a four-byte zero at that position. The candidate's sole image-backed
+  64-bit pointer occurrence is at `0xa463e0` in the neighboring descriptor area.
+- GASSPH's exported `SetAlg()` instead references its earlier structures at
+  `0x826f98`, `0x826fb8`, `0x827068`, `0x827088`, `0x8271c8` and data descriptors in
+  the `0xa446xx` area. For example descriptor pointer field `0xa44680` points to
+  `0x8271a8`; subsequent descriptors point to symbols near `0x8271e8..0x827234`.
+
+This makes a foreign adjacent-table hit the strong explanation for the mismatch.
+The pointer occurrence and position do not by themselves establish the complete
+MS_COMP descriptor ownership graph. The bounded result is a conflict in the old
+symbol-association heuristic, not proof that GASSPH uses four-byte precision here.
+Actual symbol-to-driver ownership needs to be recovered before using such records as
+unqualified independent anchors. The corpus test pins this single conflict explicitly
+so a future ownership fix or a new discrepancy cannot silently change the count.
+
+## Other negative cases
 
 The indexed-transfer proof covers only `FE0`, `FE2`, ..., `FEE`. Other `Fx` windows,
 including firmware `FF0` examples, remain unsupported. In particular, ten `4709`
@@ -140,10 +203,12 @@ python3 -m unittest discover -s tests -p test_header_study.py -v
 
 The script writes aggregate results and counterexample locations to ignored
 `local/header-study.json`; it does not publish full program bytes or native disassembly.
-The seven tests cover synthetic register/literal references, odd packed literals,
-literal aliases, paired long extensions, transfers, rejection behavior and the optional
-local corpus. The pure checks require no local firmware; corpus tests skip when local
+The nine tests cover synthetic register/literal references, odd packed literals,
+literal aliases, mixed long/short/transfer pools, extended operation counts, paired long
+extensions, rejection behavior and the optional local corpus plus its explicit metadata
+conflict. The pure checks require no local firmware; corpus tests skip when local
 artifacts or Capstone are absent.
 
-Arithmetic and timing remain unverified on hardware. Higher-arity header ranking,
-special short operations and other transfer windows were left unresolved.
+Arithmetic and timing remain unverified on hardware. Miscellaneous-family payloads,
+unrestricted higher-arity header ranking, exceptional short operations and other transfer
+windows remain unresolved.

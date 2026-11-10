@@ -73,7 +73,10 @@ def check_segments(data, segments):
 
 
 def coefficient_widths(inventory):
-    """Use actual _CoefSym width records, never a best-fit literal length."""
+    """Compare adjacent _CoefSym candidates; class ownership is not established.
+
+    Numeric agreement is a cross-check, never a way to choose a candidate width.
+    """
     data = lib.Z
     image_starts = sorted({s[3] for item in inventory['lists'] for s in item[3] if s[1]})
     counts, rows = collections.Counter(), []
@@ -116,8 +119,12 @@ def coefficient_widths(inventory):
             counts[f'width_{width}'] += 1
             counts['exact' if error == 0 else 'within_lsb' if error <= quantum else 'different'] += 1
             rows.append(dict(cls=cls, relative=relative, width=width, symbol_offsets=matches,
+                             metadata_basis='adjacent_symbol_candidate', ownership='unverified',
                              native=native, decoded=decoded, error=error, quantum=quantum))
-    return dict(counts=counts, records=rows)
+    return dict(counts=counts, records=rows, limitations=[
+        'A matching adjacent record does not prove ownership by this class.',
+        'GASSPH relative 0x2a8 conflicts with the operand layout; see header-fields-study.md.',
+    ])
 
 
 def paired_layout():
@@ -184,7 +191,9 @@ def main():
                               failed_segments=len(summary[name]['failures']))
                    for name in ('zenology', 'b0c1a.bin', 'b1c1a.bin')},
         paired_render_classes=summary['paired_render_classes'],
-        paired_layout=summary['paired_layout'], coefficient_checks=coefficients['counts'])
+        paired_layout=summary['paired_layout'], coefficient_checks=coefficients['counts'],
+        coefficient_check_basis='adjacent symbol candidates; class ownership unverified',
+        coefficient_check_limitations=coefficients['limitations'])
     (out / 'summary.json').write_text(json.dumps(aggregate, indent=2) + '\n')
     for name in ('zenology', 'b0c1a.bin', 'b1c1a.bin'):
         result = summary[name]

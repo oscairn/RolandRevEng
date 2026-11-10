@@ -59,5 +59,10 @@
     "non_literal_default_records": 9,
     "width_2": 72,
     "different": 1
-  }
+  },
+  "coefficient_check_basis": "adjacent symbol candidates; class ownership unverified",
+  "coefficient_check_limitations": [
+    "A matching adjacent record does not prove ownership by this class.",
+    "GASSPH relative 0x2a8 conflicts with the operand layout; see header-fields-study.md."
+  ]
 }

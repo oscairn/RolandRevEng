@@ -36,19 +36,26 @@ def families(header):
         choices = [seq for seq in combinations_with_replacement(range(5), 3)
                    if sum(kind in (0, 1) for kind in seq) <= 2]
         return choices[code - 32]
-    observed = {0x47: (0, 0, 4, 4), 0x58: (0, 4, 4, 4), 0x5f: (1, 1, 4, 4),
-                0x69: (1, 4, 4, 4), 0x78: (4, 4, 4, 4),
-                0xab: (0, 4, 4, 4, 4)}
+    observed = {0x47: (0, 0, 4, 4), 0x4e: (0, 1, 4, 4),
+                0x58: (0, 4, 4, 4), 0x5f: (1, 1, 4, 4),
+                0x69: (1, 4, 4, 4), 0x78: (4, 4, 4, 4)}
     if code in observed and count == len(observed[code]):
         return observed[code]
     if code == 0xb8:
         return (1, 1) + (4,) * (count - 2)
     if code == 0xe4:
         return (4,) * count
+    prefixes = {0x8f: ((0, 0), (5, 6, 7, 8)), 0x9c: ((0, 1), (5, 6)),
+                0xab: ((0,), (5, 6)), 0xc7: ((1,), (5, 6))}
+    if code in prefixes:
+        prefix, counts = prefixes[code]
+        if count in counts:
+            return prefix + (4,) * (count - len(prefix))
     raise UnsupportedLayout(f'Unresolved header family {header:04x}')
 
 
 SPECIAL_SHORT = frozenset((0x4091, 0x0094, 0x2091, 0x3092, 0x1090))
+UNPROVEN_SHORT = frozenset((0x20a0, 0x20a4, 0x20a5, 0x30a0, 0x30a2))
 
 
 def reference(code, payload_bytes):
@@ -66,9 +73,9 @@ def reference(code, payload_bytes):
 def layout(words):
     """Resolve the supported base-op/reference layouts within a single packet.
 
-    The bounded subset is one-op long ALU, one/two-op short ALU, pure indexed
-    transfers, and the observed 47xx pair-of-long-ops/two-transfers form. Returned
-    byte offsets count from packet start. Other mixed families fail closed.
+    The bounded subset combines regular long/short ALU families and indexed
+    transfers in observed header contexts. Returned byte offsets count from
+    packet start. Miscellaneous and unclassified families fail closed.
     """
     if not words:
         raise ValueError('Empty packet')
@@ -83,8 +90,8 @@ def layout(words):
         if len(words) != 1:
             raise ValueError('Compact packet has a payload')
         return dict(families=[], fields=[], registers=[], padding=0)
-    if types not in ((0,), (1,), (1, 1), (0, 0, 4, 4)) and any(kind != 4 for kind in types):
-        raise UnsupportedLayout('Mixed or miscellaneous operation layouts remain unresolved')
+    if any(kind not in (0, 1, 4) for kind in types):
+        raise UnsupportedLayout('Miscellaneous operation layouts remain unresolved')
     payload, size = 2 * (count + 1), 2 * len(words)
     if payload > size:
         raise ValueError('Truncated base-op area')
@@ -93,6 +100,8 @@ def layout(words):
         if kind in (0, 1):
             if kind == 1 and control in SPECIAL_SHORT:
                 raise UnsupportedLayout('Known special short operation has a different operand syntax')
+            if kind == 1 and control in UNPROVEN_SHORT:
+                raise UnsupportedLayout('Short operation has unproved operand syntax')
             codes = [control & 63]
             if kind == 0:
                 extension_offset = payload + 2 * extensions_seen
@@ -190,9 +199,15 @@ def study():
                 if offset <= record['relative'] < offset + 2 * len(words):
                     anchors['named_width_position_anchors'] += 1
                     if (record['relative'], record['width']) not in actual:
-                        anchor_failures.append(dict(cls=cls, offset=offset, symbol_offset=record['relative']))
+                        anchor_failures.append(dict(cls=cls, offset=offset,
+                                                    symbol_offset=record['relative'],
+                                                    candidate_width=record['width'],
+                                                    candidate_symbol_offsets=record['symbol_offsets'],
+                                                    predicted_widths=sorted(width for position, width in actual
+                                                                            if position == record['relative'])))
                     else:
                         anchors['matching_anchors'] += 1
+    # The legacy key is retained, but adjacency alone does not prove table ownership.
     results['independent_symbols'] = dict(counts=dict(anchors), failures=anchor_failures)
     target = root / 'local/header-study.json'
     target.write_text(json.dumps(results, indent=2) + '\n')

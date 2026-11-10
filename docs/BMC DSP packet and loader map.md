@@ -1,6 +1,6 @@
 # BMC DSP packet and loader map
 
-2026-11-09. Follow-up to **BMC DSP ISA**, **BMC chips**, and **Fantom-0 research**.
+2026-11-09, extended 2026-11-10. Follow-up to **BMC DSP ISA**, **BMC chips**, and **Fantom-0 research**.
 Target: Fantom-0 v1.08, especially Fantom-07; local ZENOLOGY arm64 implementation as a
 comparison. This is static interoperability research. No firmware was installed, no
 instrument was accessed, and no program has been tested on a BMC.
@@ -24,17 +24,35 @@ The subsequent unattended studies refine this first-pass map:
   uses a live coefficient through input port 1, so ports 3/7 are not exclusive
   coefficient registers.
 - [Dry/wet MAC controls](dry-wet-mac-study.md): two exact control/extension forms
-  match complete dry/wet-plus-gain expressions in FETDRIVE and LINEDRIVE; a different
-  LFCOMP extension remains unsupported.
+  match complete dry/wet-plus-gain expressions in FETDRIVE and LINEDRIVE.
+- [Further MAC controls](mac-controls-and-issue-study.md): the LFCOMP port-2 mix, four-stage
+  LINEDRIVE allpass chains and pre-arithmetic same-packet stores have independent
+  native expression checks. This does not establish unrestricted issue timing.
 - [Header fields](header-fields-study.md): six-bit register/literal references and
-  long-operation extensions account for 21,178 admitted packet layouts, with all 387
-  independent symbol width/position anchors matching. Broader layouts remain open.
+  long-operation extensions account for 41,710 admitted packet layouts. Of 2,234
+  adjacent symbol candidates, 2,233 agree and one exposes a foreign-table association
+  in the old width scan. Table ownership is not established by adjacency.
+- [Exceptional short controls](special-ops-and-exp-study.md): coincidental literal
+  aliases are excluded, and two native exponential windows are anchored without
+  assigning a guessed meaning to their individual exceptional instructions.
 - [Transfer spaces](transfer-spaces-study.md): native provenance distinguishes circular
   data paths from a separate CBMCDrm-backed direct/window data path. The earlier global
   tag-2-is-IO and tag-4-is-coefficient-RAM readings were too broad.
 - [CORE1 command entry](core1-command-entry-study.md): RTTI links a specific command
   callback, while the nearby test-mode/restart strings belong to a logging formatter.
   Those strings alone do not establish an accessible upload/debug command.
+- [CORE1 receive path and test controls](core1-receive-and-test-controls.md): the
+  concrete local receive queues/router, stock test controls and observed execution
+  mode calls. A Linux-host upload protocol remains unproved.
+- [Host transport](host-transport-study.md): the normal `mi078` startup connects BMC
+  IPC to `/dev/ttyGS0`. The old claim that UART4 factory-test strings make this gadget
+  spare was incorrect. The link between this transport and CORE1's ingress ring still
+  needs evidence.
+- [Code generation](supported-code-generation.md): exact mix/gain and four-stage
+  allpass fragment emission/inverse decoding, plus an explicit-policy literal encoder.
+- [Native arithmetic primitives](native-arithmetic-primitives.md): shaping, feedback,
+  constant-source, breakpoint and voice-end reference semantics, without assigning
+  unproved DSP opcodes.
 
 The structural packet checks remain useful. A payload can also contain operation
 extension words, so “payload” does not mean every word is an address or literal.
@@ -236,15 +254,22 @@ The representable magnitude limit approaches 512 at every width; width controls
 precision. The decoder implements all three forms. Examples: `30 00` = 1,
 `2f e0 00` = 0.9921875, `50 00 00` = 16, `19 99 99 99` is a 4-byte approximation to 0.1.
 
-Scanning actual adjacent symbol records resolves widths for 2,684 native defaults:
+Scanning adjacent symbol candidates supplies tentative widths for 2,684 native defaults:
 72 width-2, 2,174 width-3, 438 width-4. Of these, 2,134 match exactly and another 549
 are within one encoded LSB. This explains much of the earlier apparent revision drift.
-790 defaults still lack an unambiguous width record in the bounded scan.
+790 defaults still lack an unambiguous candidate width in the bounded scan. This search
+does not prove that a matching record belongs to the selected class; candidate counts
+are retained for reproducibility, not reported as owner-proven width metadata.
 
-One explicit-width mismatch remains: `SIM_MFX_GASSPH`, relative `0x2a8`, width 4,
+The old width-candidate mismatch is `SIM_MFX_GASSPH`, relative `0x2a8`, candidate width 4,
 native `0.998046875`, image `0.9980475269258022` (175 LSB difference). Its symbol is at
-ZENOLOGY file offset `0x827cac`. Revision drift is possible, not established. Preserve
-the discrepancy. The much larger native value 646.1 mentioned in the older note still
+ZENOLOGY file offset `0x827cac`. The expanded operand decoder instead predicts width 3
+at that location, independently of numeric fitting; it decodes to the native value
+exactly. The candidate lies next to MS_COMP, whose own width-4 zero at the same relative
+address fits it. A neighboring table association is the strong explanation, not
+evidence of revision drift. The conflict remains explicit until symbol ownership is
+fully traced; see [the detailed analysis](header-fields-study.md).
+The much larger native value 646.1 mentioned in the older note still
 cannot be represented by this format and must not be used to infer an unlimited range.
 
 `evidence/coefficient_widths.json` retains every matched symbol position, width, native
@@ -254,9 +279,10 @@ The subsequent [operand-field study](header-fields-study.md) independently recov
 the encoded reference for its supported ALU families: high two bits select register,
 2-, 3- or 4-byte literal; low four bits select the register index or a byte offset
 inside the common operand pool. Long operations use one such field in the base word
-and two in an extension word. This verifies 387 named symbol width/position anchors
-without trying different lengths against numeric defaults. Special operations and
-broader mixed layouts remain explicitly unsupported.
+and two in an extension word. The expanded mixed layouts check 2,234 adjacent metadata
+candidates, retaining the single conflict above. No width is selected by trying numeric
+fits. Special operations, miscellaneous families and other transfer windows remain
+explicitly unsupported.
 
 ## 5. CORE1 executable and scatter map
 
@@ -452,13 +478,16 @@ The next work should proceed in this order:
    pass-through, zero, gain, impulse delay and a one-state filter against the native
    model. Measure issue budget, register readiness, state updates, clipping and noise.
    Existing `2016..2019` effect slots are a contextual lead, not a universal audio ABI.
-5. **Map host audio and control transport.** Determine the Fantom's real UART/mailbox
-   protocol, which DSP context owns the chosen IO slots, both BMCs' clock/routing roles,
+5. **Map host audio and complete the control bridge.** Normal application BMC IPC has
+   a statically traced `/dev/ttyGS0` path; its relationship to CORE1 commands is not yet
+   proved. Determine which DSP context owns the chosen IO slots, both BMCs' clock/routing roles,
    and how custom engine buffers enter and leave that context. ERAM kernels also need
    the DRAM-IO scheduler/FIFO contract.
-6. **Only then build a semantic assembler/backend.** It must emit control/payload
-   records, literal widths, labels/relocations, initial state, resource bounds and a
-   proven schedule. A small supported kernel subset is a reasonable first target;
+6. **Extend the constrained emitter into an engine backend.** The two independently
+   checked mix/filter fragment templates already emit control/payload records and
+   preserve their observed ordering. A general backend must additionally handle
+   remaining instruction forms, labels/relocations, initial state, resource bounds and a
+   proven schedule. The existing fragments are not complete executable kernels;
    translating arbitrary existing synth C++ is not yet justified.
 
 Stock-program reparameterization is closer than a new engine, because CORE1 already

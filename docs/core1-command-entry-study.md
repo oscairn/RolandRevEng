@@ -69,3 +69,10 @@ python3 tools/core1.py local/b0c1a.bin --address 0x61025c62 --size 0x30
 The pointer tracing tool is bounded to image-backed Thumb candidates and 32 entries
 per group; it is not a complete C++ ABI parser. No function was executed. No plugin,
 firmware body or native disassembly is included in the repository.
+
+## Follow-up
+
+The [November 10 receive and test-control study](core1-receive-and-test-controls.md)
+recovers a concrete CORE-local ring-to-callback path, manager call sites, stock program
+transitions and named oscillator coefficient controls. It supersedes the incoming-path
+unknown above while leaving the external ring producer and Linux upload API unresolved.

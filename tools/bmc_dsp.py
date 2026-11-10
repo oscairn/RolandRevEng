@@ -1,5 +1,6 @@
 """Byte-preserving BMC packet tools; this is not a semantic assembler or emulator."""
 import argparse
+import math
 from pathlib import Path
 import struct
 
@@ -62,6 +63,37 @@ def literal(data):
     magnitude = int.from_bytes(data, 'big') & ((1 << (8 * len(data) - 3)) - 1)
     exponent = -24 + 4 * ((first >> 5) & 3) + 8 * (3 - len(data))
     return (-1 if first & 128 else 1) * magnitude * 2.0 ** exponent
+
+
+def encode_literal(value, width):
+    """Encode a finite constant with software nearest/ties-to-even quantization.
+
+    This is an assembler policy, not a claim about the hardware float-write port.
+    Reject overflow instead of clipping; prefer the finest exponent on equal error.
+    """
+    if type(width) is not int or width not in (2, 3, 4):
+        raise ValueError('Literal width must be 2, 3 or 4 bytes')
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError('Literal value must be a finite number')
+    try:
+        value = float(value)
+    except OverflowError as error:
+        raise ValueError('Literal value exceeds the representable range') from error
+    if not math.isfinite(value):
+        raise ValueError('Literal value must be finite')
+    magnitude_bits = 8 * width - 3
+    limit = (1 << magnitude_bits) - 1
+    base_exponent = -24 + 8 * (3 - width)
+    if abs(value) > limit * 2.0 ** (base_exponent + 12):
+        raise ValueError('Literal value exceeds the representable range')
+    choices = []
+    for exponent in range(4):
+        quantum = 2.0 ** (base_exponent + 4 * exponent)
+        magnitude = min(round(abs(value) / quantum), limit)
+        bits = ((value < 0 and magnitude != 0) << (8 * width - 1)) | (exponent << magnitude_bits) | magnitude
+        encoded = bits.to_bytes(width, 'big')
+        choices.append((abs(literal(encoded) - value), exponent, encoded))
+    return min(choices)[2]
 
 
 def main():

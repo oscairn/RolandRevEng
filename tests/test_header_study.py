@@ -42,8 +42,41 @@ class ReferenceTests(unittest.TestCase):
         self.assertEqual([(f['role'], f['offset']) for f in decoded['fields']],
                          [('extension', 10), ('extension', 12), ('address', 14), ('address', 16)])
 
+    def test_mixed_long_short_and_transfer_reference_packing(self):
+        paired = layout([0x1107, 0x0422, 0x4525, 0, 0, 0, 0])
+        self.assertEqual(paired['families'], [0, 1])
+        self.assertEqual([(f['role'], f['offset'], f['width']) for f in paired['fields']],
+                         [('extension', 6, 2), ('literal', 8, 3), ('literal', 11, 3)])
+        mixed = layout([0x2509, 0x0422, 0x4525, 0x3fe8, 0, 0, 0, 0, 0])
+        self.assertEqual(mixed['families'], [0, 1, 4])
+        self.assertEqual([(f['role'], f['offset']) for f in mixed['fields']],
+                         [('extension', 8), ('literal', 10), ('literal', 13), ('address', 16)])
+        four = layout([0x4e0b, 0x0422, 0x4525, 0x3fe8, 0x7fea, 0, 0, 0, 0, 0, 0])
+        self.assertEqual(four['families'], [0, 1, 4, 4])
+        self.assertEqual([(f['role'], f['offset']) for f in four['fields']],
+                         [('extension', 10), ('literal', 12), ('literal', 15),
+                          ('address', 18), ('address', 20)])
+
+    def test_extended_count_adds_transfer_slots(self):
+        five = layout([0x8f0b, 0x044b, 0x454b, 0x2fe4, 0x3fe6, 0x7fe8, 0, 4, 0, 0, 0])
+        self.assertEqual(five['families'], [0, 0, 4, 4, 4])
+        eight = layout([0x8fd1, 0x044b, 0x454b, 0x1fe4, 0x2fe6, 0x3fe8,
+                        0x4fea, 0x5fec, 0x6fee, 0, 4, 0, 0, 0, 0, 0, 0])
+        self.assertEqual(eight['families'], [0, 0, 4, 4, 4, 4, 4, 4])
+        self.assertEqual([f['offset'] for f in eight['fields']], [18, 20, 22, 24, 26, 28, 30, 32])
+        self.assertEqual(families(0x9c4d), (0, 1, 4, 4, 4, 4))
+        self.assertEqual(families(0xab50), (0, 4, 4, 4, 4, 4))
+        self.assertEqual(families(0xc74e), (1, 4, 4, 4, 4, 4))
+        with self.assertRaises(UnsupportedLayout):
+            families(0x9c8d)
+
     def test_unsupported_forms_do_not_gain_guessed_operands(self):
-        for words in ([0x0902, 0x4091], [0x0a02, 0xff70], [0x2e05, 0x0403, 0x4503, 0x3fe0, 0]):
+        for words in ([0x0902, 0x4091], [0x0a02, 0xff70],
+                      [0x1108, 0x0432, 0x20a0, 0, 0, 0, 0, 0],
+                      [0x1108, 0x0432, 0x30a0, 0, 0, 0, 0, 0],
+                      [0x1108, 0x0432, 0x20a4, 0, 0, 0, 0, 0],
+                      [0x1108, 0x0432, 0x20a5, 0, 0, 0, 0, 0],
+                      [0x1108, 0x0432, 0x30a2, 0, 0, 0, 0, 0]):
             with self.subTest(words=words), self.assertRaises(UnsupportedLayout):
                 layout(words)
         with self.assertRaises(ValueError):
@@ -56,12 +89,15 @@ class CorpusReferenceTests(unittest.TestCase):
     def test_bounded_layout_and_independent_symbol_positions(self):
         from header_study import study
         results = study()
-        for name in ('zenology', 'b0c1a.bin', 'b1c1a.bin', 'independent_symbols'):
+        for name in ('zenology', 'b0c1a.bin', 'b1c1a.bin'):
             self.assertEqual(results[name]['failures'], [], name)
-        self.assertEqual(results['zenology']['counts']['decoded'], 3047)
-        self.assertEqual(results['b0c1a.bin']['counts']['decoded'], 13739)
-        self.assertEqual(results['b1c1a.bin']['counts']['decoded'], 4392)
-        self.assertEqual(results['independent_symbols']['counts']['matching_anchors'], 387)
+        self.assertEqual(results['zenology']['counts']['decoded'], 8970)
+        self.assertEqual(results['b0c1a.bin']['counts']['decoded'], 25864)
+        self.assertEqual(results['b1c1a.bin']['counts']['decoded'], 6876)
+        self.assertEqual(results['independent_symbols']['counts']['matching_anchors'], 2233)
+        self.assertEqual(results['independent_symbols']['failures'], [dict(
+            cls='SIM_MFX_GASSPH', offset=0x29e, symbol_offset=0x2a8,
+            candidate_width=4, candidate_symbol_offsets=[0x827cac], predicted_widths=[3])])
 
 
 if __name__ == '__main__':

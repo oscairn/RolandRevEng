@@ -1,5 +1,6 @@
 import json
 import importlib.util
+import math
 from pathlib import Path
 import struct
 import sys
@@ -7,7 +8,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
-from bmc_dsp import assemble, command_count, literal, packets, swap_words
+from bmc_dsp import assemble, command_count, encode_literal, literal, packets, swap_words
 from prepare_zenology import arm64_slice
 from c0_header import header
 
@@ -52,6 +53,35 @@ class PacketTests(unittest.TestCase):
                 self.assertEqual(literal(bytes.fromhex(encoded)), expected)
         with self.assertRaises(ValueError):
             literal(b'\x30')
+
+    def test_literal_encoder_exact_values_quantization_and_overflow(self):
+        for width in (2, 3, 4):
+            quantum = 2.0 ** (-24 + 8 * (3 - width))
+            limit = ((1 << (8 * width - 3)) - 1) * quantum * 4096
+            for value in (0, -0.0, 1, -1, 16, -16, limit, -limit):
+                with self.subTest(width=width, value=value):
+                    self.assertEqual(literal(encode_literal(value, width)), value)
+            self.assertEqual(literal(encode_literal(2.5 * quantum, width)), 2 * quantum)
+            self.assertEqual(literal(encode_literal(3.5 * quantum, width)), 4 * quantum)
+            self.assertEqual(literal(encode_literal(-2.5 * quantum, width)), -2 * quantum)
+            self.assertEqual(encode_literal(-quantum / 4, width), bytes(width))
+            # Equal-error values straddling two exponents keep the finer one.
+            fine_limit = (1 << (8 * width - 3)) - 1
+            self.assertEqual(encode_literal((fine_limit + 0.5) * quantum, width),
+                             fine_limit.to_bytes(width, 'big'))
+            with self.assertRaises(ValueError):
+                encode_literal(math.nextafter(limit, math.inf), width)
+        for value in (math.nan, math.inf, -math.inf, True, '1', 10 ** 1000):
+            with self.subTest(value=repr(value)[:20]), self.assertRaises(ValueError):
+                encode_literal(value, 3)
+        for width in (True, 1, 5, 3.0):
+            with self.assertRaises(ValueError):
+                encode_literal(1, width)
+
+    def test_all_two_byte_values_survive_numeric_decode_encode_roundtrip(self):
+        for bits in range(0x10000):
+            value = literal(bits.to_bytes(2, 'big'))
+            self.assertEqual(literal(encode_literal(value, 2)), value)
 
     def test_rejects_unrelated_macho(self):
         with self.assertRaises(ValueError):

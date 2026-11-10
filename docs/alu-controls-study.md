@@ -4,6 +4,11 @@
 The source is the local ZENOLOGY arm64 image identified in that report. No plugin or
 firmware was executed. No hardware was accessed.
 
+Follow-up, 2026-11-10: [the MAC controls and issue study](mac-controls-and-issue-study.md)
+establishes that main-port stores in the selected mixed packets capture incoming
+values, before same-packet arithmetic. The gain model now uses that ordering; all
+12 native tail matches still pass. Base-word order must not be used as issue order.
+
 ## Result
 
 A bounded model of gain controls and indexed transfers matches the terminal gain

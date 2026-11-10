@@ -1,0 +1,5 @@
+{
+  "kind": "dry_wet_tail",
+  "wet_addresses": [32, 33],
+  "coefficient_slots": [1, 2, 3, 4]
+}

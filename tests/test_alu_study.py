@@ -30,6 +30,22 @@ class GainModelTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             dsp_gain_tail([(0, [0x0c03, 0x3fee, 0xc005])])
 
+    def test_same_packet_stores_capture_before_gain(self):
+        rows = [[0x0c03, 0x3fe0, 0xc002], [0x1503, 0x0403, 0x4503],
+                [0x0c03, 0x3fe0, 0xc003],
+                [0xb809, 0x0403, 0x4503, 0x3fe0, 0x8fe2, 0xcfe4,
+                 0xc004, 0x10, 0x11],
+                [0x1e05, 0x0fe0, 0x4fe2, 0x10, 0x11],
+                [0x3d06, 0x00f8, 0x8fe0, 0xcfe2, 0x2018, 0x2019]]
+        self.assertEqual(dsp_gain_tail(packets(assemble(rows))), {0: [2], 1: [2]})
+
+    def test_arithmetic_consumes_old_coefficient_before_same_packet_load(self):
+        rows = [[0x0c03, 0x3fe0, 0xc002],
+                [0x2e05, 0x0403, 0x4503, 0x3fe0, 0xc003],
+                [0x1503, 0x0403, 0x4503],
+                [0x3d06, 0x00f8, 0x8fe0, 0xcfe2, 0x2018, 0x2019]]
+        self.assertEqual(dsp_gain_tail(packets(assemble(rows))), {0: [2, 3], 1: [2, 3]})
+
     def test_unknown_store_invalidates_aliased_memory(self):
         rows = [[0x0c03, 0x3fe0, 0xc005], [0x1503, 0x0403, 0x4503],
                 [0x0c03, 0x8fe0, 0x0010], [0x0c03, 0x9fe0, 0x0010],

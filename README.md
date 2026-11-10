@@ -11,19 +11,27 @@ Independent follow-up studies:
 
 - [Gain controls](docs/alu-controls-study.md): native def/use comparison of selected gain chains.
 - [Dry/wet MAC controls](docs/dry-wet-mac-study.md): symbolic mixing expressions for the established subset.
+- [MAC, allpass and store timing](docs/mac-controls-and-issue-study.md): additional exact arithmetic forms and pre-arithmetic stores.
 - [Transfer spaces](docs/transfer-spaces-study.md): pointer provenance and the contextual meaning of address tags.
 - [Header fields](docs/header-fields-study.md): bounded operation-family and payload-layout findings.
+- [Exceptional operations](docs/special-ops-and-exp-study.md): exponential reference windows and deliberately unsupported short controls.
 - [CORE1 command entry](docs/core1-command-entry-study.md): actual callbacks versus logging strings.
+- [Receive path and test controls](docs/core1-receive-and-test-controls.md): CORE-local queues, boot modes and stock diagnostic controls.
+- [Host transport](docs/host-transport-study.md): the normal application's gadget-serial IPC and correction to the older spare-port assumption.
+- [Supported code generation](docs/supported-code-generation.md): mix/gain and four-stage allpass fragments, with original examples.
+- [Native arithmetic primitives](docs/native-arithmetic-primitives.md): bounded native shaping, feedback and voice-end reference semantics.
 
 This directory contains offline tools and derived research. It does not contain
-a working custom synth engine, semantic assembler, flasher or hardware driver. Nothing
+a working custom synth engine, general assembler, flasher or hardware driver. A constrained
+emitter reproduces two verified fragment families; it does not schedule arbitrary operations. Nothing
 here opens a device or executes Roland's plugin. Production Oscairn code was not changed.
 
 ## Reproduce
 
 Python 3 and Capstone 5.0.7 are sufficient for the analysis; `requirements.txt` records
 the existing analysis dependency. Preparing exports also uses Xcode's `dyld_info` and
-`c++filt`. Use an interpreter with Capstone installed. To prepare a fresh environment:
+`c++filt`; the exceptional-operation study uses `xcrun otool` to identify import stubs.
+Use an interpreter with Capstone installed. To prepare a fresh environment:
 
 ```sh
 python3 -m venv .venv
@@ -72,13 +80,14 @@ python3 tools/c0_header.py local/bmc0_MI078_C0A_up.bin
 
 Packet output is `offset: header | base control words | operand pool as words`.
 The pool can contain operation extension words as well as addresses and literals.
-`bmc_dsp.assemble()` reconstructs raw packets and checks lengths. It does not assemble
-named arithmetic instructions. The decoder rejects unobserved header bit 5 and unknown
+`bmc_dsp.assemble()` reconstructs raw packets and checks lengths. The separate
+`bmc_subset.py` emits the two supported named fragment templates. The decoder rejects unobserved header bit 5 and unknown
 compact forms instead of skipping bytes to manufacture a successful parse.
 
 The locally generated `evidence/analysis.json` contains packet inventories, complete scatter records and the
 firmware program-list candidates. `coefficient_widths.json` records exact symbol offsets
-and the one unresolved value mismatch among explicitly sized decoded coefficients.
+and the adjacent-symbol width conflict explained in the header study. Candidate
+symbol adjacency does not prove ownership by a program class.
 `core1_bmc0_api.json` and `core1_bmc0_functions.txt` retain the build-specific load path.
 
 Local documentation prepared for the existing vault is under ignored `docs/obsidian/`;

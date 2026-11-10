@@ -94,6 +94,9 @@ def dsp_gain_tail(decoded):
             continue
         count = command_count(words[0])
         payload = words[1 + count:]
+        # Native paired kernels store the incoming main values in packets that
+        # also update them arithmetically; base-word order is not an issue order.
+        store_state = state[:]
         for kind, word in zip(types, words[1:1 + count]):
             if kind == 4 and _indexed(word):
                 index = (word & 15) // 2
@@ -106,9 +109,9 @@ def dsp_gain_tail(decoded):
                         state[port // 4] = inputs[port]
                 elif port in (8, 12):
                     channel = (port - 8) // 4
-                    memory[address] = state[channel]
+                    memory[address] = store_state[channel]
                     if address in (0x2018, 0x2019):
-                        output[address - 0x2018] = state[channel]
+                        output[address - 0x2018] = store_state[channel]
                 else:
                     # Unknown store sources still overwrite their destination.
                     memory.pop(address, None)
@@ -120,12 +123,13 @@ def dsp_gain_tail(decoded):
             elif not (kind == 2 and words[0] == 0x0a02 and word in (0xff70, 0xff71, 0xff75)
                       or kind == 3 and words[0] == 0x3d06 and word == 0x00f8):
                 state = [opaque((offset, 'A')), opaque((offset, 'B'))]
+                store_state = state[:]
                 inputs = [opaque((offset, 'input', index)) for index in range(8)]
                 memory.clear()
     return {channel: factors(value) for channel, value in output.items()}
 
 
-def native_values(code, pointer_fields, address_fields, signal_addresses=()):
+def native_values(code, pointer_fields, address_fields, signal_addresses=(), trace=None):
     """Track actual ARM64 register definitions, not field-offset matches alone.
 
     Supported pointer paths start at this/input/output arguments. Any unsupported
@@ -139,6 +143,9 @@ def native_values(code, pointer_fields, address_fields, signal_addresses=()):
     def write_fp(register, value):
         fp.pop(('s' if register.startswith('d') else 'd') + register[1:], None)
         fp[register] = value
+        if trace is not None:
+            trace.append(dict(kind='fp', pc=ins.address, instruction=ins.mnemonic,
+                              register=register, value=value))
 
     def invalidate_vector(register, pc):
         if register[0] in 'qvhb' and register[1:].isdigit():
@@ -234,11 +241,18 @@ def native_values(code, pointer_fields, address_fields, signal_addresses=()):
             write_fp(dst, value)
             products.append(ins.address)
             handled.add(dst)
-        elif signal_addresses and name in ('fadd', 'fmadd'):
+        elif signal_addresses and name in ('fadd', 'fsub', 'fmadd', 'fmsub', 'fnmsub'):
             names = [reg(ins, op) for op in ops]
             dst = names[0]
             values = [fp.get(source, opaque(('register', source, ins.address))) for source in names[1:]]
-            value = ('add', values[0], values[1]) if name == 'fadd' else ('add', ('mul', values[0], values[1]), values[2])
+            if name in ('fadd', 'fsub'):
+                value = ('add' if name == 'fadd' else 'sub', values[0], values[1])
+            elif name == 'fmadd':
+                value = ('add', ('mul', values[0], values[1]), values[2])
+            elif name == 'fmsub':
+                value = ('sub', values[2], ('mul', values[0], values[1]))
+            else:
+                value = ('sub', ('mul', values[0], values[1]), values[2])
             write_fp(dst, value)
             handled.add(dst)
         elif name == 'str' and len(ops) == 2 and ops[1].type == a64.ARM64_OP_MEM:
@@ -248,6 +262,9 @@ def native_values(code, pointer_fields, address_fields, signal_addresses=()):
                 key = mem_key(ins, ops[1])
                 if key is not None:
                     memory[key] = value
+                    if trace is not None:
+                        trace.append(dict(kind='store', pc=ins.address, key=key,
+                                          value=value))
                     base = key[1]
                     if base and base[0] == 'output':
                         output[base[1]] = value
