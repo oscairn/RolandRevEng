@@ -5,8 +5,8 @@ shared-prefix comparison and TS808 as a later alternative. This is an engineerin
 priority among five inspected native/DSP pairs, not a statement that any complete
 stock effect can currently execute. No complete program was justified in this pass.
 
-The two strict interpreter milestones being developed separately cover exact
-60-byte dry/wet and 82-byte allpass fragments. Here an admitted region means the
+The two integrated strict interpreter milestones now execute exact 60-byte dry/wet
+and 82-byte allpass fragments in the offline reference model. Here an admitted region means the
 specific class/offset context already independently compared with native dataflow
 and reproduced by `bmc_subset.py`. Equal control words, a successful packet parse,
 or a known header family do not admit other contexts. See the
@@ -144,6 +144,62 @@ quantized nonlinear prefix with integer conversion/shift boundaries and nonzero
 history fixtures. In parallel, implicit call/return state is the smallest global
 proof still preventing even the short stock placeholder from becoming a complete
 callable program. Extra copies of the same packet sequence cannot supply that state.
+
+## Prefix follow-up: two literal identities remain unresolved
+
+A bounded follow-up checked the proposed `004..038` window, using the existing
+`header_study.layout()`, independent `constructor_memory()` reconstruction and
+`native_accesses()`/`check_bindings()` provenance checks. It establishes the native
+result and two destination fields, but **does not admit a new DSP fragment**.
+
+The four decoded width-3 literal fields are distinct byte ranges:
+
+| Program field | Stored default | Native constructor-owned record / load |
+|---|---:|---|
+| `14` | 0 | record `+50`, double `+58`, read at `2df890` |
+| `17` | 0 | No matching record among the eight reconstructed defaults |
+| `24` | 1 | record `+70`, double `+78`, read at `2df89c` |
+| `27` | 1 | No matching record among the eight reconstructed defaults |
+
+Both zero fields occur in the `4822` packet; the two unit-valued fields occur in
+the `2424/3467` packet. This follows their pool-reference syntax, not an arithmetic
+assignment. Getter `2df728..2df824` compares a requested relative field with each
+of the eight records and returns its double, or returns null. No additional alias
+for `17` or `27` was identified in that getter. An external descriptor/write group
+could still constrain the fields together; its absence is not proved here.
+
+With independent input samples L/R, the native sequence at `2df888..2df8a4` reads
+the doubles M=`object[58]`, S=`object[78]` and produces the formal expressions
+`M*(L+R)+S*L` and `M*(L+R)+S*R`. FMUL/FMADD ordering is preserved in the source
+anchors; the polynomial notation does not assert bit-exact fused/rounded behavior.
+The two stores have independently checked field identities and circular-data
+pointer/mask/scaled-double provenance:
+
+| Program operand → native object field | Native store | Observed target |
+|---|---|---|
+| `32 → +8c` | `2df8c4` | data index 1 |
+| `34 → +94` | `2df8d8` | data index 2 |
+
+These checks connect the actual native stores to the packet's `afe0/bfe2` address
+fields. They do not identify their complete DSP source-port state or prove which
+incoming versus newly computed port value those stores capture. The same packet
+also loads live coefficient C2 through `5fe4`; a result-only macro that discards
+that outgoing port state would be incomplete.
+
+Equal defaults cannot establish the missing two identities. For example, a tied
+native expression uses one M and one S, whereas a hypothetical split expression
+could use `M1*L+M2*R+S1*L` and `M1*L+M2*R+S2*R`. Both give `(1,2)` for L=1,
+R=2 and stored defaults M1=M2=0, S1=S2=1. Setting only M2=1 distinguishes
+`(3,4)` from tied `(1,2)`; setting only S2=2 distinguishes `(1,4)` from `(1,2)`.
+These are checked algebraic counterexamples, **not predictions of mutated DSP
+execution**. No program or parameter was changed or executed.
+
+The smallest remaining prefix proof is therefore specific: recover the ownership,
+fixed-constant rule or grouped-write relation for fields `17` and `27`, then prove
+the full outgoing register/port state and store capture semantics. Merely equating
+their defaults with fields `14` and `24` would conceal the unresolved relationship.
+The checked diagnostic is retained in ignored `local/line-prefix-ownership.json`;
+all three target-selection tests still pass, and the strict admissions are unchanged.
 
 ## Reproduce and review
 
