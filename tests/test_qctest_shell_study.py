@@ -32,6 +32,9 @@ class CorpusTests(unittest.TestCase):
         self.assertEqual(result['gate']['required'], 3)
         self.assertEqual(result['gate']['direct_setter_values'], [0, 1, 2])
         self.assertEqual(result['gate']['file_initial'], -1)
+        self.assertEqual(result['gate']['page_adrp_add_count'], 110)
+        self.assertEqual(result['gate']['mode_adrp_sites'], [0x40752c, 0x407d90, 0x407f1c, 0x407fd0])
+        self.assertFalse(result['gate']['all_writers_proven'])
         self.assertFalse(result['activation_proven'])
         self.assertIsNone(result['runtime_uid'])
         with self.assertRaises(ValueError):

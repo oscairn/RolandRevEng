@@ -74,6 +74,40 @@ indirect call, alias/computed store or a different installed build. UI sequences
 visible in this handler select other modes; they must not be presented as a shell
 activation recipe. The page's setting display is likewise conditional on mode 3.
 
+A bounded follow-up checked addresses independently of those setter calls. Across
+the complete decoded `.text`, **110** ADRP instructions materialize page `456000`;
+all have an immediately following ADD from that page register. Four materialize
+the exact mode address:
+
+| ADRP / ADD | Memory operation | Interpretation |
+|---|---|---|
+| `40752c / 407530` | `407538: str w1, [x0]` | The known setter, using the saved argument |
+| `407d90 / 407d94` | `407d98: ldr w0, [x0]` | Setting-display gate |
+| `407f1c / 407f20` | `407f24: ldr w0, [x0]` | Value-adjustment gate |
+| `407fd0 / 407fd4` | `407fd8: ldr w0, [x0]` | ENTER/exit gate |
+
+Four adjacent-base materializations address `456ed8`: loads at `407dc8`,
+`407f48`, `407fec`, and the one-byte store at `407f5c`. That store does not reach
+the mode four bytes later. Nearby page references include six to `456e48` and 23
+to `456ea8`. The former initialization writes six eight-byte pointer slots from
+`456e48` through `456e98` in 16-byte strides. The latter is an indexed table whose
+file-backed entries are `(456c98,6), (456cf8,21), (456e48,6)` in 16-byte records;
+these observed pointer/count slots end at `456ed7`. Neither static layout nor those
+initialization stores overlaps the mode. The page-object initializer `4072d4`
+constructs the object at `5e3f60`, not this mode address. Other adjacent immediate
+bases are `456ee0` (one reference), `456ee8` (nine), `456ef0`, `456ef8` and
+`456f00` (one each); their inspected accesses do not overlap `456edc`.
+
+No ADR or MOV immediate materializes an address in `456e80..456f07` in `.text`.
+No byte-aligned raw 64-bit pointer value to `456ed8`, `456edc` or setter `40751c`
+occurs anywhere in the ELF, and no relocation writes within `456e80..456f07`. These
+negative checks cover those literal/materialization forms, not every possible
+computed address. Indexed table accesses, spilled pointers, cross-function aliases,
+bulk-copy destinations and arbitrary indirect dispatch were not exhaustively
+resolved. Consequently this pass establishes **one concrete mode writer in the
+recognized references**, not an all-writers proof and not universal unreachability
+of mode 3. No concrete alternative writer or mode-3 activation edge was found.
+
 The page object is constructed: RTTI name `11CPageDmyVer` is at `42f828`, its
 vtable address point is `42f790`, and slot `+28` points to handler `407eb0`.
 Constructor `408270` installs that address point; static initializer `407318`

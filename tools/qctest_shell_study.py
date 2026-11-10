@@ -93,11 +93,33 @@ def report(data):
     switch_name = struct.unpack('<Q', read(0x456930+0x3e*8, 8))[0]
     if initial != -1 or values != [0, 1, 2] or read(switch_name, 16) != b'SW_DRV_ID_ENTER\0':
         raise ValueError('Mode initialization/caller values/switch name mismatch')
+    md.detail = True
+    code = list(md.disasm(text.data(), text['sh_addr']))
+    if len(code)*4 != len(text.data()):
+        raise ValueError('Incomplete text decode')
+    page_pairs = []
+    for index, ins in enumerate(code):
+        if ins.mnemonic != 'adrp' or ins.operands[1].imm != 0x456000:
+            continue
+        add = code[index+1]
+        if (add.mnemonic != 'add' or add.operands[1].reg != ins.operands[0].reg
+                or add.operands[2].type != capstone.arm64.ARM64_OP_IMM):
+            raise ValueError('Unclassified page-base materialization')
+        page_pairs.append((ins.address, 0x456000+add.operands[2].imm))
+    mode_refs = [site for site, address in page_pairs if address == 0x456edc]
+    if len(page_pairs) != 110 or mode_refs != [0x40752c, 0x407d90, 0x407f1c, 0x407fd0]:
+        raise ValueError('Mode reference materializations changed')
+    # This is a literal/form scan, not an alias or all-writers analysis.
+    for target in (0x456ed8, 0x456edc, 0x40751c):
+        if struct.pack('<Q', target) in data:
+            raise ValueError('Previously absent raw pointer now present')
     return dict(qctest_sha256=QCTEST_SHA256, shell_call=0x402f58,
                 argv=['sh', '-l'], exit_flag=0x45a2c8,
                 gate=dict(switch_code=0x3e, switch_name='SW_DRV_ID_ENTER',
                           mode_address=0x456edc, required=3, file_initial=initial,
-                          direct_setter_callers=callers, direct_setter_values=values),
+                          direct_setter_callers=callers, direct_setter_values=values,
+                          page_adrp_add_count=len(page_pairs), mode_adrp_sites=mode_refs,
+                          all_writers_proven=False),
                 side_effect='/home/root/net.sh %3d', activation_proven=False,
                 runtime_uid=None, tty_topology=None)
 
