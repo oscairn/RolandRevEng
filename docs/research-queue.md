@@ -18,6 +18,49 @@ Reuse saved evidence. REA's Hopper provider was unavailable in the earlier pass;
 ordinary file/Capstone analysis is available and must be labeled as such. Do not
 repeat an unchanged failed provider setup or alter client configuration.
 
+### OMP/Qwen delegation and review
+
+Jacob additionally authorized using OMP with Qwen on his Mac Studio to save tokens,
+with independent review of the returned work. The installed OMP is 18.18.0 and the
+existing model identifier is `MacStudio/Qwen3.8-Flash-Next-Uncensored-oQ6e-mtp`.
+Use bounded analysis/coding prompts; Codex remains responsible for validating evidence
+and accepting changes.
+
+OMP's ordinary state directory is outside writable roots. Isolated provider profiles
+are already prepared at each worktree's `local/omp-agent`, with only the existing
+MacStudio provider. The launch environment that reached startup is:
+
+```sh
+PI_CONFIG_DIR='Projects/Open Synth Platform/bmc-research/local/omp-root'
+PI_CODING_AGENT_DIR="$PWD/local/omp-agent"
+```
+
+`PI_CONFIG_DIR` is relative to the existing home directory in this installed OMP;
+do not reassign HOME. Pass these variables to the OMP process using `env` or a
+structured subprocess environment. Never print provider credentials or commit profiles.
+The no-tool 30-second smoke test started but timed out; a read-only request to the
+configured model endpoint failed hostname resolution in this command runner. Model
+availability is therefore **not verified**. Do not claim Qwen was used unless a run
+actually returns, and do not spend the research run repeatedly repairing networking.
+Use the available Codex path when the local model cannot be reached.
+
+If Qwen becomes available:
+
+- Serialize requests with a process lock on the main checkout's
+  `local/omp-qwen.lock`, using `fcntl.flock`; avoid competing long inference jobs.
+- Prefer no-tool drafts with supplied bounded source/evidence, or read-only tools
+  `read,grep,glob`. Keep writes, commits and integration under the reviewing worker.
+  Disable extra extensions/title generation and use an explicit model and time limit.
+  No paid-model fallback, configuration installs or approval bypass flags.
+- Save prompts/results under the worker's ignored `local/`. Treat output as a draft,
+  including any claimed test results and instruction meanings.
+- Review every accepted diff for correct logic, bounds, unknown-state handling,
+  unnecessary dependencies/abstractions and unintended file changes. Run the relevant
+  tests yourself, including meaningful failure cases; independently reproduce binary
+  evidence. Compilation or self-reported tests alone are insufficient.
+- State in the handoff which work Qwen actually returned, what was accepted/rejected,
+  and which independent checks passed. The integration task reviews it again.
+
 Shared rules:
 
 - Code stays in the project. The Obsidian vault gets documentation only and is
