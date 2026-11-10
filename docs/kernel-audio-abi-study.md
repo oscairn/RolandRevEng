@@ -1,0 +1,311 @@
+# Kernel context, routing and program ownership
+
+2026-11-10, branch `research/kernel-abi`. Static file/Capstone 5.0.7 analysis,
+not REA-provider or runtime evidence. CORE1 addresses below apply only to bmc0
+MI078 C1A v1.08, payload SHA-256
+`6d95449ae2a2df48fb60f8b69da6bf8c7198611255b63d59081ba5bdf5263154`.
+Native comparison: ZENOLOGY arm64 SHA-256
+`b8ba7f41e26bef91e2cc38e99452e7795cd132e9f2a59695a68a77f18b8a2c30`.
+
+**Result:** a concrete stock effect context is recoverable, including manager-owned
+reservations, shared routing slots and an actual mute-control update. This supports
+an offline inspection tool and a staged stock-context probe design. It does not
+establish a complete standalone DSP kernel, safe injection point or cycle budget.
+
+**Transport constraint:** normal BMC IPC uses `/dev/ttyGS0`; prepared shell update
+packages can contend with it. This study changes neither package nor payload. A
+future probe cannot assume that gadget is an unused debug channel.
+
+## Evidence anchors and question status
+
+| Question | Result and evidence boundary |
+|---|---|
+| `ff71` / `ff70` | Stock `SetMuteMode` reads and patches this control family; lifecycle callers distinguish opening and muting. Actual silicon skip/clear behavior remains unobserved. |
+| `ff75`, `00f8` | Exact stock contexts and counterexamples recovered; execution meaning remains unknown. |
+| IO ownership | Native DSP4 routing writes/reads shared effect slots; the addresses relocate between instances and differ in Fantom. No physical TDM mapping. |
+| Program/data ownership | CORE1 `SDSPSegmentInfo` fields and five effect reservations mapped from constructors and manager bodies. |
+| State initialization | Native core clears and stock global transition clearing are observed; effect `SetAlg` itself does not prove a complete state reset. |
+| Manager context/order | Concrete manager objects, vtable paths and effect mute/load ordering recovered; safe arbitrary task entry remains unresolved. |
+| Minimal probe | Retain the stock graph/instance and use its mute plus live gain controls first; new fragment execution remains gated on wrapper/routing/timing evidence. |
+
+## The first control is mutable mute state
+
+The CORE1 `CBmcDspMgr` address point is `0x6117647c`. Vtable slot `+0xe0`
+contains Thumb pointer `0x01133b39`. Its target has the assertion signature
+`void CBmcDspMgr::SetMuteMode(const LabelSym *, bool)`.
+
+The body at `0x01133b38`:
+
+1. Takes the shared program check/set flag at `0x2008480c`.
+2. Resolves the label's absolute u16 address, or manager render base plus the
+   label's relative u16 address and segment byte at `+4`.
+3. Reads the first 16-bit word through `ReadLiteralRaw` (`0x0112f6e8`) and takes
+   its low five bits as the halfword count to scan.
+4. For following halfwords, compares `(word >> 2) & 0x3fff` with `0x3fdc`
+   (`0x01133bde..be4`), equivalent to `word & 0xfffc == 0xff70`.
+5. Writes `0xff70 | saved_bool` as a width-2 raw value and releases the flag
+   (`0x01133be6..3c00`). A failed search asserts; it does not invent a wrapper.
+
+For FETDRIVE, label `0x610e7b98` has absolute `0x4020`, relative 0, segment 0.
+The first packet is `0a02 ff71`; the scan finds its single control at base+2.
+The actual lifecycle uses bool 0 for opening and bool 1 for muting. Thus `ff71`
+is not an immutable generic entry opcode. The hardware consequence of mute mode
+(skip, suppress stores, clear, or another action) is still unknown; do not infer
+that it writes numerical zero to every output or clears filter history.
+
+This scan excludes `ff75` (`ff75 & fffc == ff74`). Voice-side `ff75` is not a
+drop-in substitute for this effect gate. In the small FETDRIVE image `00f8`
+appears in the output-store packet at relative `0x1ba`, followed by a distinct
+`0a02 ff70` packet at `0x1c6`. It is not the final packet. An empty DSP4 effect
+stub from `0x610a8bcc` is six bytes: a packet containing `00f8`, then compact
+`0001`; it has neither the opening `ff71` nor trailing `ff70`. FZ also has no
+initial `ff71` in its `0x37e`-byte implementation. These are counterexamples to
+making an executable wrapper from a universal `ff71/body/00f8` recipe.
+
+## `2016..2019` belong to a shared routing context
+
+In native `CSimDSP4Routing::VSubProc` (`0x000413d0`), the path at
+`0x00041bc0..bd0` resolves the core's **second** circular data array and its
+base pointer. It then:
+
+- Stores fallback output values at indices `0x18/0x19` (`0x00041c54..c78`).
+- Stores scaled input values at `0x16/0x17` (`0x00041c84..ca8`). Each effective
+  array index is `(absolute_index - array_base) & 0x7ff`.
+- When its condition is enabled, passes pointers to `0x16/0x17` as the input
+  pointer array and `0x18/0x19` as the output pointer array to the selected
+  effect's virtual method at `0x00041cd8`.
+- Reads slot `0x18` again at `0x00041da8..db8`, after that conditional call.
+
+This explains the agreement between direct native arguments in FETDRIVE and
+tag-2 memory accesses in FZ. It establishes shared routing storage, including
+preseeded outputs when the effect call is bypassed. It does not establish
+peripheral channels, codec pins, TDM slots, or an independent audio callback ABI.
+
+The addresses are not fixed even within the desktop corpus. FETDRIVE and
+LINEDRIVE's second image uses inputs `2459/245a` and outputs `245b/245c` where
+the first uses `2016..2019`. The corresponding Fantom render lists use:
+
+| List segment | DSP selected by manager | Program base / capacity (bytes) | Input operands | Output operands |
+|---:|---:|---|---|---|
+| 0 | 4 | `4020 / 1000` | `2000/2001` | `2002/2003` |
+| 1 | 5 | `8040 / 1000` | `2005/2006` | `2007/2008` |
+| 2 | 5 | `9040 / 1000` | `2009/200a` | `200b/200c` |
+| 3 | 5 | `a040 / 1000` | `200d/200e` | `200f/2010` |
+| 4 | 1 | `3020 / 1800` | `20ee/20ef` | `20f0/20f1` |
+
+FETDRIVE list `0x610e7b88` and LINEDRIVE list `0x611084fc` both have five
+segments and **header DSP byte 1**. Their lengths are `0x1ca` and `0x242` per
+segment. Header DSP 1 is not the destination of every segment: the segmented
+manager path selects both DSP and segment subset from its descriptor.
+
+Independent firmware corroboration: normal DSP4 list `0x610a1f18`, primary
+base `0x20`, source `0x610a5614`, contains indexed transfers targeting `2000/2001`
+at absolute program byte `0x2f8`, and loads `2002/2003` at `0x308`. The earlier
+transfers at `0x2ce/0x2e0` also target `2002/2003`. Port E/F arithmetic semantics
+are not assigned here; this establishes actual operand use in the surrounding
+graph, not a recovered schedule of its calls into effect segments.
+
+## CORE1 resource descriptor and placement rules
+
+Manager objects constructed at `0x6102c924` use vtable `0x6117647c`, common
+object pointer `0x2009be2c` at manager+4, the descriptor at manager+8, and an
+instance-related pointer at manager+`0x10`. The manager is 20 bytes in these
+constructors. The `0x10` pointer varies; copying only the descriptor into an
+invented manager object loses context.
+
+| `SDSPSegmentInfo` offset | Observed field / evidence |
+|---|---|
+| `00` | u32 DSP index |
+| `04` | Render reservation pointer, `{u32 byte_base, u32 byte_capacity}` stride 8 |
+| `08`, `09` | First program-list segment byte, signed count byte |
+| `0c` | DRAM-IO reservation pointer; separate program format |
+| `10`, `11` | First DRAM-IO segment byte, signed count byte |
+| `14` | Additional reference pointer; not decoded as a render reservation |
+| `18`, `1c` | Memory enum 6 reservation pointer and count |
+| `20`, `24` | Enum 0 reservation pointer and count |
+| `28`, `2c` | Enum 1 reservation pointer and count |
+| `30`, `34` | Enum 2 reservation pointer and count |
+| `38`, `3c` | Enum 5 reservation pointer and count |
+| `40`, `44` | Enum 11 reservation pointer and count |
+
+Memory records are `{u32 base, u32 length}` stride 8. `ParseDspMemoryWordAdrs`
+at `0x01131968` selects the listed groups by the `_DataSym` enum byte at
+`+0x10`. When a group exists it checks the symbol segment, relative index less
+than length, and relocation flag at symbol+`0x12`, then adds the reservation's
+base. Without a group it returns the symbol's absolute value. Enum numbers are
+not converted here into guessed physical RAM names.
+
+The five descriptors selecting the effect images above are:
+
+| Descriptor | DSP / first / count | Enum 0 base,length | Enum 1 base,length | Enum 6 base,length |
+|---|---|---|---|---|
+| `610a1674` | 4 / 0 / 1 | `100,96` | `47e,0` | `190,14` |
+| `610a16bc` | 5 / 1 / 1 | `320,96` | `44c,0` | `1f4,14` |
+| `610a1704` | 5 / 2 / 1 | `3b6,96` | `44c,0` | `208,14` |
+| `610a174c` | 5 / 3 / 1 | `44c,96` | `44c,0` | `21c,14` |
+| `610a1d14` | 1 / 4 / 1 | `c0,c0` | `70,0` | `e,14` |
+
+All values in these tables are hexadecimal except DSP/first/count. Enum 1 has
+zero private length in these descriptors despite real shared tag-2 IO accesses
+in their programs. Its base is not a private allocation of `2016..2019`.
+
+The manager methods are materially different:
+
+| Path | Actual checks and destination |
+|---|---|
+| All-program `01131c4e` | Manager DSP <7, equals list DSP, list type 0; walks every list segment and writes its base/length. Does **not** load the segment capacity field. |
+| Segmented `01131e70` | Requires manager reservations; checks first+count <= list count and each selected length <= owner capacity. Writes **list base**, not owner base. No list-DSP equality check in this body. |
+| Unique segmented `0113214e` | Checks owner count <= list count and lengths <= owner capacities. Takes source segments starting at 0, writes **owner base**, ignoring their list bases. |
+
+The latter two do not themselves relocate internal memory operands, labels or
+coefficients. Replacing a list's base cannot relocate a complete effect. The
+non-unique path checks length but trusts destination base: the new offline
+inspector additionally requires it to match the owner reservation. This stricter
+policy is explicit; it is not an undocumented firmware guarantee.
+
+## Stock effect lifecycle and state boundaries
+
+The exact RTTI `15CFspMfxFETDRIVE` points to vtable group `0x6117a0fc`, whose
+address point is `0x6117a104`. Its `SetAlg` callback is `0x6104a35a`. Actual
+branches and arguments give this sequence:
+
+1. Manager vtable `+0x28` writes the manager-selected render segment from
+   `0x610e7b88`, with final DMA wait enabled (`011350ae` → `01131e70`).
+2. Manager `+0x2c` writes the selected DRAM-IO list `0x610e7b90` with wait enabled.
+   The DRAM-IO page machinery is distinct from render-program loading.
+3. Calls wait helper `0x011271b8` through `0x6107769e`, count 1, completion 1.
+4. Calls its own level setter with 127 (`0x6104a380..388`).
+5. Calls `SetMuteMode(label=610e7b98, false)`, then passes the master symbol
+   `0x610e7ba8`, float 1, envelope argument 10 and final flag 0 through manager
+   `+0xb0` (`0x6104a38a..3be`).
+
+The separate open routine at `0x6104a31e` performs step 5. The close routine at
+`0x6104a3c4` first requests the master ramp toward zero (float constant at
+`0x6104a514`) with final flag 1, then sets the mute label true, then waits count
+3/completion 1. The native exported `MuteOff`/`MuteOn` methods independently
+have that order. The numeric timing meaning of envelope argument 10 and the
+final flag is not assigned here.
+
+The wait helper operates a completion flag at `0x200845b4`, installs an IRQ
+callback, and arms a counter through `0x01103772` at MMIO `0x40059000`. The
+neighbor at `0x0112721a` multiplies its argument by 48000 and divides by 1000
+before using the same mechanism. **Inference:** the first API counts units
+related to a 48 kHz timebase. That does not prove timer calibration or elapsed
+sample boundaries on a unit; the transition counts remain counts here.
+
+Neither this `SetAlg` body nor `SetMuteMode` clears all effect data history.
+Native `SIM_MFX_FETDRIVE::Init` allocates constructor/default/symbol storage;
+its `EndProc` frees it. Those allocations are not a hardware state reset.
+Native `CSimDSP4_Core` constructor zeroes two circular arrays and initializes
+its CBMCDrm arrays (`0x0016bbb0..bc04`), at a larger ownership boundary.
+The [global transition study](core1-receive-and-test-controls.md) separately
+records clears, waits, temporary programs and normal graph restoration before
+DAC enable. Preserve both distinctions: per-effect parameter setup versus whole
+graph state initialization.
+
+The program and coefficient methods use a check/set/clear byte, not a demonstrated
+blocking or atomic lock. DRAM-IO uses its neighboring byte. Nonwaiting uploads
+can release the program flag with DMA work still pending. A new IRQ/worker must
+not treat a zero flag as sufficient synchronization. Joining the actual stock
+task, maintaining object lifetimes, completing queued DMA and bounding waits
+remain requirements; a universally safe new entry context has not been found.
+
+## Minimal probe design and hardware gates
+
+The smallest supported design retains **one complete stock effect instance and
+its parent routing graph**. Keep all program bytes, DRAM-IO setup, labels,
+reservations and state initialization intact. Initially vary the already matched
+dry/wet and live gain parameters. No standalone executable is emitted.
+
+For FETDRIVE segment 0 the independently matched tail is at relative `0x16a`:
+wet data `0117/0118`, dry/wet/post/master coefficient operands
+`c192/c193/c194/c190`. The corresponding `_DataSym` handles are
+`610e7be0` (dry), `610e7bfc` (wet), `610e7c18` (post), `610e7ba8` (master).
+Their enum is 6; their relative indices are 2,3,4,0 in the manager's reservation.
+The handle's relocation records refer to the matching program operands.
+The [native MAC proof](dry-wet-mac-study.md) establishes the formal output:
+
+```text
+outL = (inL * dry + W(0x117) * wet) * post * master
+outR = (inR * dry + W(0x118) * wet) * post * master
+```
+
+The firmware and native FETDRIVE/LINEDRIVE packet headers, controls and offsets
+match completely, independently checked by the new corpus regression. Their
+operand values and some literals differ. In particular, LINEDRIVE's tag-0
+native-to-firmware deltas are not globally constant; copying the desktop's state
+layout or coefficients is not justified. No new arithmetic meanings are assigned.
+
+| Stage | Proposed settings in verified, finite stock state | Expected observation / required readback |
+|---|---|---|
+| Baseline | Stock graph/parameters and externally attenuated capture | Save exact selected program, label controls, data/reservations and coefficient values; establish known channel routing. |
+| Zero-output calculation | dry=1, wet=0, post=1, master=0 | Formal tail outputs zero for finite operands. Verify coefficients and both output slots; this is stronger than assuming gate mute clears them. |
+| Pass-through | Same values, master=1 | Output slots follow asymmetric low-level left/right inputs; physical output still depends on parent graph. |
+| Gain | Same values, master=1/4, then 1/2 | Corresponding output-slot gain ratios; compare settled intervals after stock ramps. |
+| Stateful reference | Restore stock LINEDRIVE with complete state/default initialization | Record impulse/history and both native-matched allpass chains before considering any fragment replacement. |
+
+These are proposed measurements, not measured results. A live parameter operation
+must use the owner manager's actual method and handle, with its stock ramp/context;
+`_CoefSym` program-literal methods and `_DataSym` live-memory methods are different
+ABIs. No tool in this change calls either. Zero wet gain does not make unknown,
+uninitialized or non-finite upstream state safe by itself.
+
+Before any execution, a unit-specific entry mechanism, recovery procedure, verified
+manager identity/task, quiescence point, readback path and routing capture are needed.
+The firmware driver has `ReadDspProg` at `0x0112f74c` and `ReadLiteralRaw` at
+`0x0112f6e8`; their presence does not establish a host command that invokes them.
+Normalize readback byte order and halfword edges, compare only uploaded logical
+bytes, and retain neighboring program guards. Require the selected reservation,
+coefficient values and changed mute bit to read back as intended before proceeding.
+
+Stop on a build/owner/hash mismatch, reservation violation, unexpected neighbor
+change, missing completion, unknown route, clipped/non-finite output, or loss of
+ordinary IPC. Remain externally muted and restore through the verified stock
+lifecycle/recovery route; do not improvise SetExeMode values or blind MMIO writes.
+DSP4/5's rejection of mode 2 still rules out a generic `mode 2 = run` recipe.
+Cycle limits, numerical precision, gate behavior and timing remain hardware gates.
+
+## Reproduce offline
+
+Use the existing interpreter with Capstone; Homebrew's default Python in this
+session lacked it. No dependency installation or provider repair was needed.
+
+```sh
+PY=/Users/jacob/.pyenv/versions/3.13.7/bin/python3
+$PY tools/kernel_abi.py local/b0c1a.bin --list 0x610e7b88 --segment-info 0x610a1674 > local/kernel-fetdrive.json
+$PY tools/kernel_abi.py local/b0c1a.bin --list 0x611084fc --segment-info 0x610a1d14 > local/kernel-linedrive.json
+$PY -m unittest discover -s tests -p test_kernel_abi.py -v
+$PY tools/core1_rtti.py local/b0c1a.bin 15CFspMfxFETDRIVE
+$PY tools/core1.py local/b0c1a.bin --address 0x01133b38 --size 0xee
+$PY tools/core1.py local/b0c1a.bin --address 0x6104a31e --size 0xf2
+$PY tools/core1.py local/b0c1a.bin --address 0x01131e70 --size 0x122
+$PY tools/core1.py local/b0c1a.bin --address 0x0113214e --size 0x112
+$PY tools/core1.py local/b0c1a.bin --address 0x6102c998 --size 0x2a
+$PY tools/core1.py local/b0c1a.bin --address 0x6102cd26 --size 0x34
+```
+
+For the native routing and core initialization anchors, still without execution:
+
+```sh
+PYTHONPATH=tools $PY - <<'PY'
+import lib
+for address, size in [(0x41bc0, 0x200), (0x16bbb0, 0x58)]:
+    for ins in lib.md().disasm(lib.Z[address:address+size], address):
+        print(f'{ins.address:08x} {ins.mnemonic} {ins.op_str}')
+PY
+```
+
+`kernel_abi.py` reads exact supplied list/descriptor addresses, bounds every read
+to a single mapped image region, rejects unsupported record forms and reports
+`execution_ready: false`. It reports framing controls and indexed transfers
+without interpreting payload literals as addresses. `--unique` models the different
+source-selection/destination rule only; it performs no operand relocation. It never
+writes vendor input or emits a deployable program. Build-specific addresses are
+caller-selected and the output includes the image hash; verify that identity.
+Detailed generated JSON/disassembly stay in ignored `local/`.
+
+Next concrete offline lead: trace the effect-system caller that clears/initializes
+an instance before `SetAlg`, and resolve scheduling from the parent routing program
+to its render reservations. Next hardware experiment, once its gates are met: retain
+the complete graph and measure the master-zero/pass/gain sequence above, including
+program/parameter readback and adjacent-instance isolation.

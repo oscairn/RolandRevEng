@@ -31,8 +31,11 @@ tags, extra packets and schema fields are rejected.
 
 Entry/exit instructions, output stores, routing, data initialization, coefficients'
 values, program placement and stop/start management are intentionally absent. A
-fragment cannot be loaded as a complete program. In particular, the surrounding stock
-`ff71` / `00f8` controls have not been assigned safe executable meanings here.
+fragment cannot be loaded as a complete program. The [kernel ABI follow-up](kernel-audio-abi-study.md)
+recovers the stock `ff70/ff71` mute-mode update, manager reservations and shared routing.
+It does not establish a safe executable wrapper or the meaning of `00f8`. The fixed
+`2016/2017` inputs above are one desktop instance; other instances and firmware use
+different operands. This template performs no resource or routing relocation.
 
 ## Use without vendor artifacts
 
