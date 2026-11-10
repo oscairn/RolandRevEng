@@ -511,3 +511,69 @@ Hardware timing, precision, ownership-safe transitions, bulk-clear units and a
 verified live entry/recovery route remain open. No target/plugin/device/update,
 flash operation or prepared shell package was executed or modified. This checkpoint
 adds reproducible offline semantics and interfaces, not a runnable custom engine.
+
+## Functional fragment emulator checkpoint — 2026-11-10
+
+Continued from `51a92ef` with three isolated workers and local OMP/Qwen support.
+The new `bmc_emulator.execute_fragment` steps actual packet bytes for the strict
+60-byte dry/wet and 82-byte allpass profiles. It validates complete streams and
+all input maps, rejects missing/non-finite values and unknown forms, uses old-port
+arithmetic/stores, commits packet writes locally and returns independent snapshots.
+Caller maps are preserved on success and failure. No whole-template symbolic
+predictor is substituted for packet execution.
+
+Independent tests pin the actual four stock byte spans and full image/program
+identities, rerun the native polynomial proofs, compare every eight-port trace
+and all stores, and carry the two real LINEDRIVE allpass outputs directly into
+its real tail. The corpus tests made 33 fragment calls across asymmetric vectors,
+sequential purity checks and adjacent-fragment composition. No plugin/native
+sample processing or device was executed.
+
+Original audio demonstration: 12,000 frames each of a mono allpass impulse and
+stereo dry/wet tones. Explicit host history/delay wiring supplies inputs; this is
+not reconstructed stock state cadence. Float impulse energy is 0.25 and the mix
+reference maximum error is zero. WAV headers/payloads and summaries were inspected.
+48 kHz and PCM16 are software output choices, not BMC calibration. Outputs stay
+ignored in `local/seventh-fragment-demo`; no listening claim is made.
+
+The complete-program inventory verifies all 75 paired render descriptors and
+compares five primary streams. LINEDRIVE is the next target, leaving 42 whole
+packets outside exact fragment admission plus parameter/history/wrapper contracts.
+FETDRIVE has 51 unadmitted packets and unresolved header forms; shorter CHO/GATE
+streams are not easier by size alone. Structural decode is not execution coverage.
+
+Qwen returned three bounded drafts/reviews. The initial large implementation
+request timed out; a smaller core-only request with per-run thinking disabled
+returned code. Review accepted only its useful packet-loop/copy/trace structure
+and corrected tag, IO, target-address, extension, store-commit, bytes, uninitialized
+and numeric-boundary defects before execution. Independent tests were authored
+before acceptance. The oracle review's unsupported same-chain aliases and trace
+objections were rejected; its state-boundary suggestion led to the real adjacent
+composition test. Target-review range arithmetic was checked, while invented
+ranking/flush/scheduling conclusions were rejected. Prompts, outputs and correction
+ledgers stay ignored/local; no persistent provider configuration was changed.
+
+Validation: **212 passing tests** with the local corpus: a 207-test full discovery
+run plus all five newly integrated corpus tests. A clean tracked-text export
+runs all 212: **167 pass and 45 artifact-dependent tests skip explicitly**.
+Core/demo tests require no vendor bytes or Capstone. Relative Markdown links,
+tracked-text boundaries and whitespace checks pass. No CORE0 key, verified hardware
+entry/recovery route, complete stock-effect emulator or hardware engine follows
+from this functional milestone. Silicon precision, timing and native-plugin audio
+remain untested.
+
+
+The bounded LINE prefix follow-up checks four width-3 fields at `14/17/24/27`,
+with defaults `0/0/1/1`, against eight native records. Only `14/24` have identified
+native ownership. Two actual store destinations and native input-mix expressions
+are anchored; split-field counterexamples show why equal defaults do not prove
+aliases. Outgoing port state, store timing and the two unowned-field relationships
+remain unresolved; no extra opcode or fragment was admitted.
+
+Vault preflight matched all 46 previous hashes. Seven Markdown files were written
+with backups and atomic per-file concurrent-edit checks; **49 notes** verified
+byte for byte. The original ISA status now links the interpreter, validation and
+complete-program inventory. Current manifest is
+`local/obsidian-applied-seventh-2026-11-10.json`. Code, WAVs, reports and vendor
+bytes remain in the project. No live action, updater, flash or prepared shell
+package was executed or modified.

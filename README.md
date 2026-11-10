@@ -136,9 +136,9 @@ symbol adjacency does not prove ownership by a program class.
 Local documentation prepared for the existing vault is under ignored `docs/obsidian/`;
 code stays here. These working copies are not part of the GitHub repository.
 The initial 19-note update was applied to the vault on 2026-11-10 through reviewed file access.
-Subsequent passes now cover 46 verified notes, including official cross-model
+Subsequent passes now cover 49 verified notes, including the functional fragment emulator, official cross-model
 comparisons, key/access studies and corrections to older recovery claims.
-The latest pass wrote 13 Markdown notes and verified all 46 against the staged
+The latest pass wrote seven Markdown notes and verified all 49 against the staged
 hashes. Firmware downloads remain local/ignored.
 Saved hashes were checked before each update; every note was verified byte for byte.
 Original backups, the initial validated patch and the applied hash manifests remain
