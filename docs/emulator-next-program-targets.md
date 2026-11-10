@@ -5,7 +5,7 @@ shared-prefix comparison and TS808 as a later alternative. This is an engineerin
 priority among five inspected native/DSP pairs, not a statement that any complete
 stock effect can currently execute. No complete program was justified in this pass.
 
-The strict interpreter now executes exact dry/wet tails, with an optional checked
+The strict interpreter executes a stereo input packet, exact dry/wet tails, with an optional checked
 scratch round trip, and 82-byte allpass fragments in the offline reference model. Here an admitted region means the
 specific class/offset context already independently compared with native dataflow
 and reproduced by `bmc_subset.py`. Equal control words, a successful packet parse,
@@ -33,8 +33,8 @@ render list in this recorded metadata; no extra render list was silently discard
 |---|---|---|---|
 | `SIM_CHO_CHO` | 312 / `7c5080` | `a9084..a9620` | None |
 | `SIM_MFX_GATE` | 332 / `833318` | `313dd0..3140b8` | None |
-| `SIM_MFX_FETDRIVE` | 458 / `8372f4` | `2f7de4..2f81c4` | Dry/wet plus scratch `16a..1ba` |
-| `SIM_MFX_LINEDRIVE` | 578 / `7b47f4` | `2df874..2dfd94` | Allpass `13e..190`, `190..1e2`; dry/wet plus scratch `1e2..232` |
+| `SIM_MFX_FETDRIVE` | 458 / `8372f4` | `2f7de4..2f81c4` | Input `004..00e`; dry/wet plus scratch `16a..1ba` |
+| `SIM_MFX_LINEDRIVE` | 578 / `7b47f4` | `2df874..2dfd94` | Input `004..00e`; allpass `13e..190`, `190..1e2`; dry/wet plus scratch `1e2..232` |
 | `SIM_MFX_TS808` | 588 / `8403fc` | `2085f0..208ab0` | Additional bounded tap/feedback evidence, but neither strict template |
 
 Ranges are half-open hexadecimal byte offsets. Sources and native addresses are
@@ -54,7 +54,7 @@ an existing structural family interpretation. The remaining arithmetic, payload
 roles and wrapper semantics are still unresolved; the header observation removes
 one source of structural ambiguity without conferring execution semantics.
 
-The complete remaining regions are `000..13e` and `232..242`: **40 packets**.
+The complete remaining regions are `000..004`, `00e..13e` and `232..242`: **39 packets**.
 All of each remaining packet, including its shared pool, stays unadmitted. The
 local JSON lists each packet's start/end, header, base controls, structural family
 or explicit layout failure, and pool byte range. No hole is skipped as zero, NOP,
@@ -63,7 +63,7 @@ an immediate or an address merely because its encoding resembles a familiar form
 | Remaining LINEDRIVE region / requirement | Concrete gap |
 |---|---|
 | Opening `000..004` | `ff71` is a stock mutable mute gate; its execution/skip/store consequences are unproved |
-| Input/prefix `004..13e` | Mixed long/short arithmetic, extensions, special controls and transfers are not fully decoded. Examples include `4822`, `2424/3467`, `2485`, `fe10`, `b9b2`, `ac99`, `aed2/1e10`, `aeda`, `0e8b`, `5424/643e`, `5464/647e`, `ceae`, `4086`, `0044/1044`; these names are inventory, not opcode assignments |
+| Input mix/prefix `00e..13e` | Mixed long/short arithmetic, extensions, special controls and transfers are not fully decoded. Examples include `4822`, `2424/3467`, `2485`, `fe10`, `b9b2`, `ac99`, `aed2/1e10`, `aeda`, `0e8b`, `5424/643e`, `5464/647e`, `ceae`, `4086`, `0044/1044`; these names are inventory, not opcode assignments |
 | Pool roles throughout that prefix | Literal width/reference selection, extension consumption, auxiliary store sources and interactions with special/condition state need exact contextual proofs |
 | Suffix `232..242` | Co-issued output stores with `00f8` and trailing `ff70` must execute under a proved entry/return contract |
 | History/factor inputs to the allpass chains | Caller must supply real prior state and the factors produced before `13e`; using zero or arbitrary external factors would create a different program |
@@ -84,7 +84,7 @@ states that precise boundary.
 
 **Second: FETDRIVE.** Its smaller image and branch-free native body are useful for
 checking shared mixing/shaping hypotheses. The strict dry/wet region leaves
-`000..16a` and `1ba..1ca` unadmitted: **49 packets**. Header `7308` is unresolved
+`000..004`, `00e..16a` and `1ba..1ca` unadmitted: **48 packets**. Header `7308` is unresolved
 at `88` and `11e`; the whole prefix also needs its nonlinear/quantization, filter,
 special-state and auxiliary-transfer semantics. The two
 [cross-destination allpass comparisons](operand-variants-and-macro-boundaries.md)
@@ -222,3 +222,19 @@ than LINE's 318 bytes and inferred a complexity difference unsupported by the
 supplied straight-line callbacks. Its suggestions that the epilogue might be an
 output flush and that BMC scheduling is likely block-based/fixed-point supplied
 no evidence. No opcode, timing or numeric claim was admitted from that draft.
+
+
+## Input packet and bank comparison
+
+Both LINE and FETDRIVE load left and right in the packet at `004`. Native
+`2df884..2df890` and `2f7df4..2f7e00` independently load the two samples
+through the input pointer pair. The primary and alternate banks use the
+same load controls with different input slots. The packet is now admitted.
+
+The four checked banks all store zero in both mono-mix literal fields and
+one in both stereo literal fields. FETDRIVE co-issues a coefficient load
+in its stereo arithmetic packet and moves the width-three stereo fields
+to `28/2b`. In LINE they remain at `24/27`. The bank variation changes
+the input addresses, and the class variation changes the packet layout.
+The equal stored literals leave the tied-versus-split input-mix behavior
+underdetermined. The `afe0/bfe2` store-source identities remain open.

@@ -697,3 +697,30 @@ hashes verified.
 
 The full local suite passed all 246 tests. Focused emulator and emitter tests
 also passed after tightening the scratch profile's input validation.
+
+## JDMLT_B continuation evidence and stereo input
+
+Native JDMLT_B SetAlg and SetSequence connect the render list, the
+width-two field at `8018`, and the three calls through the four-entry
+native table. The four function bodies load constructor records tied to
+transfer operands in distinct DSP regions. The first callee writes the
+ring cell named in the packet after the `208` return candidate. The
+second writes the cell named by a transfer co-issued with `00f8` at
+`332`. The match `43c2 * 2 = 8784` is a separate candidate transfer
+from the `0080` packet to the terminal site. The continuation source
+and issue order are still unresolved. Qwen incorrectly assigned the
+first pool word to a family-1 ALU operand. The checked width-three ALU
+operands start at pool offsets 2 and 5.
+
+The emulator now steps the stereo input packet from both observed banks
+and the conditional reference WAV remains byte-identical. The bounded
+`4822` scan covered 12,365 native render packets and 36,793/12,176
+framed CORE1 packets. Its four native and ten bmc0 occurrences all have
+literal values `0,0,1,1` across the two adjacent arithmetic packets.
+bmc1 has no occurrence in this inventory. Counts include repeated
+segments and do not supply independent parameter variations. The
+scan is retained locally as `local/tenth-prefix-corpus.py`.
+
+The full local suite passed 250 tests. The focused selector tests also
+passed with the final SetAlg and native output-use anchors. Seven Roland
+notes were updated and all 57 verified.

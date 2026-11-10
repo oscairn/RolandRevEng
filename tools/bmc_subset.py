@@ -11,6 +11,20 @@ import sys
 from bmc_dsp import assemble, packets, swap_words
 
 
+STEREO_INPUT_ADDRESSES = ((0x2016, 0x2017), (0x2459, 0x245a))
+
+
+def assemble_stereo_input(spec):
+    if (not isinstance(spec, dict) or set(spec) != {'kind', 'input_addresses'}
+            or spec['kind'] != 'stereo_input'):
+        raise ValueError('Expected stereo_input and input_addresses')
+    addresses = spec['input_addresses']
+    if (not isinstance(addresses, list) or any(type(address) is not int for address in addresses)
+            or tuple(addresses) not in STEREO_INPUT_ADDRESSES):
+        raise ValueError('Expected one checked stereo input pair in channel order')
+    return assemble([[0x1e05, 0x0fe0, 0x1fe2, *addresses]])
+
+
 def validate(spec):
     if not isinstance(spec, dict) or set(spec) != {'kind', 'wet_addresses', 'coefficient_slots'}:
         raise ValueError('Expected kind, wet_addresses and coefficient_slots only')
@@ -128,6 +142,8 @@ def disassemble_allpass(stream):
 def assemble_fragment(spec):
     if not isinstance(spec, dict):
         raise ValueError('Expected a JSON object')
+    if spec.get('kind') == 'stereo_input':
+        return assemble_stereo_input(spec)
     if spec.get('kind') == 'allpass4':
         return assemble_allpass(spec)
     if spec.get('kind') == 'dry_wet_tail_with_scratch':
@@ -136,6 +152,12 @@ def assemble_fragment(spec):
 
 
 def disassemble_fragment(stream):
+    if len(stream) == 10:
+        spec = dict(kind='stereo_input', input_addresses=[
+            int.from_bytes(stream[offset:offset+2], 'big') for offset in (6, 8)])
+        if assemble_stereo_input(spec) != stream:
+            raise ValueError('Unsupported stereo input packet')
+        return spec
     if len(stream) == 80:
         return disassemble_tail_with_scratch(stream)
     if len(stream) == 82:

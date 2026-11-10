@@ -16,7 +16,7 @@ and hardware timing still block a runnable custom engine. The MMIO read-reply bu
 also has a static stack-size discrepancy; it is not a demonstrated safe loader.
 
 A strict [offline fragment interpreter](docs/fragment-emulator.md) steps the checked
-dry/wet, scratch transfer and allpass profiles with per-packet traces and corpus tests.
+stereo input, dry/wet, scratch transfer and allpass profiles with per-packet traces and corpus tests.
 It can render original impulse and stereo mix WAV demonstrations without vendor
 artifacts. The [complete-program inventory](docs/emulator-next-program-targets.md)
 selects LINEDRIVE next and tracks its remaining packets and wrappers.
@@ -76,7 +76,7 @@ Independent follow-up studies:
 
 This directory contains offline tools and derived research. It does not contain
 a working custom synth engine, full stock-effect emulator, general assembler, flasher or hardware driver. A constrained
-emitter reproduces fixed dry/wet, scratch and allpass profiles. Nothing
+emitter reproduces fixed stereo input, dry/wet, scratch and allpass profiles. Nothing
 here opens a device or executes Roland's plugin. Production Oscairn code was not changed.
 
 ## Reproduce
@@ -152,7 +152,7 @@ were verified byte for byte; their unique title links remain valid. Continued
 research now covers 57 verified notes in this folder. Future vault
 updates target this subdirectory. The move manifest is
 `local/obsidian-applied-roland-move-2026-11-10.json`; the latest update manifest
-is `local/obsidian-applied-ninth-2026-11-10.json`. Current folder and manifest
+is `local/obsidian-applied-tenth-2026-11-10.json`. Current folder and manifest
 are recorded in `local/obsidian-location.json`. Earlier manifests describe historical paths.
 
 The research notes include the functional fragment emulator, official cross-model

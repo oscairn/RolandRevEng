@@ -144,3 +144,18 @@ with asymmetric vectors and checks each write and final port value.
 The next packet combines `00f8` with the output transfers to `2018/2019`.
 Its return state and issue behavior remain open, as does the trailing `ff70`.
 The accepted profile ends before both packets.
+
+## Stereo input
+
+The `stereo_input` profile accepts `input_addresses` of `[8214,8215]`
+or `[9305,9306]` in JSON. These are `2016/2017` and `2459/245a`
+in hex. The ten-byte packet has header `1e05` and loads the two input
+slots into ports 0 and 1 with `0fe0/1fe2`. Both LINE and FETDRIVE use
+the first pair in the `4020` bank and the second in the `8000` bank.
+Native input-pointer loads and all four actual packet slices were checked.
+The executor accepts the matching pair as its IO map for this profile.
+
+The following input-mix packets still need independent evidence for the
+duplicated literal fields and outgoing store sources. The conditional LINE
+render uses the admitted stereo input packet before applying its host
+shaping equations.

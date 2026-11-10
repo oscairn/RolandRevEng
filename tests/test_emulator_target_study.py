@@ -40,11 +40,11 @@ class CorpusTests(unittest.TestCase):
         self.assertEqual(result['paired_classes_checked'], 75)
         rows = {r['cls']: r for r in result['candidates']}
         line = rows['SIM_MFX_LINEDRIVE']
-        self.assertEqual(line['remaining_regions'], [[0, 0x13e], [0x232, 0x242]])
+        self.assertEqual(line['remaining_regions'], [[0, 4], [0xe, 0x13e], [0x232, 0x242]])
         self.assertEqual([(r['kind'], r['start'], r['end']) for r in line['exact_checked_fragment_regions']],
-                         [('allpass4', 0x13e, 0x190), ('allpass4', 0x190, 0x1e2),
+                         [('stereo_input', 4, 0xe), ('allpass4', 0x13e, 0x190), ('allpass4', 0x190, 0x1e2),
                           ('dry_wet_tail_with_scratch', 0x1e2, 0x232)])
-        self.assertEqual(rows['SIM_MFX_FETDRIVE']['remaining_regions'], [[0, 0x16a], [0x1ba, 0x1ca]])
+        self.assertEqual(rows['SIM_MFX_FETDRIVE']['remaining_regions'], [[0, 4], [0xe, 0x16a], [0x1ba, 0x1ca]])
         self.assertEqual(rows['SIM_MFX_GATE']['unresolved_family_headers'], [0x6508, 0xbf07, 0xde4c])
         self.assertEqual(line['unresolved_family_headers'], [])
         self.assertTrue(all(not row['complete_program_executable'] for row in rows.values()))

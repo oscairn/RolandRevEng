@@ -25,6 +25,23 @@ def allpass_inputs():
 
 
 class FragmentNumericsTests(unittest.TestCase):
+    def test_stereo_input_preserves_channel_identity_and_context(self):
+        for addresses in ([0x2016, 0x2017], [0x2459, 0x245a]):
+            spec = dict(kind='stereo_input', input_addresses=addresses)
+            program = assemble_fragment(spec)
+            self.assertEqual(disassemble_fragment(program), spec)
+            inputs = dict(zip(addresses, (3.5, -2.75)))
+            result = execute_fragment(program, {4: 12}, {}, inputs)
+            self.assertEqual(result['ports'], [3.5, -2.75] + [None]*6)
+            self.assertEqual(result['data'], {4: 12})
+            self.assertEqual(result['trace'][0]['writes'], {})
+            with self.assertRaises(ValueError):
+                execute_fragment(program, {}, {}, {addresses[0]: 3.5})
+            with self.assertRaises(ValueError):
+                assemble_fragment(dict(spec, input_addresses=addresses[::-1]))
+            with self.assertRaises(ValueError):
+                execute_fragment(program[:4]+bytes.fromhex('4fe2')+program[6:], {}, {}, inputs)
+
     def test_scratch_round_trip_executes_writes_and_rejects_changed_suffix(self):
         tail, data, coefficients, io = tail_inputs()
         spec = dict(disassemble_fragment(tail), kind='dry_wet_tail_with_scratch',

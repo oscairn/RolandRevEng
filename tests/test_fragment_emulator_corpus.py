@@ -153,6 +153,38 @@ class EmulatorCorpusTests(unittest.TestCase):
             before = current
         return result
 
+    def test_stereo_input_packet_in_both_stock_banks(self):
+        import parse
+        from bmc_emulator import execute_fragment
+        from bmc_subset import disassemble_fragment
+
+        from bmc_dsp import literal, packets
+        from header_study import layout
+
+        stock_fragments()  # Pins the native image and both primary programs.
+        for cls, load in [('SIM_MFX_LINEDRIVE', 0x2df884), ('SIM_MFX_FETDRIVE', 0x2f7df4)]:
+            _, _, code = parse.disasm_meth(cls, 'VSubProc(double const**, double**)')
+            self.assertEqual([(ins.mnemonic, ins.op_str) for ins in code if load <= ins.address < load+12],
+                             [('ldp', 'x12, x11, [x1]'), ('ldr', 'd0, [x12]'), ('ldr', 'd1, [x11]')])
+            _, primary, peer, _, base, peer_base = parse.program(cls)
+            self.assertEqual((base, peer_base), (0x4020, 0x8000))
+            for blob, addresses in [(primary, [0x2016, 0x2017]), (peer, [0x2459, 0x245a])]:
+                with self.subTest(cls=cls, addresses=addresses):
+                    program = blob[4:14]
+                    self.assertEqual(disassemble_fragment(program),
+                                     dict(kind='stereo_input', input_addresses=addresses))
+                    result = execute_fragment(program, {}, {}, dict(zip(addresses, (-5/8, 13/32))))
+                    self.assertEqual(result['ports'], [-5/8, 13/32] + [None]*6)
+                    fields = {}
+                    literal_end = 0x2a if cls.endswith('LINEDRIVE') else 0x2e
+                    for offset, words in packets(blob[14:literal_end]):
+                        for field in layout(words)['fields']:
+                            if field['role'] == 'literal':
+                                start = 14 + offset + field['offset']
+                                fields[start] = literal(blob[start:start+field['width']])
+                    stereo_offsets = (0x24, 0x27) if cls.endswith('LINEDRIVE') else (0x28, 0x2b)
+                    self.assertEqual(fields, {0x14: 0, 0x17: 0, **dict.fromkeys(stereo_offsets, 1)})
+
     def test_stock_scratch_packets_match_native_cell_and_output_provenance(self):
         import lib
         import parse

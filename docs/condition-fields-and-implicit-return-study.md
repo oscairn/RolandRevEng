@@ -163,3 +163,55 @@ To regenerate the inventory with the prepared pairing metadata:
 ```sh
 python3 tools/condition_return_study.py local/zen_arm64 --inventory
 ```
+
+## JDMLT_B sequence selector and store provenance
+
+Native JDMLT_B `SetAlg` passes render list `a46f00` to manager slot `50`.
+The list has a six-byte bank-A placeholder and a full `8000..878a`
+render segment. The DSP5 routing parent has a
+numeric reference to `8000` at `3f02` under the existing even `00aN`
+pool-index hypothesis. The full child segment has no matching indexed
+`00aN` base control. The parent reference identifies the entry slot,
+whose contents depend on the loaded effect.
+
+Native `SetSequence` writes descriptor `a47750` through manager slot
+`c8`. Its single record selects width 2 at program field `18`, absolute
+`8018`. The six rows at `829258` contain permutations of selectors
+0, 1 and 2. For reverb types 3 through 6 the setter substitutes 3 for 2.
+When the write runs, the setter packs the order in low-to-high nibbles
+and multiplies the integer by `2^-14`. Constructor fields `18` and
+`30` supply the default sequence `210` and mask `f` at the same scale.
+
+The native callback uses that encoding to select three calls at
+`130d90`, `130e44` and `130f18` through table `a01ec0`. It passes
+the constructor record area at object plus `5c0` to each callee. The caller
+loads the two stack outputs after each call.
+The following actual record loads tie those functions to transfer operands
+in four different DSP regions. Offsets and indices are hexadecimal.
+
+| Selector | Native target | Program operand | Stored word | Following `00f8` |
+|---|---|---|---|---|
+| 0 | `131bec` | `13e` | `01a5` | `208` |
+| 1 | `131e74` | `22c` | `01b6` | `332` |
+| 2 | `132298` | `34a` | `01bf` | `564` |
+| 3 | `13275c` | `678` | `4016` | `76e` |
+
+For selector 0, native store `131e34` uses the record at `x3+b4`.
+Its relative field `21c` names the `9fe4` transfer in packet `210`,
+**the packet after** `00f8` at `208`. For selector 1, native store
+`132234` uses `x3+144`. Its field `33a` names the `bfe0` transfer
+in packet `332`, **the same packet as** `00f8`. The native stores use
+scaled doubles in the masked ring before their respective returns.
+This constrains the state changes a matching DSP execution must produce.
+The saved return location and the issue order of those packets remain open.
+
+At `11c`, the family-1 controls `1462` and `5565` use three-byte
+literals at pool offsets 2 and 5. The remaining word is `43c2`. Under
+the doubled-address hypothesis it points to `8784`, exactly the final
+standalone `00f8` packet. The packet's family-3 control is `0080`.
+The address match leaves the control's ownership of that word, its
+predicate and execution behavior to be established independently.
+
+Run `python3 tools/jdmlt_sequence_study.py` with the prepared local native
+and pairing data. The checker reads the stock setter, descriptor, call
+table, reconstructed constructor records and original packets.

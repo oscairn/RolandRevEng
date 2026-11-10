@@ -34,9 +34,9 @@ The subsequent unattended studies refine this first-pass map:
   bounded negative ROM/key scans. Different AX-Edge bytes are not absent features.
 
 - [Offline fragment emulator](fragment-emulator.md) executes the exact
-  checked mix, scratch and allpass profiles and renders original audio. [Independent validation](fragment-emulator-validation.md)
+  checked stereo input, mix, scratch and allpass profiles and renders original audio. [Independent validation](fragment-emulator-validation.md)
   checks actual bytes and every packet/store. The [next-program inventory](emulator-next-program-targets.md)
-  selects LINEDRIVE while retaining 40 unadmitted packets plus history/wrapper
+  selects LINEDRIVE while retaining 39 unadmitted packets plus history/wrapper
   requirements; no complete stock effect or hardware engine is executable yet.
 
 - [Control-semantics ledger](opcode-semantics-ledger.md) collects independently

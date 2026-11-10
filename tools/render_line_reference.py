@@ -22,6 +22,7 @@ def render_reference(frames):
     from line_shaping_study import native_channel_reference
     if type(frames) is not int or not 128 <= frames <= 1000000:
         raise ValueError('Expected 128..1000000 frames')
+    input_program = assemble_fragment(dict(kind='stereo_input', input_addresses=[0x2016, 0x2017]))
     left_program, right_program = assemble_allpass(LEFT), assemble_allpass(RIGHT)
     tail = assemble_fragment(dict(kind='dry_wet_tail_with_scratch', wet_addresses=[0x29, 0x2a],
                                   coefficient_slots=[3, 4, 5, 0], scratch_addresses=[0x2b, 0x2c]))
@@ -32,9 +33,11 @@ def render_reference(frames):
     for frame in range(frames):
         left = 0.1*math.sin(2*math.pi*220*frame/SAMPLE_RATE)
         right = 0.08*math.sin(2*math.pi*330*frame/SAMPLE_RATE)
+        inputs = {0x2016: left, 0x2017: right}
+        ports = execute_fragment(input_program, {}, {}, inputs)['ports']
         data = {address: ring[native_ring_index(address, 0, origin)] for address in source_addresses}
         for mixed, history_address, current, saved, factor_address in (
-                (left, 4, 1, 3, 0x27), (right, 7, 2, 6, 0x28)):
+                (ports[0], 4, 1, 3, 0x27), (ports[1], 7, 2, 6, 0x28)):
             history = ring[native_ring_index(history_address, 0, origin)]
             reference = native_channel_reference(mixed, history=history, **PARAMETERS)
             data[current], data[saved], data[factor_address] = mixed, reference['smoothed'], reference['factor']
@@ -44,7 +47,7 @@ def render_reference(frames):
         data = execute_fragment(left_program, data, {})['data']
         data = execute_fragment(right_program, data, {})['data']
         result = execute_fragment(tail, data, {0: 1, 3: 0.5, 4: 0.5, 5: 1},
-                                  {0x2016: left, 0x2017: right})
+                                  inputs)
         output = result['ports'][0], result['ports'][4]
         for address, value in result['data'].items():
             ring[native_ring_index(address, 0, origin)] = value

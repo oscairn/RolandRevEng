@@ -37,14 +37,15 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
     """Step a complete supported logical fragment without mutating its inputs."""
     if not isinstance(program, bytes):
         raise ValueError('Program must be logical bytes')
-    disassemble_fragment(program)
+    spec = disassemble_fragment(program)
+    io_addresses = spec.get('input_addresses', (0x2016, 0x2017))
     memory = _values(data, 'data', range(0x800))
     coefs = _values(coefficients, 'coefficients', range(0x1000))
-    inputs = _values({} if io is None else io, 'io', (0x2016, 0x2017))
+    inputs = _values({} if io is None else io, 'io', io_addresses)
     ports, trace = [None] * 8, []
 
     def load(address):
-        if address in (0x2016, 0x2017):
+        if address in io_addresses:
             source, key, label = inputs, address, 'io'
         elif 0 <= address < 0x800:
             source, key, label = memory, address, 'data'

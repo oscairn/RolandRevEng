@@ -460,3 +460,20 @@ packets. The primary-program gap inventory leaves 40 and 49 packets respectively
 including the two final packets in each program. The next suffix proof needs
 the return state consumed by `00f8` and the fate of its co-issued output stores.
 [Scratch profile and evidence](supported-code-generation.md#drywet-tail-with-scratch-transfers)
+
+## JDMLT_B sequence and LINE input checkpoint
+
+The JDMLT_B native selector now ties the stock sequence setter, dispatch
+table and four callee regions together. Two constructor records bind native
+writes to transfers beside the internal `00f8` sites. The next control-flow
+proof needs to resolve the DSP selector dispatch and saved continuation.
+The `0080` packet's remaining word matches the terminal address under
+the existing doubled-address hypothesis.
+[JDMLT_B selector and return evidence](condition-fields-and-implicit-return-study.md#jdmlt_b-sequence-selector-and-store-provenance)
+
+The checked stereo input packet runs in the conditional LINE renderer.
+LINEDRIVE and FETDRIVE have 39 and 48 primary packets left respectively.
+The alternate-bank comparison keeps the duplicated input-mix literals
+equal, so resolving their independent roles and the auxiliary store
+sources still needs a discriminating case.
+[Stereo input and bank comparison](emulator-next-program-targets.md#input-packet-and-bank-comparison)

@@ -77,8 +77,8 @@ unchanged register/alias provenance is required instead of matching equal expres
 
 ## Existing code generation
 
-[Supported generation](supported-code-generation.md) exposes fixed fragment profiles in `bmc_subset.py` for dry/wet gain, the dry/wet
-tail with scratch transfers, and four-stage allpass. Their
+[Supported generation](supported-code-generation.md) exposes fixed fragment profiles in `bmc_subset.py` for stereo input, dry/wet gain, the
+dry/wet tail with scratch transfers, and four-stage allpass. Their
 resource and packet ordering restrictions remain in force. Stereo taps and the
 feedback variation are semantic studies, not new emitter templates. No entry/exit
 wrapper, allocator, general register decoder or custom synth engine follows from
@@ -90,7 +90,7 @@ DSP arithmetic opcode or a program-literal write.
 ## Executable offline subset
 
 The [functional fragment interpreter](fragment-emulator.md) now executes only the
-same exact dry/wet, scratch and allpass contexts accepted by the inverse decoder. It steps
+same exact stereo input, dry/wet, scratch and allpass contexts accepted by the inverse decoder. It steps
 packet bytes with old-port arithmetic/stores, next-packet loads and copied trace
 snapshots. [Corpus validation](fragment-emulator-validation.md) checks the actual
 four stock spans and native proofs independently. Other arithmetic entries above

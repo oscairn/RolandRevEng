@@ -1,7 +1,7 @@
 # Offline functional fragment emulator
 
-2026-11-10. `tools/bmc_emulator.py` executes logical packet bytes for three checked profiles. The dry/wet tail has 60-byte and 80-byte forms, and
-the four-stage allpass has 82 bytes. This is a packet-stepping functional model with memory and
+2026-11-10. `tools/bmc_emulator.py` executes logical packet bytes for four checked profiles. Stereo input takes 10 bytes, the dry/wet tail
+has 60-byte and 80-byte forms, and the four-stage allpass takes 82 bytes. This is a packet-stepping functional model with memory and
 per-packet traces. It is not yet a complete Roland effect or a cycle/bit-accurate
 BMC emulator. No vendor plugin or instrument is executed.
 
@@ -18,7 +18,9 @@ controls, altered extensions and partial templates are rejected. The interpreter
 then steps the actual packets, rather than returning a whole-template expression.
 
 `data` maps indices `0..0x7ff` to finite real numbers. `coefficients` maps slots
-`0..0xfff`; optional `io` uses the full contextual addresses `0x2016/0x2017`.
+`0..0xfff`; optional `io` uses contextual addresses `0x2016/0x2017`. The stereo input
+profile also accepts the observed alternate pair `0x2459/0x245a` when encoded
+in its packet.
 These are separate explicit dictionaries. Keys must be integers, excluding booleans;
 values must be finite integers or floats, excluding booleans. Every supplied entry
 is validated, including unused entries. Missing reads fail. No memory is silently
@@ -88,8 +90,8 @@ fragment render does not establish that a complete stock engine can yet execute.
 
 Python 3.13+ supplies `math.fma` for the separate
 [native shaping oracle](line-prefix-shaping-study.md). A second original-signal
-experiment combines that oracle with the two strict allpass fragments and the
-strict dry/wet fragment with scratch transfers:
+experiment combines that oracle with the checked stereo input packet,
+two allpass fragments and the dry/wet fragment with scratch transfers:
 
 ```sh
 python3.13 tools/render_line_reference.py local/line-reference.wav
