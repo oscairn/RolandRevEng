@@ -47,6 +47,7 @@ Independent follow-up studies:
 - [Native LINE shaping](docs/line-prefix-shaping-study.md): fixed conversion/wrap, sign/clamp, smoothing and rational-reference arithmetic.
 - [LINE parameter groups](docs/line-prefix-parameter-study.md): counted literal writes versus native representative updates.
 - [Global prefix-group inventory](docs/line-prefix-global-groups.md): bounded negative inventory with positive controls; two input-mix identities remain unresolved.
+- [Cross-model LINE mix comparison](docs/emulator-next-program-targets.md#jupiter-x-carries-an-asymmetric-instance-of-4822--1940): exact `4822 / 1940` form with unequal literals in a JUPITER-X list.
 - [AX-Edge/JUNO-X updates](docs/ax-edge-and-juno-x-firmware-study.md): two further official images, shared code/ciphertext and bounded negative ROM/key scans.
 - [Fragment emulator validation](docs/fragment-emulator-validation.md): pinned stock bytes, complete traces, stores and adjacent-fragment composition.
 - [Supported code generation](docs/supported-code-generation.md): mix/gain and four-stage allpass fragments, with original examples.

@@ -61,6 +61,19 @@ class ReferencePipelineTests(unittest.TestCase):
             self.assertEqual(output.read_bytes(), before)
             self.assertEqual(info['frames'], 256)
 
+    def test_native_mix_changes_wet_input_only(self):
+        from line_shaping_study import native_stereo_mix
+
+        self.assertEqual(native_stereo_mix(2, -3, mono=0.5, stereo=0.25), (0, -1.25))
+        rows, info = render_reference(128, mono=0, stereo=0)
+        expected = [(0.05*math.sin(2*math.pi*220*i/SAMPLE_RATE),
+                     0.04*math.sin(2*math.pi*330*i/SAMPLE_RATE)) for i in range(128)]
+        self.assertEqual(rows, expected)
+        self.assertEqual(info['native_mix'], dict(mono=0, stereo=0))
+        self.assertEqual(info['factor_peak'], 0)
+        with self.assertRaises(ValueError):
+            native_stereo_mix(1, 2, mono=float('nan'), stereo=1)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -238,3 +238,57 @@ to `28/2b`. In LINE they remain at `24/27`. The bank variation changes
 the input addresses, and the class variation changes the packet layout.
 The equal stored literals leave the tied-versus-split input-mix behavior
 underdetermined. The `afe0/bfe2` store-source identities remain open.
+
+## JUPITER-X carries an asymmetric instance of `4822 / 1940`
+
+`tools/line_mix_variation.py` searches packet boundaries for the exact `0806` header,
+`4822` control and `1940` extension. It decodes each literal by reference slot and
+reports the following packet separately. CORE1 totals count segment occurrences
+from the bounded render-list inventory, including relocated copies.
+
+| Local image | Framed segments | Framed packets | Exact matches | Unequal literal pair |
+|---|---:|---:|---:|---:|
+| ZENOLOGY arm64 | 177 | 12,365 | 4 | 0 |
+| Fantom bmc0 | 377 | 36,793 | 10 | 0 |
+| Fantom bmc1 | 34 | 12,176 | 0 | 0 |
+| JUPITER-X C1A | 979 | 86,857 | 24 | 2 |
+| MC-101 C1A | 59 | 13,639 | 0 | 0 |
+| SH-4d C1A | 909 | 79,912 | 22 | 0 |
+
+Six MC-101 and one SH-4d candidate segments did not frame and were excluded. The
+QSPI parser checks the container CRC and member bounds. The report maps each stored
+source back to its original container member. The JUPITER-X container SHA-256 is
+`9368ef3243567cbd639dc990c0bb8ca6d2ee817da2fd8412597ae77d6f0b567b`.
+
+The two unequal matches belong to one JUPITER-X list at `61218324`, with segment
+bases `2020` and `7020`. Each segment is `16a6` logical bytes. The original container
+source offsets are `2545d0` and `255c78`. A native Thumb call at `6102b4f2` reaches
+the setup body at `6107dace`. That body loads this exact list through the literal
+at `6107dbc4` and passes it to manager slot `28` at `6107dade`. The caller and list
+selection are static observations. The model or user-facing effect name is unknown.
+
+Both segments load through `0fe0/1fe2` immediately before the exact `4822 / 1940`
+packet at logical `ca`. The width-three fields at `d0/d3` contain `(1, 0)` in slot
+order. The next packet at `d6` has `5824 / 19c0`, a co-issued `cfe2` store to
+`200e` or `207e`, and independent width-three fields at `e0/e3` containing `(0, 1)`.
+This establishes that a stock instance of the exact first form can encode unequal
+literals. Its successor and input transfers differ from LINE's. Both instances
+are relocations of one context, and their results have not been observed. Literal
+contribution, source/destination port selection, the LINE-specific tie rule and
+`afe0/bfe2` capture remain open.
+
+An independent native comparison point is BITCRUSH. Its `4812 / 1500` packets at
+`15c`, `1a8` and `1f4` carry width-two pairs `(0.75, 0.25)`, `(0.5, 0.5)` and
+`(0.25, 0.75)`. Native instructions at `241b98..241ba4` load constructor fields
+`+158/+168` for the first pair and compute `d1 × first + d3 × second`. The
+analogous native windows start at `241c6c` and `241d44`. These comparisons provide
+different coefficients and a weighted-sum reference for the neighboring form.
+They leave the DSP input and output ports of `4822 / 1940` unresolved.
+
+```sh
+python tools/line_mix_variation.py \
+  --core1 local/b0c1a.bin --core1 local/b1c1a.bin \
+  --qspi local/crossmodel/jupiter-x/MI077_C1A_up.bin \
+  --qspi local/crossmodel/mc101/RPG69_C1A_up.bin \
+  --qspi local/crossmodel/sh-4d/DD013_C1A_up.bin > local/line-mix-variation.json
+```

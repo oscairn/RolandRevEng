@@ -750,3 +750,19 @@ history relation. The implementation uses exact half-open slices,
 literal operand identities, and read=write+1 in the reference model.
 All 255 tests passed with the local corpus. Four Roland Markdown notes
 were updated and all 57 verified.
+
+## Asymmetric input-mix literals on JUPITER-X
+
+The expanded scan found two `4822 / 1940` packets with `(1, 0)` literal
+pairs. Both belong to the same JUPITER-X list at `61218324`, in relocated
+segments. The setup path supplies that list to the DSP manager. This rules
+out a universal equality requirement for the encoded pair. The two copies
+share one context and do not establish which ports hold the result. The
+BITCRUSH native callback gives a separate weighted-sum comparison for
+`4812 / 1500` with genuinely different literal values.
+
+The renderer now models the two native mix coefficients explicitly and tests
+that they only affect the wet path. Its default Fantom WAV is byte-identical
+to the earlier fixture. No new instruction entered the strict interpreter.
+All 258 tests passed with the local corpus. OMP could not resolve the Mac
+Studio endpoint in this session and supplied no review.

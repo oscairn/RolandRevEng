@@ -112,6 +112,9 @@ not a hardware circular-addressing rule.
 [Counted literal groups](line-prefix-parameter-study.md) explain actual rational
 parameter duplicates through a declared operation; the missing input-mix group
 relation remains unproved after a [bounded static inventory](line-prefix-global-groups.md).
+The [JUPITER-X comparison](emulator-next-program-targets.md#jupiter-x-carries-an-asymmetric-instance-of-4822--1940)
+establishes unequal stored literals for the exact `4822 / 1940` form in a separate
+program. Its native setup locates the list. DSP values and port timing remain open.
 The [conditional LINE render](fragment-emulator.md#conditional-line-reference-pipeline)
 is a host oracle plus supported fragments, with explicit fixture state and
 software timing. It does not skip unknown words to manufacture complete program

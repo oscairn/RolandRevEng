@@ -153,6 +153,13 @@ through origin wrap in all five placements. Runtime selection,
 on-device state and silicon issue timing remain open.
 [Recorded placements and readback](kernel-audio-abi-study.md#offline-line-placement-and-readback-comparison)
 
+`render_reference()` accepts optional `mono` and `stereo` coefficients for the
+native-reference input mix. The fixture defaults to `(0, 1)`. The shared term is
+computed as `fma(left, mono, right * mono)` and then added by FMA to each input
+scaled by `stereo`, matching native `2df890..2df8a4`. These coefficients affect the
+wet path only. They do not patch the firmware or resolve how its four fields are
+bound. The default 12,000-frame Fantom reference WAV remains byte-identical.
+
 ## Original one-pole kernel
 
 `bmc_one_pole.programs()` assembles two 80-byte variants of the checked

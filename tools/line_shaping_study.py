@@ -55,6 +55,18 @@ def quantize_native_reference(value):
     return dict(fixed_integer=fixed, shifted_integer=shifted, quantized=float(shifted) * EPSILON)
 
 
+def native_stereo_mix(left, right, *, mono, stereo):
+    """Model the two constructor coefficients used at native 2df890..2df8a4."""
+    if not hasattr(math, 'fma'):
+        raise ValueError('This native oracle requires Python3.13+ math.fma')
+    left, right, mono, stereo = map(_finite, (left, right, mono, stereo))
+    try:
+        shared = _finite(math.fma(left, mono, _finite(right * mono)))
+        return _finite(math.fma(left, stereo, shared)), _finite(math.fma(right, stereo, shared))
+    except OverflowError as error:
+        raise ValueError('Native-reference arithmetic overflow') from error
+
+
 def native_channel_reference(mixed, *, drive_scale, drive, mode, history,
                              smoothing, rational_scale, a, b):
     """Native-reference channel from mixed input through pre/post-rational values.

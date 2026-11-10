@@ -18,8 +18,8 @@ PARAMETERS = dict(drive_scale=1/512, drive=0.5, mode=0.5, smoothing=0.75,
                   rational_scale=0.5, a=1.0, b=0.0)
 
 
-def render_reference(frames, *, firmware_context=None):
-    from line_shaping_study import native_channel_reference
+def render_reference(frames, *, firmware_context=None, mono=0.0, stereo=1.0):
+    from line_shaping_study import native_channel_reference, native_stereo_mix
     if type(frames) is not int or not 128 <= frames <= 1000000:
         raise ValueError('Expected 128..1000000 frames')
     if firmware_context is None:
@@ -44,7 +44,8 @@ def render_reference(frames, *, firmware_context=None):
         inputs = dict(zip(input_addresses, (left, right)))
         ports = execute_fragment(input_program, {}, {}, inputs)['ports']
         data = {address: ring[native_ring_index(address, 0, origin)] for address in source_addresses}
-        for mixed, chain, (history_address, saved) in zip(ports[:2], chains, shape_addresses):
+        mixed_inputs = native_stereo_mix(*ports[:2], mono=mono, stereo=stereo)
+        for mixed, chain, (history_address, saved) in zip(mixed_inputs, chains, shape_addresses):
             current, _, _, factor_address, *_ = chain['sources']
             history = ring[native_ring_index(history_address, 0, origin)]
             reference = native_channel_reference(mixed, history=history, **PARAMETERS)
@@ -60,11 +61,12 @@ def render_reference(frames, *, firmware_context=None):
             ring[native_ring_index(address, 0, origin)] = value
         rows.append(output)
         origin = advance_native_origin(origin)
-    info = dict(model='native shaping oracle + strict allpass/tail fragment interpreter',
+    info = dict(model='native input mix and shaping + strict packet interpreter',
                 whole_dsp_program_executed=False, hardware_timing_verified=False,
                 native_plugin_audio_verified=False, software_sample_rate=SAMPLE_RATE,
                 wrapper_base=0, origin_steps=frames, final_origin=origin,
                 ring_initialization='explicit cold zero fixture', parameters=dict(PARAMETERS),
+                native_mix=dict(mono=mono, stereo=stereo),
                 factor_peak=factor_peak, **metrics(rows))
     if firmware_context is not None:
         info['firmware_context'] = firmware_context[2]
