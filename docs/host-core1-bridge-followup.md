@@ -367,7 +367,7 @@ PY
 
 `tools/core1_sysex.py` reads **one existing raw SysEx file** and accepts only the
 nine-byte internal-word wrapper or command-13 debug read reply. It validates
-canonical seven-bit bytes, exact word/nibble boundaries and read-reply checksum;
+canonical seven-bit bytes, four-byte-aligned offsets, exact word/nibble boundaries and read-reply checksum;
 unsupported forms fail closed. It neither encodes a request nor opens a device.
 A decoded reply is not evidence it was captured on real hardware. Tests use original
 synthetic records with asymmetric high bits, nibble order, wrong checksums,

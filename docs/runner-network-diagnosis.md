@@ -32,13 +32,16 @@ an actual Qwen response are successfully retested in the intended execution cont
 
 ## Queue state
 
-Three research tasks and an integration task were created. All four currently
-report `waitingOnApproval`. Their last pending actions are internal progress messages
-using `send_message_to_thread`; this is distinct from the
-network restriction and from a reverse-engineering blocker. They have performed initial
-static analysis but are not verified progressing unattended past those approvals.
-Do not describe a queued task as completed or actively making progress from its title
-or an `active` label alone. Clear the client approvals or use an execution path whose
-permissions cover the authorized work; do not bypass a pending approval.
-Follow-up instructions are queued to use file handoffs instead of further cross-task
-messages once those pending client approvals are resolved.
+Three research tasks and an integration task were created. At the initial diagnostic
+checkpoint, all four reported `waitingOnApproval`. Their pending actions were internal
+progress messages using `send_message_to_thread`; this was distinct from the network
+restriction and from a reverse-engineering blocker. At that point only initial static
+analysis was verified. A task title or an `active` label alone did not establish
+unattended progress past those approvals.
+
+Those client approvals were subsequently cleared, and all three workers resumed
+offline research with no approval flags. Integration uses completed local file handoffs
+and branch commits; no further cross-task progress messages are required. This resolved
+the messaging pause, not the command-network restriction described above.
+All three completed worker handoffs and clean commits were subsequently reviewed and
+integrated; final checks and unresolved research boundaries are in the work log.

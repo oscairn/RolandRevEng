@@ -7,7 +7,11 @@ Keep the repository private as requested. This is not an official Roland project
 Read [the packet and loader map](docs/BMC%20DSP%20packet%20and%20loader%20map.md) for findings,
 confidence, build-specific addresses and the remaining requirements for custom engines.
 The [queued research](docs/research-queue.md) prioritizes the host bridge, instruction
-semantics and kernel/audio ABI, followed by integration and verification.
+semantics and kernel/audio ABI. All three offline passes are now reviewed and integrated.
+CORE1 has a raw MMIO SysEx handler overlapping DSP program RAM, and stock effect
+ownership/mute controls are mapped. The external peer, safe task entry, state setup
+and hardware timing still block a runnable custom engine. The MMIO read-reply builder
+also has a static stack-size discrepancy; it is not a demonstrated safe loader.
 
 Independent follow-up studies:
 
@@ -20,6 +24,7 @@ Independent follow-up studies:
 - [CORE1 command entry](docs/core1-command-entry-study.md): actual callbacks versus logging strings.
 - [Receive path and test controls](docs/core1-receive-and-test-controls.md): CORE-local queues, boot modes and stock diagnostic controls.
 - [Host transport](docs/host-transport-study.md): the normal application's gadget-serial IPC and correction to the older spare-port assumption.
+- [Host/CORE1 bridge](docs/host-core1-bridge-followup.md): routes, service replies, CORE-local MMIO and the precise missing peer boundary.
 - [Supported code generation](docs/supported-code-generation.md): mix/gain and four-stage allpass fragments, with original examples.
 - [Kernel and audio ABI](docs/kernel-audio-abi-study.md): stock mute controls, manager reservations, shared routing and a gated probe design.
 - [Native arithmetic primitives](docs/native-arithmetic-primitives.md): bounded native shaping, feedback and voice-end reference semantics.
@@ -96,10 +101,10 @@ symbol adjacency does not prove ownership by a program class.
 
 Local documentation prepared for the existing vault is under ignored `docs/obsidian/`;
 code stays here. These working copies are not part of the GitHub repository.
-The current session could read the vault but its filesystem sandbox rejected writes.
-The original vault files were checked afterward and are unchanged. The local
-`docs/obsidian-update.patch` was applied in a temporary project directory and its results
-compared byte for byte with the staged documents. To apply it from a writable session:
+The vault is outside the writable roots. Its four saved original notes were rehashed
+and remain unchanged. The local 19-note `docs/obsidian-update.patch` was applied to
+temporary copies with zero fuzz and compared byte for byte with the staged documents.
+Check for newer vault changes before applying it from a writable session:
 
 ```sh
 cd /Users/jacob/Documents/ObsidianVault/Projects/Oscairn

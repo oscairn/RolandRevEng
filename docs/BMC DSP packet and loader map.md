@@ -53,6 +53,16 @@ The subsequent unattended studies refine this first-pass map:
 - [Native arithmetic primitives](native-arithmetic-primitives.md): shaping, feedback,
   constant-source, breakpoint and voice-end reference semantics, without assigning
   unproved DSP opcodes.
+- [Operand variants and macro boundaries](operand-variants-and-macro-boundaries.md):
+  one mono-sum and two cross-destination allpass comparisons, with exact record
+  provenance. Exceptional controls and four oscillator packet layouts remain unsupported.
+- [Kernel/audio ABI](kernel-audio-abi-study.md): mutable stock mute controls,
+  manager-owned render/data reservations and shared, relocated effect IO. A complete
+  stock graph is the smallest justified probe context; no standalone wrapper is emitted.
+- [Host/CORE1 bridge](host-core1-bridge-followup.md): outer routes and service clients,
+  CORE-local SysEx word conversion and actual raw MMIO read/write bodies. Their window
+  overlaps program RAM, but the external peer is missing and the read-reply builder
+  can exceed its stack reservation. This does not establish safe host loading.
 
 The structural packet checks remain useful. A payload can also contain operation
 extension words, so “payload” does not mean every word is an address or literal.
@@ -183,6 +193,11 @@ Three controls, two payload words: store main result A to IO `2018`, B to IO `20
 plus the `00f8` control. The meaning of `00f8` and its scheduling effect need proof.
 Within the stock MFX context, `2016/2017` are input slots and `2018/2019` output slots;
 these are not proven physical TDM slot numbers.
+The kernel follow-up traces them to shared native routing storage, including fallback
+output values, and shows different operands in other instances and firmware.
+`SetMuteMode` also scans the labeled first packet and rewrites its `ff70/ff71`
+control. Those values are mutable mute state in this context, not a universal fixed
+entry/exit wrapper; the hardware gate behavior remains unobserved.
 
 The transfer-space follow-up refines the memory tags. Tag-0 accesses use one native
 circular data path; the resolved tag-2 accesses use another path and also wrap with
@@ -413,8 +428,19 @@ evidence for a safe stop/start sequence. Queued DMA tracks state 0/1/2 and compl
 bit 4 in bmc0 SRAM; arbitrary writes racing the stock manager can corrupt a running graph.
 
 These addresses are in the **BMC CORE1** address space. Mapping the same numbers through
-the i.MX8M's `/dev/mem` does not establish access to them. A host bridge or resident CORE1
-agent is still needed.
+the i.MX8M's `/dev/mem` does not establish access to them. The bridge follow-up finds
+a CORE-local SysEx MMIO service based at `0x41100000`, with writes below offset
+`0x01000000`; all seven program apertures lie within it. Its host forwarding route,
+manager coordination and safe use remain unproved. Its read helper reserves `0x50`
+stack bytes but can emit 139 bytes at the allowed count of 64. Address overlap alone
+does not supply a safe loader or an ARM-code installation route for a resident agent.
+
+The stock manager's all-program uploader does not read segment capacity. Segmented
+uploaders instead check manager-owned capacities, with different destination rules
+for ordinary versus unique segments. FETDRIVE's five list entries belong to DSP4,
+DSP5 and DSP1 contexts despite a list-header DSP byte of 1. The read-only
+`kernel_abi.py` inspector validates those reservations and explicitly reports
+`execution_ready: false`; neither it nor the emitter relocates a complete graph.
 
 ## 7. CORE0 and new public work
 
@@ -468,8 +494,10 @@ The next work should proceed in this order:
    state write, saturation/wrap and simple coefficient loads. Separate header/layout
    knowledge from ALU meaning; do not label hundreds of headers as solved opcodes.
 2. **Recover entry and ownership.** Identify a Fantom-specific CORE1 execution hook or
-   supported development command, manager locking, stop/start events and reserved
-   program/data windows. An offline unsigned-looking image does not prove that the
+   proved external service path and safe task entry. Stock reservation descriptors,
+   mute/load ordering and the check/set exclusion byte are now mapped, but full state
+   initialization, scheduling, stop/start events and peer forwarding remain open.
+   An offline unsigned-looking image does not prove that the
    updater accepts it or that a bad image is recoverable.
 3. **Read back before constructing a new program.** With a verified resident route,
    compare a stock segment's runtime RAM with its stored bytes and confirm coefficient
@@ -479,8 +507,10 @@ The next work should proceed in this order:
    model. Measure issue budget, register readiness, state updates, clipping and noise.
    Existing `2016..2019` effect slots are a contextual lead, not a universal audio ABI.
 5. **Map host audio and complete the control bridge.** Normal application BMC IPC has
-   a statically traced `/dev/ttyGS0` path; its relationship to CORE1 commands is not yet
-   proved. Determine which DSP context owns the chosen IO slots, both BMCs' clock/routing roles,
+   a statically traced `/dev/ttyGS0` path; the missing peer must connect its outer
+   envelopes and replies to CORE1's rings/services. An owned decrypted peer image or
+   existing bidirectional stream/ring capture is the next concrete evidence needed.
+   Preserve the stock instance's recovered shared IO assignments and determine both BMCs' clock/routing roles,
    and how custom engine buffers enter and leave that context. ERAM kernels also need
    the DRAM-IO scheduler/FIFO contract.
 6. **Extend the constrained emitter into an engine backend.** The two independently
@@ -494,6 +524,14 @@ Stock-program reparameterization is closer than a new engine, because CORE1 alre
 has literal conversion and live coefficient APIs. This pass does not demonstrate either
 path on hardware. Physical recovery, update acceptance, numerical accuracy and timing
 remain material limits on claiming a working custom BMC engine.
+
+The reviewed offline probe design therefore retains an entire stock effect instance
+and its parent graph, beginning with master-zero, pass-through and gain calculations
+in verified finite state. It requires proven entry/recovery, manager task/identity,
+quiescence, program/parameter readback and routing capture before any execution.
+Normal ttyGS0 IPC can contend with the prepared shell payloads; neither was changed
+or used. No Qwen output was obtained: command networking blocked the configured
+endpoint, and all accepted work and independent integration review used Codex.
 
 ## Reproduction and scope
 

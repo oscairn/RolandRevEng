@@ -47,6 +47,13 @@ class Core1SysExTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     inspect(data)
 
+    def test_unaligned_reply_is_rejected_even_with_valid_checksum(self):
+        for offset in (1, 2, 3):
+            body = bytes.fromhex('f041104e13000000') + bytes([offset]) + bytes(8)
+            data = body + bytes([-sum(body[5:]) & 127, 0xf7])
+            with self.subTest(offset=offset), self.assertRaisesRegex(ValueError, 'aligned'):
+                inspect(data)
+
 
 if __name__ == '__main__':
     unittest.main()

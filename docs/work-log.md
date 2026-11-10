@@ -119,3 +119,85 @@ the staged text/artifact boundaries were inspected. The 16-note Obsidian patch w
 applied to temporary originals and compared byte for byte; all four original vault
 notes were rehashed and remain unchanged. Vendor artifacts and detailed generated
 evidence are still excluded from Git.
+
+## Reviewed three-worker queue checkpoint
+
+2026-11-10. All three workers delivered committed, clean file handoffs and were
+confirmed idle before their branches were merged into main. The accepted worker
+commits are transport `8e42a7e`, ISA `6c4678c` and kernel/audio ABI `0ecc0fe`.
+Integration preserved those commits with three ordinary merges; no conflicts or
+history rewriting were needed.
+
+- [Host/CORE1 bridge](host-core1-bridge-followup.md) maps actual outer routes,
+  service-specific replies, payload retention and CORE1 SysEx callbacks. CORE1 has
+  raw MMIO read/write bodies whose window overlaps the DSP program apertures.
+  This corrects any broad claim that there is no memory service. The host peer,
+  physical endpoint mapping and safe managed loading remain unproved. The read
+  helper's `0x50`-byte stack reservation can be exceeded by its permitted reply
+  sizes; the 64-byte count clamp is not a safe-read guarantee.
+- [Operand variants](operand-variants-and-macro-boundaries.md) independently match
+  CHO_JU106's mono sum and two FETDRIVE cross-destination allpass expressions.
+  Incoming A and result B are distinct. Exact operand-record provenance, two
+  independent cutpoints and straight-line native windows are required. No general
+  decoder/emitter expansion was accepted. TRANSIENT modifies both exponential
+  returns before storing them, and six named oscillator literals occupy four
+  unsupported packet headers.
+- [Kernel/audio ABI](kernel-audio-abi-study.md) traces mutable `ff70/ff71` mute
+  controls, shared relocated IO, five actual owner reservations, and effect lifecycle
+  order. All-program loading ignores capacity; segmented methods check owner
+  capacities and differ in destination rules. A full stock instance/parent graph,
+  with live parameter changes in verified finite state, is the smallest supported
+  probe design. No standalone executable wrapper is emitted.
+
+Integration reviewed every changed source/test/prose file and independently read
+the relevant raw host/native/Thumb instructions and data records. Checks reproduced
+the three expression matches, six oscillator anchors, five effect placements,
+native/firmware control schedules, mute/load ordering, both SysEx callback pointers,
+program-aperture overlap and the reply-size arithmetic. A fresh bounded scan again
+found zero direct BL calls to seven named helpers across 75 render-class bodies
+through their first return. That negative result does not exclude inlining or
+indirect calls.
+
+The new saved-reply decoder initially accepted an unaligned offset with a valid
+checksum, despite the observed read helper's alignment check. Integration added the
+two-line rejection and a regression for offsets 1, 2 and 3. This is an offline parser
+correction; no vendor firmware or handler was modified. Existing decoder/emitter
+callers and the IPC exact-row test were checked; no unrelated interfaces changed.
+
+Qwen returned no work to any worker: no draft or self-reported test was accepted.
+The documented OMP smoke timeout and command-network EPERM/DNS/TCP restrictions
+remain the exact blockers. The earlier cross-task-message approval pause was cleared;
+workers then completed offline with Codex and local handoffs. REA provider setup was
+not retried, and ordinary Capstone/file observations are not described as REA Evidence.
+No approval/input request remains pending.
+
+Final verification in main:
+
+- **98 tests pass, no skips**, using the existing Python 3.13.7/Capstone 5.0.7
+  environment and local corpus. All 61,334 packets in 588 nonempty segment
+  observations reproduce with zero structural failures; tracked aggregate output
+  is unchanged, including the known adjacent-symbol ownership conflict.
+- A fresh export of indexed text files discovers the same 98 tests: with Capstone,
+  85 pass and 13 corpus checks skip; without Capstone, 64 pass and 34 dependency/
+  corpus checks skip. No artifacts or local symlinks were copied into that checkout.
+- Source syntax, relative documentation links, whitespace, tracked file modes,
+  credential patterns and text/artifact boundaries were inspected. All new binary
+  fixtures are original authored instructions/records; vendor inputs/dumps stay local.
+- The rebuilt **19-note Obsidian patch** applies with zero fuzz to temporary saved
+  originals and reproduces every staged note byte for byte. Its filenames with
+  spaces retain tab-separated patch timestamps. All four current vault originals
+  still match saved SHA-256 values. No vault write was attempted in this pass.
+
+Reproduction logs, independent disassembly and review records are ignored under
+`local/integration-*`; the main README/report and queue status link the final studies.
+No Roland target code, hardware, updater, shell payload or production Oscairn code
+was executed or changed. GitHub private visibility and remote history remain
+unverified because of the recorded command-network restriction; no push was attempted.
+
+The next required evidence is an owned decrypted peer image or an existing
+bidirectional stream/ring capture, a unit-specific recoverable entry/readback route,
+the permitted manager task and complete state/scheduling context, physical routing,
+and hardware measurements of gate behavior, precision and timing. The MMIO reply
+size discrepancy must be resolved before treating that service as safe. Normal
+ttyGS0 IPC still conflicts with prepared shell payloads. These are explicit blockers
+to a runnable engine, not completed hardware experiments.

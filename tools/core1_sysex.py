@@ -36,6 +36,8 @@ def inspect(data):
         offset = 0
         for byte in data[5:9]:
             offset = offset << 7 | byte
+        if offset & 3:
+            raise ValueError('Read-reply offset must be four-byte aligned')
         words = []
         for start in range(0, len(encoded), 8):
             word = 0

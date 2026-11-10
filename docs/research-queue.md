@@ -180,3 +180,23 @@ worker commits, then:
 The queue can advance offline analysis using the prepared artifacts. Agent execution
 still requires an available Mac and service connection. Losing that execution context
 is not evidence that a queued task completed.
+
+## Reviewed offline checkpoint
+
+All three workers completed clean, committed handoffs and were idle before integration.
+The main checkout independently reviewed and reproduced their results:
+
+| Work | Accepted worker commit | Result / remaining boundary |
+|---|---|---|
+| Host/CORE1 bridge | `8e42a7e` | Actual CORE-local MMIO service and host route/service map; external peer, safe manager coordination and read-reply stack discrepancy remain unresolved. |
+| Instruction semantics | `6c4678c` | Three exact native expression comparisons and oscillator/macro bounds; no general decoder/emitter expansion. |
+| Kernel/audio ABI | `0ecc0fe` | Stock mute/routing/reservations and an offline stock-context probe design; task entry, complete state initialization and hardware behavior remain unresolved. |
+
+Integration tightened saved read-reply decoding to reject unaligned offsets even
+when their checksum is valid. Qwen returned no work in any worker; no Qwen draft
+was accepted. The OMP/network diagnosis is recorded separately, with the earlier
+messaging-approval pause explicitly historical. Tests and final document-patch
+validation are recorded in the [work log](work-log.md). No hardware/target execution,
+shell-payload edit, vault write or push occurred. The next evidence requirements
+are in the three follow-up studies; this checkpoint completes the queued offline
+passes, not a runnable engine or hardware validation.
