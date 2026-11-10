@@ -86,6 +86,9 @@ Shared rules:
 - Each worker owns its branch/worktree. Do not edit another worker's checkout or
   merge into main. Commit coherent findings and write a final handoff with commit IDs,
   reproduction commands, checks, limitations and next concrete experiment.
+- Use the worker's ignored `local/HANDOFF.md` for the final handoff, then finish the
+  task normally. Do not send cross-task progress messages: the client requested
+  approval for those calls in this run. Integration reads the files and branches.
 
 ## 1. Host-to-CORE1 bridge — branch research/transport
 
@@ -160,7 +163,8 @@ recovery and device-specific calibration stay unperformed until a unit is availa
 
 ## Integration and completion
 
-The integration task waits for all three handoffs, then:
+The integration task waits for all three `local/HANDOFF.md` files and completed
+worker commits, then:
 
 1. Reviews evidence and changes, rejects unproved claims, and resolves any conflicts.
 2. Integrates accepted commits into the main research checkout without force-pushing.

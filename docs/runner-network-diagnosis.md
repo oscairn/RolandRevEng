@@ -32,11 +32,13 @@ an actual Qwen response are successfully retested in the intended execution cont
 
 ## Queue state
 
-Three research tasks and an integration task were created. The three workers currently
+Three research tasks and an integration task were created. All four currently
 report `waitingOnApproval`. Their last pending actions are internal progress messages
-back to the parent task using `send_message_to_thread`; this is distinct from the
+using `send_message_to_thread`; this is distinct from the
 network restriction and from a reverse-engineering blocker. They have performed initial
 static analysis but are not verified progressing unattended past those approvals.
 Do not describe a queued task as completed or actively making progress from its title
 or an `active` label alone. Clear the client approvals or use an execution path whose
 permissions cover the authorized work; do not bypass a pending approval.
+Follow-up instructions are queued to use file handoffs instead of further cross-task
+messages once those pending client approvals are resolved.
