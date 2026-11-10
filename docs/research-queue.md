@@ -43,6 +43,8 @@ configured model endpoint failed hostname resolution in this command runner. Mod
 availability is therefore **not verified**. Do not claim Qwen was used unless a run
 actually returns, and do not spend the research run repeatedly repairing networking.
 Use the available Codex path when the local model cannot be reached.
+Later diagnostics confirmed direct TCP and DNS sockets are denied with EPERM by the
+current command sandbox; see [runner diagnosis](runner-network-diagnosis.md).
 
 If Qwen becomes available:
 
