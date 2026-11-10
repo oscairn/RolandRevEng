@@ -1,5 +1,12 @@
 # Effect replacement, coefficient clearing and parent entry references
 
+Follow-ups: [DRAM-IO records/native clearing](dramio-clear-records-and-native-state.md)
+recovers owner-linked record fields and bounds the separate native clear loops;
+[wait completion](core1-wait-and-initial-data-study.md) traces the actual timer,
+chunking and initial flags. Neither establishes a complete hardware history reset.
+The [parent-control study](parent-control-and-nested-organ-study.md) connects the
+previously unresolved fifth DSP1 context through the organ Od interface.
+
 2026-11-10. Static bytes and Capstone 5.0.7, without target execution or a REA
 provider. Addresses apply to bmc0 MI078 C1A v1.08, header-stripped payload SHA-256
 `6d95449ae2a2df48fb60f8b69da6bf8c7198611255b63d59081ba5bdf5263154`.

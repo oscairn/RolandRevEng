@@ -19,6 +19,18 @@ The vendor files stay in its ignored `local/` directory. Counts below are genera
 
 The subsequent unattended studies refine this first-pass map:
 
+- [DRAM-IO clearing](dramio-clear-records-and-native-state.md): four owner-matched
+  32-bit record streams and native clear-loop bounds. These do not yet establish
+  exact hardware history clearing.
+- [Wait completion](core1-wait-and-initial-data-study.md): shared timer completion,
+  chunking and recovered initial flags; a timer wait is not a general DSP fence.
+- [Parent controls](parent-control-and-nested-organ-study.md): the fifth reservation
+  connects through the nested organ graph; shifted `00aN` references and four
+  native callback contexts constrain control transfer without proving timing.
+- [Official MC-101](mc101-v182-core1-comparison.md) and
+  [JUPITER-X](jupiter-crossmodel-c1-study.md) factory updates supply independent
+  shared-code anchors and counterexamples to universal wait/list-layout assumptions.
+
 - [Service startup](core1-service-startup-mmio.md): reset, scatter, runtime and
   initializer-table calls establish compiled activation of both supplied builds'
   SysEx receivers, assuming preceding initialization completes. The exact MMIO

@@ -30,6 +30,11 @@ Independent follow-up studies:
 - [Supported code generation](docs/supported-code-generation.md): mix/gain and four-stage allpass fragments, with original examples.
 - [Kernel and audio ABI](docs/kernel-audio-abi-study.md): stock mute controls, manager reservations, shared routing and a gated probe design.
 - [Effect lifecycle and parent entries](docs/effect-lifecycle-and-parent-entry-study.md): factory replacement ordering, coefficient clearing and four effect-entry candidates.
+- [DRAM-IO records and native clearing](docs/dramio-clear-records-and-native-state.md): owner-matched address fields and exact native clear-loop bounds.
+- [Wait completion and initial data](docs/core1-wait-and-initial-data-study.md): timer chunking, initial flag recovery and explicit completion limits.
+- [Parent controls and the organ graph](docs/parent-control-and-nested-organ-study.md): nested DSP1 ownership, shifted pool references and native callback IO.
+- [Official MC-101 comparison](docs/mc101-v182-core1-comparison.md): shared MMIO/wait code and a different software scaling constant.
+- [Official JUPITER-X comparison](docs/jupiter-crossmodel-c1-study.md): shared routine windows and eleven RAMCLR segments with two record spacings.
 - [Native arithmetic primitives](docs/native-arithmetic-primitives.md): bounded native shaping, feedback and voice-end reference semantics.
 - [Operand variants and macro boundaries](docs/operand-variants-and-macro-boundaries.md): exact mono-sum and cross-destination allpass comparisons, with oscillator-layout and exceptional-macro limits.
 - [Oscillator layout candidates](docs/oscillator-layout-candidates.md): competing arities consistent with six independently owned coefficient anchors.
@@ -106,7 +111,8 @@ symbol adjacency does not prove ownership by a program class.
 Local documentation prepared for the existing vault is under ignored `docs/obsidian/`;
 code stays here. These working copies are not part of the GitHub repository.
 The initial 19-note update was applied to the vault on 2026-11-10 through reviewed file access.
-The continued pass adds four studies and refreshes six notes, for 23 verified notes.
+Subsequent passes add nine studies, for 28 verified notes, including the official
+MC-101/JUPITER-X firmware comparisons. Firmware downloads remain local/ignored.
 Saved hashes were checked before each update; every note was verified byte for byte.
 Original backups, the initial validated patch and the applied hash manifests remain
 ignored/local. The patch records the initial original-to-updated change;

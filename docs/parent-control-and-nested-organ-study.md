@@ -43,7 +43,7 @@ packet at `10d8` stores input slots **`20ee/20ef`**. Packet `10ec` reads `20f0`
 again. These are exactly the fifth effect context's IO operands and entry in
 descriptor `610a1d14`, independently recovered in the earlier kernel study.
 
-The host-side object path supplies a second ownership cross-check. Aggregate
+The CORE1 management object path supplies a second ownership cross-check. Aggregate
 constructor `01128730`, reached through veneer `61077734`, installs three
 subinterfaces at object+8/+c/+10:
 

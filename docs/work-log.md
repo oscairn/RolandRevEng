@@ -266,3 +266,59 @@ issue timing, opaque oscillator-control syntax, and the actual external peer whe
 an owned image or correlated recording becomes available. No hardware execution,
 flashing, device access or shell-payload changes occurred. A runnable custom engine,
 complete state reset, physical audio routing and hardware precision remain unverified.
+
+## DRAM-IO, parent control flow and official cross-model firmware
+
+Continued from `ef39d1b` and incorporated Jacob's suggestion to download other
+Roland BMC firmware. All comparisons are offline; no updater, target or device ran.
+
+- `0e0a79f`: actual CORE1 wait chunk/final-completion behavior, register arithmetic
+  and IRQ/callback path. Bounded scatter-data expansion recovers initial done=1,
+  registered=0; an independent decoder reproduced the complete output hash.
+- Worker `65b13ea`, integrated as `a54e98a`: 92 owner-matched DRAM-IO records,
+  low-23-bit address rewrite and the separate native clear loops' excluded start.
+  Hardware clearing coverage remains open.
+- Worker `5287ec4`, integrated as `16f5b83`: nested organ Od connects the fifth
+  DSP1 context; the native DSP4 routing list has 24 segments, beyond the original
+  inventory limit. Shifted `00aN` references and four native IO callbacks constrain
+  functional order without admitting call/return timing or a universal stereo ABI.
+- Common QSPI reader `26b6bbf`, integrated as `a05ce1a`: bounded two-member C1A
+  container inspection, original ranges/hashes and explicit synthetic-view identity.
+  No inferred zeros fill an unbacked ITCM gap. Member checksum fields remain
+  observed values; a simple additive sum does not validate the SDRAM member.
+- MC-101 worker `851ec7a`, integrated as `0cb5a37`: official v1.82 download,
+  exact 324-byte Fantom MMIO prefix/epilogue, wait body differing only in three
+  BL relocations, and a 44100 scaling constant versus Fantom's 48000.
+- JUPITER-X worker `c13945c`, integrated as `efba6ee`: official v3.03 download,
+  exact 158-byte RAMCLR and 14-byte rewrite windows, eleven list segments with
+  two record spacings instead of Fantom's four. Original-member offsets were
+  independently checked. A truncated documentation hash was corrected before merge.
+
+The official ZIPs, tar updates, C1A/C0A components, extracted members, source pages
+and local manifests stay under ignored `local/crossmodel/` and worktree scratch.
+Their identities and actual shared/different code are recorded in the studies.
+Identical crypto header mode/key indices do not establish identical keys.
+
+Two additional no-tool Qwen drafts returned for wait and clearing arithmetic.
+Useful mechanical observations were independently reproduced; incorrect overflow,
+counter rationale and range arithmetic were rejected. No generated code was
+accepted. Exact cross-model comparisons did not require Qwen.
+
+Validation: **132 tests pass with no skips** using the full local artifacts.
+A fresh tracked-text checkout discovers the same 132 tests: **111 pass, 21 corpus
+checks skip explicitly** with Capstone present and no copied vendor inputs.
+Focused checks, report CLIs, original byte-window hashes, syntax, relative links,
+tracked-text boundaries and whitespace were reviewed. Logs are ignored under
+`local/third-*`; no production Oscairn code or existing shell payload changed.
+
+The vault update checked the latest saved hashes, found no collisions, backed up
+changed notes and wrote eight Markdown notes (five new, three refreshed). All
+**28 notes** match their staged bytes afterward. The latest hash manifest is
+`local/obsidian-applied-third-2026-11-10.json`; earlier manifests/patches remain
+historical. No scripts, images or vendor bytes went to the vault.
+
+Next: use the two preserved model images to constrain DRAM-IO counter/source
+semantics and render condition/return timing. Full hardware state clearing,
+physical routing, permitted manager task entry and the external Fantom peer still
+block a runnable engine. Shared code and passing offline checks do not establish
+firmware compatibility, a safe live read bound or successful hardware execution.

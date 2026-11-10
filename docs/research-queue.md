@@ -244,3 +244,46 @@ The next useful offline questions, in order:
    correlated existing two-way traffic. Neither public MC-101 code nor startup
    activation fills that missing edge. Continue other offline work until that
    artifact or hardware evidence is available; do not invent a host upload command.
+
+## Further pass: clearing, parent controls and other factory firmware
+
+From `ef39d1b`, continued the first three questions above and added Jacob's request
+to inspect other Roland BMC products. The official MC-101 v1.82 and JUPITER-X
+v3.03 archives were downloaded, identified and compared offline. Original files,
+download pages, manifests and extracted members remain ignored/local.
+
+- [DRAM-IO/native state](dramio-clear-records-and-native-state.md): 92 owner-matched
+  Fantom records, an actual low-23-bit rewrite path and three separate native
+  zero loops. Native start indices are excluded; exact hardware coverage is open.
+- [Parent controls](parent-control-and-nested-organ-study.md): fifth DSP1 context
+  connects through nested organ Od, desktop DSP4 has a previously omitted 24-record
+  list, and shifted `00aN` candidates match native callback IO. No call/return timing
+  or universal stereo ABI is admitted.
+- [Wait/initial data](core1-wait-and-initial-data-study.md): initial flags recovered
+  from bounded compressed scatter data; pending completion, chunking, final polling
+  and 32-bit scale arithmetic reproduced and independently reviewed.
+- [MC-101](mc101-v182-core1-comparison.md): exact 324-byte MMIO read prefix and
+  relocated wait body; scaled-wait multiplier 44100 differs from Fantom 48000.
+- [JUPITER-X](jupiter-crossmodel-c1-study.md): exact RAMCLR/rewrite windows, but
+  eleven segments with two record spacings. Shared code does not establish a shared
+  firmware ABI, physical routing or safe Fantom transport.
+
+Two additional bounded Qwen drafts returned for arithmetic/dataflow review; errors
+were rejected against the instructions and direct calculations. Cross-model work
+used exact bytes/ranges and no model-generated code. One common read-only QSPI
+reader serves both comparisons; the Fantom mapper and production ISA admission
+remain unchanged. Member checksum fields are preserved, with their semantics open.
+
+Next useful questions:
+
+1. Explain the two JUPITER-X DRAM-IO strides through actual owner/counter/source
+   semantics, then test the resulting model against Fantom's four contexts. A
+   repeated record pattern alone is insufficient for a clear-coverage proof.
+2. Decode the condition/control words associated with shifted `00aN` references
+   and the actual return state/timing. Retain the four-output native callback
+   counterexample when specifying an engine ABI.
+3. Extend cross-model program/owner comparisons using these preserved official
+   inputs before downloading more near-duplicate models. Keep product addresses,
+   clock assumptions and capacities build-specific.
+4. The encrypted/external peer and recoverable host entry remain dependencies for
+   an end-to-end Fantom loader. Neither downloaded factory image closes that edge.
