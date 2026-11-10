@@ -215,3 +215,10 @@ The requested GitHub repository was verified private and its remote refs were em
 The reviewed checkpoint contains only tracked text tools/tests/research; vendor inputs,
 raw dumps, credentials and working vault copies remain excluded. Publication uses an
 ordinary non-forced push, with a remote-commit comparison after upload.
+
+The first push succeeded, and remote `main` was independently compared with local
+commit `e5bc5a6`. The repository remains private. Reviewed filesystem access also
+allowed the previously staged Obsidian update: all four originals still matched their
+saved hashes, all 19 Markdown notes were written atomically per file, and every note
+was verified byte for byte afterward. Original backups and the validated patch remain
+local/ignored. No code, vendor artifact or firmware was written to the vault.

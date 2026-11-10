@@ -101,12 +101,9 @@ symbol adjacency does not prove ownership by a program class.
 
 Local documentation prepared for the existing vault is under ignored `docs/obsidian/`;
 code stays here. These working copies are not part of the GitHub repository.
-The vault is outside the writable roots. Its four saved original notes were rehashed
-and remain unchanged. The local 19-note `docs/obsidian-update.patch` was applied to
-temporary copies with zero fuzz and compared byte for byte with the staged documents.
-Check for newer vault changes before applying it from a writable session:
-
-```sh
-cd /Users/jacob/Documents/ObsidianVault/Projects/Oscairn
-patch -p1 < '/Users/jacob/Projects/Open Synth Platform/bmc-research/docs/obsidian-update.patch'
-```
+The 19-note update was applied to the vault on 2026-11-10 through reviewed file access.
+All four originals matched their saved hashes before writing; every updated note was
+verified byte for byte afterward. Original backups, the validated patch and the applied
+hash manifest remain ignored/local. The patch records the original-to-updated change;
+do not reapply it to the already updated vault. Check for newer edits before future
+updates. No code or vendor artifact was written there.
