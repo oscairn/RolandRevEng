@@ -283,7 +283,13 @@ An independent native comparison point is BITCRUSH. Its `4812 / 1500` packets at
 `+158/+168` for the first pair and compute `d1 × first + d3 × second`. The
 analogous native windows start at `241c6c` and `241d44`. These comparisons provide
 different coefficients and a weighted-sum reference for the neighboring form.
-They leave the DSP input and output ports of `4822 / 1940` unresolved.
+In the first window, the native value in `d1` was saved to DM[`c`] at `241a9c`
+and `d3` was loaded from DM[`d`] at `241ad8`. Their constructor address fields
+refer to program operands `106` and `122`, respectively. Those operands are an
+`8fe4` main-A store and a `1fe2` port-1 load. Trace the intervening packet effects
+on those ports before treating their values as still live at `15c`. This supplies
+concrete source cutpoints for BITCRUSH. The port assignment for `4822 / 1940`
+still needs an independent comparison.
 
 ```sh
 python tools/line_mix_variation.py \

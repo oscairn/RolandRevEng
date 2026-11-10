@@ -764,5 +764,11 @@ BITCRUSH native callback gives a separate weighted-sum comparison for
 The renderer now models the two native mix coefficients explicitly and tests
 that they only affect the wet path. Its default Fantom WAV is byte-identical
 to the earlier fixture. No new instruction entered the strict interpreter.
-All 258 tests passed with the local corpus. OMP could not resolve the Mac
-Studio endpoint in this session and supplied no review.
+All 258 tests passed with the local corpus. A clean export passed 199 tests
+with 59 artifact-dependent skips. The ordinary OMP attempt failed DNS. The
+network-enabled retry returned a Qwen review, which suggested seeking an
+asymmetric context. It overclaimed what literal references and main-port
+store ordering establish. Those observations alone do not show that a
+referenced literal contributes to the result or that the LINE auxiliary
+stores capture an incoming value. No generated code or semantic claim
+from the review was used.
