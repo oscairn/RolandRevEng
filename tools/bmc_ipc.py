@@ -30,7 +30,8 @@ def frames(data):
             end = offset + 12
             payload = prefix[4:4 + length]
         row = dict(offset=offset, size=end - offset, kind=kind, variable=variable,
-                   prefix=prefix.hex(), payload=payload.hex())
+                   prefix=prefix.hex(), payload=payload.hex(),
+                   byte1=prefix[1], destination=prefix[2], selector=prefix[3])
         if kind == 3 and len(payload) == 4:
             row['word_le'] = int.from_bytes(payload, 'little')
         yield row

@@ -190,3 +190,8 @@ No arbitrary DSP upload operation, live USB topology, complete route-ID map, pee
 forwarding implementation or hardware recovery has been established. The practical
 next bridge target is the peer of this IPC stream, rather than sending the UART echo
 pattern or bare CORE1 callback command numbers to an instrument.
+
+The [host/CORE1 bridge follow-up](host-core1-bridge-followup.md) maps the outer route
+dispatcher, service clients and payload ownership, and recovers a CORE-local SysEx
+MMIO handler. It retains the missing peer boundary and identifies a read-reply
+stack-size discrepancy; it does not establish a usable host loader.
