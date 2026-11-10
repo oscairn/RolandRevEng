@@ -13,7 +13,8 @@ class IpcTests(unittest.TestCase):
         data = bytes.fromhex('0660e1000b923456aabbcc04')
         row, = frames(data)
         self.assertEqual(row, dict(offset=0, size=12, kind=3, variable=False,
-                                  prefix=data.hex(), payload='0b923456', word_le=0x5634920b))
+                                  prefix=data.hex(), payload='0b923456', word_le=0x5634920b,
+                                  byte1=0x60, destination=0xe1, selector=0))
 
     def test_variable_and_concatenated_frames(self):
         prefix = bytes.fromhex('13610100123456789abcdef0')
@@ -22,6 +23,8 @@ class IpcTests(unittest.TestCase):
         rows = list(frames(variable + empty))
         self.assertEqual((rows[0]['kind'], rows[0]['size'], rows[0]['payload']), (9, 19, '616263'))
         self.assertTrue(rows[0]['variable'])
+        self.assertEqual((rows[0]['byte1'], rows[0]['destination'], rows[0]['selector']),
+                         (0x61, 1, 0))
         self.assertEqual((rows[1]['offset'], rows[1]['payload']), (19, ''))
         self.assertEqual(list(frames(b'')), [])
 
