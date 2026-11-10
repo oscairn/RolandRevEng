@@ -47,7 +47,8 @@ def literal_calls(code):
                     raise ValueError('Unclassified literal call/argument')
                 result.append(dict(slot_load=ins.address, call=following.address, symbol=symbol))
                 break
-            if following.mnemonic == 'bl' or following.mnemonic.startswith('b.'):
+            if (following.mnemonic in ('b', 'bl', 'ret', 'cbz', 'cbnz', 'tbz', 'tbnz')
+                    or following.mnemonic.startswith('b.')):
                 raise ValueError('Control flow interrupts literal-call provenance')
             shape = following.op_str
             if following.mnemonic == 'adrp' and shape.startswith('x1, #'):

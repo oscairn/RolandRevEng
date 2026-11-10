@@ -7,7 +7,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/'tools'))
-from line_prefix_study import descriptor, report
+from line_prefix_study import descriptor, literal_calls, report
 
 
 class DescriptorTests(unittest.TestCase):
@@ -28,6 +28,24 @@ class DescriptorTests(unittest.TestCase):
         struct.pack_into('<I', data, 72, 0x103)
         with self.assertRaises(ValueError):
             descriptor(data, 0)  # Unproved nonzero segment encoding is not silently accepted.
+
+
+@unittest.skipUnless(importlib.util.find_spec('capstone'), 'Capstone required')
+class NativeCallTests(unittest.TestCase):
+    def test_branch_or_return_cannot_bridge_to_a_later_call(self):
+        import capstone
+        md = capstone.Cs(capstone.CS_ARCH_ARM64, capstone.CS_MODE_LITTLE_ENDIAN)
+        md.detail = True
+        # LDR vtable/slot; ADRP+ADD x1; BLR x8. These are original synthetic instructions.
+        prefix, call = [0xf9400008, 0xf9406508, 0x90000001, 0x91008021], 0xd63f0100
+        def decode(words):
+            return list(md.disasm(struct.pack('<'+'I'*len(words), *words), 0x1000))
+        self.assertEqual(literal_calls(decode(prefix+[call])),
+                         [dict(slot_load=0x1004, call=0x1010, symbol=0x1020)])
+        for control in [0x14000001, 0x94000001, 0xb4000020, 0xb5000020,
+                        0x36000020, 0x37000020, 0x54000020, 0xd65f03c0]:
+            with self.subTest(control=hex(control)), self.assertRaises(ValueError):
+                literal_calls(decode(prefix+[control, call]))
 
 
 CORPUS = Path(os.environ.get('BMC_CORPUS_DIR', ROOT/'local'))
