@@ -1,5 +1,10 @@
 # Kernel context, routing and program ownership
 
+Follow-up: [effect lifecycle and parent entries](effect-lifecycle-and-parent-entry-study.md)
+traces the generic replacement caller, RAMCLR coefficient zeroing and DRAM-IO cleanup,
+and four parent entry-reference candidates. It also bounds the evidence for FETDRIVE
+selection: available implementation bytes do not prove stock activation.
+
 2026-11-10, branch `research/kernel-abi`. Static file/Capstone 5.0.7 analysis,
 not REA-provider or runtime evidence. CORE1 addresses below apply only to bmc0
 MI078 C1A v1.08, payload SHA-256

@@ -1,5 +1,9 @@
 # Operand variants and exceptional-macro boundaries
 
+Follow-up: [oscillator layout candidates](oscillator-layout-candidates.md) explains
+all six owned oscillator literal references while retaining two arity ambiguities.
+The production decoder and emitter remain unchanged.
+
 2026-11-10. Follow-up to the [MAC/issue study](mac-controls-and-issue-study.md),
 [exceptional controls](special-ops-and-exp-study.md), and
 [native primitives](native-arithmetic-primitives.md). This uses ordinary Capstone

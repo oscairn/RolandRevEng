@@ -1,5 +1,9 @@
 # Six-bit operands and bounded header-family decoding
 
+Follow-up: [oscillator layout candidates](oscillator-layout-candidates.md) explains
+all six owned oscillator literal references while retaining two arity ambiguities.
+The production decoder and emitter remain unchanged.
+
 Offline follow-up, 2026-11-09, extended 2026-11-10. This study uses the same local ZENOLOGY arm64 and
 Fantom-0 v1.08 inputs as the packet/loader report. It adds operand-layout information;
 it does not execute Roland code or establish hardware arithmetic or timing.

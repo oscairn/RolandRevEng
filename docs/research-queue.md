@@ -204,3 +204,43 @@ validation are recorded in the [work log](work-log.md). No hardware/target execu
 shell-payload edit, vault write or push occurred. The next evidence requirements
 are in the three follow-up studies; this checkpoint completes the queued offline
 passes, not a runnable engine or hardware validation.
+
+## Continued offline pass: startup, lifecycle and oscillator layouts
+
+Starting checkpoint `5246bce`. Three independent collaboration workers used new
+isolated worktrees; the parent separately traced host version identities and
+compared pinned public MC-101 source. The prior TUI messaging-approval restriction
+above is historical; these workers returned local commits through collaboration.
+
+- [Service startup](core1-service-startup-mmio.md): both compiled startup loops
+  visit the receiver constructors. Exact reply-frame geometry confirms the local
+  buffer discrepancy in both supplied builds. External ingress remains unknown.
+- [Effect lifecycle](effect-lifecycle-and-parent-entry-study.md): generic factory
+  replacement, temporary RAMCLR, coefficient writes, DRAM-IO cleanup and DMA wait.
+  Four numeric parent-entry candidates; complete history reset remains unknown.
+- [Oscillator layouts](oscillator-layout-candidates.md): four exact contexts and
+  six owned anchors constrain arities, with two ambiguities retained. The general
+  decoder/emitter is unchanged.
+- [Host versions](host-version-and-upstream-crosscheck.md): five component slots
+  and actual expected strings. Peer-to-physical-chip identity remains unproved.
+
+Four bounded OMP/Qwen requests actually returned on the authorized Mac Studio.
+Each response was independently checked. They contained substantive errors;
+no generated code or unverified semantic assignments were accepted. Prompts and
+responses remain ignored/local. All published conclusions follow file evidence.
+
+The next useful offline questions, in order:
+
+1. Decode the separate four-segment RAMCLR **DRAM-IO** program sufficiently to
+   identify every state range it writes and relate its returned `1900` wait value
+   to actual completion. The coefficient loop alone cannot settle history reset.
+2. Compare `00a0/00a2` parent contexts with native callback/routing boundaries and
+   placeholders. Prove the entry operand, return/condition state and issue timing
+   before emitting a wrapper; resolve the fifth DSP1 parent separately.
+3. Recover opaque controls around the four oscillator packets. Obtain independent
+   arity evidence for `3074` and extension ownership for `2d64/0c3b`; a header-rank
+   fit or a matching coefficient alone is insufficient.
+4. The end-to-end loader still needs the actual ttyGS0 peer implementation or
+   correlated existing two-way traffic. Neither public MC-101 code nor startup
+   activation fills that missing edge. Continue other offline work until that
+   artifact or hardware evidence is available; do not invent a host upload command.

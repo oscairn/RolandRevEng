@@ -19,6 +19,19 @@ The vendor files stay in its ignored `local/` directory. Counts below are genera
 
 The subsequent unattended studies refine this first-pass map:
 
+- [Service startup](core1-service-startup-mmio.md): reset, scatter, runtime and
+  initializer-table calls establish compiled activation of both supplied builds'
+  SysEx receivers, assuming preceding initialization completes. The exact MMIO
+  reply-frame analysis does not establish safe external access.
+- [Effect lifecycle and parent entries](effect-lifecycle-and-parent-entry-study.md):
+  generic replacement ordering, coefficient-only RAMCLR writes and four numeric
+  entry-reference candidates. Complete history clearing and call timing remain open.
+- [Oscillator layout candidates](oscillator-layout-candidates.md): six owned
+  coefficient anchors narrow four packet layouts but leave two arity ambiguities;
+  no oscillator opcode or unsupported header is admitted.
+- [Host version identities](host-version-and-upstream-crosscheck.md): five logical
+  component slots and checked strings; physical peer mapping remains unproved.
+
 - [Gain controls](alu-controls-study.md): independent native def/use checks verify
   12 effect tails, 24 output chains and 48 live-coefficient gain applications. EH also
   uses a live coefficient through input port 1, so ports 3/7 are not exclusive

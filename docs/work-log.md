@@ -222,3 +222,47 @@ allowed the previously staged Obsidian update: all four originals still matched 
 saved hashes, all 19 Markdown notes were written atomically per file, and every note
 was verified byte for byte afterward. Original backups and the validated patch remain
 local/ignored. No code, vendor artifact or firmware was written to the vault.
+
+## Continued offline pass: startup, lifecycle and oscillator ambiguity
+
+From published checkpoint `5246bce`, independently reviewed and integrated:
+
+- Worker `6308466`, integrated as `5f35157`: both CORE1 reset/scatter/runtime paths
+  reach their initializer walkers and service constructors. Exact stack/frame and
+  count-width analysis confirms the read-reply discrepancy in both builds.
+- Worker `aee4885`, integrated as `efd6869`: generic effect replacement, temporary
+  RAMCLR coefficient clearing, DRAM-IO reservation cleanup and DMA wait. Four parent
+  numeric effect-entry candidates remain separate from call/timing semantics.
+- Worker `86d2698`, integrated as `1553e14`: six independently owned oscillator
+  literals match reference fields; two contexts constrain arity uniquely while
+  two retain meaningful extension/arity ambiguities. General decoding is unchanged.
+- Parent `29e54bf`: five host version-component slots and direct file-backed string
+  verification, plus pinned public MC-101 source comparison. Neither establishes
+  the missing Fantom stream peer or physical chip identities.
+
+Four bounded no-tool OMP/Qwen analysis requests actually returned through the
+authorized Mac Studio endpoint, serialized by a local process lock. Independently
+checked useful offsets/slot arithmetic were retained where file evidence agreed;
+invented identities, arity assignments, count behavior and reset/fence semantics
+were rejected. No generated model code was accepted. Prompts/responses and upstream
+source checkouts remain ignored/local. No upstream patcher/probe was executed.
+
+Verification: **111 tests pass, no skips**, with the full existing local corpus.
+A fresh tracked-text export passes the same 111 discovered tests with **16 explicit
+corpus skips** (95 pass), using Capstone but no vendor artifacts. All new focused
+tests and read-only reports were also reproduced during review. Source syntax,
+relative documentation links and whitespace checks pass. Logs are under ignored
+`local/next-*`. A bounded reproduction script in the host study was executed;
+Apple objdump's ignored data-dump address limits were replaced with PT_LOAD reads.
+
+The vault preflight matched saved hashes and found no new-note collisions. Reviewed
+file access wrote **10 Markdown notes** (four new, six refreshed), backed up previous
+versions and verified all **23 notes** byte for byte. The latest expected hashes are
+in `local/obsidian-applied-next-2026-11-10.json`; the earlier manifest/patch is historical.
+Only documentation went to Obsidian. Code remains in this project.
+
+The next offline priorities are DRAM-IO clearing semantics, parent entry/return and
+issue timing, opaque oscillator-control syntax, and the actual external peer when
+an owned image or correlated recording becomes available. No hardware execution,
+flashing, device access or shell-payload changes occurred. A runnable custom engine,
+complete state reset, physical audio routing and hardware precision remain unverified.

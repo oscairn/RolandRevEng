@@ -1,5 +1,12 @@
 # Host routes, CORE1 SysEx and the remaining bridge
 
+Follow-up: [service initialization and reply frames](core1-service-startup-mmio.md)
+closes the startup-table activation edge below for both supplied builds. It also
+refines the exact count/remainder and saved-register bounds; the external bridge
+remains unproved. [Host version identities](host-version-and-upstream-crosscheck.md)
+recovers five component slots and their actual version strings without assigning
+unproved physical chip identities. The original bounded investigation follows.
+
 2026-11-10. Follow-up to [host transport](host-transport-study.md) and
 [CORE1 receive path](core1-receive-and-test-controls.md). This is offline static
 analysis with Apple's `objdump`, Python and Capstone 5.0.7. REA's native provider

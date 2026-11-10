@@ -7,7 +7,7 @@ Private visibility was verified on 2026-11-10; keep it private as requested. Thi
 Read [the packet and loader map](docs/BMC%20DSP%20packet%20and%20loader%20map.md) for findings,
 confidence, build-specific addresses and the remaining requirements for custom engines.
 The [queued research](docs/research-queue.md) prioritizes the host bridge, instruction
-semantics and kernel/audio ABI. All three offline passes are now reviewed and integrated.
+semantics and kernel/audio ABI. Follow-up passes are reviewed below.
 CORE1 has a raw MMIO SysEx handler overlapping DSP program RAM, and stock effect
 ownership/mute controls are mapped. The external peer, safe task entry, state setup
 and hardware timing still block a runnable custom engine. The MMIO read-reply builder
@@ -25,10 +25,14 @@ Independent follow-up studies:
 - [Receive path and test controls](docs/core1-receive-and-test-controls.md): CORE-local queues, boot modes and stock diagnostic controls.
 - [Host transport](docs/host-transport-study.md): the normal application's gadget-serial IPC and correction to the older spare-port assumption.
 - [Host/CORE1 bridge](docs/host-core1-bridge-followup.md): routes, service replies, CORE-local MMIO and the precise missing peer boundary.
+- [CORE1 service startup](docs/core1-service-startup-mmio.md): normal initializer-table activation in both builds and exact MMIO reply-frame bounds.
+- [Host version identities](docs/host-version-and-upstream-crosscheck.md): five component slots, checked version strings and bounded public-source comparisons.
 - [Supported code generation](docs/supported-code-generation.md): mix/gain and four-stage allpass fragments, with original examples.
 - [Kernel and audio ABI](docs/kernel-audio-abi-study.md): stock mute controls, manager reservations, shared routing and a gated probe design.
+- [Effect lifecycle and parent entries](docs/effect-lifecycle-and-parent-entry-study.md): factory replacement ordering, coefficient clearing and four effect-entry candidates.
 - [Native arithmetic primitives](docs/native-arithmetic-primitives.md): bounded native shaping, feedback and voice-end reference semantics.
 - [Operand variants and macro boundaries](docs/operand-variants-and-macro-boundaries.md): exact mono-sum and cross-destination allpass comparisons, with oscillator-layout and exceptional-macro limits.
+- [Oscillator layout candidates](docs/oscillator-layout-candidates.md): competing arities consistent with six independently owned coefficient anchors.
 
 This directory contains offline tools and derived research. It does not contain
 a working custom synth engine, general assembler, flasher or hardware driver. A constrained
@@ -101,9 +105,10 @@ symbol adjacency does not prove ownership by a program class.
 
 Local documentation prepared for the existing vault is under ignored `docs/obsidian/`;
 code stays here. These working copies are not part of the GitHub repository.
-The 19-note update was applied to the vault on 2026-11-10 through reviewed file access.
-All four originals matched their saved hashes before writing; every updated note was
-verified byte for byte afterward. Original backups, the validated patch and the applied
-hash manifest remain ignored/local. The patch records the original-to-updated change;
+The initial 19-note update was applied to the vault on 2026-11-10 through reviewed file access.
+The continued pass adds four studies and refreshes six notes, for 23 verified notes.
+Saved hashes were checked before each update; every note was verified byte for byte.
+Original backups, the initial validated patch and the applied hash manifests remain
+ignored/local. The patch records the initial original-to-updated change;
 do not reapply it to the already updated vault. Check for newer edits before future
 updates. No code or vendor artifact was written there.
