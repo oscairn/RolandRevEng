@@ -47,6 +47,9 @@ Independent follow-up studies:
 - [Factory intro and dispatch](docs/factory-gate-and-ui-dispatch-study.md): actual UI transitions, separate test groups and the still-unresolved mode-3 entry.
 - [Clear completion interrupt](docs/clear-completion-interrupt-study.md): event `0x17` connects to IRQ80, status acknowledgement, registration and startup setup.
 - [CORE1 transmit and backpressure](docs/core1-transmit-and-backpressure-study.md): the service-reply word edge, TXDT context, reserved slots and full-ring retries.
+- [Coefficient envelopes](docs/coefficient-envelope-and-completion-study.md): EnvTC selectors, wait/dispatch semantics, shared completion and native timing limits.
+- [Memory-domain labels](docs/memory-domain-labels-and-clear-count-boundary.md): explicit IDM/EDM monitor naming, a diagnostic defect and unresolved bulk-clear units.
+- [Fresh official Fantom build](docs/fantom-official-build-provenance.md): current download equality, complete member provenance and the unchanged access gap.
 - [Native arithmetic primitives](docs/native-arithmetic-primitives.md): bounded native shaping, feedback and voice-end reference semantics.
 - [Operand variants and macro boundaries](docs/operand-variants-and-macro-boundaries.md): exact mono-sum and cross-destination allpass comparisons, with oscillator-layout and exceptional-macro limits.
 - [Oscillator layout candidates](docs/oscillator-layout-candidates.md): competing arities consistent with six independently owned coefficient anchors.

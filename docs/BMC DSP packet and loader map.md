@@ -19,6 +19,15 @@ The vendor files stay in its ignored `local/` directory. Counts below are genera
 
 The subsequent unattended studies refine this first-pass map:
 
+- [Coefficient envelopes](coefficient-envelope-and-completion-study.md): live
+  coefficient banks, 16-value time selectors, conditional ramp dispatch and
+  IRQ65..70 completion. Native nominal times are not hardware calibration.
+- [IDM/EDM labels](memory-domain-labels-and-clear-count-boundary.md): explicit
+  diagnostic monitor names give software naming, with a retained control-label
+  defect and unknown bulk-clear units.
+- [Official build provenance](fantom-official-build-provenance.md): a fresh
+  manufacturer download matches the existing v1.08 artifacts. No alternate
+  factory build or readable Linux recovery consumer was obtained.
 - [Stereo tap accumulation](stereo-tap-accumulation-study.md): four exact-context
   long-control meanings match six native arithmetic stages and eight memory
   accesses. General register decoding and hardware numerics remain open.

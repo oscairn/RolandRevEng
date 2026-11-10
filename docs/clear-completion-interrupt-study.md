@@ -1,5 +1,10 @@
 # Global clear completion: event 0x17 is hardware IRQ80
 
+Follow-ups: [domain labels](memory-domain-labels-and-clear-count-boundary.md) tie
+the Boolean banks to explicit software diagnostic names, retaining a control-label
+defect and unknown physical/count semantics. [Coefficient envelopes](coefficient-envelope-and-completion-study.md)
+use separate IRQ65..70 and shared bit1 in the same flag word, rather than clear bit0.
+
 The Fantom CORE1 completion path is now joined from registration through the vector,
 peripheral status acknowledgement, callback and shared waiter flag. Firmware event
 `0x17` is a callback-table index; it is **not NVIC IRQ23**. The corresponding vector

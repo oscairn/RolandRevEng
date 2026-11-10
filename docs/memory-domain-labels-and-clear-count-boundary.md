@@ -106,9 +106,9 @@ is itself a `RET` stub. The similar name is not evidence about DSP IDM units.
 
 The native/firmware manager table correspondence places clear at firmware slot
 `ec`, write float/fixed/raw at `f4/f8/fc`, and read float/fixed/raw at
-`100/104/108`. A whole-payload, halfword-aligned search for the specific
+`100/104/108`. A halfword-aligned search of the actual ITCM/ERAM spans for the specific
 `LDR.W Rt,[Rn,#imm12]` unsigned-immediate form excludes PC-relative literals.
-It finds only `6102a3be` for slot `ec`, the already documented stock global clear
+No candidate may straddle the unmapped runtime gap. It finds only `6102a3be` for slot `ec`, the already documented stock global clear
 call. It finds no non-PC candidates for `f4`, `fc`, `104`, or `108`. The five `f8`
 hits access an object field. The three `100` hits include an NVIC enable-register
 read (`0110247e`) and two unclassified encoding matches (`0110b330/0110b786`);

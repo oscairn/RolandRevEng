@@ -76,8 +76,10 @@ def report(core, native):
         diagnostic_labels=labels,
         bool_domain_diagnostic_names={'0': 'IDM', '1': 'EDM'},
         control_labels_share_register=True,
-        ldr_unsigned_candidates={hex(n): [core.address(off) for off in
-            unsigned_ldr_offsets(core.data, n)] for n in (0xec, 0xf4, 0xf8, 0xfc, 0x100, 0x104, 0x108)},
+        ldr_unsigned_candidates={hex(n): [core.address(start+off)
+            for start,end in ((0,core.eram_offset),(core.eram_offset,len(core.data)))
+            for off in unsigned_ldr_offsets(core.data[start:end],n)]
+            for n in (0xec, 0xf4, 0xf8, 0xfc, 0x100, 0x104, 0x108)},
         native_clear_or_float_domain_routing_present=False,
         idmem_checksum_source=0x01100000,
         bulk_clear_count_unit_proven=False, physical_domain_name_validated=False,

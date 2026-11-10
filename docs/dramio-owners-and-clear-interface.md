@@ -5,6 +5,11 @@ IRQ80, stock priority/enable/mask setup and the handler's status acknowledgement
 It adds per-element portal-address evidence while preserving bulk-unit/domain and
 safe-ownership limits below.
 
+[Named diagnostics](memory-domain-labels-and-clear-count-boundary.md) additionally
+call the false bank IDM and true bank EDM through their monitor labels. A duplicate
+control-register read in that same display limits the corroboration; bulk-clear
+count units and a physical hardware specification remain unproved.
+
 2026-11-10. Offline follow-up to [the JUPITER-X comparison](jupiter-crossmodel-c1-study.md)
 and [RAMCLR/native clearing](dramio-clear-records-and-native-state.md). This pass
 connects the eleven JUPITER-X RAMCLR sources to actual constructor-selected manager

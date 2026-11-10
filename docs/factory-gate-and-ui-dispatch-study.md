@@ -1,5 +1,9 @@
 # Factory introductory page: dispatch, test groups and the unresolved setting gate
 
+Follow-up: a [fresh official build check](fantom-official-build-provenance.md)
+reproduced the same v1.08 archive and qctest bytes. Checked older detail links
+did not supply an alternate build or readable recovery consumer.
+
 2026-11-10. This follows the [access-route audit](fantom-access-route-audit.md)
 using the same stock v1.08 `qctest`: 304912 bytes, SHA-256
 `d87316806a54548920773b026f0b4d332b702450e1c1e7c317f5dc46ebfa29a6`.

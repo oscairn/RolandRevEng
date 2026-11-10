@@ -185,11 +185,14 @@ branches and arguments give this sequence:
    `+0xb0` (`0x6104a38a..3be`).
 
 The separate open routine at `0x6104a31e` performs step 5. The close routine at
-`0x6104a3c4` first requests the master ramp toward zero (float constant at
+`0x6104a3c4` first requests the master target zero through envelope-capable dispatch (float constant at
 `0x6104a514`) with final flag 1, then sets the mute label true, then waits count
 3/completion 1. The native exported `MuteOff`/`MuteOn` methods independently
-have that order. The numeric timing meaning of envelope argument 10 and the
-final flag is not assigned here.
+have that order. The [envelope follow-up](coefficient-envelope-and-completion-study.md)
+now identifies argument 10 as an EnvTC selector and the final flag as wait/no-wait
+on the with-envelope path. Another dispatch Boolean can select a without-envelope
+method. Native selector10 corresponds to nominal12 ms in its 44100-based formula;
+the actual Fantom ramp timing and runtime dispatch choice remain unverified.
 
 The wait helper operates a completion flag at `0x200845b4`, installs an IRQ
 callback, and arms a counter through `0x01103772` at MMIO `0x40059000`. The
