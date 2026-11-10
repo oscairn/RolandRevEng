@@ -322,3 +322,70 @@ semantics and render condition/return timing. Full hardware state clearing,
 physical routing, permitted manager task entry and the external Fantom peer still
 block a runnable engine. Shared code and passing offline checks do not establish
 firmware compatibility, a safe live read bound or successful hardware execution.
+
+## Conditions, owner contracts, key provenance and Fantom access
+
+Continued from `788a0f1`. The main checkout reviewed isolated worker commits and
+reproduced their focused checks against the retained artifacts:
+
+- Condition/return `60749b5`: four native predicate inputs match exact DSP
+  fields; `00f8` has no explicit PC operand in the scoped packets. Hardware
+  condition bits, return storage and timing remain unassigned.
+- Task context `3f6cbf4`: normal startup registers RXDT/ASGN through software
+  IRQs, with actual priorities and queue gates. These are not established OS
+  threads or a proven safe custom callback/loader entry.
+- Owner/clear interface `1510a1f`: JUPITER-X constructors explain eleven manager
+  owners and two layouts. Counter access and global clear are distinct APIs;
+  clear units, shared completion synchronization and per-instance safety are open.
+- Official SH-4d v2.00 and TR-8S v3.00 `b69b6df`: preserved downloads/manifests,
+  another split CORE1 comparison and a package with only encrypted CORE0 and
+  initialization data. Shared code does not prove compatible hardware maps.
+- Key-provider `33d237a` and material scan `6227df8`: no confirmed key/provider
+  in seven readable images; no documented MC-101 ROM copy in 27 scoped objects
+  totaling 146,004,684 bytes, including all retained tar components and five
+  verified initial-data expansions. Unknown/transformed keys are not ruled out.
+- Access audit `3b09159`, writer follow-up `93de9b2`: stock qctest contains a
+  login-shell endpoint, but mode 3, effective UID and usable terminal remain
+  unproved. One concrete mode writer was identified among recognized references;
+  its direct callers pass 0/1/2. This is not an all-writers/unreachability proof.
+  The actual mi078 I2C path and MMC boot autodetection correct older assumptions.
+
+Root comparison `7696c65` pins six C0A containers and measures distinct nontrivial
+eight-byte blocks inside exact validated payload bounds. Fantom bmc0/bmc1 share
+14,335 blocks; each other model shares 8,124–15,985 with bmc0. Under the reported
+ECB scheme this supports testing a recovered MC-101 key against Fantom. It is
+not key recovery or plaintext validation. The public decryptor depends on an
+external ROM dump absent from the retained checkout; its reported B6 table slot
+is `012034c0..012034d7`, not a verified Fantom/i.MX read address.
+
+Direct OpenPGP header inspection also confirms the stock update's encoded S2K
+count byte is `ff` (65,011,712 input bytes), correcting the old `c8` wording.
+No update plaintext, consumer, passphrase or BMC decryption was recovered.
+Retained GPL uboot/linux/imxboot tars were hash-checked and preserved locally;
+their outer ZIP and exact deployed build equivalence remain unverified.
+
+One bounded no-tool OMP/Qwen review returned for the cross-model checker. Its
+mechanical observations were checked against source/tests; its statement that
+only synthetic tests exist was rejected. No generated code was accepted.
+The installed pyelftools 0.33 dependency is now declared for ELF reproducibility;
+no installation or provider configuration change was needed.
+
+Validation: **157 tests pass, no skips**, with full local artifacts. A clean
+tracked-text export discovers 157: **129 pass, 28 artifact checks skip explicitly**.
+After the bounded writer follow-up, its two affected checks were repeated against
+the corpus and clean export (two pass locally; one pass/one skip without the ELF).
+Syntax, relative links, tracked-text boundaries and whitespace were checked.
+Logs and review outputs remain under ignored `local/fourth-*`.
+
+The vault preflight matched all 28 prior managed notes and the newly managed
+passphrase note. Seventeen Markdown notes were written (eight new studies and
+nine corrections/refreshes), with prior text backed up and all **37 notes**
+verified byte for byte. The current manifest is
+`local/obsidian-applied-fourth-2026-11-10.json`; earlier patches/manifests are
+historical. Code and all vendor artifacts remain in the project, not the vault.
+
+Next evidence is an applicable BMC ROM/runtime or peer artifact, or a proven
+console route, alongside further condition/return and clear-engine semantics.
+No live device, target code, updater, shell package, flash writer or exploit was
+run or changed. Recovery, secure-boot state, physical routing and render timing/
+numerics remain unverified; there is still no runnable custom BMC engine.

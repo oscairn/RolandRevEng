@@ -119,8 +119,10 @@ symbol adjacency does not prove ownership by a program class.
 Local documentation prepared for the existing vault is under ignored `docs/obsidian/`;
 code stays here. These working copies are not part of the GitHub repository.
 The initial 19-note update was applied to the vault on 2026-11-10 through reviewed file access.
-Subsequent passes add nine studies, for 28 verified notes, including the official
-MC-101/JUPITER-X firmware comparisons. Firmware downloads remain local/ignored.
+Subsequent passes now cover 37 verified notes, including official cross-model
+comparisons, key/access studies and corrections to older recovery claims.
+The latest pass wrote 17 Markdown notes and verified all 37 against the staged
+hashes. Firmware downloads remain local/ignored.
 Saved hashes were checked before each update; every note was verified byte for byte.
 Original backups, the initial validated patch and the applied hash manifests remain
 ignored/local. The patch records the initial original-to-updated change;
