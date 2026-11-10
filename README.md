@@ -1,8 +1,8 @@
 # RolandRevEng
 
 Independent Roland BMC interoperability research, starting with Fantom-0 v1.08 and
-the installed ZENOLOGY plugin. Intended remote: `https://github.com/jbschooley/RolandRevEng.git`.
-Keep the repository private as requested. This is not an official Roland project.
+the installed ZENOLOGY plugin. Remote: `https://github.com/jbschooley/RolandRevEng.git`.
+Private visibility was verified on 2026-11-10; keep it private as requested. This is not an official Roland project.
 
 Read [the packet and loader map](docs/BMC%20DSP%20packet%20and%20loader%20map.md) for findings,
 confidence, build-specific addresses and the remaining requirements for custom engines.

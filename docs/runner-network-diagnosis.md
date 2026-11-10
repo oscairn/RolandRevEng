@@ -45,3 +45,40 @@ and branch commits; no further cross-task progress messages are required. This r
 the messaging pause, not the command-network restriction described above.
 All three completed worker handoffs and clean commits were subsequently reviewed and
 integrated; final checks and unresolved research boundaries are in the work log.
+
+## Verified after reopening Codex
+
+Jacob applied the network-only config patch and reopened Codex. The config contains
+`sandbox_workspace_write.network_access = true`, but ordinary commands in the existing
+session still have the restricted runtime policy. Automatic approval review now permits
+explicitly reviewed network executions. That distinction was tested directly:
+
+- Ordinary sandbox DNS and HTTP requests still fail.
+- An approved read-only execution resolves GitHub and the configured Mac Studio
+  Tailscale hostname. GitHub returns HTTP 200; the model catalog without credentials
+  returns HTTP 401, proving reachability but not authenticated model access.
+- A separate approved OMP execution uses the existing provider credentials and returns
+  the exact requested `BMC_RUNNER_OK`. This is an actual authenticated model response.
+  Tools were disabled; it made no code changes. No earlier research is attributed to it.
+- GitHub reports `jbschooley/RolandRevEng` is private. Its refs were empty before the
+  initial publication attempt; no force push or remote-history replacement is needed.
+
+The tested OMP command, run from the transport worktree with its already prepared
+ignored provider profile, is:
+
+```sh
+env PI_CONFIG_DIR='Projects/Open Synth Platform/bmc-research/local/omp-root' \
+    PI_CODING_AGENT_DIR="$PWD/local/omp-agent" \
+    omp -p --model MacStudio/Qwen3.8-Flash-Next-Uncensored-oQ6e-mtp \
+    --system-prompt 'This is a connectivity test. Follow the user instruction exactly.' \
+    --no-tools --no-session --no-extensions --no-lsp --no-title \
+    --no-skills --no-context-files --max-time 90s \
+    'Reply with exactly BMC_RUNNER_OK and nothing else.'
+```
+
+The agent command tool used `sandbox_permissions = require_escalated` for this bounded
+network request, with the user's requested Mac Studio use and automatic review. This
+was not a silent permission bypass. Future requests must use an execution context whose
+actual permissions permit them; the config file alone is not connectivity evidence.
+Provider credentials and writable OMP state remain ignored/local. The existing review
+and test gates still apply to any subsequent Qwen draft.

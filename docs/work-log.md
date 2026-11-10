@@ -201,3 +201,17 @@ and hardware measurements of gate behavior, precision and timing. The MMIO reply
 size discrepancy must be resolved before treating that service as safe. Normal
 ttyGS0 IPC still conflicts with prepared shell payloads. These are explicit blockers
 to a runnable engine, not completed hardware experiments.
+
+## Network and local-model verification after reopening
+
+Jacob applied the network config patch and reopened Codex. Ordinary command networking
+is still restricted, while the new automatic-review execution path permits bounded
+approved network calls. GitHub DNS/HTTP succeeds through that path, and the configured
+Mac Studio returns an actual authenticated `BMC_RUNNER_OK` through OMP with tools
+disabled. No code or research finding was produced by this smoke test. Qwen can now
+be used for bounded drafts followed by independent evidence/code review and tests.
+
+The requested GitHub repository was verified private and its remote refs were empty.
+The reviewed checkpoint contains only tracked text tools/tests/research; vendor inputs,
+raw dumps, credentials and working vault copies remain excluded. Publication uses an
+ordinary non-forced push, with a remote-commit comparison after upload.

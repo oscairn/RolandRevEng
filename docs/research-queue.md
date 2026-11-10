@@ -38,15 +38,19 @@ PI_CODING_AGENT_DIR="$PWD/local/omp-agent"
 `PI_CONFIG_DIR` is relative to the existing home directory in this installed OMP;
 do not reassign HOME. Pass these variables to the OMP process using `env` or a
 structured subprocess environment. Never print provider credentials or commit profiles.
-The no-tool 30-second smoke test started but timed out; a read-only request to the
+Initially, the no-tool 30-second smoke test started but timed out; a read-only request to the
 configured model endpoint failed hostname resolution in this command runner. Model
-availability is therefore **not verified**. Do not claim Qwen was used unless a run
+availability was therefore unverified. Do not claim Qwen was used unless a run
 actually returns, and do not spend the research run repeatedly repairing networking.
 Use the available Codex path when the local model cannot be reached.
 Later diagnostics confirmed direct TCP and DNS sockets are denied with EPERM by the
-current command sandbox; see [runner diagnosis](runner-network-diagnosis.md).
+command sandbox. After Jacob reopened Codex with automatic approval review, an
+approved network execution returned an authenticated `BMC_RUNNER_OK` from this exact
+OMP/Qwen provider. The ordinary sandbox remained restricted: use the reviewed network
+execution path, not a claim that all commands now have unrestricted network access.
+See [runner diagnosis](runner-network-diagnosis.md) for the verified invocation.
 
-If Qwen becomes available:
+When using Qwen:
 
 - Serialize requests with a process lock on the main checkout's
   `local/omp-qwen.lock`, using `fcntl.flock`; avoid competing long inference jobs.
