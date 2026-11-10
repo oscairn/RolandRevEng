@@ -6,6 +6,8 @@ Keep the repository private as requested. This is not an official Roland project
 
 Read [the packet and loader map](docs/BMC%20DSP%20packet%20and%20loader%20map.md) for findings,
 confidence, build-specific addresses and the remaining requirements for custom engines.
+The [queued research](docs/research-queue.md) prioritizes the host bridge, instruction
+semantics and kernel/audio ABI, followed by integration and verification.
 
 Independent follow-up studies:
 
