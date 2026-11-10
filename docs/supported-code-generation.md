@@ -123,3 +123,24 @@ logical-byte fragments with explicit memory/coefficient/input dictionaries and
 per-packet traces. It retains all emitter restrictions and supplies no wrapper or
 resource allocator. Original WAV demonstrations and independent stock-byte tests
 are documented there.
+
+## Dry/wet tail with scratch transfers
+
+Use `kind: dry_wet_tail_with_scratch` with the usual `wet_addresses` and
+`coefficient_slots` plus two `scratch_addresses`. The four wet and scratch
+indices must be distinct and below `0x800`. This profile has 80 logical bytes.
+It appends two ten-byte packets to the original dry/wet tail. The first stores
+A and B with `8fe0/cfe2`. The second reloads the same cells into A and B with
+`0fe0/4fe2`. Both use header `1e05`. The decoder requires matching store and
+reload addresses in channel order.
+
+The LINE primary fragment ends at `232` and uses cells `2b/2c`. FETDRIVE ends
+at `1ba` and uses `19/1a`. Native windows `2dfd44..2dfd84` and
+`2f8174..2f81b4` each store two distinct computed values and reload through the
+same constructor fields and ring path. The native output values agree with the
+prior symbolic mix proof. The corpus test executes both actual byte ranges
+with asymmetric vectors and checks each write and final port value.
+
+The next packet combines `00f8` with the output transfers to `2018/2019`.
+Its return state and issue behavior remain open, as does the trailing `ff70`.
+The accepted profile ends before both packets.

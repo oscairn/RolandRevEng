@@ -1,8 +1,7 @@
 # Offline functional fragment emulator
 
-2026-11-10. `tools/bmc_emulator.py` executes logical packet bytes for the two
-independently proved fragment families: the 60-byte dry/wet tail and 82-byte
-four-stage allpass. This is a packet-stepping functional model with memory and
+2026-11-10. `tools/bmc_emulator.py` executes logical packet bytes for three checked profiles. The dry/wet tail has 60-byte and 80-byte forms, and
+the four-stage allpass has 82 bytes. This is a packet-stepping functional model with memory and
 per-packet traces. It is not yet a complete Roland effect or a cycle/bit-accurate
 BMC emulator. No vendor plugin or instrument is executed.
 
@@ -90,7 +89,7 @@ fragment render does not establish that a complete stock engine can yet execute.
 Python 3.13+ supplies `math.fma` for the separate
 [native shaping oracle](line-prefix-shaping-study.md). A second original-signal
 experiment combines that oracle with the two strict allpass fragments and the
-strict dry/wet fragment:
+strict dry/wet fragment with scratch transfers:
 
 ```sh
 python3.13 tools/render_line_reference.py local/line-reference.wav
@@ -109,9 +108,9 @@ The host supplies a cold zero ring, fixed P=0, no other owner writes, and one
 [native origin step](line-state-and-history-study.md) per generated frame. It
 retains the pre-rational smoother values at logical3/6 separately from the
 current factors27/28, executes the two actual allpass address assignments, and
-feeds their current outputs29/2a into the real tail assignment. Output scratch
-2b/2c is written explicitly from the native dataflow; unknown entry/return and
-mute controls are not run.
+feeds their current outputs 29/2a into the real tail assignment. The final two
+admitted packets write and reload scratch cells 2b/2c. The host reads the
+resulting ports for the WAV output.
 
 An independent integration test uses direct five-value delay histories and
 unrolled allpass equations instead of circular addressing or packet execution.

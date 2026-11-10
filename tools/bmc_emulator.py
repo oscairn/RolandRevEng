@@ -1,4 +1,4 @@
-"""Functional float reference for two exact BMC fragments, not silicon precision.
+"""Functional float reference for exact BMC fragments, not silicon precision.
 
 No device IO, scheduling, history advancement, clipping or unknown operations.
 Only complete profiles accepted by bmc_subset may enter the packet interpreter.
@@ -34,7 +34,7 @@ def _values(mapping, label, keys):
 
 def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[int, float],
                      io: dict[int, float] | None = None) -> dict:
-    """Step a complete logical dry_wet_tail/allpass4 without mutating its inputs."""
+    """Step a complete supported logical fragment without mutating its inputs."""
     if not isinstance(program, bytes):
         raise ValueError('Program must be logical bytes')
     disassemble_fragment(program)

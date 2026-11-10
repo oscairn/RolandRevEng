@@ -6,7 +6,7 @@ from pathlib import Path
 import wave
 
 from bmc_emulator import execute_fragment
-from bmc_subset import assemble_allpass, assemble_tail
+from bmc_subset import assemble_allpass, assemble_fragment
 from line_state_study import advance_native_origin, native_ring_index
 from render_fragment_demo import SAMPLE_RATE, metrics, pcm16
 
@@ -23,8 +23,8 @@ def render_reference(frames):
     if type(frames) is not int or not 128 <= frames <= 1000000:
         raise ValueError('Expected 128..1000000 frames')
     left_program, right_program = assemble_allpass(LEFT), assemble_allpass(RIGHT)
-    tail = assemble_tail(dict(kind='dry_wet_tail', wet_addresses=[0x29, 0x2a],
-                              coefficient_slots=[3, 4, 5, 0]))
+    tail = assemble_fragment(dict(kind='dry_wet_tail_with_scratch', wet_addresses=[0x29, 0x2a],
+                                  coefficient_slots=[3, 4, 5, 0], scratch_addresses=[0x2b, 0x2c]))
     # Explicit experiment: fixed P=0, cold zero ring, one origin step per generated frame.
     ring, origin, rows = [0.0]*2048, 0, []
     source_addresses = set(LEFT['sources'] + RIGHT['sources'])
@@ -46,9 +46,7 @@ def render_reference(frames):
         result = execute_fragment(tail, data, {0: 1, 3: 0.5, 4: 0.5, 5: 1},
                                   {0x2016: left, 0x2017: right})
         output = result['ports'][0], result['ports'][4]
-        # Native output scratch writes; no unknown return/wrapper instruction is run.
-        data[0x2b], data[0x2c] = output
-        for address, value in data.items():
+        for address, value in result['data'].items():
             ring[native_ring_index(address, 0, origin)] = value
         rows.append(output)
         origin = advance_native_origin(origin)

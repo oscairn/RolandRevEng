@@ -15,11 +15,11 @@ ownership/mute controls are mapped. The external peer, safe task entry, state se
 and hardware timing still block a runnable custom engine. The MMIO read-reply builder
 also has a static stack-size discrepancy; it is not a demonstrated safe loader.
 
-A strict [offline fragment interpreter](docs/fragment-emulator.md) now steps the two
-proved packet families, with per-packet traces and independent actual-corpus checks.
+A strict [offline fragment interpreter](docs/fragment-emulator.md) steps the checked
+dry/wet, scratch transfer and allpass profiles with per-packet traces and corpus tests.
 It can render original impulse and stereo mix WAV demonstrations without vendor
 artifacts. The [complete-program inventory](docs/emulator-next-program-targets.md)
-selects LINEDRIVE next; its remaining packets and wrappers are still unadmitted.
+selects LINEDRIVE next and tracks its remaining packets and wrappers.
 
 The [conditional LINE reference](docs/fragment-emulator.md#conditional-line-reference-pipeline)
 now combines a checked native shaping oracle, explicit native ring steps and the
@@ -76,7 +76,7 @@ Independent follow-up studies:
 
 This directory contains offline tools and derived research. It does not contain
 a working custom synth engine, full stock-effect emulator, general assembler, flasher or hardware driver. A constrained
-emitter reproduces two verified fragment families; it does not schedule arbitrary operations. Nothing
+emitter reproduces fixed dry/wet, scratch and allpass profiles. Nothing
 here opens a device or executes Roland's plugin. Production Oscairn code was not changed.
 
 ## Reproduce
@@ -134,7 +134,7 @@ python3 tools/c0_header.py local/bmc0_MI078_C0A_up.bin
 Packet output is `offset: header | base control words | operand pool as words`.
 The pool can contain operation extension words as well as addresses and literals.
 `bmc_dsp.assemble()` reconstructs raw packets and checks lengths. The separate
-`bmc_subset.py` emits the two supported named fragment templates. The decoder rejects unobserved header bit 5 and unknown
+`bmc_subset.py` emits the supported named fragment profiles. The decoder rejects unobserved header bit 5 and unknown
 compact forms instead of skipping bytes to manufacture a successful parse.
 
 The locally generated `evidence/analysis.json` contains packet inventories, complete scatter records and the
@@ -152,12 +152,12 @@ were verified byte for byte; their unique title links remain valid. Continued
 research now covers 57 verified notes in this folder. Future vault
 updates target this subdirectory. The move manifest is
 `local/obsidian-applied-roland-move-2026-11-10.json`; the latest update manifest
-is `local/obsidian-applied-eighth-2026-11-10.json`. Current folder and manifest
+is `local/obsidian-applied-ninth-2026-11-10.json`. Current folder and manifest
 are recorded in `local/obsidian-location.json`. Earlier manifests describe historical paths.
 
 The research notes include the functional fragment emulator, official cross-model
 comparisons, key/access studies and corrections to older recovery claims.
-The latest pass wrote ten Markdown notes and verified all 57 against the staged
+The latest pass updated seven Markdown notes and verified all 57 against the staged
 hashes. Firmware downloads remain local/ignored.
 Saved hashes were checked before each update; every note was verified byte for byte.
 Original backups, the initial validated patch and the applied hash manifests remain

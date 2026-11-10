@@ -451,3 +451,12 @@ readable CORE1/ciphertext comparisons but no applicable ROM/key candidate or
 access/recovery route. Repeating unchanged code windows and literal-address
 scans is unlikely to resolve the missing peer or silicon state. Future vault
 updates go to `Projects/Oscairn/Roland`; code and generated audio stay in the project.
+
+## Stereo scratch transfer checkpoint
+
+The dry/wet profile now covers the store and reload pair in both LINEDRIVE
+and FETDRIVE. The conditional LINE render obtains scratch values from those
+packets. The primary-program gap inventory leaves 40 and 49 packets respectively,
+including the two final packets in each program. The next suffix proof needs
+the return state consumed by `00f8` and the fate of its co-issued output stores.
+[Scratch profile and evidence](supported-code-generation.md#drywet-tail-with-scratch-transfers)

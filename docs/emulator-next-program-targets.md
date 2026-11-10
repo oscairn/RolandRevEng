@@ -5,8 +5,8 @@ shared-prefix comparison and TS808 as a later alternative. This is an engineerin
 priority among five inspected native/DSP pairs, not a statement that any complete
 stock effect can currently execute. No complete program was justified in this pass.
 
-The two integrated strict interpreter milestones now execute exact 60-byte dry/wet
-and 82-byte allpass fragments in the offline reference model. Here an admitted region means the
+The strict interpreter now executes exact dry/wet tails, with an optional checked
+scratch round trip, and 82-byte allpass fragments in the offline reference model. Here an admitted region means the
 specific class/offset context already independently compared with native dataflow
 and reproduced by `bmc_subset.py`. Equal control words, a successful packet parse,
 or a known header family do not admit other contexts. See the
@@ -33,8 +33,8 @@ render list in this recorded metadata; no extra render list was silently discard
 |---|---|---|---|
 | `SIM_CHO_CHO` | 312 / `7c5080` | `a9084..a9620` | None |
 | `SIM_MFX_GATE` | 332 / `833318` | `313dd0..3140b8` | None |
-| `SIM_MFX_FETDRIVE` | 458 / `8372f4` | `2f7de4..2f81c4` | Dry/wet `16a..1a6` |
-| `SIM_MFX_LINEDRIVE` | 578 / `7b47f4` | `2df874..2dfd94` | Allpass `13e..190`, `190..1e2`; dry/wet `1e2..21e` |
+| `SIM_MFX_FETDRIVE` | 458 / `8372f4` | `2f7de4..2f81c4` | Dry/wet plus scratch `16a..1ba` |
+| `SIM_MFX_LINEDRIVE` | 578 / `7b47f4` | `2df874..2dfd94` | Allpass `13e..190`, `190..1e2`; dry/wet plus scratch `1e2..232` |
 | `SIM_MFX_TS808` | 588 / `8403fc` | `2085f0..208ab0` | Additional bounded tap/feedback evidence, but neither strict template |
 
 Ranges are half-open hexadecimal byte offsets. Sources and native addresses are
@@ -54,7 +54,7 @@ an existing structural family interpretation. The remaining arithmetic, payload
 roles and wrapper semantics are still unresolved; the header observation removes
 one source of structural ambiguity without conferring execution semantics.
 
-The complete remaining regions are `000..13e` and `21e..242`: **42 packets**.
+The complete remaining regions are `000..13e` and `232..242`: **40 packets**.
 All of each remaining packet, including its shared pool, stays unadmitted. The
 local JSON lists each packet's start/end, header, base controls, structural family
 or explicit layout failure, and pool byte range. No hole is skipped as zero, NOP,
@@ -65,13 +65,15 @@ an immediate or an address merely because its encoding resembles a familiar form
 | Opening `000..004` | `ff71` is a stock mutable mute gate; its execution/skip/store consequences are unproved |
 | Input/prefix `004..13e` | Mixed long/short arithmetic, extensions, special controls and transfers are not fully decoded. Examples include `4822`, `2424/3467`, `2485`, `fe10`, `b9b2`, `ac99`, `aed2/1e10`, `aeda`, `0e8b`, `5424/643e`, `5464/647e`, `ceae`, `4086`, `0044/1044`; these names are inventory, not opcode assignments |
 | Pool roles throughout that prefix | Literal width/reference selection, extension consumption, auxiliary store sources and interactions with special/condition state need exact contextual proofs |
-| Suffix `21e..242` | Stores to scratch, reloads, co-issued output stores with `00f8`, and trailing `ff70` must all execute under a proved entry/return contract |
+| Suffix `232..242` | Co-issued output stores with `00f8` and trailing `ff70` must execute under a proved entry/return contract |
 | History/factor inputs to the allpass chains | Caller must supply real prior state and the factors produced before `13e`; using zero or arbitrary external factors would create a different program |
 | Cross-invocation memory | Ring base/current index, wrap, retained history and initialization must be modeled explicitly; the fixed fragment's stores do not supply an allocator or reset protocol |
 | Parameter binding | Eight constructor default records and six live coefficient-pointer fields have different roles; literal patching, parameter-base offsets and live float reads cannot be collapsed into a single coefficient array without proof |
 | Numeric policy | Prefix native fixed-point conversions, integer shifts and nonlinear selection cannot be replaced by unconstrained floating arithmetic; BMC precision, saturation and issue timing remain a separate silicon-validation gap |
 
-The suffix is 36 bytes/four packets in both LINEDRIVE and FETDRIVE. Seeing a native
+The two unresolved suffix packets occupy 16 bytes in both LINEDRIVE and FETDRIVE.
+The [scratch round trip](supported-code-generation.md#drywet-tail-with-scratch-transfers)
+now accounts for the preceding 20 bytes. Seeing a native
 return after output writes does not identify `00f8`'s saved PC, transfer latency or
 the meaning of the following `ff70`. The six-byte stock placeholder
 `00f8`/NOP is likewise not a justified complete trivial target: its implicit return
@@ -82,7 +84,7 @@ states that precise boundary.
 
 **Second: FETDRIVE.** Its smaller image and branch-free native body are useful for
 checking shared mixing/shaping hypotheses. The strict dry/wet region leaves
-`000..16a` and `1a6..1ca` unadmitted: **51 packets**. Header `7308` is unresolved
+`000..16a` and `1ba..1ca` unadmitted: **49 packets**. Header `7308` is unresolved
 at `88` and `11e`; the whole prefix also needs its nonlinear/quantization, filter,
 special-state and auxiliary-transfer semantics. The two
 [cross-destination allpass comparisons](operand-variants-and-macro-boundaries.md)
@@ -97,7 +99,7 @@ nonlinear blocks and four unresolved-layout packets (`4b09` and `8a0c`, each twi
 remain. The feedback proof cannot distinguish source port 3 from 7 where both hold
 equal factors. That is an outstanding semantic ambiguity, not permission to select
 either one arbitrarily. Neither existing strict template covers this complete image;
-all 40 packets remain outside those two interpreter admissions.
+all 40 packets remain outside the interpreter admissions.
 
 **The shortest counterexamples:** CHO has eight unresolved header forms and a
 native callback with branches and two helper calls, plus modulation/history memory

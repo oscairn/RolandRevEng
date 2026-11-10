@@ -8,7 +8,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
 from bmc_dsp import assemble
-from condition_return_study import classify, evaluate, field_anchor, preserved, report, return_shape
+from condition_return_study import classify, evaluate, field_anchor, preserved, report, return_inventory, return_shape
 
 
 class BoundaryTests(unittest.TestCase):
@@ -47,6 +47,22 @@ CORPUS = Path(os.environ.get('BMC_CORPUS_DIR', ROOT / 'local'))
 @unittest.skipUnless(importlib.util.find_spec('capstone') and (CORPUS/'zen_arm64').exists(),
                      'Capstone and recorded native image required')
 class CorpusTests(unittest.TestCase):
+    @unittest.skipUnless((CORPUS/'pairs.json').exists(), 'Prepared pairing metadata required')
+    def test_primary_returns_can_precede_more_than_one_packet(self):
+        import lib
+        inventory = return_inventory((CORPUS/'zen_arm64').read_bytes(), lib.pairs())
+        rows = inventory['occurrences']
+        self.assertEqual(inventory['primary_streams'], 75)
+        self.assertEqual(len(rows), 79)
+        self.assertEqual(sum(row['family'] == 3 for row in rows), 70)
+        self.assertEqual(sum(row['family'] is None for row in rows), 9)
+        self.assertEqual(sum(row['successor'] == [0x0a02, 0xff70] for row in rows), 45)
+        internal = [row for row in rows if row['remaining_packets'] > 1]
+        self.assertEqual({row['cls'] for row in internal}, {'SIM_MFX_JDMLT_B'})
+        self.assertEqual([(row['offset'], row['family']) for row in internal],
+                         [(0x208, 3), (0x332, 3), (0x564, None), (0x76e, None)])
+        self.assertEqual(internal[1]['successor'], [0x0c03, 0xdfe0, 0x01b7])
+
     def test_actual_predicates_field_paths_and_rejected_branch_mutation(self):
         import capstone
         native = (CORPUS/'zen_arm64').read_bytes()

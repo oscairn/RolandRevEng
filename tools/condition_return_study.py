@@ -113,6 +113,45 @@ def return_shape(words):
                 pool_bytes_assigned_to_other_transfers=len(covered))
 
 
+def return_inventory(native, pairings):
+    """Locate 00f8 base words and their following packets in primary render streams."""
+    from emulator_target_study import segment_stream, verify_list
+    from header_study import UnsupportedLayout, families
+
+    if hashlib.sha256(native).hexdigest() != NATIVE_SHA256:
+        raise ValueError('Expected recorded ZENOLOGY arm64 image')
+    scanned = 0
+    occurrences = []
+    for cls, (_, _, lists) in sorted(pairings.items()):
+        render = [entry for entry in lists or [] if entry[1] == 0]
+        if not render:
+            continue
+        if len(render) != 1:
+            raise ValueError(f'{cls}: expected one render list')
+        entry = render[0]
+        verify_list(native, entry)
+        segment = max(entry[3], key=lambda item: item[1])
+        rows = packets(segment_stream(native, segment))
+        scanned += 1
+        for index, (offset, words) in enumerate(rows):
+            controls = words[1:1+command_count(words[0])]
+            if 0x00f8 not in controls:
+                continue
+            try:
+                layout = families(words[0])
+            except UnsupportedLayout:
+                layout = None
+            remaining = len(rows)-index-1
+            for slot, word in enumerate(controls):
+                if word == 0x00f8:
+                    occurrences.append(dict(cls=cls, source=segment[3], offset=offset,
+                                            header=words[0], slot=slot,
+                                            family=None if layout is None else layout[slot],
+                                            remaining_packets=remaining,
+                                            successor=rows[index+1][1] if remaining else []))
+    return dict(primary_streams=scanned, occurrences=occurrences)
+
+
 def report(native):
     if hashlib.sha256(native).hexdigest() != NATIVE_SHA256:
         raise ValueError('Expected recorded ZENOLOGY arm64 image')
@@ -188,9 +227,16 @@ def report(native):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('native_bin', type=Path)
+    parser.add_argument('--inventory', action='store_true', help='Inspect primary streams using the prepared pairing metadata')
     args = parser.parse_args()
     try:
-        print(json.dumps(report(args.native_bin.read_bytes()), indent=2))
+        native = args.native_bin.read_bytes()
+        if args.inventory:
+            import lib
+            result = return_inventory(native, lib.pairs())
+        else:
+            result = report(native)
+        print(json.dumps(result, indent=2))
     except (OSError, ValueError, KeyError) as error:
         parser.exit(2, f'{error}\n')
 

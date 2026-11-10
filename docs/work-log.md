@@ -671,3 +671,29 @@ A complete stock DSP byte stream, arbitrary synth compiler, CORE0 decryption,
 verified access/recovery route and silicon timing/precision remain unimplemented
 or unverified. No plugin, target, updater, flash, MMIO probe or prepared shell
 package was executed or modified.
+
+## Scratch transfers and return placement
+
+The 80-byte dry/wet profile adds the stereo store and reload pair from LINE
+and FETDRIVE. Both callbacks reuse the same two native constructor records
+for the writes and subsequent reads. The corpus test checks the record and
+ring provenance, output expressions and packet results. The conditional LINE
+WAV is byte-identical after replacing host scratch writes with the interpreter's
+stores. The primary-program inventory now leaves 40 LINE and 49 FETDRIVE
+packets. The co-issued output and `00f8` packet remains outside the profile.
+
+The descriptor-checked return inventory found 79 base-word occurrences across
+75 primary streams. Two confirmed family-3 placements in JDMLT_B are internal
+to its longest segment. Another two internal placements have unresolved
+headers. The scan establishes placement. Return destinations, execution of
+successors and co-issue behavior require further evidence.
+
+Qwen's bounded review highlighted malformed lengths, aliased indices and
+state preservation for tests. Its proposed hardware aliases and bus effects
+lacked evidence for this logical-cell model. The synthetic and corpus tests
+cover the accepted addresses and reject swapped, duplicated, out-of-range
+and trailing operands. Seven Roland vault notes were updated and all 57
+hashes verified.
+
+The full local suite passed all 246 tests. Focused emulator and emitter tests
+also passed after tightening the scratch profile's input validation.

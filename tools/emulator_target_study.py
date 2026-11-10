@@ -14,9 +14,9 @@ SHORTLIST = ('SIM_CHO_CHO', 'SIM_MFX_GATE', 'SIM_MFX_FETDRIVE',
              'SIM_MFX_LINEDRIVE', 'SIM_MFX_TS808')
 # Admission comes from independent native/DSP studies, not searching for equal words.
 CHECKED_REGIONS = {
-    'SIM_MFX_FETDRIVE': [('dry_wet_tail', 0x16a, 60)],
+    'SIM_MFX_FETDRIVE': [('dry_wet_tail_with_scratch', 0x16a, 80)],
     'SIM_MFX_LINEDRIVE': [('allpass4', 0x13e, 82), ('allpass4', 0x190, 82),
-                         ('dry_wet_tail', 0x1e2, 60)],
+                         ('dry_wet_tail_with_scratch', 0x1e2, 80)],
 }
 
 

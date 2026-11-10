@@ -153,6 +153,65 @@ class EmulatorCorpusTests(unittest.TestCase):
             before = current
         return result
 
+    def test_stock_scratch_packets_match_native_cell_and_output_provenance(self):
+        import lib
+        import parse
+        from alu_study import coefficient_pointer_fields
+        from bmc_emulator import execute_fragment
+        from bmc_subset import disassemble_fragment
+        from mac_controls_study import native_trace
+        from mac_study import polynomial
+        from operand_variants_study import check_bindings
+        from transfer_study import constructor_memory, native_accesses, records_from_memory
+
+        for fragment in stock_fragments():
+            if fragment['kind'] != 'tail':
+                continue
+            cls = fragment['cls']
+            with self.subTest(cls=cls):
+                _, stream, *_ = parse.program(cls)
+                start = fragment['offset']
+                program = stream[start:start+80]
+                scratch = disassemble_fragment(program)['scratch_addresses']
+                self.assertEqual(scratch, [0x2b, 0x2c] if cls.endswith('LINEDRIVE') else [0x19, 0x1a])
+                _, _, outputs, trace, native = native_trace(cls, fragment['wet_addresses'])
+                ctor = parse.parse_ctor(cls)
+                lo, hi = lib.func(ctor['ctor'])
+                decoder = lib.md()
+                decoder.detail = True
+                constructor = list(decoder.disasm(lib.Z[lo:hi], lo))
+                base, count, old_records = parse.parse_datsym(cls, ctor)
+                records = records_from_memory(constructor_memory(constructor, lib.Z), base, count)
+                self.assertEqual(records, old_records)
+                fields = {base+8*i+4: dict(relative=relative, address=address)
+                          for i, (relative, address) in enumerate(records)}
+                accesses = native_accesses(native, fields, coefficient_pointer_fields(constructor))['accesses']
+                # Native reloads reuse the constructor record for the DSP store operand.
+                expected = [dict(kind=kind, relative=start+66+2*channel, address=address)
+                            for kind in ('write', 'read')
+                            for channel, address in enumerate(scratch)]
+                instructions = {ins.address: ins for ins in native}
+                proof = check_bindings(accesses, fields, expected, instructions)
+                self.assertTrue(proof['verified'], proof)
+                stores = {row['pc']: row for row in trace if row['kind'] == 'store'}
+                fields_used = [row['object_field'] for row in proof['accesses']]
+                self.assertEqual(fields_used[:2], fields_used[2:])
+                self.assertNotEqual(*fields_used[:2])
+                pc = [row['pc'] for row in proof['accesses']]
+                self.assertEqual(pc, sorted(set(pc)))
+                for channel in (0, 1):
+                    self.assertEqual(polynomial(stores[pc[channel]]['value']), polynomial(outputs[channel]))
+                    self.assertTrue(instructions[pc[channel+2]].op_str.startswith(f'd{channel}, '))
+                for vector in TAIL_VECTORS:
+                    data, coefs, io, after, _ = tail_case(fragment, vector)
+                    data.update(dict(zip(scratch, (-99, 99))))
+                    expected_writes = dict(zip(scratch, (after[-1][0], after[-1][4])))
+                    result = execute_fragment(program, data, coefs, io)
+                    self.assertEqual(result['ports'], after[-1])
+                    self.assertEqual(result['data'], data | expected_writes)
+                    self.assertEqual(result['trace'][-2]['writes'], expected_writes)
+                    self.assertEqual(result['trace'][-1]['after'], after[-1])
+
     def test_stock_dry_wet_outputs_and_coefficient_load_timing(self):
         for fragment in stock_fragments():
             if fragment['kind'] != 'tail':

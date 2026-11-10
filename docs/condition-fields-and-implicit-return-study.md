@@ -140,3 +140,26 @@ branch condition, scalar/vector alias clobbers, the inclusive finite boundary,
 equal values at wrong field positions, explicit extra return payload and the two
 real return-packet shapes. Detailed generated records remain ignored under `local/`.
 No Qwen draft/code was used, and production decoder/emitter coverage is unchanged.
+
+## Placement across primary render streams
+
+The descriptor-checked inventory finds 79 occurrences of the `00f8` base word
+across 75 primary render streams in the pinned native image. The header decoder
+identifies 70 as family 3. Nine occur in headers whose family assignments are
+unresolved. Of all 79 occurrences, 75 have exactly one packet left in the
+segment and 45 are immediately followed by the plain `ff70` packet.
+
+The four earlier placements are in the longest `SIM_MFX_JDMLT_B` segment.
+Offsets `208` and `332` are family 3 and have 67 and 54 packets left. At
+`332` the following packet is `0c03 dfe0 01b7`, a framed transfer form.
+Offsets `564` and `76e` are the other two placements, both with unresolved
+headers. The same segment ends with the standalone form at `784` followed
+by `0001`. This rules out using physical position at the end of a render
+segment as the sole criterion for recognizing the family-3 form. Whether the
+following packets run and how the earlier blocks are entered remain open.
+
+To regenerate the inventory with the prepared pairing metadata:
+
+```sh
+python3 tools/condition_return_study.py local/zen_arm64 --inventory
+```

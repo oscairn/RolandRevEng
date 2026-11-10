@@ -1,4 +1,4 @@
-"""Assemble/disassemble two independently matched mix/filter packet templates.
+"""Assemble/disassemble independently matched mix/filter packet templates.
 
 This emits a program fragment in the stock MFX context, not a standalone engine.
 Packet ordering is fixed: no instruction scheduling or unknown controls are invented.
@@ -57,6 +57,35 @@ def disassemble_tail(stream):
     return spec
 
 
+def assemble_tail_with_scratch(spec):
+    if (not isinstance(spec, dict)
+            or spec.get('kind') != 'dry_wet_tail_with_scratch'
+            or set(spec) != {'kind', 'wet_addresses', 'coefficient_slots', 'scratch_addresses'}):
+        raise ValueError('Expected dry/wet resources and scratch_addresses')
+    base = {key: spec[key] for key in ('wet_addresses', 'coefficient_slots')}
+    tail = assemble_tail(dict(kind='dry_wet_tail', **base))
+    scratch = spec['scratch_addresses']
+    if (not isinstance(scratch, list) or len(scratch) != 2
+            or any(type(value) is not int or not 0 <= value <= 0x7ff for value in scratch)
+            or len(set(base['wet_addresses'] + scratch)) != 4):
+        raise ValueError('Expected two distinct scratch indices separate from wet indices')
+    return tail + assemble([
+        [0x1e05, 0x8fe0, 0xcfe2, *scratch],
+        [0x1e05, 0x0fe0, 0x4fe2, *scratch],
+    ])
+
+
+def disassemble_tail_with_scratch(stream):
+    tail = disassemble_tail(stream[:60])
+    decoded = packets(stream[60:])
+    if len(decoded) != 2 or any(len(words) != 5 for _, words in decoded):
+        raise ValueError('Expected exactly two scratch packets')
+    spec = dict(tail, kind='dry_wet_tail_with_scratch', scratch_addresses=decoded[0][1][3:])
+    if assemble_tail_with_scratch(spec) != stream:
+        raise ValueError('Unsupported scratch store or reload')
+    return spec
+
+
 def validate_allpass(spec):
     if not isinstance(spec, dict) or set(spec) != {'kind', 'sources', 'targets'} or spec['kind'] != 'allpass4':
         raise ValueError('Expected an allpass4 assignment with sources and targets only')
@@ -101,10 +130,14 @@ def assemble_fragment(spec):
         raise ValueError('Expected a JSON object')
     if spec.get('kind') == 'allpass4':
         return assemble_allpass(spec)
+    if spec.get('kind') == 'dry_wet_tail_with_scratch':
+        return assemble_tail_with_scratch(spec)
     return assemble_tail(spec)
 
 
 def disassemble_fragment(stream):
+    if len(stream) == 80:
+        return disassemble_tail_with_scratch(stream)
     if len(stream) == 82:
         return disassemble_allpass(stream)
     return disassemble_tail(stream)

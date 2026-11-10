@@ -7,7 +7,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
 from bmc_dsp import swap_words
-from bmc_subset import assemble_fragment
+from bmc_subset import assemble_fragment, disassemble_fragment
 from bmc_emulator import execute_fragment
 
 
@@ -25,6 +25,28 @@ def allpass_inputs():
 
 
 class FragmentNumericsTests(unittest.TestCase):
+    def test_scratch_round_trip_executes_writes_and_rejects_changed_suffix(self):
+        tail, data, coefficients, io = tail_inputs()
+        spec = dict(disassemble_fragment(tail), kind='dry_wet_tail_with_scratch',
+                    scratch_addresses=[0, 0x7fe])
+        program = assemble_fragment(spec)
+        self.assertEqual(disassemble_fragment(program), spec)
+        data.update({0: -99, 0x7fe: 88, 1: 33})
+        result = execute_fragment(program, data, coefficients, io)
+        self.assertEqual(result['data'], data | {0: 51, 0x7fe: -153})
+        self.assertEqual(result['trace'][-2]['writes'], {0: 51, 0x7fe: -153})
+        self.assertEqual(result['trace'][-1]['writes'], {})
+        self.assertEqual((data[0], data[0x7fe]), (-99, 88))
+        self.assertEqual([r['offset'] for r in result['trace'][-2:]], [60, 70])
+        for bad in (program[:-4] + program[-2:] + program[-4:-2],
+                    program[:-2] + bytes(2), program[:-2] + bytes.fromhex('0800'),
+                    program + bytes(1), program + bytes.fromhex('3d0600f88fe0cfe220182019'),
+                    program + bytes.fromhex('0a02ff70')):
+            with self.subTest(suffix=bad[60:].hex()), self.assertRaises(ValueError):
+                execute_fragment(bad, data, coefficients, io)
+        with self.assertRaises(ValueError):
+            assemble_fragment(dict(spec, scratch_addresses=[0x21, 0x7fe]))
+
     def test_tail_every_packet_and_old_coefficient_load_timing(self):
         program, data, coefficients, io = tail_inputs()
         result = execute_fragment(program, data, coefficients, io)
