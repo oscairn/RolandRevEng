@@ -5,6 +5,12 @@ evidence. Native arm64 artifact SHA-256
 `b8ba7f41e26bef91e2cc38e99452e7795cd132e9f2a59695a68a77f18b8a2c30`.
 This extends the [parent control study](parent-control-and-nested-organ-study.md).
 
+The [CORE1 label writer](label-target-encoding-study.md) now proves that the SDK
+converts an even byte target to a halfword value before counted field writes.
+Five parent words match the encoding. Their counted descriptor ownership, the
+consuming control and saved continuation remain unproved; this does not admit a
+CALL/RETURN execution rule or an arbitrary wrapper.
+
 **New result:** the native values governing four conditional callbacks now connect
 to exact width-2 DSP operand fields and their particular producer controls. The
 three `28bb` contexts all test the same finite magnitude boundary despite using

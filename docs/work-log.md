@@ -1226,3 +1226,29 @@ no unchecked draft was adopted. All 359 tests passed, followed by the seven
 planner tests after adding strict owner-address type rejection. Remaining work
 includes task entry/return, actual owner coordination, safe typed initialization,
 readback, routing and physical calibration, alongside the unresolved ISA work.
+
+## CORE1 label-target encoding and counted references
+
+The implemented manager methods at0113338c/011334d6 establish six-byte LP32
+records and an explicit logical target right shift by one. The raw driver at
+0112f528 accepts widths2/3/4, masks the site to19bits, and can truncate a target
+that exceeds its field width. High-nibble flags skip the entire reference before
+resolution. Reservation validation covers the start only; the ordinary program
+check/set byte covers one eligible patch, not a batch or demonstrated atomic lock.
+
+The new source-pinned report checks instruction/vtable/guard anchors, the real
+FETDRIVE symbol and five parent numeric target fields. The actual FETDRIVE label
+has zero incoming counted references. Its representative resolves to4020, but
+this does not bind a parent target field. The native unsigned-target manager and
+_CORE1_DSPWriteProgAll compatibility bodies are stubs; separate MDSP task controls
+do not establish render-DSP continuation state. No CALL/RETURN decoder, wrapper
+or hardware write was added.
+
+Qwen's static review returned in48.6seconds with wrong record offsets, branch
+destinations, register roles, width bounds and guard behavior; its semantic
+claims were rejected. A separate test-only draft returned in45.0seconds. Review
+retained its helper checks, corrected the installed import path, added an actual
+32-bit wrap, nonzero width3/4 cases, mixed skipping, count bounds and the real
+firmware corpus check. All368tests passed in32.337seconds. Next evidence needed
+is owner-proven nonempty label references or an independent control-flow
+implementation; saved return state, issue order and physical deployment remain open.

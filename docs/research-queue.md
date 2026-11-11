@@ -4,6 +4,12 @@ Queued 2026-11-10 at Jacob's request. Starting research checkpoint: `80b740b`.
 The practical target is a small custom engine running on the BMC render DSPs, with
 the i.MX8M handling UI/control. Current emitters produce verified fragments only.
 
+Latest entry-boundary result: [CORE1 label targets](label-target-encoding-study.md)
+proves the halfword scaling and counted record layout, verifies five existing
+parent numeric fields, and checks the actual FETDRIVE entry label has no incoming
+counted references. Next is an owner-proven nonempty label list or independent
+flow implementation, then continuation/issue-order evidence. No wrapper is emitted.
+
 ## Execution and ownership
 
 Three separate Codex tasks work in isolated Git worktrees under ignored

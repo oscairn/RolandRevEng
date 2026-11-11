@@ -5,6 +5,12 @@ traces the generic replacement caller, RAMCLR coefficient zeroing and DRAM-IO cl
 and four parent entry-reference candidates. It also bounds the evidence for FETDRIVE
 selection: available implementation bytes do not prove stock activation.
 
+The [label-target study](label-target-encoding-study.md) checks the implemented
+manager reference writer: six-byte records, even-byte targets shifted right once,
+per-reference guard scope, and width/address truncation. FETDRIVE's actual entry
+label has zero counted references; this does not bind a parent call or reveal
+return state. The original voice plans retain no executable wrapper or load address.
+
 2026-11-10, branch `research/kernel-abi`. Static file/Capstone 5.0.7 analysis,
 not REA-provider or runtime evidence. CORE1 addresses below apply only to bmc0
 MI078 C1A v1.08, payload SHA-256
