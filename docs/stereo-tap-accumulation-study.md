@@ -128,7 +128,7 @@ the meaning assigned here. Production decoder/emitter coverage is unchanged.
 Use the existing prepared corpus and Capstone environment:
 
 ```sh
-PY=/Users/jacob/.pyenv/versions/3.13.7/bin/python3
+PY=python3
 $PY tools/stereo_tap_study.py
 $PY -m unittest discover -s tests -p test_stereo_tap_study.py -v
 ```

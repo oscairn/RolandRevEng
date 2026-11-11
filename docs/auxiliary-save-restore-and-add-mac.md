@@ -124,11 +124,11 @@ wrapper, live graph or audio route. No complete FDRV program is emulated.
 ## Reproduce and verification
 
 ```sh
-/Users/jacob/.pyenv/versions/3.13.7/bin/python tools/native_auxiliary_study.py --execute-native
-/Users/jacob/.pyenv/versions/3.13.7/bin/python tools/bmc_subset.py assemble examples/register-add-mac-pair.json local/register-add-mac-pair.bin --stored
-/Users/jacob/.pyenv/versions/3.13.7/bin/python tools/bmc_subset.py disassemble local/register-add-mac-pair.bin --stored
-/Users/jacob/.pyenv/versions/3.13.7/bin/python -m unittest discover -s tests -p 'test_native_auxiliary_study.py' -v
-/Users/jacob/.pyenv/versions/3.13.7/bin/python -m unittest discover -s tests -p 'test_register_add_mac_pair.py' -v
+python3 tools/native_auxiliary_study.py --execute-native
+python3 tools/bmc_subset.py assemble examples/register-add-mac-pair.json local/register-add-mac-pair.bin --stored
+python3 tools/bmc_subset.py disassemble local/register-add-mac-pair.bin --stored
+python3 -m unittest discover -s tests -p 'test_native_auxiliary_study.py' -v
+python3 -m unittest discover -s tests -p 'test_register_add_mac_pair.py' -v
 ```
 
 The 64-byte native cache fixture joins two separately checked original slices

@@ -136,7 +136,7 @@ program was executed or modified.
 ## Reproduce
 
 ```sh
-PY=/Users/jacob/.pyenv/versions/3.13.7/bin/python3
+PY=python3
 $PY tools/condition_return_study.py local/zen_arm64 > local/condition-proof.json
 $PY -m unittest discover -s tests -p test_condition_return_study.py -v
 ```

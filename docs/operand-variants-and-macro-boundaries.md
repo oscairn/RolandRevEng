@@ -261,8 +261,7 @@ do not supply that missing DSP4 oscillator implementation.
 
 ## Reproduce and remaining work
 
-Use the existing Capstone environment (in this session,
-`/Users/jacob/.pyenv/versions/3.13.7/bin/python3`):
+Use a Python 3.13+ environment with the dependencies from `requirements.txt`:
 
 ```sh
 python3 tools/operand_variants_study.py

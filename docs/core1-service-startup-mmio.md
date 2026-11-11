@@ -189,9 +189,9 @@ bad bounds, count-width examples, exact frame intersections, unknown-build
 rejection and both local corpus builds.
 
 ```sh
-/Users/jacob/.pyenv/versions/3.13.7/bin/python3 tools/core1_service_audit.py local/b0c1a.bin
-/Users/jacob/.pyenv/versions/3.13.7/bin/python3 tools/core1_service_audit.py local/b1c1a.bin
-/Users/jacob/.pyenv/versions/3.13.7/bin/python3 -m unittest discover -s tests -p test_core1_service_audit.py -v
+python3 tools/core1_service_audit.py local/b0c1a.bin
+python3 tools/core1_service_audit.py local/b1c1a.bin
+python3 -m unittest discover -s tests -p test_core1_service_audit.py -v
 ```
 
 One actual OMP/Qwen draft reviewed a bounded read-helper disassembly using

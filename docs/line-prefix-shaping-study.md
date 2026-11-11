@@ -383,7 +383,7 @@ python -m unittest discover -s tests -p test_coefficient_shift_study.py -v
 ## Reproduce and Qwen review
 
 ```sh
-PY=/Users/jacob/.pyenv/versions/3.13.7/bin/python3
+PY=python3
 $PY tools/line_shaping_study.py
 $PY -m unittest discover -s tests -p test_line_shaping_study.py -v
 ```

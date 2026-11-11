@@ -190,11 +190,11 @@ patch is generated.
 ## Reproduce and review
 
 ```sh
-/Users/jacob/.pyenv/versions/3.13.7/bin/python tools/fdrv_cubic_study.py --core1 local/b0c1a.bin
-/Users/jacob/.pyenv/versions/3.13.7/bin/python tools/fdrv_cubic_study.py --execute-native --native-window-frames 12000
+python3 tools/fdrv_cubic_study.py --core1 local/b0c1a.bin
+python3 tools/fdrv_cubic_study.py --execute-native --native-window-frames 12000
 python3.13 tools/bmc_subset.py assemble examples/cubic-quad.json local/cubic-quad.bin --stored
 python3.13 tools/bmc_subset.py disassemble local/cubic-quad.bin --stored --length 126
-/Users/jacob/.pyenv/versions/3.13.7/bin/python -m unittest discover -s tests -p 'test_fdrv_cubic_study.py' -v
+python3 -m unittest discover -s tests -p 'test_fdrv_cubic_study.py' -v
 ```
 
 The standalone native curve probe extracts only `305a00..305a24`, nine verified register-only

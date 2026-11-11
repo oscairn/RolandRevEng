@@ -177,7 +177,7 @@ does not by itself prove a mandatory one-packet delay slot.
 ## Reproduce and remaining gates
 
 ```sh
-PY=/Users/jacob/.pyenv/versions/3.13.7/bin/python3
+PY=python3
 $PY tools/parent_control_study.py local/b0c1a.bin --native-bin local/zen_arm64 > local/parent-controls.json
 $PY -m unittest discover -s tests -p test_parent_control_study.py -v
 $PY tools/core1.py local/b0c1a.bin --address 0x01128730 --size 0x64

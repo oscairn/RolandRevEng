@@ -474,7 +474,7 @@ Use the existing interpreter with Capstone; Homebrew's default Python in this
 session lacked it. No dependency installation or provider repair was needed.
 
 ```sh
-PY=/Users/jacob/.pyenv/versions/3.13.7/bin/python3
+PY=python3
 $PY tools/kernel_abi.py local/b0c1a.bin --list 0x610e7b88 --segment-info 0x610a1674 > local/kernel-fetdrive.json
 $PY tools/kernel_abi.py local/b0c1a.bin --list 0x611084fc --segment-info 0x610a1d14 > local/kernel-linedrive.json
 $PY -m unittest discover -s tests -p test_kernel_abi.py -v

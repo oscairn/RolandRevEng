@@ -194,95 +194,27 @@ parent numeric fields, and checks the actual FETDRIVE entry label has no incomin
 counted references. Next is an owner-proven nonempty label list or independent
 flow implementation, then continuation/issue-order evidence. No wrapper is emitted.
 
-## Execution and ownership
+## Research workflow
 
-Three separate Codex tasks work in isolated Git worktrees under ignored
-`local/worktrees/`. Each has a research branch, its own generated outputs and symlinks
-to the existing vendor inputs. An integration task reviews their commits after they
-finish. Worktrees and binaries are not repository deliverables.
+Read the relevant studies and reuse saved evidence before repeating analysis.
+Keep generated reports and supplied vendor inputs in ignored local storage.
 
-Workers read this file, README, the relevant studies and the REA and Ponytail skills.
-Read `/Users/jacob/.agents/skills/reverse-engineer-anything/SKILL.md` and
-`/Users/jacob/.codex/plugins/cache/ponytail/ponytail/5.3.3/skills/ponytail/SKILL.md`.
-Reuse saved evidence. REA's Hopper provider was unavailable in the earlier pass;
-ordinary file/Capstone analysis is available and must be labeled as such. Do not
-repeat an unchanged failed provider setup or alter client configuration.
-
-### OMP/Qwen delegation and review
-
-Jacob additionally authorized using OMP with Qwen on his Mac Studio to save tokens,
-with independent review of the returned work. The installed OMP is 18.18.0 and the
-existing model identifier is `MacStudio/Qwen3.8-Flash-Next-Uncensored-oQ6e-mtp`.
-Use bounded analysis/coding prompts; Codex remains responsible for validating evidence
-and accepting changes.
-
-OMP's ordinary state directory is outside writable roots. Isolated provider profiles
-are already prepared at each worktree's `local/omp-agent`, with only the existing
-MacStudio provider. The launch environment that reached startup is:
-
-```sh
-PI_CONFIG_DIR='Projects/Open Synth Platform/bmc-research/local/omp-root'
-PI_CODING_AGENT_DIR="$PWD/local/omp-agent"
-```
-
-`PI_CONFIG_DIR` is relative to the existing home directory in this installed OMP;
-do not reassign HOME. Pass these variables to the OMP process using `env` or a
-structured subprocess environment. Never print provider credentials or commit profiles.
-Initially, the no-tool 30-second smoke test started but timed out; a read-only request to the
-configured model endpoint failed hostname resolution in this command runner. Model
-availability was therefore unverified. Do not claim Qwen was used unless a run
-actually returns, and do not spend the research run repeatedly repairing networking.
-Use the available Codex path when the local model cannot be reached.
-Later diagnostics confirmed direct TCP and DNS sockets are denied with EPERM by the
-command sandbox. After Jacob reopened Codex with automatic approval review, an
-approved network execution returned an authenticated `BMC_RUNNER_OK` from this exact
-OMP/Qwen provider. The ordinary sandbox remained restricted: use the reviewed network
-execution path, not a claim that all commands now have unrestricted network access.
-See [runner diagnosis](runner-network-diagnosis.md) for the verified invocation.
-
-When using Qwen:
-
-- Serialize requests with a process lock on the main checkout's
-  `local/omp-qwen.lock`, using `fcntl.flock`; avoid competing long inference jobs.
-- Prefer no-tool drafts with supplied bounded source/evidence, or read-only tools
-  `read,grep,glob`. Keep writes, commits and integration under the reviewing worker.
-  Disable extra extensions/title generation and use an explicit model and time limit.
-  No paid-model fallback, configuration installs or approval bypass flags.
-- Save prompts/results under the worker's ignored `local/`. Treat output as a draft,
-  including any claimed test results and instruction meanings.
-- Review every accepted diff for correct logic, bounds, unknown-state handling,
-  unnecessary dependencies/abstractions and unintended file changes. Run the relevant
-  tests yourself, including meaningful failure cases; independently reproduce binary
-  evidence. Compilation or self-reported tests alone are insufficient.
-- State in the handoff which work Qwen actually returned, what was accepted/rejected,
-  and which independent checks passed. The integration task reviews it again.
-
-Shared rules:
-
-- Code stays in the project. The Obsidian vault gets documentation only and is
-  currently outside writable roots; prepare updated notes/patches locally.
-- Use local artifacts without executing Roland's plugin/app/firmware or opening any
-  live device. No firmware packaging, flashing, boot-script changes or blind commands.
-- Do not change the existing shell update packages. Normal BMC IPC uses ttyGS0;
-  the prepared shells can contend with it. Record this actual conflict prominently.
-- Preserve vendor inputs. Keep vendor binaries, raw programs, coefficient tables,
-  disassembly and detailed dumps ignored/local. Commit original tools/tests, recovered
-  interfaces and research prose only. The requested GitHub repository is private;
-  do not push until private visibility and existing history can be verified.
 - Distinguish observations, hypotheses and hardware-dependent unknowns. Structural
   parsing and numerical coincidence do not establish instruction meaning or timing.
-- Fail closed on unsupported forms. Add a small meaningful regression for new parser,
-  assembler or provenance logic; retain counterexamples and conflicting evidence.
-- Work unattended. Make routine decisions and continue independent work when one
-  lead stalls. Do not leave approval/input requests pending. If a question is truly
-  unavoidable, first run `/Users/jacob/.codex/bin/prompt-ding`; otherwise record the
-  exact missing evidence and continue another lead.
-- Each worker owns its branch/worktree. Do not edit another worker's checkout or
-  merge into main. Commit coherent findings and write a final handoff with commit IDs,
-  reproduction commands, checks, limitations and next concrete experiment.
-- Use the worker's ignored `local/HANDOFF.md` for the final handoff, then finish the
-  task normally. Do not send cross-task progress messages: the client requested
-  approval for those calls in this run. Integration reads the files and branches.
+- Preserve vendor inputs. Commit original tools/tests, recovered interfaces,
+  aggregate metadata and research prose; exclude binaries, disassembly, extracted
+  program/coefficient tables, credentials and personal working notes.
+- Fail closed on unsupported forms. New parser, assembler or provenance logic
+  needs a focused regression test; retain counterexamples and conflicting evidence.
+- Independently review model-assisted work and reproduce its claimed evidence
+  and tests. Record which results were accepted and their limitations.
+- Keep code in this project; external note vaults receive documentation only.
+- Do not access an instrument, package firmware, flash an update or change boot
+  scripts as part of an offline study. Normal BMC IPC uses ttyGS0; prepared shell
+  packages can contend with that interface.
+
+Local runner configuration and provider profiles are not part of the public
+research workflow. Historical execution details remain in the work log.
 
 ## 1. Host-to-CORE1 bridge — branch research/transport
 

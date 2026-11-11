@@ -3,7 +3,7 @@
 The repository contains research conclusions, aggregate verification results, artifact
 hashes and recovered interface addresses. It excludes Roland firmware/plugin binaries,
 raw DSP program images, extracted coefficient tables, native disassembly and boot-ROM
-dumps. Those stay local even when the remote repository is private.
+dumps. Those stay in ignored local storage and are not publication deliverables.
 
 `summary.json` is the aggregate result from the offline corpus checks. The CORE0 header
 and bmc0 CORE1 API JSON files contain metadata and addresses, not decryption keys or ROM

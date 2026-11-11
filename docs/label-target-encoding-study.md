@@ -128,8 +128,8 @@ addresses, exclude wrappers, and remain `execution_ready: false`.
 ## Reproduce and review
 
 ```sh
-/Users/jacob/.pyenv/versions/3.13.7/bin/python tools/label_target_study.py local/b0c1a.bin
-/Users/jacob/.pyenv/versions/3.13.7/bin/python -m unittest discover -s tests -p 'test_label_target_study.py' -v
+python3 tools/label_target_study.py local/b0c1a.bin
+python3 -m unittest discover -s tests -p 'test_label_target_study.py' -v
 ```
 
 The report pins the image, verifies manager slots, the guard pointer and

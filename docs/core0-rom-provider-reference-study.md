@@ -151,9 +151,9 @@ keys or vendor ROM data. The full seven-file scan was also run once and its
 candidate records retained under ignored `local/provider-reference-results.json`.
 
 ```sh
-/Users/jacob/.pyenv/versions/3.13.7/bin/python3 tools/core0_provider_refs.py local/b0c1a.bin
-/Users/jacob/.pyenv/versions/3.13.7/bin/python3 tools/core0_provider_refs.py local/crossmodel/mc101/RPG69_C1A_up.bin
-/Users/jacob/.pyenv/versions/3.13.7/bin/python3 -m unittest discover -s tests -p test_core0_provider_refs.py -v
+python3 tools/core0_provider_refs.py local/b0c1a.bin
+python3 tools/core0_provider_refs.py local/crossmodel/mc101/RPG69_C1A_up.bin
+python3 -m unittest discover -s tests -p test_core0_provider_refs.py -v
 ```
 
 The scan does not cover noncontiguous constant construction, computed or indirect

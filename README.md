@@ -1,235 +1,100 @@
 # RolandRevEng
 
-Independent Roland BMC interoperability research, starting with Fantom-0 v1.08 and
-the installed ZENOLOGY plugin. Remote: `https://github.com/jbschooley/RolandRevEng.git`.
-Private visibility was verified on 2026-11-10; keep it private as requested. This is not an official Roland project.
+Independent research into Roland BMC DSPs for future custom synth engines and
+interoperability with [Oscairn](https://github.com/oscairn). The initial targets
+are Fantom-0 v1.08 firmware and a locally supplied ZENOLOGY plugin.
+This project is not affiliated with or endorsed by Roland.
 
-Read the [current mapping status](docs/bmc-mapping-status.md) for what is proved
-and what still blocks custom engines or full emulation. The executable DSP subset
-has 18 exact sequence profiles; packet parsing and ARM control checks are separate.
+## Current status
 
-The [Fantom parameter-dispatch study](docs/fantom-parameter-dispatch-study.md)
-connects an unchanged-algorithm callback through logical fields 2/3 to original
-filter/mode/math execution. Its 96 cases match 360 coefficient writes; the route
-from a registered task and raw incoming buffers is still unproved.
+This is experimental offline research. It does not yet provide a loadable custom
+engine, complete BMC emulator, general assembler, hardware driver or flasher.
 
-The [Fantom envelope-mode study](docs/fantom-envelope-mode-study.md) traces FDRV's
-mode query to a per-slot mute nesting counter. Original caller execution selects
-envelopes at count zero and immediate writes while muted; this is not a task test.
+- A strict packet interpreter and constrained emitter support **18 exact sequence
+  profiles**, with original oscillator/filter voice examples.
+- The complete FDRV arithmetic reference matches the pinned native callback's
+  audio and persistent state in the documented tests. This is a software
+  comparison, not a measurement of BMC silicon.
+- Packet framing, selected instruction contexts, resource layouts, coefficient
+  generation and parts of the ARM control/loader interface are documented.
+- General opcode semantics, entry/return behavior, safe loading, runtime ownership,
+  hardware precision and timing remain unresolved.
 
-The [Fantom EqVg/control study](docs/fantom-eqvg-control-study.md) checks the original
-ARM32 generator, setters and selected manager paths in isolated CPU memory. It
-recovers four active filter types, fixed 48 kHz math, float32 rounding and the
-pre-arm completion clear. Actual task exclusion and hardware timing remain open.
+Start with the [mapping status](docs/bmc-mapping-status.md),
+[packet and loader map](docs/BMC%20DSP%20packet%20and%20loader%20map.md),
+[semantics ledger](docs/opcode-semantics-ledger.md) and
+[research queue](docs/research-queue.md). Historical results and their original
+limitations remain in the [work log](docs/work-log.md).
 
-The [manager processing study](docs/coefficient-manager-processing-study.md) executes
-original interpolation/envelope processing with controlled task primitives. It
-checks subdivision counts, wait counters, completion bitmaps and EqVg sequencing;
-actual OS/hardware timing remains unverified.
+## Quickstart without vendor artifacts
 
-The [EqVg filter study](docs/eqvg-filter-generation-study.md) now recovers the five-coefficient
-generator, consumer permutations, native UI scaling and stock interpolation sequencing.
-Its 48-event replays retain the complete FDRV audio/state comparisons.
-
-Read [the packet and loader map](docs/BMC%20DSP%20packet%20and%20loader%20map.md) for findings,
-confidence, build-specific addresses and the remaining requirements for custom engines.
-The [control-semantics ledger](docs/opcode-semantics-ledger.md) collects exact
-supported arithmetic contexts and the explicit boundaries on unresolved forms.
-The [queued research](docs/research-queue.md) prioritizes the host bridge, instruction
-semantics and kernel/audio ABI. Follow-up passes are reviewed below.
-CORE1 has a raw MMIO SysEx handler overlapping DSP program RAM, and stock effect
-ownership/mute controls are mapped. The external peer, safe task entry, state setup
-and hardware timing still block a runnable custom engine. The MMIO read-reply builder
-also has a static stack-size discrepancy; it is not a demonstrated safe loader.
-
-A strict [offline fragment interpreter](docs/fragment-emulator.md) steps the checked
-stereo input, dry/wet, scratch transfer and allpass profiles with per-packet traces and corpus tests.
-It can render original impulse and stereo mix WAV demonstrations without vendor
-artifacts. The [complete-program inventory](docs/emulator-next-program-targets.md)
-selects LINEDRIVE next and tracks its remaining packets and wrappers.
-
-The [conditional LINE reference](docs/fragment-emulator.md#conditional-line-reference-pipeline)
-now combines a checked native shaping oracle, explicit native ring steps and the
-proved fragment bytes. This supplies a broader offline test fixture without
-executing the unknown DSP prefix or wrappers. It can use the original fragments
-from any of the five recorded Fantom placements. Its FMA oracle requires Python 3.13+.
-
-Independent follow-up studies:
-
-- [OSC sine folding](docs/oscillator-sine-study.md): native polynomial, owned literals, four Fantom placements and bit-exact boundary execution.
-- [Native FETDRIVE fixture](docs/fragment-emulator.md#native-fetdrive-execution-fixture): complete native callback output and per-frame checks of the first shaped stores.
-- [Full FETDRIVE reference](docs/fragment-emulator.md#full-python-fetdrive-reference): exact native output agreement, eight checked history pairs and paired filter-literal ownership.
-- [Late phaser clamps](docs/operand-variants-and-macro-boundaries.md#late-phaser-clamp-stores-and-native-execution): branch-preserving store provenance, native finite-boundary execution and twelve Fantom contexts.
-- [Full TRANSIENT reference](docs/transient-full-reference.md): complete independent detector/envelope/output agreement with the pinned native callback, including branch and cache checks.
-- [Original BMC oscillator](docs/original-bmc-allpass-oscillator.md): a static 120-byte feedback core with all sample arithmetic executed by the packet interpreter.
-- [Stereo oscillator voice](docs/original-bmc-stereo-voice.md): a 200-byte body with packet-executed output gain and a checked static fit against five Fantom owners.
-- [Fantom voice resource plans](docs/fantom-voice-resource-plans.md): explicit data/coefficient/IO substitutions, protected non-address bytes, six-seed dependencies and identical output across all five layouts.
-- [Exact program-write geometry](docs/kernel-audio-abi-study.md#render-write-source-extent-and-completion-state-2026-11-11): source versus destination extent, edge ordering, DMA descriptors, queued start and a separate active drain through manager slots 44/48.
-- [Exact stock mute search](docs/kernel-audio-abi-study.md#exact-stock-mute-search-and-its-limits-2026-11-11): raw first-match mutation, payload collisions, unchecked capacity and five verified FETDRIVE first packets; hardware halt remains unproved.
-- [Label target encoding](docs/label-target-encoding-study.md): firmware-proved halfword scaling, counted reference records and five parent numeric matches; call ownership and return state remain open.
-- [Short-add candidates](docs/short-add-context-candidates.md): nine-class inventory, constructor/literal binding and retained source-port ambiguity.
-- [Clipped half-sample interpolation](docs/fdrv-cubic-waveshaping-study.md#stereo-half-sample-interpolation-and-clipping): an exact 80-byte profile with unclipped history, average-before-clip ordering, native checks and five stock body matches.
-- [FDRV cubic waveshaping](docs/fdrv-cubic-waveshaping-study.md): exact 126-byte four-curve profile, bit-exact native checks, partial short-control fields and five Fantom placements.
-- [Auxiliary saves and add/MAC execution](docs/auxiliary-save-restore-and-add-mac.md): native round trips, proved additive cutpoints and an original 84-byte profile with checked stores, loads and five Fantom body matches.
-- [Second filter and recombination](docs/fdrv-state-variable-filter.md#second-filter-and-recombination-milestone-2026-11-11): 496 packet-executed bytes and 192,000 matching native-prefix values through five wraps; hardware execution remains unverified.
-- [Four-section filter bank](docs/fdrv-state-variable-filter.md#four-section-filter-bank-milestone-2026-11-11): 902 packet-executed bytes and 336,000 native-prefix comparisons through five wraps, stopping before resampling arithmetic.
-- [Connected resampling and drive](docs/fdrv-cubic-waveshaping-study.md#connected-resampling-and-drive-milestone-2026-11-11): 1,230 packet-executed bytes through cubic shaping; both recorded drive scales match 456,000 native data comparisons each.
-- [Stage keyboard targets for Oscairn](docs/stage-keyboard-oscairn-targets.md): sourced comparison of V-STAGE, Nord, Yamaha CK, Kronos and other panels, separating internal-host evidence from MIDI-controller suitability.
-- [Post-cubic history mix](docs/fdrv-cubic-waveshaping-study.md#post-cubic-history-mix-milestone-2026-11-11): 1,340 packet-executed bytes, with 504,000 native comparisons per scale pair.
-- [V-STAGE firmware hardware evidence](docs/vstage-firmware-hardware-study.md): official update targets bmc0..bmc4, three image groups and reusable CORE1 layouts; UI/host identity remains unresolved.
-- [Cascaded history filters](docs/fdrv-cubic-waveshaping-study.md#cascaded-history-filter-milestone-2026-11-11): 1,504 packet-executed bytes and 552,000 native comparisons per scale pair, leaving 11 stock packets.
-- [V-STAGE/Fantom code comparison](docs/vstage-firmware-hardware-study.md#core1-and-candidate-dsp-comparison-2026-11-11): exact service windows, large shared candidate DSP segments and one relocated FDRV body; unseen contexts remain unassigned.
-- [Complete FDRV arithmetic reference](docs/fdrv-cubic-waveshaping-study.md#complete-arithmetic-and-output-milestone-2026-11-11): final stereo audio and all persistent ring/cache state match native callbacks through five wraps; DSP return/loading remain unresolved.
-- [V-STAGE program callers](docs/vstage-firmware-hardware-study.md#shared-program-callers-and-ownership-2026-11-11): RTTI-linked FDRV caller, diagnostic dispatch and large bootstrap-list references.
-- [FDRV parameter controls](docs/fdrv-cubic-waveshaping-study.md#setter-derived-live-updates-2026-11-11): checked live/literal ownership, setter-derived targets and native envelope/audio comparisons during 13 live updates; full EQ generation remains open.
-- [Independent FETDRIVE cross-check](docs/fragment-emulator.md#independent-fetdrive-cross-check-2026-11-11): 8,224 native mixed/shaped cutpoints through wrap and a concrete literal-precision counterexample; no new opcode admission.
-- [Three-coefficient filter controls](docs/fdrv-cubic-waveshaping-study.md#three-coefficient-filter-generation-and-ui-dispatch-2026-11-11): recovered EqFaCal, original UI-dispatch checks and 38 cutoff/type events with separate native-double and encoded-filter precision policies.
-- [Completed stereo input/filter stage](docs/fdrv-state-variable-filter.md#completed-input-to-first-filter-stage-2026-11-11): 270 packet-executed bytes, a separate model ring and 120,000 matching native callback values through five wraps.
-- [Stereo state-variable filter](docs/fdrv-state-variable-filter.md): a complete 184-byte filter component, explicit state recurrence and exact native/byte comparisons through ring wrap and all cursor pairs.
-- [Original filtered voice](docs/original-bmc-filtered-voice.md): 384-byte filtered and 510-byte cubic-shaped oscillator bodies, ten seeds, eleven coefficients and checked relocation into all five recorded resource layouts.
-- [Typed state initialization](docs/state-initialization-and-float-writers.md): enum-0 native ring identity, Fantom float-write apertures, explicit readback rejection and checked source rounding.
-- [Gain controls](docs/alu-controls-study.md): native def/use comparison of selected gain chains.
-- [Dry/wet MAC controls](docs/dry-wet-mac-study.md): symbolic mixing expressions for the established subset.
-- [MAC, allpass and store timing](docs/mac-controls-and-issue-study.md): additional exact arithmetic forms and pre-arithmetic stores.
-- [Stereo tap accumulation](docs/stereo-tap-accumulation-study.md): six independently matched native stages and exact state-record aliases for four additional long controls.
-- [Tap feedback variations](docs/tap-feedback-variation-study.md): auxiliary products, unchanged input stores and accumulated feedback distinguished in two further native contexts.
-- [Transfer spaces](docs/transfer-spaces-study.md): pointer provenance and the contextual meaning of address tags.
-- [Header fields](docs/header-fields-study.md): bounded operation-family and payload-layout findings.
-- [Exceptional operations](docs/special-ops-and-exp-study.md): exponential reference windows and deliberately unsupported short controls.
-- [CORE1 command entry](docs/core1-command-entry-study.md): actual callbacks versus logging strings.
-- [Receive path and test controls](docs/core1-receive-and-test-controls.md): CORE-local queues, boot modes and stock diagnostic controls.
-- [Host transport](docs/host-transport-study.md): the normal application's gadget-serial IPC and correction to the older spare-port assumption.
-- [Host/CORE1 bridge](docs/host-core1-bridge-followup.md): routes, service replies, CORE-local MMIO and the precise missing peer boundary.
-- [CORE1 service startup](docs/core1-service-startup-mmio.md): normal initializer-table activation in both builds and exact MMIO reply-frame bounds.
-- [Host version identities](docs/host-version-and-upstream-crosscheck.md): five component slots, checked version strings and bounded public-source comparisons.
-- [Native LINE state/history](docs/line-state-and-history-study.md): ring origins, twelve delayed-state relationships and the shared-init boundary.
-- [Native LINE shaping](docs/line-prefix-shaping-study.md): fixed conversion/wrap, sign/clamp, smoothing and rational-reference arithmetic.
-- [LINE parameter groups](docs/line-prefix-parameter-study.md): counted literal writes versus native representative updates.
-- [Global prefix-group inventory](docs/line-prefix-global-groups.md): bounded negative inventory with positive controls; two input-mix identities remain unresolved.
-- [Cross-model LINE mix comparison](docs/emulator-next-program-targets.md#jupiter-x-carries-an-asymmetric-instance-of-4822--1940): exact `4822 / 1940` form with unequal literals in a JUPITER-X list.
-- [AX-Edge/JUNO-X updates](docs/ax-edge-and-juno-x-firmware-study.md): two further official images, shared code/ciphertext and bounded negative ROM/key scans.
-- [Fragment emulator validation](docs/fragment-emulator-validation.md): pinned stock bytes, complete traces, stores and adjacent-fragment composition.
-- [Supported code generation](docs/supported-code-generation.md): mix/gain and four-stage allpass fragments, with original examples.
-- [Kernel and audio ABI](docs/kernel-audio-abi-study.md): stock mute controls, manager reservations, shared routing and a gated probe design.
-- [Effect lifecycle and parent entries](docs/effect-lifecycle-and-parent-entry-study.md): factory replacement ordering, coefficient clearing and four effect-entry candidates.
-- [DRAM-IO records and native clearing](docs/dramio-clear-records-and-native-state.md): owner-matched address fields and exact native clear-loop bounds.
-- [Wait completion and initial data](docs/core1-wait-and-initial-data-study.md): timer chunking, initial flag recovery and explicit completion limits.
-- [Parent controls and the organ graph](docs/parent-control-and-nested-organ-study.md): nested DSP1 ownership, shifted pool references and native callback IO.
-- [Official MC-101 comparison](docs/mc101-v182-core1-comparison.md): shared MMIO/wait code and a different software scaling constant.
-- [Official JUPITER-X comparison](docs/jupiter-crossmodel-c1-study.md): shared routine windows and eleven RAMCLR segments with two record spacings.
-- [Condition fields and implicit returns](docs/condition-fields-and-implicit-return-study.md): exact native predicate inputs and payload limits on `00f8` interpretations.
-- [Owners and clear interfaces](docs/dramio-owners-and-clear-interface.md): constructor-selected ownership, counter aliases and actual global clear callers.
-- [CORE1 task context](docs/core1-task-context-and-host-peer.md): software IRQ registration, priorities, queue ownership and the remaining host peer.
-- [SH-4d and TR-8S updates](docs/sh4d-and-tr8s-firmware-study.md): another readable shared-code case and an encrypted-only package boundary.
-- [CORE0 ciphertext and key location](docs/core0-ciphertext-and-key-location.md): six-image block comparison and the reported MC-101 ROM slot, with Fantom validation still missing.
-- [Embedded ROM/key-material scan](docs/embedded-rom-key-material-scan.md): 27 scoped objects, including all retained update components and verified initial-data expansions.
-- [Readable key-provider references](docs/core0-rom-provider-reference-study.md): bounded instruction/literal candidates and rejected cross-MCU address matches.
-- [Fantom access-route audit](docs/fantom-access-route-audit.md): a gated stock factory-shell endpoint, MMC boot autodetection and corrected console/recovery claims.
-- [Factory intro and dispatch](docs/factory-gate-and-ui-dispatch-study.md): actual UI transitions, separate test groups and the still-unresolved mode-3 entry.
-- [Clear completion interrupt](docs/clear-completion-interrupt-study.md): event `0x17` connects to IRQ80, status acknowledgement, registration and startup setup.
-- [CORE1 transmit and backpressure](docs/core1-transmit-and-backpressure-study.md): the service-reply word edge, TXDT context, reserved slots and full-ring retries.
-- [Coefficient envelopes](docs/coefficient-envelope-and-completion-study.md): EnvTC selectors, wait/dispatch semantics, shared completion and native timing limits.
-- [Memory-domain labels](docs/memory-domain-labels-and-clear-count-boundary.md): explicit IDM/EDM monitor naming, a diagnostic defect and unresolved bulk-clear units.
-- [Fresh official Fantom build](docs/fantom-official-build-provenance.md): current download equality, complete member provenance and the unchanged access gap.
-- [Native arithmetic primitives](docs/native-arithmetic-primitives.md): bounded native shaping, feedback and voice-end reference semantics.
-- [Operand variants and macro boundaries](docs/operand-variants-and-macro-boundaries.md): exact mono-sum and cross-destination allpass comparisons, with oscillator-layout and exceptional-macro limits.
-- [Oscillator layout candidates](docs/oscillator-layout-candidates.md): competing arities consistent with six independently owned coefficient anchors.
-
-The [native LINE fixture](docs/fragment-emulator.md#direct-native-line-callback)
-runs the pinned translated sample callback in an isolated macOS ARM64 process
-and compares its audio against the conditional Python reference.
-The [OSC phase study](docs/oscillator-phase-study.md) checks an owned
-frequency field, four Fantom placements and a native phase-step boundary.
-
-This directory contains offline tools and derived research. It does not contain
-a working custom synth engine, full stock-effect emulator, general assembler, flasher or hardware driver. A constrained
-emitter reproduces fixed stereo input, dry/wet, scratch, allpass and coefficient-shift profiles. Nothing
-here opens a device. The native fixture invokes the extracted sample callback
-with explicit test memory. Production Oscairn code was not changed.
-
-## Reproduce
-
-Python 3, Capstone 5.0.7 and pyelftools 0.33 support the analysis; `requirements.txt` records
-these dependencies. Preparing exports also uses Xcode's `dyld_info` and
-`c++filt`; the exceptional-operation study uses `xcrun otool` to identify import stubs.
-Use an interpreter with Capstone installed. To prepare a fresh environment:
+Use **Python 3.13 or later**; the numerical references use `math.fma`.
+The verified environment is macOS ARM64 with Python 3.13.7. Other platforms have
+not been validated. Native execution fixtures require macOS ARM64 and permission
+to allocate executable memory; corpus-dependent tests skip when inputs are absent.
 
 ```sh
-python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
+git clone https://github.com/oscairn/RolandRevEng.git
+cd RolandRevEng
+python3.13 -m venv .venv
 . .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m unittest discover -s tests -v
 ```
 
-From this directory, with that environment active:
+Generate and decode an original fragment, or render an original filtered voice:
 
 ```sh
-python3 tools/prepare_zenology.py '/Library/Audio/Plug-Ins/VST3/Roland/ZENOLOGY.vst3/Contents/MacOS/ZENOLOGY' --out local
-python3 tools/extract_zenology.py
-python3 tools/analyze.py
-python3 -m unittest discover -s tests -v
+mkdir -p local
+python tools/bmc_subset.py assemble examples/dry-wet-tail.json local/my-tail.bin --stored
+python tools/bmc_subset.py disassemble local/my-tail.bin --stored
+python tools/bmc_filtered_voice.py local/filtered-voice.wav --frames 12000
 ```
 
-The first two commands regenerate the effect metadata without the old scratchpad or its
-pickle files. `analyze.py` additionally expects `local/b0c1a.bin` and `local/b1c1a.bin`:
-the respective `bmc*_MI078_C1A_up.bin` files with their first 32 container bytes removed.
-These inputs are already prepared locally for this investigation. The unmodified files
-are inside `FNTM0_UPA.BIN` in the user's v1.08 update. Artifact SHA-256 identities are
-recorded in `evidence/analysis.json`; other plugin versions require a fresh analysis.
+These examples need no Roland binary and do not open a device. Outputs must be
+new paths. The emitted fragment has no executable entry/return or hardware-loading
+wrapper. See [supported code generation](docs/supported-code-generation.md),
+[the fragment interpreter](docs/fragment-emulator.md) and
+[the filtered voice](docs/original-bmc-filtered-voice.md) for their exact contracts.
 
-`local/`, detailed generated evidence and working vault copies are ignored. Keep vendor
-images, generated exports, disassembly and extracted coefficient/program data local.
-Only aggregate results, artifact identities and recovered interfaces are tracked.
-The existing `parse.py`, `lift.py` and `coeftab.py` were preserved from Jacob's earlier
-scratchpad and adapted for durable paths and the corrected segment layout. Their ARM
-readers are bounded heuristics, not general interpreters. Native operand dumps remain
-supporting evidence rather than a semantic proof.
+## Optional local corpus
 
-## Inspect
+Supply your own firmware/plugin artifacts separately. None are distributed here.
+Build-specific addresses and hashes are recorded in the studies and
+[evidence/summary.json](evidence/summary.json); a different build requires fresh
+analysis. Dependencies are pinned in [requirements.txt](requirements.txt).
+
+On macOS, preparing a locally installed ZENOLOGY ARM64 image also requires Xcode
+command-line tools (`xcrun dyld_info`) and `c++filt`:
 
 ```sh
-# Native DSP0 program in the header-stripped bmc0 CORE1 payload:
-python3 tools/bmc_dsp.py local/b0c1a.bin --stored --offset 0xc49b0 --length 0x13e4
-
-# Recover a CORE1 scatter map, or inspect the DSP upload function:
-python3 tools/core1.py local/b0c1a.bin
-python3 tools/core1.py local/b0c1a.bin --address 0x112f582 --size 0x122
-python3 tools/core1.py local/b0c1a.bin --find 'CBmcDspDrv::GetDspProgAdrs('
-
-# Inspect a complete CORE0 container header without decrypting it:
-python3 tools/c0_header.py local/bmc0_MI078_C0A_up.bin
+python tools/prepare_zenology.py '/Library/Audio/Plug-Ins/VST3/Roland/ZENOLOGY.vst3/Contents/MacOS/ZENOLOGY' --out local
+python tools/extract_zenology.py
 ```
 
-Packet output is `offset: header | base control words | operand pool as words`.
-The pool can contain operation extension words as well as addresses and literals.
-`bmc_dsp.assemble()` reconstructs raw packets and checks lengths. The separate
-`bmc_subset.py` emits the supported named fragment profiles. The decoder rejects unobserved header bit 5 and unknown
-compact forms instead of skipping bytes to manufacture a successful parse.
+`tools/analyze.py` additionally expects `local/b0c1a.bin` and `local/b1c1a.bin`:
+the respective `bmc*_MI078_C1A_up.bin` members of the Fantom-0 v1.08 update,
+with their first 32 container bytes removed. After preparing those inputs:
 
-The locally generated `evidence/analysis.json` contains packet inventories, complete scatter records and the
-firmware program-list candidates. `coefficient_widths.json` records exact symbol offsets
-and the adjacent-symbol width conflict explained in the header study. Candidate
-symbol adjacency does not prove ownership by a program class.
-`core1_bmc0_api.json` and `core1_bmc0_functions.txt` retain the build-specific load path.
+```sh
+python tools/analyze.py
+# Inspect one build-specific native DSP0 program:
+python tools/bmc_dsp.py local/b0c1a.bin --stored --offset 0xc49b0 --length 0x13e4
+# Inspect CORE1's scatter map and a loader routine:
+python tools/core1.py local/b0c1a.bin
+python tools/core1.py local/b0c1a.bin --address 0x112f582 --size 0x122
+```
 
-Local documentation prepared for the existing vault is under ignored `docs/obsidian/`;
-code stays here. These working copies are not part of the GitHub repository.
-The initial 19-note update was applied to the vault on 2026-11-10 through reviewed file access.
-The Roland research and related planning notes are organized in
-`/Users/jacob/Documents/ObsidianVault/Projects/Oscairn/Roland`. All 52 moved notes
-were verified byte for byte; their unique title links remain valid. Continued
-research now covers 65 verified notes in this folder. Future vault
-updates target this subdirectory. The move manifest is
-`local/obsidian-applied-roland-move-2026-11-10.json`; the latest update manifest
-is `local/obsidian-applied-voice-relocation-2026-11-10.json`. Current folder and manifest
-are recorded in `local/obsidian-location.json`. Earlier manifests describe historical paths.
+`BMC_CORPUS_DIR` can point readers that support it at an alternative prepared
+corpus directory. Detailed generated reports such as `evidence/analysis.json`
+and `evidence/coefficient_widths.json` are local outputs, excluded from Git.
+Keep vendor images, native disassembly, extracted program/coefficient tables,
+provider credentials and personal working notes in ignored local storage.
 
-The research notes include the functional fragment emulator, official cross-model
-comparisons, key/access studies and corrections to older recovery claims.
-The latest passes add a complete independent TRANSIENT reference, explicit original-voice
-resource plans and typed state-initialization evidence, verifying the 65-note set against staged hashes.
-Firmware downloads remain local/ignored.
-Saved hashes were checked before each update; every note was verified byte for byte.
-Original backups, the initial validated patch and the applied hash manifests remain
-ignored/local. The patch records the initial original-to-updated change;
-do not reapply it to the already updated vault. Check for newer edits before future
-updates. No code or vendor artifact was written there.
+## License
+
+Original code and documentation are available under the [MIT License](LICENSE).
+The research includes firmware-derived interface descriptions and instruction
+templates; this license grants only rights held by the contributors and does not
+license Roland firmware, plugin binaries, samples, ROMs or trademarks.
+See [evidence boundaries](evidence/README.md) for what is kept outside the repository.

@@ -201,7 +201,7 @@ actually selected owner/algorithm when hardware evidence becomes available.
 ## Reproduce
 
 ```sh
-PY=/Users/jacob/.pyenv/versions/3.13.7/bin/python3
+PY=python3
 $PY tools/effect_lifecycle_study.py local/b0c1a.bin > local/effect-lifecycle.json
 $PY -m unittest discover -s tests -p test_effect_lifecycle_study.py -v
 $PY tools/core1.py local/b0c1a.bin --address 0x011290ee --size 0xf4

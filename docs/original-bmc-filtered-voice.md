@@ -90,11 +90,11 @@ and one more designs the filter.
 ## Render and export
 
 ```sh
-/Users/jacob/.pyenv/versions/3.13.7/bin/python tools/bmc_filtered_voice.py local/filtered-voice.wav \
+python3 tools/bmc_filtered_voice.py local/filtered-voice.wav \
   --frequency 440 --gain .5 --cutoff 1000 --frames 12000
-/Users/jacob/.pyenv/versions/3.13.7/bin/python tools/fantom_voice_plan.py local/b0c1a.bin \
+python3 tools/fantom_voice_plan.py local/b0c1a.bin \
   local/filtered-plan-dsp4 --owner 0x610a1674 --cutoff 1000 --frames 12000
-/Users/jacob/.pyenv/versions/3.13.7/bin/python -m unittest discover -s tests -p 'test_bmc_filtered_voice.py' -v
+python3 -m unittest discover -s tests -p 'test_bmc_filtered_voice.py' -v
 ```
 
 The renderer needs Python 3.13+ but no vendor artifact, plugin or instrument.

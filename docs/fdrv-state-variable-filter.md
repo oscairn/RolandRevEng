@@ -134,10 +134,10 @@ physical precision/timing remain unresolved.
 ## Reproduce and execution checks
 
 ```sh
-/Users/jacob/.pyenv/versions/3.13.7/bin/python tools/fdrv_filter_study.py --execute-native --frames 12000
-/Users/jacob/.pyenv/versions/3.13.7/bin/python tools/bmc_subset.py assemble examples/state-variable-pair.json local/state-variable-pair.bin --stored
-/Users/jacob/.pyenv/versions/3.13.7/bin/python tools/bmc_subset.py disassemble local/state-variable-pair.bin --stored
-/Users/jacob/.pyenv/versions/3.13.7/bin/python -m unittest discover -s tests -p 'test_fdrv_filter_study.py' -v
+python3 tools/fdrv_filter_study.py --execute-native --frames 12000
+python3 tools/bmc_subset.py assemble examples/state-variable-pair.json local/state-variable-pair.bin --stored
+python3 tools/bmc_subset.py disassemble local/state-variable-pair.bin --stored
+python3 -m unittest discover -s tests -p 'test_fdrv_filter_study.py' -v
 ```
 
 The fixture runs the unmodified native callback `3050ec..305ea8`, 879 instructions,

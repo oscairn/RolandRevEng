@@ -158,7 +158,7 @@ are unchanged.
 With the prepared local corpus and installed Capstone:
 
 ```sh
-PY=/Users/jacob/.pyenv/versions/3.13.7/bin/python3
+PY=python3
 $PY tools/tap_feedback_variation_study.py
 $PY -m unittest discover -s tests -p test_tap_feedback_variation.py -v
 ```

@@ -153,9 +153,9 @@ relocated wait body and MC-101 scaling instruction. It emits metadata only.
 Vendor files and detailed scratch disassembly stay under ignored `local/`.
 
 ```sh
-/Users/jacob/.pyenv/versions/3.13.7/bin/python3 tools/mc101_core1_compare.py \
+python3 tools/mc101_core1_compare.py \
   local/crossmodel/mc101/RPG69_C1A_up.bin local/b0c1a.bin
-/Users/jacob/.pyenv/versions/3.13.7/bin/python3 -m unittest discover -s tests -p test_mc101_core1_compare.py -v
+python3 -m unittest discover -s tests -p test_mc101_core1_compare.py -v
 ```
 
 No additional Qwen draft was used in this comparison; byte equality and direct

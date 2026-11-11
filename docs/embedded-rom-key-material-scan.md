@@ -125,10 +125,10 @@ cannot answer their absence with certainty.
 ## Reproduce and verify
 
 ```sh
-BMC_CORPUS_DIR='/Users/jacob/Projects/Open Synth Platform/bmc-research/local' \
-  /Users/jacob/.pyenv/versions/3.13.7/bin/python3 tools/key_material_scan.py
-BMC_CORPUS_DIR='/Users/jacob/Projects/Open Synth Platform/bmc-research/local' \
-  /Users/jacob/.pyenv/versions/3.13.7/bin/python3 -m unittest discover -s tests -p test_key_material_scan.py -v
+BMC_CORPUS_DIR="$PWD/local" \
+  python3 tools/key_material_scan.py
+BMC_CORPUS_DIR="$PWD/local" \
+  python3 -m unittest discover -s tests -p test_key_material_scan.py -v
 ```
 
 The report contains identities, provenance, counts, offset samples and window hashes;
