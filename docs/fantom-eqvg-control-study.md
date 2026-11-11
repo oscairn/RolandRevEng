@@ -1,5 +1,10 @@
 # Fantom EqVg math and control correspondence
 
+The subsequent [parameter-dispatch checkpoint](fantom-parameter-dispatch-study.md)
+adds the original outer callback and concrete FDRV logical live1 field routing.
+It records raw-interface forwarding without claiming a decoded message/flag ABI
+or a proved registered-task route.
+
 The subsequent [envelope-mode checkpoint](fantom-envelope-mode-study.md) resolves
 the query below: the source-bound MFX interface reads a per-slot mute nesting
 counter. Original FDRV callers select envelopes at count zero and immediate

@@ -2158,3 +2158,56 @@ AudioQueueStart (-66680).
 Remaining: actual setter dispatch/task callbacks and masks/exclusion; hardware
 completion cadence/precision; history, entry/return and safe engine loading. No
 opcode profile or FDRV audio arithmetic changes. No instrument accessed/flashed.
+
+
+## Fantom parameter dispatch and consolidated mapping status (2026-11-11)
+
+Connected the original unchanged-algorithm outer update 011290ee through the
+RTTI-linked CMfxFDRVPrm parameter callback 61032e90, logical live1 fields 2/3,
+FDRV setter, manager/mute query and original coefficient math. Mode 0 selects
+fallback; modes 1/2 select lowpass. Cutoff is converted to float, gain 0 and fixed
+Q 0.7070000171661377. Mode changes also request slope mode-1; slope calls are
+recorded rather than applied. Actual raw flags/buffer ABI and registered-task
+routing remain unproved. Equal algorithm markers only select the unchanged
+fixture path; replacement/RAMCLR/factory processing is excluded.
+
+Ninety-six cases across edge slots 0/3, mute counts 0/2, three modes, two cutoffs
+and four changed sets match 360 coefficient writes. Original outer/parameter/
+FDRV/piece/stability/software-math bodies execute in the existing bounded
+private-RAM oracle. Parameter-interface values/changed flags, coefficient reads/
+writes and companion slope calls are controlled callbacks. No app startup, OS
+or IRQ tasks, real MMIO or hardware scheduling executes.
+
+Checked complete NVIC task-mask helper bodies: unconditional CPSID/CPSIE, no
+incoming PRIMASK save/restore. Arm CMSIS documentation corroborates the instruction
+semantics. Registration survey does not identify the nearby DEMO task as an
+EFCT worker. Existing RXDT/ASGN bindings remain source facts, without a new
+ASGN-to-setter edge. Timer byte+1 is a persistent registration indicator, not
+a lock. Already-complete/zero-count cases also prevent a blanket masked-WFI
+conclusion. Actual completion/preemption/exclusion still needs evidence.
+
+Qwen saved a usable mask review; its wrapper returned 1 at 60.1 seconds. Parent
+checks accept the narrow CPSID/CPSIE observations and reject/narrow the registration
+byte-as-lock claim, one polling-PC attribution and unconditional deadlock claims.
+Raw worker reports, source listings and numerical outputs remain ignored locally.
+
+Added bmc-mapping-status.md to distinguish structural parsing (original 61,334
+packets), the 18 exact DSP sequence profiles, complete offline FDRV arithmetic
+(1,692 bytes/104 packets), authored voices/five placements, ARM interfaces and
+unverified silicon/loading. Emitter dispatch independently counts 18 profile kinds.
+No whole-chip percentage is justified. These control checkpoints add no DSP
+opcode profile; no physical engine has run in this research.
+
+All 35 focused/related regressions pass in 4.077 seconds, with no skips: new
+parameter dispatch, both prior Fantom CPU studies, timer, registered tasks,
+clear, coefficient envelope and effect lifecycle. Corpus-free tests pass (two
+model tests, two corpus skips). Syntax/diff/changed-document links are checked.
+The unchanged broader audio/arithmetic suite was not repeated. Guarded Markdown
+sync updated 11 notes and verified all 77 current hashes. Final metadata is
+recorded in ignored local/fantom-dispatch-checkpoint.json.
+The attention chime again failed with AudioQueueStart (-66680).
+
+Next: actual parameter-interface producer and raw flags/buffers, then a source-
+proved registered callback path with masks and object lifetime. Broader DSP
+semantics and hardware entry/return, precision/timing, history and safe loading
+remain separate work. No instrument was accessed or flashed.

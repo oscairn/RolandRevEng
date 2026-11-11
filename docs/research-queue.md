@@ -4,6 +4,10 @@ Queued 2026-11-10 at Jacob's request. Starting research checkpoint: `80b740b`.
 The practical target is a small custom engine running on the BMC render DSPs, with
 the i.MX8M handling UI/control. Current emitters produce verified fragments only.
 
+The [mapping-status inventory](bmc-mapping-status.md) distinguishes the 18 exact
+DSP profiles and complete FDRV arithmetic reference from structural parsing,
+ARM control evidence and unverified hardware. No whole-chip percentage is known.
+
 Latest arithmetic result (2026-11-11): the exact 126-byte cubic quad executes
 four independently checked waveshaping curves, matching all five Fantom bodies.
 It now composes between the original oscillator/gain and lowpass filter: 510
@@ -36,10 +40,18 @@ match: count zero enables envelopes, nonzero selects immediate writes. This quer
 does not inspect task identity. Sample waits use a separate timer byte; bit0 of
 the shared completion word belongs to clear completion.
 
-Next trace actual setter dispatch/registered task callbacks and their masks or
-exclusion, plus sample-wait/interrupt ownership and sync cadence. The shared busy
-byte is an assertion marker, not proved atomic exclusion. Hardware precision,
-history setup, entry/return and safe loading remain open.
+The [parameter-dispatch checkpoint](fantom-parameter-dispatch-study.md) now connects
+the original unchanged-algorithm module callback to the concrete FDRV parameter
+body, logical live1 fields 2/3, mute query and coefficient math. Ninety-six cases
+and 360 writes match. Checked NVIC helpers use unconditional CPSID/CPSIE rather
+than preserving an incoming PRIMASK; this is not an exclusion protocol.
+
+Next recover the actual parameter-interface buffer/flag producer and its route
+from a concrete registered task callback, preserving masks and object lifetimes.
+Sample-wait/interrupt ownership and cadence remain open. These control passes add
+no DSP opcode coverage; new independently supported instruction contexts remain
+a separate useful offline direction. Hardware precision, history setup,
+entry/return and safe loading remain open.
 
 The preceding bounded filter milestone is complete (2026-11-11): [EqVgCal](eqvg-filter-generation-study.md)
 now has native-checked formulas, Q clamping, consumer permutations and UI scaling.

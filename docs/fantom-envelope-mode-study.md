@@ -1,5 +1,10 @@
 # Fantom envelope mode and mute nesting
 
+The subsequent [parameter-dispatch checkpoint](fantom-parameter-dispatch-study.md)
+executes the original unchanged-algorithm callback and logical live1 fields 2/3
+through this mode query and setter. Raw buffers and registered-task ownership
+remain unresolved.
+
 2026-11-11. The FDRV mode query is now traced through its actual manager binding
 and checked by original Thumb execution. For this CORE1 graph it reads a
 **per-slot mute nesting counter**, rather than current task identity. A zero

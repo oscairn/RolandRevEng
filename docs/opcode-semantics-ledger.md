@@ -1,5 +1,9 @@
 # DSP control semantics ledger
 
+The [mapping-status inventory](bmc-mapping-status.md) consolidates coverage.
+Recent ARM parameter/control studies do not expand the 18 exact DSP profiles
+or establish general opcode semantics.
+
 2026-11-10. This index consolidates the **bounded semantic proofs** scattered
 across the studies. It is not a general instruction-set specification. The unit
 of admission is the exact header/control/extension/operand context checked by the

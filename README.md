@@ -4,6 +4,15 @@ Independent Roland BMC interoperability research, starting with Fantom-0 v1.08 a
 the installed ZENOLOGY plugin. Remote: `https://github.com/jbschooley/RolandRevEng.git`.
 Private visibility was verified on 2026-11-10; keep it private as requested. This is not an official Roland project.
 
+Read the [current mapping status](docs/bmc-mapping-status.md) for what is proved
+and what still blocks custom engines or full emulation. The executable DSP subset
+has 18 exact sequence profiles; packet parsing and ARM control checks are separate.
+
+The [Fantom parameter-dispatch study](docs/fantom-parameter-dispatch-study.md)
+connects an unchanged-algorithm callback through logical fields 2/3 to original
+filter/mode/math execution. Its 96 cases match 360 coefficient writes; the route
+from a registered task and raw incoming buffers is still unproved.
+
 The [Fantom envelope-mode study](docs/fantom-envelope-mode-study.md) traces FDRV's
 mode query to a per-slot mute nesting counter. Original caller execution selects
 envelopes at count zero and immediate writes while muted; this is not a task test.

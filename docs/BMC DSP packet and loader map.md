@@ -1,5 +1,9 @@
 # BMC DSP packet and loader map
 
+See [current mapping status](bmc-mapping-status.md) for consolidated coverage and
+remaining gates. Later checkpoints complete the offline FDRV arithmetic chain
+and selected ARM parameter/control paths; the DSP subset remains 18 exact profiles.
+
 2026-11-09, extended 2026-11-10 and 2026-11-11. Follow-up to **BMC DSP ISA**, **BMC chips**, and **Fantom-0 research**.
 Target: Fantom-0 v1.08, especially Fantom-07; local ZENOLOGY arm64 implementation as a
 comparison. This is static interoperability research. No firmware was installed, no

@@ -1,5 +1,9 @@
 # EqVg generation and interpolation policy
 
+The [Fantom parameter-dispatch checkpoint](fantom-parameter-dispatch-study.md)
+checks logical live1 mode/cutoff fields 2/3 through original ARM32 callback,
+setter and math execution. Panel/MIDI encoding and raw buffer flags remain open.
+
 The [Fantom mode-query checkpoint](fantom-envelope-mode-study.md) connects the
 original caller to its source-bound mute nesting count: count zero enables live
 envelopes, nonzero selects immediate writes. This resolves the dispatch choice

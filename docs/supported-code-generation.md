@@ -1,5 +1,9 @@
 # First supported code-generation subset
 
+The [mapping-status inventory](bmc-mapping-status.md) summarizes the current 18
+exact profiles. Recent ARM parameter/control checks add no instruction profile
+or safe hardware-entry guarantee.
+
 2026-11-10. `tools/bmc_subset.py` turns checked mix/filter and state-arithmetic operations
 and explicitly assigned indices into exact packet sequences independently matched
 against native FETDRIVE, LINEDRIVE and FDRV expressions. This is a constrained semantic code emitter and

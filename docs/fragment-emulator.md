@@ -1,5 +1,9 @@
 # Offline functional fragment emulator
 
+The [mapping-status inventory](bmc-mapping-status.md) separates the 18 executable
+profiles, composed FDRV arithmetic and authored voices from a full BMC emulator.
+Recent parameter-dispatch checks execute ARM control code, not new DSP opcodes.
+
 The [Fantom ARM32 control fixture](fantom-eqvg-control-study.md) separately checks
 the original CPU coefficient producers and selected manager paths. Its fallback,
 float32 rounding and pre-arm completion clear differ from desktop assumptions.

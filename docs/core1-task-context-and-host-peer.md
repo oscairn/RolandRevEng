@@ -1,5 +1,10 @@
 # Stock CORE1 task context and the remaining external peer
 
+The [parameter-dispatch audit](fantom-parameter-dispatch-study.md) checks the
+original FDRV parameter callback and confirms the task IRQ-mask helpers use
+unconditional CPSID/CPSIE. It does not establish an ASGN-to-setter call edge or
+safe waits under arbitrary incoming masks.
+
 The later [FDRV envelope-mode study](fantom-envelope-mode-study.md) resolves its
 manager query as per-slot mute nesting state, not task identity. The software-IRQ
 bindings below remain relevant; selecting envelope mode does not prove ownership
