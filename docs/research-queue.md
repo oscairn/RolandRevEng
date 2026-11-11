@@ -585,6 +585,13 @@ Next are the remaining state/filter producer arithmetic and PHONO, with actual
 owner/entry/return and hardware gates still required. Qwen's initial
 single-class/numeric rejection was independently corrected.
 
+The [state-variable filter pass](fdrv-state-variable-filter.md) now resolves the
+first complete stereo block and adds a 184-byte byte-executed template. Its
+native sign, state aliases, shared coefficients and one-level auxiliary lifetime
+are checked. Next is composing this reusable filter with the original oscillator
+voice, verifying shared resources and seed dependencies across the five owner
+layouts, while continuing the remaining arithmetic, routing and control-flow work.
+
 The resource planner exports original logical/stored bodies and manifests only.
 It verifies all thirty transfer operands while protecting every other byte,
 and derives exactly six read-before-write data seeds. Across five 12,000-frame

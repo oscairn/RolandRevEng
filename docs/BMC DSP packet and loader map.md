@@ -11,6 +11,12 @@ locations, and a concrete CORE1 program-loading map. It does **not** yet support
 an arbitrary C/C++ synth to the render DSPs. Most arithmetic opcodes, scheduling, precision
 and resource rules remain unresolved.
 
+The [184-byte state-variable filter](fdrv-state-variable-filter.md) now executes
+the complete first FDRV stereo filter component, including its producer arithmetic
+and balanced auxiliary saves. Its body matches five Fantom placements, and its
+state/output recurrence agrees with the native callback through ring wrap. It
+adds a reusable engine component while hardware ownership, entry and timing stay open.
+
 The [auxiliary/add-MAC study](auxiliary-save-restore-and-add-mac.md) maps native
 save/restore round trips and admits an original 84-byte byte-executed profile.
 Its stock arithmetic body matches all five Fantom placements and 1,024 asymmetric

@@ -30,6 +30,7 @@ rounding, saturation, accumulator width or fused evaluation on silicon.
 | `048f / 0000` | A = A + I2×I7 | Stereo taps, second TS808 state term |
 | `458f / 0004` | B = B + I6×I7 | Stereo taps, second TS808 state term |
 | `1c42 / 5d46` short pair, then `044b/0000` + `454f/0004` long pair | In the exact FDRV context, sum I1+I2 and I5+I6, store incoming I1/I5, then accumulate the sums into A/B with a shared coefficient | [Auxiliary/add-MAC study](auxiliary-save-restore-and-add-mac.md), strict 84-byte profile; coefficient-port ambiguity retained |
+| FDRV `66..f8` filter context | Two coupled state updates, a weighted output, and balanced port-2/port-6 saves/restores | [State-variable filter](fdrv-state-variable-filter.md), strict 184-byte profile; no word-only decoding or physical stack-depth claim |
 
 For the first gain row the slash separates two **short controls**. In long rows,
 it separates a base control from its extension. Headers and shared pool layout
@@ -114,6 +115,12 @@ bound source/result relations and a directly executed native curve reference.
 Two short `5d46` contexts sit in that window; four others sit in state/filter
 sequences. Whole-window agreement does not admit the individual short controls
 or the miscellaneous producers. All five Fantom placements retain the context.
+
+The 184-byte `state_variable_pair` profile now executes the first FDRV filter
+block including its producers and one balanced auxiliary save/restore per port.
+Its reference preserves binary64 states, binary32 coefficients, native FMA and
+the verified `FNMSUB` sign. The native callback comparison covers all valid
+cursor pairs and ring wrap. The cubic producer window remains unadmitted.
 
 The [functional fragment interpreter](fragment-emulator.md) now executes only the
 same exact stereo input, dry/wet, scratch, allpass and VSOD coefficient-prefix contexts accepted by the inverse decoder. It steps

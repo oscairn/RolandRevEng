@@ -15,6 +15,14 @@ under the documented native numeric policy. The original example is
 matches the native-paired FDRV program and all five Fantom placements. No
 auxiliary operation or entry wrapper is included in this profile.
 
+The [state-variable filter](fdrv-state-variable-filter.md) adds a 184-byte
+`state_variable_pair` template and `examples/state-variable-pair.json`. Its
+coefficient slots are a/b/c/d/e; its ten sources and four explicit aliasing
+targets preserve the checked state update. The model includes one balanced
+auxiliary save/restore per port, with no arbitrary nesting or stack-depth claim.
+The 146-byte body matches the native-paired stream and all five Fantom placements.
+The native ring convention and all hardware entry/ownership gates remain explicit.
+
 The [original stereo oscillator voice](original-bmc-stereo-voice.md) composes
 three existing profiles into a static 200-byte body. Its resource-fit checker
 compares decoded requirements with five real Fantom owners; it emits no relocated

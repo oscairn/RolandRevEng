@@ -33,20 +33,28 @@ def _values(mapping, label, keys):
     return result
 
 
+def _fma(first, second, addend):
+    try:
+        return _finite(math.fma(first, second, addend), 'Native-reference FMA result')
+    except OverflowError as error:
+        raise ValueError('Native-reference FMA exceeds the finite domain') from error
+
+
 def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[int, float],
                      io: dict[int, float] | None = None) -> dict:
     """Step a complete supported logical fragment without mutating its inputs."""
     if not isinstance(program, bytes):
         raise ValueError('Program must be logical bytes')
     spec = disassemble_fragment(program)
-    native_coefficient_prefix = spec['kind'] in ('coefficient_shift4', 'register_add_mac_pair')
+    native_coefficient_prefix = spec['kind'] in ('coefficient_shift4', 'register_add_mac_pair',
+                                                'state_variable_pair')
     if native_coefficient_prefix and not hasattr(math, 'fma'):
         raise ValueError('This native-reference profile requires Python 3.13+ math.fma')
     io_addresses = spec.get('input_addresses', DEFAULT_INPUT_ADDRESSES)
     memory = _values(data, 'data', range(0x800))
     coefs = _values(coefficients, 'coefficients', range(0x1000))
     inputs = _values({} if io is None else io, 'io', io_addresses)
-    ports, trace = [None] * 8, []
+    ports, trace, auxiliary_saved = [None] * 8, [], {}
 
     def load(address):
         if address in io_addresses:
@@ -89,16 +97,44 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
             if word in (0x0403, 0x4503):
                 destination = 0 if word == 0x0403 else 4
                 value = old_value(destination) * old_value(3)
+            elif word in (0xaf60, 0xef60):
+                destination = 2 if word == 0xaf60 else 6
+                # The exact state-variable profile contains one balanced pair per port.
+                if destination in auxiliary_saved:
+                    raise ValueError('Nested auxiliary saves are outside this profile')
+                auxiliary_saved[destination] = old_value(destination)
+                continue
+            elif word in (0xaf61, 0xef61):
+                destination = 2 if word == 0xaf61 else 6
+                if destination not in auxiliary_saved:
+                    raise ValueError('Auxiliary restore lacks the matching save')
+                next_ports[destination] = auxiliary_saved.pop(destination)
+                continue
+            elif word in (0x1c8b, 0x5d8f):
+                destination = 1 if word == 0x1c8b else 5
+                s = old_value(destination+1)
+                if pool[:2] == [0x2001, 0x6005]:
+                    value = _fma(s, old_value(3), s)+old_value(destination)
+                elif pool[:2] == [0x9000, 0xd004]:
+                    value = _fma(s, old_value(3), -old_value(destination))+old_value(destination-1)
+                else:
+                    raise ValueError('Unsupported state-variable long extension pair')
+            elif word in (0x2443, 0x6547):
+                destination = 2 if word == 0x2443 else 6
+                value = old_value(destination-1)*old_value(3)
+            elif word in (0x08c2, 0x49c6):
+                destination = 0 if word == 0x08c2 else 4
+                value = _fma(old_value(destination), old_value(3), old_value(destination+2))
+            elif word in (0x1c4b, 0x5d4f) and pool == [0x1002, 0x5006]:
+                destination = 1 if word == 0x1c4b else 5
+                value = _fma(old_value(destination), old_value(3), old_value(destination))+old_value(destination+1)
             elif word in (0x1c42, 0x5d46):
                 destination = 1 if word == 0x1c42 else 5
                 value = old_value(destination) + old_value(destination+1)
             elif word in (0x044b, 0x454f) and pool[:2] == [0, 4]:
                 destination = 0 if word == 0x044b else 4
                 # Both possible coefficient ports carry the same value in this exact profile.
-                try:
-                    value = math.fma(old_value(destination+1), old_value(3), old_value(destination))
-                except OverflowError as error:
-                    raise ValueError('Add/MAC result exceeds the finite reference domain') from error
+                value = _fma(old_value(destination+1), old_value(3), old_value(destination))
             elif word == 0xfdd4:
                 destination = 7
                 # shortcut: native fixed32 policy until BMC conversion measurements are available.
@@ -126,4 +162,8 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
         ports = next_ports
         trace.append(dict(offset=offset, header=words[0], before=old.copy(),
                           after=next_ports.copy(), writes=writes.copy()))
+        if spec['kind'] == 'state_variable_pair':
+            trace[-1]['auxiliary_saved'] = auxiliary_saved.copy()
+    if auxiliary_saved:
+        raise ValueError('Unbalanced auxiliary state at fragment end')
     return dict(ports=ports.copy(), data=memory, trace=trace)

@@ -5,6 +5,11 @@ documents another exact byte-executed profile, with native-paired and five Fanto
 body comparisons, all-port traces and 1,024 direct native arithmetic comparisons.
 The original dry/wet/allpass checks below retain their existing numeric policy.
 
+The [complete first filter block](fdrv-state-variable-filter.md) adds a 184-byte
+profile and compares 105,232 native prefix/state/output values, including a
+12,000-frame ring-wrap run. This validates a reusable component, not complete
+FDRV effect or hardware execution.
+
 The corpus tests compare the emulator with independently recovered native
 equations for four actual stock fragments: the FETDRIVE and LINEDRIVE dry/wet
 tails, plus both LINEDRIVE four-stage allpass regions. The tests extract those

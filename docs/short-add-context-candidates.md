@@ -9,6 +9,11 @@ This inventory alone admits no opcode. The later
 FDRV state/filter sums and admits one exact composite profile. It does not define
 these short words globally or admit the unresolved cubic producer sequences.
 
+The [184-byte filter profile](fdrv-state-variable-filter.md) also covers that
+first pair's producer arithmetic and balanced auxiliary saves. It verifies the
+complete component's state/output recurrence without admitting the other
+short-add contexts or a universal instruction definition.
+
 The [FDRV cubic study](fdrv-cubic-waveshaping-study.md) now binds four complete
 waveshaping windows to their source/result stores and checks the native curve
 directly on 1,034 inputs. It locates the two cubic `5d46` candidates among the

@@ -1,5 +1,10 @@
 # Native auxiliary saves and a checked add/MAC profile
 
+Follow-up: [stereo state-variable filter](fdrv-state-variable-filter.md) resolves
+the first block's preceding producer arithmetic and admits a separate 184-byte
+profile with one balanced auxiliary save/restore per port. The 84-byte add/MAC
+profile below retains its narrower contract and executes no auxiliary words.
+
 2026-11-10. Native ZENOLOGY arm64 SHA-256
 `b8ba7f41e26bef91e2cc38e99452e7795cd132e9f2a59695a68a77f18b8a2c30`.
 Fantom CORE1 payload SHA-256

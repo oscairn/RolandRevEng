@@ -1305,3 +1305,37 @@ meaningful unit and native-execution checks. Native/firmware proof and emitter
 integration were independently derived locally. Stored example CLI roundtrip
 passes, and all 386 tests passed in 32.305 seconds after the final arithmetic-limit
 checks. No vendor binary, device operation or live allocation was added.
+
+## Complete first FDRV state-variable filter component
+
+The first stereo filter's producers now have a checked recurrence, source/state
+records, coefficient readers and native register-preservation anchors. Direct
+native execution established the FNMSUB sign as s*b minus Tnew. The paired state
+update is Tnew=t+(1+a)*s, X=y+b*s-Tnew, Snew=s+(1+a)*X in ideal arithmetic;
+the model retains actual native FMA and separate addition order. Its state matrix
+and strict ideal Jury conditions are derived, with both valid sign orientations
+and independent pole checks. This is not a hardware stability guarantee.
+
+The new 184-byte state_variable_pair profile includes all first-block producer
+arithmetic, one balanced auxiliary save/restore per port, explicit history aliases
+and following loads. Its 146-byte arithmetic body matches the native-paired
+stream and all five Fantom placements; the leading 38 bytes are authored loads.
+The inverse decoder protects the exact context without changing the general
+header grammar. Inactive physical cache slots, arbitrary depths and flags remain
+outside the model. The separate cubic producer window stays unadmitted.
+
+The owned fixture executes the unchanged 879-instruction native FDRV callback,
+checking the prefix and first block rather than claiming complete effect-output
+agreement. Nine cursor pairs, a 12,000-frame wrap run, signed-zero and large/
+precise binary64 states produce 105,232 exact native values and 78,924 matching
+byte-emulated filter values. Non-dyadic source coefficients force actual binary32
+conversion in all three comparisons. Stored-example CLI roundtrip passes, and
+all 393 tests passed in 37.550 seconds after the precision cases.
+
+Qwen returned an equation/reference draft in 70.4 seconds. Its unwanted binary32
+rounding of y/s/t and rejection of valid wide signals were corrected. Review
+retained the equations, reused the existing numeric helpers and expanded the
+requested positive-g/q stability subset to both mathematical sign orientations.
+Native/firmware evidence, byte backend and execution fixtures were derived locally.
+Next is a filtered original oscillator voice with verified shared resources and
+seeds across the five owners; entry, ownership and hardware calibration stay open.

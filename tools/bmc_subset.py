@@ -199,6 +199,38 @@ def assemble_register_add_mac_pair(spec):
     ])
 
 
+def assemble_state_variable_pair(spec):
+    if (not isinstance(spec, dict) or spec.get('kind') != 'state_variable_pair'
+            or set(spec) != {'kind', 'sources', 'targets', 'coefficient_slots'}):
+        raise ValueError('Expected state_variable_pair sources, targets and coefficient_slots')
+    for name, count, maximum in (('sources', 10, 0x800), ('targets', 4, 0x800),
+                                  ('coefficient_slots', 5, 0x1000)):
+        if (not isinstance(spec[name], list) or len(spec[name]) != count
+                or any(type(value) is not int or not 0 <= value < maximum for value in spec[name])):
+            raise ValueError(f'Expected {count} valid {name} indices')
+    y, t, s, yr, tr, sr, next_s, next_sr, next_t, next_tr = spec['sources']
+    if (t != s+1 or tr != sr+1 or spec['targets'] != [s, sr, s-1, sr-1]
+            or len(set(spec['sources']+[s-1, sr-1])) != 12
+            or len(set(spec['coefficient_slots'])) != 5):
+        raise ValueError('State-variable resources violate the checked history/alias relations')
+    a, b, c, d, e = [0xc000 | value for value in spec['coefficient_slots']]
+    return assemble([
+        [0x3e07, 0x0fe0, 0x1fe2, 0x2fe4, y, t, s],
+        [0x3e07, 0x4fe0, 0x5fe2, 0x6fe4, yr, tr, sr],
+        [0x1e05, 0x3fe0, 0x7fe2, a, a],
+        [0x4709, 0x1c8b, 0x5d8f, 0x3fe4, 0x7fe6, 0x2001, 0x6005, b, b],
+        [0x88cf, 0x1c8b, 0x5d8f, 0xaf60, 0xef60, 0x9fe4, 0x3fe6, 0xdfe8, 0x7fea,
+         0x9000, 0xd004, s, e, sr, e],
+        [0x5f07, 0x2443, 0x6547, 0x3fe0, 0x7fe2, c, c],
+        [0xb149, 0x08c2, 0x49c6, 0xaf61, 0xef61, 0x3fe0, 0x7fe2, a, a],
+        [0x1005, 0x1c4b, 0x5d4f, 0x1002, 0x5006],
+        [0xb8cf, 0x1c42, 0x5d46, 0x9fe0, 0x3fe2, 0xdfe4, 0x7fe6, 0x2fe8, 0x6fea,
+         s-1, d, sr-1, d, next_s, next_sr],
+        [0x8f4d, 0x044b, 0x454f, 0x1fe4, 0x3fe6, 0x5fe8, 0x7fea,
+         0, 4, next_t, a, next_tr, a],
+    ])
+
+
 def assemble_fragment(spec):
     if not isinstance(spec, dict):
         raise ValueError('Expected a JSON object')
@@ -210,12 +242,26 @@ def assemble_fragment(spec):
         return assemble_allpass(spec)
     if spec.get('kind') == 'register_add_mac_pair':
         return assemble_register_add_mac_pair(spec)
+    if spec.get('kind') == 'state_variable_pair':
+        return assemble_state_variable_pair(spec)
     if spec.get('kind') == 'dry_wet_tail_with_scratch':
         return assemble_tail_with_scratch(spec)
     return assemble_tail(spec)
 
 
 def disassemble_fragment(stream):
+    if len(stream) == 184:
+        rows = [words for _, words in packets(stream)]
+        if len(rows) != 10 or [len(row) for row in rows] != [7, 7, 5, 9, 15, 7, 9, 5, 15, 13]:
+            raise ValueError('Not an exact state_variable_pair profile')
+        spec = dict(kind='state_variable_pair', sources=rows[0][4:7]+rows[1][4:7]+rows[8][13:15]
+                    +[rows[9][9], rows[9][11]],
+                    targets=[rows[4][11], rows[4][13], rows[8][9], rows[8][11]],
+                    coefficient_slots=[rows[index][field] & 0xfff for index, field in
+                                       ((2, 3), (3, 7), (5, 5), (8, 10), (4, 12))])
+        if assemble_state_variable_pair(spec) != stream:
+            raise ValueError('Unsupported state-variable controls, extensions, aliases or tags')
+        return spec
     if len(stream) == 84:
         rows = [words for _, words in packets(stream)]
         if len(rows) != 4 or [len(row) for row in rows] != [7, 7, 15, 13]:
