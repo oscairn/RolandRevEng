@@ -1064,3 +1064,13 @@ with runtime groups and separate writes open. All 309 tests passed.
 The next Qwen task is a bounded TRANSIENT metadata extraction for the
 post-branch math track. It is limited to callback/constructor identities,
 import-call names and initial pointer loads; no machine-code execution.
+
+The bounded metadata job returned. Qwen misclassified three internal jumps
+as unknown calls and included FP loads in its GPR list. Independent review
+asserts 445 contiguous instructions, eight internal forward branches, a
+single return, no ADR/ADRP/indirect control flow and exactly three named
+math calls: one log and two exp. Constructor bytes end at `65f`, followed
+by four live-pointer fields through `678`. Reviewed metadata is saved
+separately. A native TRANSIENT fixture can now target these concrete
+dependencies; it has not yet been executed. Code and the 309-test checkpoint
+are unchanged by this metadata-only follow-up.

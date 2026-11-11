@@ -165,7 +165,7 @@ were verified byte for byte; their unique title links remain valid. Continued
 research now covers 59 verified notes in this folder. Future vault
 updates target this subdirectory. The move manifest is
 `local/obsidian-applied-roland-move-2026-11-10.json`; the latest update manifest
-is `local/obsidian-applied-phaser-clamp-2026-11-10.json`. Current folder and manifest
+is `local/obsidian-applied-transient-metadata-2026-11-10.json`. Current folder and manifest
 are recorded in `local/obsidian-location.json`. Earlier manifests describe historical paths.
 
 The research notes include the functional fragment emulator, official cross-model

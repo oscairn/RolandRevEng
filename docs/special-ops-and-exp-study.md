@@ -99,3 +99,43 @@ An isolated exceptional-opcode meaning, its destination/special state, the exact
 exponential approximation, valid input range, rounding, saturation and timing remain
 unresolved. Reusing a stock macro window in a newly scheduled DSP program is not yet
 established as safe or correct.
+
+## TRANSIENT callback execution boundary
+
+The complete pinned native `SIM_MFX_TRANSIENT` callback is now inventoried
+for a separate execution fixture. It spans `1d5fd0..1d66c4`, with 445
+contiguous ARM64 instructions and one final return. There are eight internal
+forward branches, no `ADR/ADRP`, and no indirect calls or branches. The
+three external calls resolve through the actual Mach-O import table.
+
+| Native call | Target stub | Imported function |
+|---|---|---|
+| `1d606c` | `6d8adc` | `_log` |
+| `1d647c` | `6d886c` | `_exp` |
+| `1d6518` | `6d886c` | `_exp` |
+
+These are the complete call set in the checked span. Unconditional `b`
+instructions are internal jumps. Capstone also labels ARM64 `bl` as both
+CALL and JUMP, so classification must handle calls before ordinary jumps.
+
+Fresh constructor extraction initializes bytes through object offset `65f`.
+The four live-coefficient pointer fields are `660/668/670/678`, slots
+`0/1/2/3`. An explicit context therefore needs at least `680` bytes.
+The primary DSP segment is 808 bytes. Initial native pointer loads follow
+the established wrapper/context/ring graph, but a complete fixture still
+needs to validate all accesses and select explicit coefficient/state values.
+
+This callback cannot be copied using the call-free LINE/FETDRIVE procedure
+unchanged. Its three external `bl` instructions require deliberate host-math
+resolution. Internal relative branches must retain their destinations, and
+the callee-saved register/stack contract must remain intact. The next offline
+step is a checked fixture with known math-call targets and explicit memory,
+followed by numeric and state comparisons.
+
+Tool-enabled Qwen produced the initial metadata. Local review corrected its
+three internal jumps misclassified as unknown calls, its conditional-branch
+count, and FP loads included in a purported GPR list. Independent extraction
+asserted the callback bounds, complete decoding, import identities, branch
+targets and constructor layout. Raw and reviewed JSON remain ignored under
+`local/transient-metadata-worker/`. No TRANSIENT callback or DSP program
+was executed in this pass; this is execution-planning evidence.

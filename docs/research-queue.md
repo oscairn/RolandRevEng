@@ -528,3 +528,12 @@ its now-proved port-3 result. No counted static group binds the duplicated
 `1.4` producer literals. The pointer-preserving late-window method also
 provides a concrete approach for revisiting TRANSIENT's post-branch math
 cutpoints, without weakening the ordinary prefix tracer.
+
+TRANSIENT's complete native callback is `1d5fd0..1d66c4`. Its only external
+calls are one `_log` and two `_exp` imports; all eight ordinary branches
+stay internal. No `ADR/ADRP` appears. Constructor data and four live-pointer
+fields require a context of at least `680` bytes. The next execution step
+is a checked host-math call bridge and explicit memory fixture, followed
+by arithmetic/state comparisons. Qwen's initial metadata has been reviewed
+and corrected; no TRANSIENT machine code has run yet.
+[TRANSIENT execution boundary](special-ops-and-exp-study.md#transient-callback-execution-boundary)
