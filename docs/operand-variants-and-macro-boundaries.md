@@ -338,12 +338,11 @@ The useful independent candidates are the phaser `bedb` contexts.
 Both native tails store an independently computed value before clamping a
 separate register with `fmin(+1)`, comparison to `-1`, and conditional
 selection. STPS's clamp is `149004..14900c`; TVPS's is `27912c..279134`.
-This supports a port-3 clamp-result candidate for `bedb`, separate from the
-FETDRIVE division sequence. It still needs a complete input/record provenance
-proof. The generic native-access tracer stops at an earlier phase branch
-in both phasers, so its prefix result cannot establish these later bindings.
-The build-specific instruction observations and constructor fields are saved
-as candidates, without new interpreter admission.
+This supports a port-3 clamp-result interpretation for `bedb`, separate from the
+FETDRIVE division sequence. The later-store proof below now establishes the
+record and pointer provenance across the earlier phase branches. Exact input
+selection and other state effects remain open; there is no new interpreter
+admission.
 
 Reproduce the bounded inventory with the existing tools
 
@@ -361,3 +360,82 @@ result = study(firmware, qspi, scan_segments=partial(scan, controls=(0x3086, 0x7
 print(json.dumps(result, indent=2))
 PY
 ```
+
+## Late phaser clamp stores and native execution
+
+`phaser_clamp_study.py` checks the two native tails beyond the prefix tracer's
+earlier stop. It does not make the general tracer ignore control flow.
+Each phaser has six forward phase-normalization branches before the studied
+window. Every target stays before or at that window; calls, returns,
+interrupts, indirect branches, back edges and bypasses are rejected.
+The constructor pointer `x22`, ring pointer `x8` and base-minus-origin
+index `w9` remain unchanged across all intervening instructions, including
+their register aliases.
+
+The proof projects only the verified entry prefix and the fresh four-instruction
+store sequences into the existing pointer tracer. Index records are loaded
+again at each store. Exact DSP operand fields, constructor-record identity,
+ring pointer path, `0x7ff` mask and scaled double accesses must agree.
+Thus the omitted numeric phase paths cannot change the proved address roots.
+Both co-issued port-2 stores and following port-3 stores in the table above
+now pass this provenance check.
+
+The proof also checks memory writes. Before the first phase branch, every
+non-stack write must have a traced data/window path. After that branch,
+all six stores must recompute a constructor-owned address, mask it to
+`0x7ff`, and write through the unchanged ring pointer. Branches into the
+middle of address preparation are rejected. Regression cases replace
+stores with constructor writes and redirect a branch past address setup;
+all are rejected. Preserved pointer registers alone would not establish
+that constructor address records remained unchanged.
+
+The clamp bounds are explicit native `+1/-1` constants whose registers remain
+unchanged. Three native instructions consume `d1`, clamp it, and write `d0`.
+The pre-clamp port-2 store saves the earlier `d0`; the later port-3 store
+saves the clamped result. This separates the two output roles and supplies
+two independent contexts for a bipolar clamp outside FETDRIVE's division.
+It does not yet prove that the incoming BMC operand is I3 or establish
+condition flags and exceptional-state effects.
+
+An isolated macOS ARM64 subprocess executes STPS's actual three clamp
+instructions followed by a return. It supplies the value and checked bounds
+through caller-saved FP argument registers. No phaser framework, pointer
+graph or earlier waveform arithmetic executes in this numeric test.
+All 526 finite probes agree bit for bit with the Python clamp, including
+both sides of `+1/-1`, signed zero, the smallest binary64 subnormals,
+large finite values and 512 deterministic random inputs. NaN, infinity
+and BMC precision remain outside this reference.
+
+The pinned Fantom image contains twelve matching STPS-form contexts,
+with relocated target pairs. This is an encoding comparison, not verified
+runtime algorithm ownership.
+
+| Fantom list | Matched packet offsets | Placement bases | Co-issued / clamped targets |
+|---|---|---|---|
+| `6112c8d8` | `190` | `4020 / 8040 / 9040 / a040` | `11c/11d`, `33c/33d`, `3d2/3d3`, `468/469` |
+| `61137e20` | `210`, `2d8` | Same four bases | First pair as above; second `123/124`, `343/344`, `3d9/3da`, `46f/470` |
+
+No exact TVPS-form `3a06/c64e` context was found in this pinned image.
+Twenty-two other framed `bedb` contexts remain outside these two recognizers.
+The existing header/layout decoder and strict DSP interpreter are unchanged.
+
+The duplicated `1.4` literal relationship remains separate. Native STPS
+loads object+`1b8`, whose representative field is `15e`; the nearby DSP
+producer uses field `182`. TVPS similarly uses representative field `146`
+and nearby field `170` through object+`1f8`. The defaults agree numerically.
+A scan of all 665 aligned native count-2+ descriptor candidates found no
+width-three group containing either pair. Qwen's lookup reached its 180-second
+limit; the negative result was independently rerun and asserted locally.
+Runtime descriptors, separate writes and other layouts remain possible.
+Equal defaults do not establish an alias or immutability.
+
+```sh
+python tools/phaser_clamp_study.py --core1 local/b0c1a.bin \
+  > local/phaser-clamp-study.json
+python -m unittest discover -s tests -p test_phaser_clamp_study.py -v
+```
+
+Six tests check finite boundaries, malformed/relocated packet contexts,
+rejected control-flow and pointer clobbers, both native store pairs,
+the twelve Fantom contexts and isolated native execution. Full phaser audio,
+arbitrary input-port selection, flags, hardware timing and loading remain open.

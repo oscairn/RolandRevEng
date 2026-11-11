@@ -517,7 +517,14 @@ checked independently.
 The next discriminating clamp comparison is now STPS `bedb` at packet `18a`
 and TVPS at `178`. Both have a following port-3 store, separate from the
 FETDRIVE reciprocal sequence. Their native tails perform explicit bipolar
-clamps. Complete provenance must account for the earlier phase branch, where
-the current prefix tracer stops. The six-artifact inventory found all 174
+clamps. The late-store checker now accounts for the earlier phase branches
+by proving invariant address roots and forward joins. It verifies both native
+store pairs and twelve Fantom contexts. The six-artifact inventory found all 174
 `3086` hits in the same 58 repeated triples, with no independent result.
 [Inventory and phaser candidates](operand-variants-and-macro-boundaries.md#reciprocal-control-context-inventory)
+
+The remaining phaser comparison needs the exact source of `bedb`, beyond
+its now-proved port-3 result. No counted static group binds the duplicated
+`1.4` producer literals. The pointer-preserving late-window method also
+provides a concrete approach for revisiting TRANSIENT's post-branch math
+cutpoints, without weakening the ordinary prefix tracer.

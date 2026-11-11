@@ -1041,3 +1041,26 @@ Their following port-3 stores correspond to explicit native clamp tails.
 The prefix tracer stops earlier at phase branches, leaving full late-window
 record/input provenance as the next step. No opcode semantics were inferred
 from inventory adjacency alone. The 303-test code checkpoint is unchanged.
+
+## Phaser late-store provenance and finite clamp execution
+
+The STPS and TVPS late windows now have checked provenance for both the
+pre-clamp port-2 store and the following clamped port-3 store. A bounded
+forward-join check proves all six phase branches enter the window with
+unchanged constructor/ring pointers and base index. Only those proved
+roots cross the projected pointer trace; the general tracer is unchanged.
+
+All 526 finite probes of STPS's actual native three-instruction clamp agree
+bit for bit. The test includes signed zero, subnormals and boundary neighbors.
+Twelve matching STPS-form contexts appear in two pinned Fantom lists.
+Exact BMC source selection and flags remain unresolved, so no strict DSP
+profile is added. Full phaser audio and instrument behavior are unverified.
+
+Qwen's counted-group lookup timed out at 180 seconds. An independent local
+scan of all 665 candidate descriptors confirms no width-three static group
+for either duplicated `1.4` pair. The result remains a bounded negative,
+with runtime groups and separate writes open. All 309 tests passed.
+
+The next Qwen task is a bounded TRANSIENT metadata extraction for the
+post-branch math track. It is limited to callback/constructor identities,
+import-call names and initial pointer loads; no machine-code execution.

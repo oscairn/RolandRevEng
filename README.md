@@ -32,6 +32,7 @@ Independent follow-up studies:
 - [OSC sine folding](docs/oscillator-sine-study.md): native polynomial, owned literals, four Fantom placements and bit-exact boundary execution.
 - [Native FETDRIVE fixture](docs/fragment-emulator.md#native-fetdrive-execution-fixture): complete native callback output and per-frame checks of the first shaped stores.
 - [Full FETDRIVE reference](docs/fragment-emulator.md#full-python-fetdrive-reference): exact native output agreement, eight checked history pairs and paired filter-literal ownership.
+- [Late phaser clamps](docs/operand-variants-and-macro-boundaries.md#late-phaser-clamp-stores-and-native-execution): branch-preserving store provenance, native finite-boundary execution and twelve Fantom contexts.
 - [Gain controls](docs/alu-controls-study.md): native def/use comparison of selected gain chains.
 - [Dry/wet MAC controls](docs/dry-wet-mac-study.md): symbolic mixing expressions for the established subset.
 - [MAC, allpass and store timing](docs/mac-controls-and-issue-study.md): additional exact arithmetic forms and pre-arithmetic stores.
@@ -164,7 +165,7 @@ were verified byte for byte; their unique title links remain valid. Continued
 research now covers 59 verified notes in this folder. Future vault
 updates target this subdirectory. The move manifest is
 `local/obsidian-applied-roland-move-2026-11-10.json`; the latest update manifest
-is `local/obsidian-applied-reciprocal-context-2026-11-10.json`. Current folder and manifest
+is `local/obsidian-applied-phaser-clamp-2026-11-10.json`. Current folder and manifest
 are recorded in `local/obsidian-location.json`. Earlier manifests describe historical paths.
 
 The research notes include the functional fragment emulator, official cross-model
