@@ -989,3 +989,20 @@ inputs and mismatched sine packet contexts have regression coverage.
 
 All 297 tests passed. A scoped tool-enabled Qwen job is preparing the
 complete native FETDRIVE fixture in ignored scratch files.
+
+## Native FETDRIVE fixture and first-store verification
+
+Tool-enabled Qwen produced and tested the complete native callback fixture.
+Review retained its implementation and reused the existing cutpoint checker
+to bind the two shaped stores to their constructor records and DSP operands.
+The native body has no helper calls or branches. All five live-coefficient
+records and the explicit ring graph remain alive across invocation.
+
+The locally repeated tests cover ring wrap, deterministic fresh renders,
+stereo output and overwrite refusal. A separate 12,000-frame run matches
+all 24,000 first shaped-store values bit for bit. The complete callback
+output is finite. Its later filters have no independent comparison yet;
+constructor filter defaults and software 48 kHz input are kept explicit.
+
+All 300 tests passed. A second Qwen job is deriving the full Python state
+reference for comparison against the now-executable native callback.

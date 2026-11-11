@@ -504,8 +504,10 @@ polynomial literals and direct boundary execution. The
 intervals and four Fantom placements. These do not establish DSP precision
 or exceptional-state effects.
 
-Next offline work is a complete native FETDRIVE fixture, independent
-contexts for exceptional arithmetic and further OSC waveforms. The
-FETDRIVE fixture is assigned to tool-enabled OMP/Qwen in ignored scratch
-files. Review and local execution remain required before integration.
-Qwen's exact rational sine expansion has been checked independently.
+The complete native FETDRIVE fixture has now passed review, local execution
+and per-frame comparison of both first shaped stores. Next is an independent
+full Python FETDRIVE state/reference model, assigned to tool-enabled OMP/Qwen
+in ignored scratch files. Review and local execution remain required before
+integration. Independent contexts for exceptional arithmetic and further
+OSC waveforms remain queued. Qwen's exact rational sine expansion has been
+checked independently.

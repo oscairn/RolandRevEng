@@ -285,3 +285,41 @@ above both clamp limits. All five stock placements predict the same values
 with this fixture. The model stops at the first stores, before the later
 filter and mixing stages. Isolated opcode semantics and hardware precision
 remain unverified.
+
+## Native FETDRIVE execution fixture
+
+```sh
+python tools/native_fetdrive_reference.py local/native-fetdrive-reference.wav \
+  --frames 12000 > local/native-fetdrive-reference.json
+python -m unittest discover -s tests -p test_native_fetdrive_reference.py -v
+```
+
+The pinned desktop ARM64 callback `2f7de4..2f81c4` now executes in an
+isolated macOS ARM64 process. The fixture checks the artifact hash,
+complete decoding, a conservative instruction allowlist, callback bounds,
+the final return and the five live-coefficient pointer fields. Its only
+data dependencies are supplied constructor memory, input/output pointers,
+live coefficient records and a cold 2,048-double ring. The existing
+cutpoint checker independently binds the first shaped stores to cells 3/4.
+
+The fixture retains constructor mono/stereo values `(0,1)`, drive scale
+`0.0015476426307448495` and post-rate gain `1`. Its live slots are
+master `1`, drive `0.5`, dry `0.5`, wet `0.5` and post `1`. The wrapper
+base is zero, and the explicit ring origin advances once per generated
+frame. Input tones are left `0.1*sin(220 Hz)` and right `0.08*sin(330 Hz)`
+on a software 48 kHz grid.
+
+At every frame, the retained shaped stores are compared bit for bit with
+`native_shaped_store()`. All 24,000 values agree in the 12,000-frame run,
+including ring wrap. The full native stereo output is finite, with peak
+`0.09773264180104757` and RMS `0.06125754092361567`. Three subprocess
+tests check wrap, fresh-render determinism and existing-output preservation.
+
+The WAV contains the complete native callback output. Only its first
+shaped stores have an independent arithmetic comparison in this fixture.
+Later filters still need their own model. Constructor filter coefficients
+are retained at their defaults while the test signals use 48 kHz; there
+is no sample-rate setup or preset calibration. DSP bytes, parent cadence,
+instrument routing and hardware precision are not executed or verified.
+Qwen wrote and ran the initial fixture. Local review added the existing
+constructor/cutpoint binding checks, then reran the tests and longer render.
