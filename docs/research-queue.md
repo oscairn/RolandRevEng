@@ -13,7 +13,16 @@ Next recover another useful exact producer/control context or an owner-proven
 nonempty label/continuation path; retain bounded opcode admission and hardware gates.
 Entry, runtime allocation and hardware calibration remain separate requirements.
 
-The next bounded milestone is complete (2026-11-11): the second filter and its
+The latest bounded milestone is complete (2026-11-11): all four stereo filter
+sections and both recombinations now execute in a 902-byte input chain, ending
+before resampling arithmetic. A separate native prefix matches 336,000 values
+through five wraps. The terminal short packet form and synthetic bridge stores
+are documented with their allocation limits. Save/sync this checkpoint and pause
+broader research as requested. On resumption, recover the resampling/drive producer
+and its history/coefficient timing to connect the already checked downstream
+clipping/cubic windows. Full FDRV and physical execution remain open.
+
+The preceding bounded milestone is complete (2026-11-11): the second filter and its
 recombination now form a 496-byte packet-only chain from the input. A separate
 native prefix captures the recombination output before the next filter begins;
 192,000 compared values match through five wraps. Save/sync this checkpoint and

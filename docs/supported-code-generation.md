@@ -5,6 +5,14 @@ and explicitly assigned indices into exact packet sequences independently matche
 against native FETDRIVE, LINEDRIVE and FDRV expressions. This is a constrained semantic code emitter and
 inverse decoder, not a general DSP assembler, scheduler or standalone engine.
 
+The [four-section milestone](fdrv-state-variable-filter.md#four-section-filter-bank-milestone-2026-11-11)
+adds 226-byte `state_variable_recombine_pair_with_output` and 202-byte
+`state_variable_terminal_pair_with_output` profiles. They compose a 902-byte
+input/filter-bank body with three original JSON assignments. The terminal retains
+154 exact stock bytes with short recombination packets; no new arithmetic words
+execute. Synthetic bridge cells are an explicit functional-fixture choice, with
+on-device allocation still unresolved. Resampling arithmetic remains excluded.
+
 The [second-filter milestone](fdrv-state-variable-filter.md#second-filter-and-recombination-milestone-2026-11-11)
 adds 194-byte `state_variable_pair_with_output` and 216-byte
 `state_variable_recombine_pair` forms. The latter retains 178 exact stock bytes,

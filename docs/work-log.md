@@ -1628,3 +1628,45 @@ commands and local496-byte logical/stored bodies are saved. Body hash:
 This bounded milestone is complete. Broader research pauses after the verified
 commit and Obsidian sync. Full FDRV, hardware precision, entry/return, ownership
 and safe live loading remain unresolved; no instrument was accessed.
+
+## Completed four-section filter-bank milestone (2026-11-11)
+
+Extended the packet-only input chain through the third and fourth stereo filter
+sections and their recombination, stopping before resampling arithmetic. The five
+86/194/226/194/202-byte fragments compose 902 logical/904 stored bytes and 53
+packets. The third 146-byte and terminal 154-byte stock bodies match the pinned
+native-paired image and all five Fantom relocations. New exact profiles add
+recombination output stores and the terminal short-packet context, reusing existing
+arithmetic. Shared resource checks preserve strict alias/type/range validation.
+
+Synthetic bridge cells 60/61 hexadecimal connect the independently initialized
+second/third fragments; their stores are authored and excluded from native state
+comparisons. They are not evidence of available on-device allocation. The raw
+final 0/3 stores do match native history writes. The owned native fixture executes
+494 original prefix instructions through 3058a4, plus the six original output and
+epilogue instructions. Some next-packet loads/stores execute, but the first
+resampling multiply is excluded. Pointer, stack and output lifetime checks remain
+enforced. The complete original callback is not executed by this fixture.
+
+The independent persistent packet ring matches 336,000 native-prefix values over
+12,000 frames and five wraps, ending at origin 1760. Nonzero C8/C9 and distinct
+nonzero C15..C19 prevent degenerate section/recombination coverage. A separate
+2,056-frame subprocess checks 57,568 values with auxiliary cursors 1/2. Pure
+terminal tests cover scalar recurrence/recombination, signed zeros, endpoints and
+seeded random signals; strict decoder and native mutation tests reject altered
+fields, arithmetic and provenance. One output-lifetime mutation initially targeted
+d0 before its final assignment; the test was corrected to clobber the live d1
+result, then extended to check d0 after its final assignment as well.
+
+Qwen supplied six invalid-input mutations. All are rejected by the assembler,
+but its intended T/S-adjacency case only repeats target mismatch. The actual
+adjacency mutation was added independently. No Qwen arithmetic was needed.
+All 452 tests pass in 62.903 seconds; tightened tag/duplicate-field and output
+mutation assertions are also checked in the focused suite. Three original JSON
+assignments and reproduction commands are saved. Local logical body SHA-256:
+35975c7fd5f68ee68078e35812931dbef7b625d8a6a47d5dfa1b10fac69e0398.
+
+This bounded milestone is complete. Save/push the verified checkpoint and sync
+the Roland Markdown notes, then pause broader work as requested. Resampling/drive
+and remaining full-FDRV integration, silicon precision/cadence, allocation,
+entry/return and safe live loading remain open. No instrument was accessed.

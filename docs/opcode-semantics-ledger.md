@@ -14,6 +14,12 @@ rounding, saturation, accumulator width or fused evaluation on silicon.
 
 ## Independently checked arithmetic contexts
 
+The [four-section FDRV checkpoint](fdrv-state-variable-filter.md#four-section-filter-bank-milestone-2026-11-11)
+adds exact terminal short-packet contexts for the existing recombination words
+and a store-extended profile. No new arithmetic word is admitted. The 902-byte
+composed chain matches 336,000 native-prefix values before resampling arithmetic;
+the whole effect and silicon semantics remain unresolved.
+
 | Control or base/extension pair | Functional result in the checked context | Evidence and scope |
 |---|---|---|
 | `0401 / 4501` short pair | A/B × I1 | [Gain study](alu-controls-study.md), EH tail |

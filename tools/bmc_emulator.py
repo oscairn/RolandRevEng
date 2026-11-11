@@ -48,7 +48,9 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
     spec = disassemble_fragment(program)
     native_coefficient_prefix = spec['kind'] in ('coefficient_shift4', 'register_add_mac_pair',
                                                 'state_variable_pair', 'stereo_prefilter',
-                                                'state_variable_pair_with_output', 'state_variable_recombine_pair')
+                                                'state_variable_pair_with_output', 'state_variable_recombine_pair',
+                                                'state_variable_recombine_pair_with_output',
+                                                'state_variable_terminal_pair_with_output')
     if (native_coefficient_prefix or spec['kind'] == 'clipped_half_pair') and not hasattr(math, 'fma'):
         raise ValueError('This native-reference profile requires Python 3.13+ math.fma')
     io_addresses = spec.get('input_addresses', DEFAULT_INPUT_ADDRESSES)

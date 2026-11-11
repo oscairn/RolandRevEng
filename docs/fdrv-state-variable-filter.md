@@ -1,9 +1,9 @@
 # A byte-executed stereo state-variable filter
 
-The [second-filter extension](#second-filter-and-recombination-milestone-2026-11-11)
-now forms a 496-byte packet-executed input/two-filter/recombination chain, checked
-against an explicitly bounded native prefix. The earlier 270-byte stage remains
-covered by its original full-callback comparison.
+The [four-section filter-bank milestone](#four-section-filter-bank-milestone-2026-11-11)
+now forms a 902-byte packet-executed input/filter/recombination chain, checked
+against a native prefix ending before resampling arithmetic. Earlier 270-byte
+and 496-byte checkpoints retain their separate original checks.
 
 The [original filtered voice](original-bmc-filtered-voice.md) now composes this
 component with the packet-executed oscillator/gain body and verifies shared
@@ -296,3 +296,80 @@ rejected. The accepted signs and values come from actual native execution and
 independent references. This milestone stops before the next filter section;
 full FDRV, silicon precision, live loading and entry/return remain open. Broader
 research pauses after saving this checkpoint, as requested.
+
+## Four-section filter-bank milestone (2026-11-11)
+
+The next bounded milestone is complete: input → prefilter → filters 1/2 →
+recombination → filters 3/4 → recombination executes through **902 logical bytes,
+904 stored bytes and 53 packets**. The five fragments take 86/194/226/194/202
+bytes. Concatenate logical bodies before word reversal and add only two final
+zero bytes; padding individual fragments changes the program. Logical SHA-256:
+`35975c7fd5f68ee68078e35812931dbef7b625d8a6a47d5dfa1b10fac69e0398`.
+
+The third section reuses the 194-byte filter-with-output profile. Its 146-byte
+arithmetic body matches stock FDRV `1aa..23c`. The fourth section adds the strict
+202-byte `state_variable_terminal_pair_with_output`: 38 authored preload bytes,
+154 exact stock bytes at `23c..2d6`, and 10 authored output-store bytes. Both
+bodies match all five pinned Fantom data/coefficient relocations. The terminal
+body uses the two short `1503` packets containing `1bc1/5bc5` and `09c1/49c5`;
+they have the established recombination math without unused following-section
+prefetches. No new arithmetic word or general packet family is admitted.
+
+Data cells below are hexadecimal; coefficient slots are decimal:
+
+| Section | Input | Incoming S/T pairs | Next S/T stores | Output | Coefficients |
+|---|---|---|---|---|---|
+| Third | authored bridge 60/61 | 35/36, 38/39 | 34/35, 37/38 | 26/27 | a..e = 15..19 |
+| Fourth | 26/27 | 3b/3c, 3e/3f | 3a/3b, 3d/3e | raw 0/3 | a..e = 15..19; g = 9 |
+
+The 226-byte `state_variable_recombine_pair_with_output` extends the earlier
+216-byte second-section form with explicit stores to **synthetic bridge cells
+60/61**. These bridge stores connect independently initialized fragments; they
+are not native stores or proof of available on-device scratch allocation. They
+are excluded from native state comparisons. Original first-filter outputs at
+24/25 remain intact. The raw final stores at 0/3 do correspond to native history
+writes. The composition preserves functional results, without claiming stock
+instruction count, scheduling or register lifetime across fragment boundaries.
+
+`tools/fdrv_filterbank_study.py` pins the image, exact bodies, constructor data
+bindings, live coefficient sequence and arithmetic anchors. Its owned native
+prefix contains **494 original instructions at 3050ec..3058a4**, followed by the
+six original output/epilogue instructions at 305e90..305ea8. This cut includes
+raw history stores and some loads from the next DSP packet; the first resampling
+multiply at 3058a4 is excluded. Checks preserve x2, the stack lifetime and final
+d1/d0 outputs. The complete original callback is explicitly **not executed** by
+this fixture. Later clipping/cubic requests are rejected with this shortened mode.
+
+A separate persistent packet ring receives only its declared initial canaries,
+external inputs and packet writes. Across 12,000 frames it matches **336,000
+native-prefix values**: 10 earlier-stage, 4 second-section state, and 14
+third/fourth state/output or final-port comparisons per frame. The count includes
+the raw 0/3 stores and final ports as separate observations. Five wraps end at
+origin 1760. The fixture uses nonzero binary32 C8/C9 and all five distinct, nonzero
+C15..C19 values, recorded in the local report. A separate 2,056-frame subprocess
+crosses wrap with auxiliary cursors 1/2 and matches 57,568 values. This is finite
+input/native-policy evidence, not exhaustive coefficient or silicon calibration.
+
+Pure tests independently compare terminal filter recurrence, fused recombination,
+signed zeros, g endpoints, seeded random inputs and output/state stores. Strict
+inverse tests reject changed headers/controls, coefficient tags, duplicate fields,
+bad resource aliases and partial/padded profiles. Native mutation tests reject
+altered arithmetic, coefficient provenance and pointer/stack/output clobbers.
+Qwen supplied six invalid-input suggestions; all fail assembly, but one duplicates
+target mismatch instead of testing T/S adjacency. The missing adjacency case was
+added independently. No Qwen math or firmware-validation claim was accepted.
+
+```sh
+python3.13 tools/fdrv_filterbank_study.py --execute-native --frames 12000
+python3.13 -m unittest discover -s tests -p 'test_fdrv_filterbank.py' -v
+python3.13 tools/bmc_subset.py assemble examples/state-variable-terminal-with-output.json local/terminal.bin --stored
+```
+
+Original assignments are `examples/state-variable-recombine-with-output.json`,
+`examples/state-variable-third-with-output.json` and
+`examples/state-variable-terminal-with-output.json`. Pure assembly and execution
+need no vendor artifacts; corpus checks need pinned local inputs, and the native
+fixture needs macOS ARM64/Python 3.13+. Broader research pauses after saving this
+checkpoint. Resampling/drive and the remaining full-FDRV integration, BMC
+precision/cadence, hardware allocation, entry/return and safe live loading remain
+open. No instrument was accessed.

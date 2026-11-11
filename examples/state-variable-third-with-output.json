@@ -1,0 +1,32 @@
+{
+  "kind": "state_variable_pair_with_output",
+  "sources": [
+    96,
+    54,
+    53,
+    97,
+    57,
+    56,
+    59,
+    62,
+    60,
+    63
+  ],
+  "targets": [
+    53,
+    56,
+    52,
+    55
+  ],
+  "coefficient_slots": [
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "output_addresses": [
+    38,
+    39
+  ]
+}

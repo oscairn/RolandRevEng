@@ -1,0 +1,34 @@
+{
+  "kind": "state_variable_recombine_pair_with_output",
+  "sources": [
+    36,
+    48,
+    47,
+    37,
+    51,
+    50,
+    53,
+    56,
+    54,
+    57
+  ],
+  "targets": [
+    47,
+    50,
+    46,
+    49
+  ],
+  "coefficient_slots": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    8,
+    15
+  ],
+  "output_addresses": [
+    96,
+    97
+  ]
+}
