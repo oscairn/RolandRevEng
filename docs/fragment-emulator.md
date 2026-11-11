@@ -1,9 +1,14 @@
 # Offline functional fragment emulator
 
-2026-11-10. `tools/bmc_emulator.py` executes logical packet bytes for nine checked profiles. Stereo input takes 10 bytes, the dry/wet tail
+2026-11-10. `tools/bmc_emulator.py` executes logical packet bytes for ten checked profiles. Stereo input takes 10 bytes, the dry/wet tail
 has 60-byte and 80-byte forms, and the four-stage allpass takes 82 bytes. This is a packet-stepping functional model with memory and
 per-packet traces. It is not yet a complete Roland effect or a cycle/bit-accurate
 BMC emulator. No vendor plugin or instrument is executed.
+
+The [completed input-to-first-filter stage](fdrv-state-variable-filter.md#completed-input-to-first-filter-stage-2026-11-11)
+combines an 86-byte native-policy prefilter and 184-byte filter. A separate packet-only
+ring matches 120,000 native callback values through five wraps. This removes the
+host-computed input mix from that stage's signal path; the rest of FDRV remains open.
 
 The [80-byte clipped half-sample pair](fdrv-cubic-waveshaping-study.md#stereo-half-sample-interpolation-and-clipping)
 adds two average-before-clip results, two direct clipped results and unmodified

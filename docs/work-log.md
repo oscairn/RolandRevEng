@@ -1560,3 +1560,37 @@ draft calculated the asymmetric example correctly but omitted inputs and assumed
 caller-map mutation; its code was rejected and working tests implemented locally.
 Updated the semantic ledger's stale cubic-admission statements and existing Roland
 notes. No firmware package, live device, output wrapper or silicon-precision claim.
+
+## Completed tonight's input-to-first-filter milestone (2026-11-11)
+
+Resumed only the bounded stage after Jacob explicitly requested continuation.
+The saved draft's failed binding was corrected to the actual constructor aliases:
+right history uses relative24, raw stores22/26, and mixed stores reuse1e/24.
+The physical mixed-store operands at5a/5c are also checked; validation was not
+weakened. The86-byte stereo_prefilter now matches all76 stock input bytes and
+adds ten authored mixed stores. Three binary32 coefficients, six explicit data
+reads and exact raw/mixed history aliases preserve the checked operation order.
+
+Combined with the184-byte state-variable profile, the270-byte signal path runs
+entirely through packet execution. Its separate persistent ring receives only
+external input samples and packet writes, never native intermediate samples or
+host-calculated mixed samples. The declared initial ring matches the fixture's
+nonzero background; independent scalar equations remain validation only.
+All120,000 raw/mixed/state/output comparisons match the native callback over
+12,000 frames and five wraps, ending at origin1760. A2056-frame subprocess test
+with auxiliary cursors1/2 independently crosses wrap. All five actual Fantom
+input spans execute the asymmetric vector identically. Qwen's checked expected
+outputs -1.875/5.625 agree, while its loose state/rounding claims were not used.
+
+Five new tests cover every packet state/write, coefficient timing and binary32
+rounding, exact fields/constants/resources, changed native arithmetic and aliases,
+all five pinned Fantom spans, and independent native execution through wrap.
+All441 tests pass in59.088 seconds; the focused suite passes again after refining
+platform/corpus skip guards. The original example and reproducible command are
+saved. Local270-byte logical/272-byte stored bodies have logical hash
+9912f101df3714156894a3b9bb7feb3c6225c468e33e3179fc68ebcd783637bb.
+
+The immediate milestone is complete. Broader research pauses after this verified
+commit and note sync, per Jacob's requested stopping point. No full-FDRV,
+physical-precision, live-loading or entry/return claim is made, and no device
+was accessed. Saved earlier WIP is historical and is superseded by this checkpoint.

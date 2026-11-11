@@ -1,0 +1,26 @@
+{
+  "kind": "stereo_prefilter",
+  "input_addresses": [
+    8214,
+    8215
+  ],
+  "sources": [
+    31,
+    32,
+    34,
+    35,
+    41,
+    44
+  ],
+  "targets": [
+    30,
+    33,
+    31,
+    34
+  ],
+  "coefficient_slots": [
+    5,
+    6,
+    7
+  ]
+}

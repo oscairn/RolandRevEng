@@ -154,3 +154,67 @@ check to both valid sign orientations, with explicit precision and pole tests.
 Native/firmware evidence, the emitter/interpreter and
 execution fixtures were derived and verified locally. Generated vendor artifacts
 remain under ignored `local/`; no binary is committed or installed.
+
+
+## Completed input-to-first-filter stage (2026-11-11)
+
+Tonight's bounded milestone is a **270-byte packet-executed stereo stage**:
+86-byte `stereo_prefilter` followed by the existing 184-byte state-variable filter.
+The signal path uses packet arithmetic throughout; host code supplies external
+input samples, declared initial state and one native-model ring-origin step.
+
+The prefilter computes each channel in the observed operation order:
+
+```text
+mixed = fma(old2, C7, fma(old1, C6, input * C5))
+```
+
+Live coefficients are read as binary32, while signals/state retain the native
+binary64/FMA policy. Its first 76 bytes match the stock FDRV input packets exactly;
+ten authored bytes store the two mixed results. `examples/stereo-prefilter.json`
+names the checked input pair, three coefficient slots, six source cells and four
+stores. Sources are `[Lold1,Lold2,Rold1,Rold2,nextSleft,nextSright]`; targets are
+`[rawLeft,rawRight,mixedLeft,mixedRight]`. The last two sources are coissued
+prefetches and do not affect the current outputs, but must be provided explicitly.
+
+For each channel, old1=raw+1, old2=raw+2 and mixed is stored at old1. The two
+channels and prefetches retain the exact distinctness restrictions. Advancing the
+native ring origin makes the following invocation read the previous raw and mixed
+values; this is not a general three-tap FIR contract. Raw stores use incoming
+ports before coissued arithmetic/loads. Coefficient changes become available in
+the next packet. All five Fantom input spans match after their actual data,
+coefficient and IO assignments, and asymmetric vectors execute identically.
+
+Constructor aliases are material: native mixed stores reuse the earlier source
+representatives at relative 1e/24 rather than new records for the later store
+operands at 5a/5c. The checker now verifies the real representatives and both stock
+store words. Native load/store paths, six arithmetic instructions and three live
+coefficient reads are independently anchored. Changed arithmetic, aliases,
+resources, headers and extensions are rejected.
+
+The combined checker uses a **separate persistent model ring** initialized from
+the declared fixture state. Only packet writes update it; no native intermediate
+sample is fed into its prefilter or filter. Parallel scalar/native checks remain
+validation oracles. A 12,000-frame run matches all 120,000 compared raw/mixed/state/
+output values against the native callback, crosses five origin wraps and ends at
+origin 1760. A separate 2,056-frame regression uses auxiliary cursors 1/2 and crosses
+a wrap. The original prefilter vectors produce left -1.875/right 5.625, with the raw
+inputs 4/-5 retained separately. Binary32 rounding and every packet state are tested.
+
+```sh
+python3.13 tools/fdrv_filter_study.py --input-stage --execute-native --frames 12000
+python3.13 -m unittest discover -s tests -p 'test_stereo_prefilter.py' -v
+python3.13 tools/bmc_subset.py assemble examples/stereo-prefilter.json local/prefilter.bin --stored
+```
+
+The prefilter alone is 86 logical/88 stored bytes. Concatenate logical fragments
+before padding/conversion: the combined stage is 270 logical/272 stored bytes.
+Its unrelocated logical hash is
+`9912f101df3714156894a3b9bb7feb3c6225c468e33e3179fc68ebcd783637bb`.
+Do not insert the prefilter's standalone padding before the filter fragment.
+
+This completes the input-to-first-filter milestone, not a complete FDRV effect or
+on-device engine. Outputs are functional A/B, with no entry/return wrapper or
+hardware output routing. BMC precision, cadence, live loading and ownership remain
+unverified. Qwen checked the asymmetric numbers; its loose state/rounding language
+was corrected against the actual packet trace and native callback.

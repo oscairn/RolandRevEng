@@ -13,6 +13,13 @@ Next recover another useful exact producer/control context or an owner-proven
 nonempty label/continuation path; retain bounded opcode admission and hardware gates.
 Entry, runtime allocation and hardware calibration remain separate requirements.
 
+Tonight's bounded input-stage milestone is complete (2026-11-11): the 86-byte
+stereo prefilter and 184-byte first filter execute entirely from packet bytes.
+The independent persistent model ring matches 120,000 native values through five
+wraps. Tests, original example and reproduction command are saved. Pause broader
+research after committing/syncing this checkpoint, as Jacob requested; require
+resumption before pursuing another block or hardware-loading gap.
+
 Latest emulator result (2026-11-11): exact clipped-half interpolation now executes
 80 bytes with verified unclipped history and average-before-clip order. Isolated
 native arithmetic, all five stock bodies and 12,000-frame callback cutpoints

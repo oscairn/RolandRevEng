@@ -5,6 +5,12 @@ and explicitly assigned indices into exact packet sequences independently matche
 against native FETDRIVE, LINEDRIVE and FDRV expressions. This is a constrained semantic code emitter and
 inverse decoder, not a general DSP assembler, scheduler or standalone engine.
 
+The [input-stage milestone](fdrv-state-variable-filter.md#completed-input-to-first-filter-stage-2026-11-11)
+adds `stereo_prefilter` and `examples/stereo-prefilter.json`: 86 logical bytes,
+three coefficient slots, exact raw/mixed history aliases and explicit prefetches.
+Combined with the existing filter it executes 270 logical bytes without a host
+input-mix calculation. Stored padding belongs only at the complete body's end.
+
 The [clipped half-sample pair](fdrv-cubic-waveshaping-study.md#stereo-half-sample-interpolation-and-clipping)
 adds an 80-byte `clipped_half_pair` profile and original JSON example. Four sources
 and six targets retain unclipped history, average-before-clip order and the

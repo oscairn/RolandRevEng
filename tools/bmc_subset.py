@@ -283,6 +283,35 @@ def assemble_clipped_half_pair(spec):
     ])
 
 
+def assemble_stereo_prefilter(spec):
+    if (not isinstance(spec, dict) or spec.get('kind') != 'stereo_prefilter'
+            or set(spec) != {'kind', 'input_addresses', 'sources', 'targets', 'coefficient_slots'}):
+        raise ValueError('Expected stereo_prefilter input, data and coefficient assignments')
+    input_pair(spec['input_addresses'])
+    for name, count, maximum in (('sources', 6, 0x800), ('targets', 4, 0x800),
+                                  ('coefficient_slots', 3, 0x1000)):
+        if (not isinstance(spec[name], list) or len(spec[name]) != count
+                or any(type(value) is not int or not 0 <= value < maximum for value in spec[name])):
+            raise ValueError('Invalid prefilter resource assignment')
+    l1, l2, r1, r2, next_l, next_r = spec['sources']
+    raw_l, raw_r, mixed_l, mixed_r = spec['targets']
+    if (l1 != raw_l+1 or l2 != raw_l+2 or r1 != raw_r+1 or r2 != raw_r+2
+            or [mixed_l, mixed_r] != [l1, r1]
+            or len(set(spec['sources']+[raw_l, raw_r])) != 8
+            or len(set(spec['coefficient_slots'])) != 3):
+        raise ValueError('Prefilter history/alias relations differ from the checked subset')
+    c5, c6, c7 = [0xc000 | value for value in spec['coefficient_slots']]
+    left, right = spec['input_addresses']
+    return assemble([
+        [0x3e07, 0x0fe0, 0x4fe2, 0x3fe4, left, right, c5],
+        [0xb88d, 0x2403, 0x6503, 0x0fe0, 0x3fe2, 0x8fe4, 0x4fe6, 0xcfe8,
+         l1, c6, raw_l, r1, raw_r],
+        [0x8f0b, 0x240b, 0x650b, 0x0fe4, 0x3fe6, 0x4fe8, 2, 6, l2, c7, r2],
+        [0x5f07, 0x08c2, 0x48c6, 0x2fe0, 0x6fe2, next_l, next_r],
+        [0x1e05, 0x8fe0, 0xcfe2, mixed_l, mixed_r],
+    ])
+
+
 def assemble_fragment(spec):
     if not isinstance(spec, dict):
         raise ValueError('Expected a JSON object')
@@ -300,12 +329,25 @@ def assemble_fragment(spec):
         return assemble_cubic_quad(spec)
     if spec.get('kind') == 'clipped_half_pair':
         return assemble_clipped_half_pair(spec)
+    if spec.get('kind') == 'stereo_prefilter':
+        return assemble_stereo_prefilter(spec)
     if spec.get('kind') == 'dry_wet_tail_with_scratch':
         return assemble_tail_with_scratch(spec)
     return assemble_tail(spec)
 
 
 def disassemble_fragment(stream):
+    if len(stream) == 86:
+        rows = [words for _, words in packets(stream)]
+        if [len(row) for row in rows] != [7, 13, 11, 7, 5]:
+            raise ValueError('Not an exact stereo_prefilter profile')
+        a, b, c, d, e = rows
+        spec = dict(kind='stereo_prefilter', input_addresses=a[4:6],
+                    sources=[b[8], c[8], b[11], c[10], *d[5:7]], targets=[b[10], b[12], *e[3:5]],
+                    coefficient_slots=[a[6] & 0xfff, b[9] & 0xfff, c[9] & 0xfff])
+        if assemble_stereo_prefilter(spec) != stream:
+            raise ValueError('Unsupported prefilter controls, extensions or resource fields')
+        return spec
     if len(stream) == 126:
         rows = [words for _, words in packets(stream)]
         if len(rows) != 11 or [len(row) for row in rows] != [5, 7, 6, 5, 5, 8, 8, 5, 3, 4, 7]:

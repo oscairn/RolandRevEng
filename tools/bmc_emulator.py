@@ -47,7 +47,7 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
         raise ValueError('Program must be logical bytes')
     spec = disassemble_fragment(program)
     native_coefficient_prefix = spec['kind'] in ('coefficient_shift4', 'register_add_mac_pair',
-                                                'state_variable_pair')
+                                                'state_variable_pair', 'stereo_prefilter')
     if (native_coefficient_prefix or spec['kind'] == 'clipped_half_pair') and not hasattr(math, 'fma'):
         raise ValueError('This native-reference profile requires Python 3.13+ math.fma')
     io_addresses = spec.get('input_addresses', DEFAULT_INPUT_ADDRESSES)
@@ -99,7 +99,7 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
                     raise ValueError('Unsupported transfer port')
                 continue
             if word in (0x0403, 0x4503, 0x2443, 0x6547, 0x2410, 0x6510,
-                        0x1400, 0x5504, 0x1440, 0x5544):
+                        0x1400, 0x5504, 0x1440, 0x5544, 0x2403, 0x6503):
                 destination, source, operand = (word >> 12) & 7, (word >> 6) & 7, word & 63
                 if operand < 8:
                     factor = old_value(operand)
@@ -136,7 +136,10 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
                     value = _fma(s, old_value(3), -old_value(destination))+old_value(destination-1)
                 else:
                     raise ValueError('Unsupported state-variable long extension pair')
-            elif word in (0x08c2, 0x49c6):
+            elif word in (0x240b, 0x650b) and pool[:2] == [2, 6]:
+                destination, main = (2, 0) if word == 0x240b else (6, 4)
+                value = _fma(old_value(main), old_value(3), old_value(destination))
+            elif word in (0x08c2, 0x48c6, 0x49c6):
                 destination = 0 if word == 0x08c2 else 4
                 value = _fma(old_value(destination), old_value(3), old_value(destination+2))
             elif word in (0x1c4b, 0x5d4f) and pool == [0x1002, 0x5006]:

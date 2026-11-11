@@ -36,6 +36,8 @@ rounding, saturation, accumulator width or fused evaluation on silicon.
 
 | FDRV `33c..378` interpolation/clipping context plus authored preload/store | Two half-sample averages followed by clipping, two direct clips and unclipped history stores | [Clipped-half study](fdrv-cubic-waveshaping-study.md#stereo-half-sample-interpolation-and-clipping), exact 80-byte profile; no universal long-form or limiter decoding |
 
+| FDRV input `0..4c`, plus authored mixed stores | Per channel, input×C5 followed by two ordered FMAs; raw/history stores and coissued prefetches | [Input stage](fdrv-state-variable-filter.md#completed-input-to-first-filter-stage-2026-11-11), exact 86-byte `stereo_prefilter`; combined 270-byte stage checked against native execution, no general opcode admission |
+
 For the first gain row the slash separates two **short controls**. In long rows,
 it separates a base control from its extension. Headers and shared pool layout
 determine which interpretation applies. Read the linked context before using a row.

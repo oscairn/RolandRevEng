@@ -94,7 +94,7 @@ def report():
 
 
 def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds=None,
-                  compare_cubic=False, compare_clip=False):
+                  compare_cubic=False, compare_clip=False, compare_input_stage=False):
     import ctypes
     import struct
     import lib
@@ -134,6 +134,9 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
     values[5] = 1.0
     values[10:15] = [-.4973, -.2531, .3737, .1279, -.0623]
     values[15:20] = [-.5, -.25, 0, .5, 0]
+    if compare_input_stage:
+        prefilter_report()
+        values[5:8] = list(map(_float32, (.7313, .1279, .0623)))
     if compare_cubic or compare_clip:
         values[0] = .75
     records = []
@@ -155,6 +158,13 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
     outputs = (ctypes.c_void_p*2)(ctypes.addressof(out_left), ctypes.addressof(out_right))
     origin, count, cubic_count, cubic_input_values = 0, 0, 0, set()
     clip_count = 0
+    stage_count = 0
+    if compare_input_stage:
+        from bmc_emulator import execute_fragment
+        from bmc_subset import assemble_fragment
+        stage_specs = [prefilter_spec(), filter_spec()]
+        stage_programs = [assemble_fragment(spec) for spec in stage_specs]
+        model_ring = list(fixture.ring)
     if compare_emulator:
         from bmc_emulator import execute_fragment
         from bmc_subset import assemble_fragment
@@ -184,6 +194,15 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                      for old1, old2, sample in ((0x1f, 0x20, left.value), (0x22, 0x23, right.value))]
             model = [filter_step(y, read(s), read(s+1), *values[10:15])
                      for y, s in zip(mixed, (0x29, 0x2c), strict=True)]
+            if compare_input_stage:
+                for fragment, assignment in zip(stage_programs, stage_specs, strict=True):
+                    data = {cell: model_ring[native_ring_index(cell, 0, origin)]
+                            for cell in assignment['sources']}
+                    stage = execute_fragment(fragment, data, dict(enumerate(values)),
+                                             {0x2016: left.value, 0x2017: right.value})
+                    for step in stage['trace']:
+                        for cell, value in step['writes'].items():
+                            model_ring[native_ring_index(cell, 0, origin)] = value
             if compare_emulator:
                 data = {cell: read(cell) for cell in spec['sources']}
                 data.update({0x1f: mixed[0], 0x22: mixed[1]})
@@ -196,6 +215,15 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                             raise ValueError('Byte-emulated filter differs from independent reference')
             struct.pack_into('<I', fixture.ring_context, 0x20, origin)
             invoke(ctypes.addressof(fixture.wrapper), ctypes.addressof(inputs), ctypes.addressof(outputs))
+            if compare_input_stage:
+                for cell in (0x1e, 0x21, 0x1f, 0x22, 0x28, 0x29, 0x2b, 0x2c):
+                    if read(cell).hex() != model_ring[native_ring_index(cell, 0, origin)].hex():
+                        raise ValueError('Independent packet input-stage state differs from native callback')
+                    stage_count += 1
+                for cell, port in ((0x24, 0), (0x25, 4)):
+                    if read(cell).hex() != stage['ports'][port].hex():
+                        raise ValueError('Independent packet input-stage output differs from native callback')
+                    stage_count += 1
             for index, item in enumerate(model):
                 for cell, expected in ((0x1f+3*index, mixed[index]), (0x28+3*index, item['state_s']),
                                        (0x29+3*index, item['state_t']), (0x24+index, item['output'])):
@@ -238,6 +266,7 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                 emulator_checked=compare_emulator, native_callback_executed=True,
                 conditional_cubic_values_checked=cubic_count,
                 conditional_clipped_values_checked=clip_count,
+                independent_packet_input_stage_values=stage_count,
                 distinct_cubic_input_values=len(cubic_input_values),
                 bmc_hardware_executed=False, coefficient_sources=values[10:15],
                 coefficients=list(map(_float32, values[10:15])))
@@ -249,6 +278,52 @@ def filter_spec():
                 targets=[0x29, 0x2c, 0x28, 0x2b], coefficient_slots=[10, 11, 12, 13, 14])
 
 
+def prefilter_spec():
+    return dict(kind='stereo_prefilter', input_addresses=[0x2016, 0x2017],
+                sources=[0x1f, 0x20, 0x22, 0x23, 0x29, 0x2c],
+                targets=[0x1e, 0x21, 0x1f, 0x22], coefficient_slots=[5, 6, 7])
+
+
+def prefilter_report():
+    import lib
+    if hashlib.sha256(lib.Z).hexdigest() != NATIVE_SHA256:
+        raise ValueError('Expected the pinned native image')
+    from bmc_subset import assemble_fragment
+    from limit_control_study import checked_access, native_context
+    from weighted_mix_study import require_instructions
+    program, native, _, fields, trace = native_context('SIM_MFX_FDRV')
+    if (assemble_fragment(prefilter_spec())[:76] != program[:0x4c]
+            or program[0x5a:0x5e] != bytes.fromhex('001f0022')):
+        raise ValueError('Prefilter differs from stock input packets')
+    for pc, shape in ((0x305148, (('fmul', 'd5, d0, d2'),)),
+                      (0x305170, (('fmul', 'd2, d1, d2'),)),
+                      (0x3051a0, (('fmadd', 'd3, d3, d4, d5'),)),
+                      (0x3051b4, (('fmadd', 'd0, d0, d4, d2'), ('fmadd', 'd1, d1, d6, d3'))),
+                      (0x3051cc, (('fmadd', 'd0, d5, d6, d0'),))):
+        require_instructions(native, pc, shape)
+    bindings = []
+    for pc, kind, field, cell in ((0x305138, 'read', 0x1e, 0x1f),
+                                 (0x30516c, 'read', 0x24, 0x22),
+                                 (0x305190, 'read', 0x38, 0x20),
+                                 (0x3051b0, 'read', 0x3c, 0x23),
+                                 (0x30515c, 'write', 0x22, 0x1e),
+                                 (0x305180, 'write', 0x26, 0x21),
+                                 (0x3051c8, 'write', 0x1e, 0x1f),
+                                 (0x3051dc, 'write', 0x24, 0x22)):
+        bindings.append(checked_access(native, fields, trace, pc, kind, field, cell))
+    for pc, slot in ((0x305114, 5), (0x305140, 6), (0x305198, 7)):
+        if dict(pc=pc, slot=slot, width=4) not in trace['coefficient_reads']:
+            raise ValueError('Prefilter coefficient source differs')
+    owned = {0x1e, 0x21, 0x1f, 0x22, 0x28, 0x29, 0x2b, 0x2c}
+    if any(access['kind'] == 'write' and access['pc'] > 0x3053ac
+           and any(fields[key]['address'] in owned for key in access['fields'])
+           for access in trace['accesses']):
+        raise ValueError('Input-stage state is overwritten by a later component')
+    return dict(native_sha256=NATIVE_SHA256, stock_bytes=76, profile_bytes=86, combined_bytes=270,
+                combined_stored_bytes=272, bindings=bindings,
+                coefficient_slots=[5, 6, 7], hardware_execution_verified=False)
+
+
 if __name__ == '__main__':
     import argparse
     import json
@@ -256,8 +331,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--frames', type=int, default=128)
     parser.add_argument('--execute-native', action='store_true')
+    parser.add_argument('--input-stage', action='store_true')
     args = parser.parse_args()
     result = report()
+    if args.input_stage:
+        result['input_stage'] = prefilter_report()
     if args.execute_native:
-        result['native_check'] = native_check(args.frames, compare_emulator=True)
+        result['native_check'] = native_check(args.frames, compare_emulator=True,
+                                              compare_input_stage=args.input_stage)
     print(json.dumps(result, indent=2, allow_nan=False))
