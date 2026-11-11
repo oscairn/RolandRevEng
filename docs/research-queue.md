@@ -588,9 +588,11 @@ single-class/numeric rejection was independently corrected.
 The [state-variable filter pass](fdrv-state-variable-filter.md) now resolves the
 first complete stereo block and adds a 184-byte byte-executed template. Its
 native sign, state aliases, shared coefficients and one-level auxiliary lifetime
-are checked. Next is composing this reusable filter with the original oscillator
-voice, verifying shared resources and seed dependencies across the five owner
-layouts, while continuing the remaining arithmetic, routing and control-flow work.
+are checked. The [original filtered voice](original-bmc-filtered-voice.md) now
+completes that composition: 384 bytes, ten seeds and eleven coefficients, with
+all five layouts verified through wrap and nonseed canaries. Next are nonlinear
+waveform producers and remaining arithmetic/control semantics, alongside live
+ownership, routing, initialization and entry/return requirements.
 
 The resource planner exports original logical/stored bodies and manifests only.
 It verifies all thirty transfer operands while protecting every other byte,

@@ -5,6 +5,12 @@ has 60-byte and 80-byte forms, and the four-stage allpass takes 82 bytes. This i
 per-packet traces. It is not yet a complete Roland effect or a cycle/bit-accurate
 BMC emulator. No vendor plugin or instrument is executed.
 
+The [original filtered voice](original-bmc-filtered-voice.md) now composes four
+existing profiles in one ring. All 24,000 channel values match a separately
+rendered oscillator voice plus independent scalar filter through five wraps,
+and all five relocated bodies match with nonseed canaries. This composition adds
+no new opcode admission or hardware precision claim.
+
 The [84-byte add/MAC profile](auxiliary-save-restore-and-add-mac.md) adds two
 proved register sums, their following shared-factor MACs, pre-arithmetic
 port-1/port-5 stores and next-packet loads. Its binary32 coefficient and

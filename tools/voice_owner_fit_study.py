@@ -7,18 +7,28 @@ from effect_lifecycle_study import IMAGE_SHA256, OWNERS
 from kernel_abi import segment_info
 
 
-def requirements():
-    prefix, allpass, tail = [disassemble_fragment(program) for program in programs()]
-    data = sorted(set([prefix['target'], *allpass['sources'], *allpass['targets'],
-                       *tail['wet_addresses'], *tail['scratch_addresses']]))
-    coefficients = sorted(set(prefix['coefficient_slots']+tail['coefficient_slots']))
-    return dict(body_bytes=sum(map(len, programs())), data_indices=data,
+def requirements(fragments=None):
+    fragments = programs() if fragments is None else fragments
+    specs = [disassemble_fragment(program) for program in fragments]
+    kinds = [spec['kind'] for spec in specs]
+    base_kinds = ['coefficient_shift4', 'allpass4', 'dry_wet_tail_with_scratch']
+    if kinds not in (base_kinds, base_kinds+['state_variable_pair']):
+        raise ValueError('Expected an original voice with its optional state-variable filter')
+    prefix, allpass, tail = specs[:3]
+    data = [prefix['target'], *allpass['sources'], *allpass['targets'],
+            *tail['wet_addresses'], *tail['scratch_addresses']]
+    coefficients = prefix['coefficient_slots']+tail['coefficient_slots']
+    if len(specs) == 4:
+        data += specs[3]['sources']+specs[3]['targets']
+        coefficients += specs[3]['coefficient_slots']
+    data, coefficients = sorted(set(data)), sorted(set(coefficients))
+    return dict(body_bytes=sum(map(len, fragments)), data_indices=data,
                 coefficient_indices=coefficients, data_extent=max(data)+1,
                 coefficient_extent=max(coefficients)+1)
 
 
-def fit(owner):
-    needed = requirements()
+def fit(owner, fragments=None):
+    needed = requirements(fragments)
     if any(len(group) != 1 for group in (owner['render'], owner['memories'][0], owner['memories'][6])):
         raise ValueError('Expected one render, enum-0 and enum-6 reservation')
     program, data, coefficients = owner['render'][0], owner['memories'][0][0], owner['memories'][6][0]

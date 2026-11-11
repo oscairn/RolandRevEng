@@ -1,6 +1,6 @@
 # BMC DSP packet and loader map
 
-2026-11-09, extended 2026-11-10. Follow-up to **BMC DSP ISA**, **BMC chips**, and **Fantom-0 research**.
+2026-11-09, extended 2026-11-10 and 2026-11-11. Follow-up to **BMC DSP ISA**, **BMC chips**, and **Fantom-0 research**.
 Target: Fantom-0 v1.08, especially Fantom-07; local ZENOLOGY arm64 implementation as a
 comparison. This is static interoperability research. No firmware was installed, no
 instrument was accessed, and no program has been tested on a BMC.
@@ -10,6 +10,12 @@ control-word/payload split, explicitly sized coefficient decoding, voice-side im
 locations, and a concrete CORE1 program-loading map. It does **not** yet support compiling
 an arbitrary C/C++ synth to the render DSPs. Most arithmetic opcodes, scheduling, precision
 and resource rules remain unresolved.
+
+The [original filtered voice](original-bmc-filtered-voice.md) now composes
+oscillation, gain and lowpass processing into 384 static bytes. Ten seed values
+and eleven coefficients suffice under the model, with all five Fantom layouts
+verified through wrap. Body load/entry/return addresses remain null; live graph
+ownership, output routing and hardware timing/precision are still unverified.
 
 The [184-byte state-variable filter](fdrv-state-variable-filter.md) now executes
 the complete first FDRV stereo filter component, including its producer arithmetic
@@ -634,8 +640,8 @@ The next work should proceed in this order:
    Preserve the stock instance's recovered shared IO assignments and determine both BMCs' clock/routing roles,
    and how custom engine buffers enter and leave that context. ERAM kernels also need
    the DRAM-IO scheduler/FIFO contract.
-6. **Extend the constrained emitter into an engine backend.** The two independently
-   checked mix/filter fragment templates already emit control/payload records and
+6. **Extend the constrained emitter into an engine backend.** The independently
+   checked mix/filter/state fragment templates already emit control/payload records and
    preserve their observed ordering. A general backend must additionally handle
    remaining instruction forms, labels/relocations, initial state, resource bounds and a
    proven schedule. The existing fragments are not complete executable kernels;

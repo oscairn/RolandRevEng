@@ -1,5 +1,10 @@
 # Original BMC oscillator voice with stereo gain/output
 
+Follow-up: the [original filtered voice](original-bmc-filtered-voice.md) retains
+this entire 200-byte body and appends the checked stereo lowpass component.
+It adds four state seeds and five coefficient slots while retaining data extent
+146. The original unfiltered behavior below remains independently verified.
+
 2026-11-10. `tools/bmc_allpass_voice.py` composes the original feedback
 oscillator with the supported stereo gain and scratch-output profile. All
 per-frame signal arithmetic runs through packet bytes. The host computes five

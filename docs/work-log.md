@@ -1339,3 +1339,36 @@ requested positive-g/q stability subset to both mathematical sign orientations.
 Native/firmware evidence, byte backend and execution fixtures were derived locally.
 Next is a filtered original oscillator voice with verified shared resources and
 seeds across the five owners; entry, ownership and hardware calibration stay open.
+
+## Original filtered voice and owner plans (2026-11-11)
+
+The oscillator/gain body now composes with the admitted lowpass filter into
+384 static bytes and 28 packets. Filter inputs use the existing 90/91 scratch
+samples; its four state seeds occupy separate cells. Final unused prefetches
+borrow current oscillator stores at 20/30/40/50, keeping exactly ten required
+initial values. Data extent remains 146 and coefficient extent becomes eleven,
+within each recorded owner's numerical capacities. Each profile initializes
+the ports it consumes; all four share one ring and one origin advance per frame.
+
+The authored lowpass helper supplies rounded a/b/c/d/e values and rejects
+nonfinite, zero-g and unstable positive-g/q designs. Its cutoff is nominal and
+the software clock is explicit. A separately rendered original voice plus scalar
+filter matches all 24,000 channel values through 12,000 frames. The renderer uses
+five oscillator-seed sine calls and one filter-design sine call at initialization,
+with no per-sample host waveform or filter calculation outside packet execution.
+
+The existing planner's default 200-byte mode remains tested. Optional cutoff mode
+relocates all 58 transfer fields while protecting 268 other bytes, including mixed
+header contexts whose general grammar remains opaque. All five 12,000-frame
+canary runs match 120,000 output values and end at origin 1760. Exported original
+body bytes/manifests verify against their hashes, and a new stereo WAV is generated
+under ignored local output. Ten CPU data-source rows and eleven coefficient-source
+rows retain the source-buffer versus raw-DSP-format distinction.
+
+Qwen returned the bounded design draft in 23.1 seconds. Review retained the math,
+fixed coefficient labels and the rate-derived bound, replaced a weak absolute
+stopband assertion with a relative response check, and verified returned values
+are already binary32. Composition, dataflow, byte protection, relocation and
+independent renders were implemented and checked locally. All 403 tests passed in
+45.987 seconds. Load/entry/return remain null, ownership/output routing and physical
+timing/precision remain unverified, and no firmware package or device write is made.

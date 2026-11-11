@@ -1,10 +1,17 @@
 # Relocated original voice bodies for Fantom resource layouts
 
-2026-11-10. `tools/fantom_voice_plan.py` now builds the original 200-byte
+2026-11-10, extended 2026-11-11. By default, `tools/fantom_voice_plan.py` builds the original 200-byte
 stereo voice with explicit data, coefficient and input-address assignments
 from each of the five recorded Fantom owners. An independent byte check
 verifies the relocation; packet execution reproduces the original model's
 outputs through ring wrap with nonzero canaries outside the six seeded cells.
+
+With `--cutoff`, the planner now selects the
+[384-byte original filtered voice](original-bmc-filtered-voice.md): ten seeds,
+eleven coefficients and 58 protected transfer fields across the same five layouts.
+All other body bytes are preserved, and the default 200-byte behavior remains
+covered by its existing tests. The unfiltered details below retain their own
+six-seed/thirty-field scope; the linked filtered study records the new variant.
 
 These are executable **offline fragment bodies**, not load-ready instrument
 programs. The builder emits no entry/return wrapper or output-IO stores and
@@ -32,7 +39,7 @@ Addresses and indices in this table are hexadecimal. The descriptors describe
 occupied stock instances; they are not available custom allocations. A program
 list's header DSP byte is not substituted for the selected manager DSP.
 
-The builder inverse-decodes the three original profiles, adjusts their named
+For the default unfiltered body, the builder inverse-decodes three original profiles, adjusts their named
 resource fields, and reassembles them:
 
 - Add enum-0 base to data sources, targets, wet values, factor and scratch cells.
@@ -50,7 +57,7 @@ results in functional main A/B after actual scratch stores and reloads.
 Frequency, amplitude and gain affect seed/parameter values, not the compiled
 body bytes. Live parameter scheduling and reseeding are not implemented.
 
-## Independent byte-level verification
+## Independent byte-level verification for the 200-byte default
 
 The verifier starts again from the original bytes, walks their packet headers
 and locates only family-4 indexed transfer operands. It applies the expected
@@ -72,7 +79,7 @@ is still exactly 200 bytes. Each plan records both logical and stored hashes.
 The default DSP4-layout logical body hash is
 `e550f733ce6979b74496d2c79900785508ac92ae35b256e5fca5f900b3909edc`.
 
-## Six required initial data values
+## Six required initial data values for the unfiltered default
 
 The read-before-write analysis follows packet memory order: current-packet
 reads use the memory available before current-packet stores commit. It finds
@@ -104,7 +111,7 @@ hardware initialization claim.
 
 ## Value representations and generated artifacts
 
-The manifest contains requested native-policy binary64 values, six separately
+The default manifest contains requested native-policy binary64 values, six separately
 rounded CPU binary32 data-source rows and six coefficient-source rows. Each
 CPU row includes its little-endian source bytes. Those bytes are **CPU source
 buffers**, not a raw DSP storage format. The

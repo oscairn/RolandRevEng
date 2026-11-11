@@ -23,6 +23,12 @@ auxiliary save/restore per port, with no arbitrary nesting or stack-depth claim.
 The 146-byte body matches the native-paired stream and all five Fantom placements.
 The native ring convention and all hardware entry/ownership gates remain explicit.
 
+The [original filtered voice](original-bmc-filtered-voice.md) composes those
+profiles into 384 bytes with ten seeds and eleven coefficients. The resource
+planner's optional `--cutoff` mode relocates only 58 checked transfer fields;
+the other 268 bytes remain protected. This adds a complete offline voice body
+without a general compiler, runtime allocation or executable wrapper.
+
 The [original stereo oscillator voice](original-bmc-stereo-voice.md) composes
 three existing profiles into a static 200-byte body. Its resource-fit checker
 compares decoded requirements with five real Fantom owners; it emits no relocated

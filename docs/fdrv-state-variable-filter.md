@@ -1,5 +1,9 @@
 # A byte-executed stereo state-variable filter
 
+The [original filtered voice](original-bmc-filtered-voice.md) now composes this
+component with the packet-executed oscillator/gain body and verifies shared
+state, ten seeds, eleven coefficients and all five recorded owner layouts.
+
 2026-11-10. Native ZENOLOGY arm64 SHA-256
 `b8ba7f41e26bef91e2cc38e99452e7795cd132e9f2a59695a68a77f18b8a2c30`.
 Fantom CORE1 payload SHA-256

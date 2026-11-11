@@ -2,6 +2,7 @@
 import argparse
 import hashlib
 import json
+import math
 from pathlib import Path
 import struct
 
@@ -21,15 +22,23 @@ from voice_owner_fit_study import fit
 
 
 def transfer_fields(fragments):
-    """Read indexed transfer fields only, within the three admitted voice profiles."""
-    if [disassemble_fragment(fragment)['kind'] for fragment in fragments] != [
-            'coefficient_shift4', 'allpass4', 'dry_wet_tail_with_scratch']:
-        raise ValueError('Expected the three original voice profiles')
+    """Read transfer fields only within exact voice/optional filter profiles."""
+    kinds = [disassemble_fragment(fragment)['kind'] for fragment in fragments]
+    base_kinds = ['coefficient_shift4', 'allpass4', 'dry_wet_tail_with_scratch']
+    if kinds not in (base_kinds, base_kinds+['state_variable_pair']):
+        raise ValueError('Expected the original voice with its optional state-variable filter')
     stream = b''.join(fragments)
+    filter_start = sum(map(len, fragments[:3]))
     result = []
     for packet, words in packets(stream):
         count = command_count(words[0])
-        for operation, kind in enumerate(families(words[0])):
+        if len(fragments) == 4 and packet >= filter_start:
+            # The exact filter recognizer gates this walk; miscellaneous grammar stays opaque.
+            types = [4 if control & 0xff0 == 0xfe0 and not control & 1 else None
+                     for control in words[1:1+count]]
+        else:
+            types = families(words[0])
+        for operation, kind in enumerate(types):
             if kind != 4:
                 continue
             control = words[operation+1]
@@ -54,13 +63,13 @@ def required_initial_data(fragments):
     return sorted(needed)
 
 
-def verify_relocation(fragments, data_base, coefficient_base, inputs):
+def verify_relocation(fragments, data_base, coefficient_base, inputs, original=None):
     """Independently patch transfer fields in original bytes; protect every other byte."""
     if any(type(value) is not int or not 0 <= value < maximum for value, maximum
            in ((data_base, 0x800), (coefficient_base, 0x1000))):
         raise ValueError('Invalid data/coefficient base')
     input_pair(inputs)
-    original = voice.programs()
+    original = voice.programs() if original is None else original
     expected = bytearray(b''.join(original))
     changes = []
     for field in transfer_fields(original):
@@ -86,18 +95,33 @@ def verify_relocation(fragments, data_base, coefficient_base, inputs):
     return changes
 
 
-def build_plan(core, owner_address, frequency=440, gain=0.5, amplitude=0.25):
+def build_plan(core, owner_address, frequency=440, gain=0.5, amplitude=0.25,
+               cutoff=None, damping=math.sqrt(2)):
     if type(owner_address) is not int:
         raise ValueError('Expected an integer owner descriptor address')
+    if cutoff is None and damping != math.sqrt(2):
+        raise ValueError('A damping control requires a filter cutoff')
     _, _, stock = load_context(core, owner_address)
-    resources = fit(segment_info(core, owner_address))
+    if cutoff is None:
+        original = voice.programs()
+        _, coefficients, seed = oscillator.initialize(frequency, amplitude)
+        gain = _finite(gain)
+        if not 0 <= gain <= 1:
+            raise ValueError('Expected gain in 0..1')
+        coefficients.update({2: 0.0, 3: _float32(gain), 4: 1.0, 5: 1.0})
+    else:
+        import bmc_filtered_voice as filtered
+        original = filtered.programs()
+        _, coefficients, seed = filtered.initialize(frequency, amplitude, gain, cutoff, damping)
+        gain = _finite(gain)
+    resources = fit(segment_info(core, owner_address), original)
     if not resources['body_capacity_fits']:
         raise ValueError('Voice body exceeds the recorded owner capacities')
     data_base, coefficient_base = resources['enum0']['base'], resources['enum6']['base']
     inputs = stock['fragments'][0]['assignment']['input_addresses']
-    specs = [disassemble_fragment(fragment) for fragment in voice.programs()]
+    specs = [disassemble_fragment(fragment) for fragment in original]
     for spec in specs:
-        if spec['kind'] != 'allpass4':
+        if spec['kind'] in ('coefficient_shift4', 'dry_wet_tail_with_scratch'):
             spec['input_addresses'] = inputs.copy()
         for key in ('target', 'sources', 'targets', 'wet_addresses', 'scratch_addresses'):
             if key in spec:
@@ -106,12 +130,7 @@ def build_plan(core, owner_address, frequency=440, gain=0.5, amplitude=0.25):
         if 'coefficient_slots' in spec:
             spec['coefficient_slots'] = [coefficient_base+slot for slot in spec['coefficient_slots']]
     fragments = tuple(assemble_fragment(spec) for spec in specs)
-    changes = verify_relocation(fragments, data_base, coefficient_base, inputs)
-    _, coefficients, seed = oscillator.initialize(frequency, amplitude)
-    gain = _finite(gain)
-    if not 0 <= gain <= 1:
-        raise ValueError('Expected gain in 0..1')
-    coefficients.update({2: 0.0, 3: _float32(gain), 4: 1.0, 5: 1.0})
+    changes = verify_relocation(fragments, data_base, coefficient_base, inputs, original)
     coefficients = {coefficient_base+index: value for index, value in coefficients.items()}
     initial_data = {data_base+index: value for index, value in seed['initial_data'].items()}
     needed = required_initial_data(fragments)
@@ -140,13 +159,16 @@ def build_plan(core, owner_address, frequency=440, gain=0.5, amplitude=0.25):
                   load_address=None, entry_address=None, return_address=None,
                   wrapper_included=False, output_io_writes_included=False,
                   runtime_ownership_verified=False, hardware_execution_verified=False, execution_ready=False)
+    if cutoff is not None:
+        result['filter_design'] = seed['filter_design']
     return fragments, result
 
 
-def render_check(core, owner_address, frames=2056, frequency=440, gain=0.5, amplitude=0.25):
+def render_check(core, owner_address, frames=2056, frequency=440, gain=0.5, amplitude=0.25,
+                 cutoff=None, damping=math.sqrt(2)):
     if type(frames) is not int or not 128 <= frames <= 1000000:
         raise ValueError('Expected 128..1000000 verification frames')
-    fragments, result = build_plan(core, owner_address, frequency, gain, amplitude)
+    fragments, result = build_plan(core, owner_address, frequency, gain, amplitude, cutoff, damping)
     ring = [0.125+index/65536 for index in range(2048)]
     for cell, value in result['initial_data'].items():
         ring[cell] = value
@@ -166,7 +188,11 @@ def render_check(core, owner_address, frames=2056, frequency=440, gain=0.5, ampl
                     ring[native_ring_index(cell, 0, origin)] = value
         rows.append((executed['ports'][0], executed['ports'][4]))
         origin = advance_native_origin(origin)
-    baseline, _ = voice.render(frames, frequency, amplitude, gain)
+    if cutoff is None:
+        baseline, _ = voice.render(frames, frequency, amplitude, gain)
+    else:
+        import bmc_filtered_voice as filtered
+        baseline, _ = filtered.render(frames, frequency, amplitude, gain, cutoff, damping)
     for frame, (observed, expected) in enumerate(zip(rows, baseline, strict=True)):
         if [value.hex() for value in observed] != [value.hex() for value in expected]:
             raise ValueError(f'Relocated voice differs from original output at frame {frame}')
@@ -199,12 +225,15 @@ if __name__ == '__main__':
     parser.add_argument('--owner', type=lambda value: int(value, 0), default=OWNERS[0])
     parser.add_argument('--frequency', type=float, default=440)
     parser.add_argument('--gain', type=float, default=0.5)
+    parser.add_argument('--cutoff', type=float, help='Include the original stereo lowpass filter')
+    parser.add_argument('--damping', type=float, default=math.sqrt(2))
     parser.add_argument('--frames', type=int, default=2056)
     args = parser.parse_args()
     try:
         if args.output.exists():
             raise FileExistsError('Refusing to replace an existing output directory')
-        fragments, result = render_check(Core1(args.core1), args.owner, args.frames, args.frequency, args.gain)
+        fragments, result = render_check(Core1(args.core1), args.owner, args.frames, args.frequency, args.gain,
+                                         cutoff=args.cutoff, damping=args.damping)
         write_plan(args.output, fragments, result)
         print(json.dumps(result, indent=2, allow_nan=False))
     except (OSError, ValueError) as error:
