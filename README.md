@@ -76,10 +76,15 @@ Independent follow-up studies:
 - [Operand variants and macro boundaries](docs/operand-variants-and-macro-boundaries.md): exact mono-sum and cross-destination allpass comparisons, with oscillator-layout and exceptional-macro limits.
 - [Oscillator layout candidates](docs/oscillator-layout-candidates.md): competing arities consistent with six independently owned coefficient anchors.
 
+The [native LINE fixture](docs/fragment-emulator.md#direct-native-line-callback)
+runs the pinned translated sample callback in an isolated macOS ARM64 process
+and compares its audio against the conditional Python reference.
+
 This directory contains offline tools and derived research. It does not contain
 a working custom synth engine, full stock-effect emulator, general assembler, flasher or hardware driver. A constrained
 emitter reproduces fixed stereo input, dry/wet, scratch, allpass and coefficient-shift profiles. Nothing
-here opens a device or executes Roland's plugin. Production Oscairn code was not changed.
+here opens a device. The native fixture invokes the extracted sample callback
+with explicit test memory. Production Oscairn code was not changed.
 
 ## Reproduce
 

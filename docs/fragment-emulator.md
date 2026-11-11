@@ -163,6 +163,45 @@ binary64 operation policy. Actual parent cadence, warm state, hardware numeric/
 timing behavior and native-plugin audio equivalence remain unverified. The 48 kHz
 WAV grid is still a software output choice.
 
+## Direct native LINE callback
+
+`native_line_reference.py` executes the pinned ZENOLOGY ARM64 translation
+of the complete LINE sample callback at `2df874..2dfd94`. The command
+runs as its own macOS ARM64 process and constructs the callback's input,
+output, literal, coefficient and circular-memory structures from the
+recovered records. It supplies the same original fixture parameters as
+the conditional LINE renderer, with a cold zero ring, P=0 and one origin
+step per generated frame.
+
+```sh
+python3.13 tools/native_line_reference.py local/native-line-reference.wav \
+  > local/native-line-reference.json
+```
+
+The tool verifies the image hash, exact callback bounds and complete
+decoding of the position-independent body. The body contains arithmetic,
+memory operations and a final return. Its copied code has no helper call
+or external branch. The tool writes its own memory mapping, switches it
+to read/execute, invalidates the instruction cache and invokes the exact
+callback bytes with pointers to its allocated buffers. These objects stay
+alive for the entire invocation loop. It then releases the mapping.
+An original two-instruction helper reads the host FPCR before and after
+the run. The observed FPCR was zero.
+
+The 12,000-frame native run produced peak `0.09981689821550582`.
+11,804 stereo frames agreed exactly with the conditional Python
+reference. The maximum absolute sample difference was
+`1.3877787807814457e-17`, consistent with the reference interpreter's
+separately rounded multiply/add operations in the filter stages.
+A separate 2,056-frame subprocess check crosses ring wrap and checks
+that an existing output is preserved.
+
+This supplies execution evidence for the native translation with the
+declared memory fixture. BMC program-byte execution, native-plugin framework
+initialization, parent scheduling and BMC numerical behavior remain
+separate requirements. The complete effect's BMC instruction sequence
+still contains unresolved controls.
+
 ## LINEDRIVE from the Fantom image
 
 Supply the pinned CORE1 file to render the same conditional fixture with

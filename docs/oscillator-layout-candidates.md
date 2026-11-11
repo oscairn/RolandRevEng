@@ -12,6 +12,11 @@ six-bit reference encoding. Two packet contexts constrain the ordinary arithmeti
 arity uniquely. The other two retain a real ambiguity, which prevents a justified
 decoder expansion.
 
+A later [cross-context comparison](#cross-context-reuse-of-3074) finds
+`3074` in ordinary short-operation slots and binds its FREQ_SHIFTER
+literal to a following port-3 store. This favors the short interpretation
+for the test oscillator while retaining the unknown bundled controls.
+
 ## Exact fields
 
 All offsets below are bytes relative to the normal DSP4 primary segment, base `0x20`,
@@ -91,7 +96,58 @@ rejected: the first skipped the alias ambiguity, the second had six slots, and t
 third dropped families 2/3 from the supplied alphabet before claiming no intervening
 multisets existed. No Qwen code or asserted family mapping was accepted.
 
-## Reproduce
+## Cross-context reuse of `3074`
+
+The control-slot inventory covers the same 241,742 framed packets as
+the conversion-control search. The table counts occurrences across
+render-list segments, including repeated banks and placements.
+
+| Artifact | `3074` classified short | `3074` under an unresolved header | `2d64` / `0c3b` |
+|---|---:|---:|---|
+| ZENOLOGY | 9 | 0 | absent |
+| Fantom BMC0 CORE1 | 16 | 1 | one each, unresolved |
+| Fantom BMC1 CORE1 | 2 | 0 | absent |
+| JUPITER-X CORE1 | 45 | 0 | absent |
+| MC-101 CORE1 | 2 | 16 | absent |
+| SH-4d CORE1 | 45 | 0 | absent |
+
+All 119 classified `3074` occurrences occupy family 1, under headers
+`3408`, `5f0b` or `2d08`. The unresolved Fantom occurrence is the
+`bd4b` test-oscillator packet. MC-101's unresolved occurrences use
+`af8c`. The inventory preserves unresolved classifications as null.
+It searches base control slots, excluding coincident words in payloads.
+
+The desktop programs give an additional independent binding.
+FREQ_SHIFTER packet `0` has header `5f0b` with `3074/7078`,
+two indexed input loads, and width-four literals at `e/12`.
+Fresh native constructor records bind the doubles at `108/118`
+to those two fields. Native loads at `455cc/455e0` carry their
+values unchanged into stores at `45600/45614`. The matched
+constructor data records bind these stores to fields `28/2a`,
+cells `0/d`. In the next DSP packet those are the `bfe4/ffe6`
+stores, from functional ports 3 and 7. The check follows register
+preservation and record identity independently of equal defaults.
+
+BPMLP and DJFXLP give ordinary `3408` contexts. Their `3074`
+literal fields at `ca/182` also have owned native constructor records.
+Taken together, these observations support `3074` as a short literal
+operation in the oscillator. Applying a fixed arity across these
+contexts selects the short candidate from the earlier pool-only
+projection. The oscillator's opaque controls and recurrence remain open.
+The raw projection continues to retain its two candidates so that this
+additional assumption is visible.
+
+```sh
+python tools/oscillator_literal_study.py > local/oscillator-literal-study.json
+python tools/oscillator_control_inventory.py \
+  --core1 local/b0c1a.bin --core1 local/b1c1a.bin \
+  --qspi local/crossmodel/jupiter-x/MI077_C1A_up.bin \
+  --qspi local/crossmodel/mc101/RPG69_C1A_up.bin \
+  --qspi local/crossmodel/sh-4d/DD013_C1A_up.bin \
+  > local/oscillator-control-inventory.json
+```
+
+## Reproduce the original pool projection
 
 ```sh
 python3 tools/oscillator_layout_study.py

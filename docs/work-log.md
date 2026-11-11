@@ -906,3 +906,36 @@ Qwen reviewed the prefix implementation. Its proposed scale mismatch
 misread hexadecimal `0x20` and the verified `2^-32` constant, and its
 store objection extended past the fragment boundary. The checked byte
 slice, native instructions and numeric boundary tests resolve those claims.
+
+## Oscillator control reuse and short literal stores
+
+Qwen drafted the control-slot inventory extension. Its scanner logic
+was retained with readable field names. Its synthetic packet lengths
+were corrected and its mocked family decoder was replaced with the
+actual decoder. The synthetic check now distinguishes a family-1
+control, an unresolved header and a payload-only occurrence.
+
+The six-artifact scan finds 119 family-1 `3074` occurrences and 17
+under unresolved headers. Exact `2d64/0c3b` occurrences remain
+confined to the ambiguous Fantom oscillator packet. The FREQ_SHIFTER
+comparison independently binds two owned short literal records to
+following port-3/port-7 stores. It supports the oscillator's short
+`3074` interpretation under the stated fixed-arity assumption.
+
+## Native LINE execution fixture
+
+The pinned ARM64 LINE callback is position-independent and has no helper
+calls or external branches. It now runs in a separate macOS ARM64 command
+with an explicit pointer graph, reconstructed constructor data, supplied
+live coefficients and cold circular state. This is the first direct
+native callback execution in this research.
+
+The 12,000-frame render has 11,804 exactly matching frames against the
+conditional Python reference. Its maximum sample difference is
+`1.3877787807814457e-17`. The isolated test crosses ring wrap at
+2,056 frames. Host FPCR was zero. Exact BMC program execution,
+hardware scheduling and silicon precision remain unverified.
+
+All 287 tests passed. Qwen's optional Python-only review of the native
+fixture timed out at 180 seconds. The callback execution, memory-lifetime
+checks and numeric comparisons were verified locally.

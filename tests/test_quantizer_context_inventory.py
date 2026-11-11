@@ -9,6 +9,19 @@ from quantizer_context_inventory import scan
 
 
 class QuantizerContextTests(unittest.TestCase):
+    def test_requested_controls_keep_known_and_unknown_families(self):
+        stream = assemble([
+            [0x3408, 0x3074, 0x0fe0, 0x8fe2, 0, 1, 0, 0],
+            [0xbd4b, 0x3074, 0xff75, 0xef75, 0x00d7, 0x1fe0, 0x2fe2, 0xc, 0xd, 0, 0],
+            [0x0c03, 0x0fe0, 0x3074],
+        ])
+        stored = swap_words(stream)
+        result = scan(stored, [(1, (0x20, len(stream), len(stored), 0))], controls=(0x3074,))
+        first, second = result['matches']
+        self.assertEqual((first['offset'], second['offset']), (0, 16))
+        self.assertEqual(first['control_slots'], [dict(slot=0, control=0x3074, family=1)])
+        self.assertEqual(second['control_slots'], [dict(slot=0, control=0x3074, family=None)])
+
     def test_controls_are_distinguished_from_payload_and_neighbor(self):
         stream = assemble([[0x0c03, 0x0fe0, 0x9c59], [0x0a02, 0x9c59], [0x0a02, 0x9ed9],
                            [0x0a02, 0x9c59]])
