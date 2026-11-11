@@ -14,6 +14,7 @@ from line_state_study import advance_native_origin, native_ring_index
 from native_callback_fixture import RingFixture, executable_mapping
 from native_math_bridge import bind_math_calls
 from render_fragment_demo import SAMPLE_RATE, metrics, pcm16
+from transient_detector_reference import DEFAULTS, HISTORY, detector_step
 from transient_envelope_reference import envelope_step, tail_reference
 from weighted_mix_study import check_constructor_literal, require_instructions
 
@@ -101,6 +102,7 @@ def render_native(frames):
     def rate(offset):
         return struct.unpack_from('<d', image, offset)[0]
 
+    detector_defaults = {offset: rate(offset) for offset in DEFAULTS}
     # Truncating fixed32 preserves this threshold predicate within the conversion domain.
     positive_first, positive_second = (_float32(COEFFICIENTS[slot]) > -EPSILON for slot in (1, 3))
     first_rates = dict(above=rate(0x68 if positive_first else 0x48), below=rate(0x58 if positive_first else 0x38))
@@ -115,6 +117,7 @@ def render_native(frames):
     inputs = (ctypes.c_void_p*2)(ctypes.addressof(left), ctypes.addressof(right))
     outputs = (ctypes.c_void_p*2)(ctypes.addressof(output_left), ctypes.addressof(output_right))
     rows, origin = [], 0
+    decisions = dict(phase_resets=0, history_rolls=0, faster_release=0)
     with executable_mapping(code) as address:
         invoke = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p)(address)
         for frame in range(frames):
@@ -122,8 +125,20 @@ def render_native(frames):
             right.value = 0.08*math.sin(2*math.pi*330*frame/SAMPLE_RATE)
             struct.pack_into('<I', fixture.ring_context, 0x20, origin)
             previous_first, previous_second = [fixture.ring[native_ring_index(cell, 0, origin)] for cell in (39, 41)]
+            detector = detector_step(left.value, right.value,
+                {cell: fixture.ring[native_ring_index(cell, 0, origin)] for cell in HISTORY}, detector_defaults)
             invoke(ctypes.addressof(fixture.wrapper), ctypes.addressof(inputs), ctypes.addressof(outputs))
-            peak = normalization*max(abs(left.value), abs(right.value))
+            for cell, expected_value in detector['writes'].items():
+                observed_value = fixture.ring[native_ring_index(cell, 0, origin)]
+                if observed_value.hex() != expected_value.hex():
+                    raise ValueError(f'Native TRANSIENT detector cell {cell} differs at frame {frame}: '
+                                     f'{observed_value.hex()} != {expected_value.hex()}')
+            decisions['phase_resets'] += detector['phase_reset']
+            decisions['history_rolls'] += detector['history_roll']
+            decisions['faster_release'] += detector['release_rate_field'] == 0xe8
+            left_magnitude = left.value if left.value >= 0 else -left.value
+            right_magnitude = right.value if right.value >= 0 else -right.value
+            peak = normalization*(left_magnitude if left_magnitude > right_magnitude else right_magnitude)
             logarithm = floor if peak == 0 else math.log(peak)
             observed = [fixture.ring[native_ring_index(cell, 0, origin)] for cell in (0, 1)]
             if [value.hex() for value in observed] != [peak.hex(), logarithm.hex()]:
@@ -131,7 +146,7 @@ def render_native(frames):
             sample = output_left.value, output_right.value
             if not all(math.isfinite(value) for value in sample):
                 raise ValueError('Native TRANSIENT produced a non-finite output')
-            argument_first, argument_second = [fixture.ring[native_ring_index(cell, 0, origin)] for cell in (36, 37)]
+            argument_first, argument_second = [detector['writes'][cell] for cell in (36, 37)]
             first = envelope_step(argument_first, previous_first, **first_rates)
             second = envelope_step(argument_second, previous_second, **second_rates)
             tail = tail_reference(left.value, right.value, first, second, COEFFICIENTS)
@@ -144,6 +159,14 @@ def render_native(frames):
     cursors = [struct.unpack_from('<I', fixture.owner, offset)[0] for offset in (0xb8, 0x118)]
     if any(cursor not in range(3) for cursor in cursors):
         raise ValueError('Native TRANSIENT cache cursor left its three-slot domain')
+    from render_transient_reference import render_reference
+
+    independent, independent_report = render_reference(frames)
+    for frame, (sample, expected) in enumerate(zip(rows, independent, strict=True)):
+        if [value.hex() for value in sample] != [value.hex() for value in expected]:
+            raise ValueError(f'Native TRANSIENT independent output differs at frame {frame}')
+    if decisions != independent_report['detector_decisions']:
+        raise ValueError('Native TRANSIENT detector decisions differ from independent state')
     return rows, dict(model='pinned native ARM64 TRANSIENT callback with explicit libm/memory fixture',
                       image_sha256=NATIVE_SHA256, callback=list(CALLBACK),
                       callback_sha256=hashlib.sha256(callback).hexdigest(), math_bridge=bridge,
@@ -153,9 +176,11 @@ def render_native(frames):
                       final_origin=origin, final_cache_cursors=cursors, zero_log_floor=floor,
                       owner_bytes=ctypes.sizeof(fixture.owner),
                       peak_normalization=normalization, peak_log_identical_values=2*frames,
+                      detector_identical_values=15*frames, detector_decisions=decisions,
                       envelope_tail_identical_values=5*frames, conditional_output_reference_verified=True,
-                      upstream_arguments_from_native=True, envelope_rates=[first_rates, second_rates],
-                      full_output_reference_verified=False, **metrics(rows))
+                      upstream_arguments_from_native=False, envelope_rates=[first_rates, second_rates],
+                      independent_output_identical_values=2*frames,
+                      full_output_reference_verified=True, **metrics(rows))
 
 
 if __name__ == '__main__':

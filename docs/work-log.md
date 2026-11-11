@@ -1139,3 +1139,32 @@ literal, an assumed vtable terminator and a broken no-call result, then derived
 and tested the native/per-DSP join locally. Worker outputs stay ignored/local.
 All 331 tests passed. Hardware placement, cadence, conversion, entry/return and
 actual host loader access still prevent a deployable engine.
+
+## Independent TRANSIENT detector and complete output reference
+
+The upstream detector now has a finite Python model: normalized log peak,
+held/window state, reset and unwrapped phase guard, both decay paths and the
+rising smoother. It preserves the one-ULP difference between constructor
+held-log floor and the separately synthesized release floor. Ten constructor/
+program history pairs are checked. Unsupported literal layouts remain rejected.
+
+The native fixture checks all fifteen retained detector writes, uses independently
+computed exp arguments, and compares its final output to a separate cold-ring
+render. Over 12,000 frames all 24,000 output floats and both WAV files agree
+exactly; 180,000 detector values and 60,000 envelope/tail values also agree.
+Report flags now mark the full output reference verified and native-sourced
+upstream arguments false. These checks do not execute BMC packet arithmetic.
+
+Native tests additionally cover 17,000 silent frames reaching the faster decay
+branch, stepped inputs, signed zero, negative live modes and cache cursors 1/2.
+The signed-zero comparison exposed and corrected the earlier peak-check oracle's
+use of Python abs, which differed from native conditional selections at -0.
+Every cache cursor round trip reads the just-written entry and restores its
+initial value. No extra delay is added to the independent model.
+
+Qwen returned a bounded draft in 188.1 seconds with a recorded frame-1 mismatch.
+Its constants, phase/window state and exp argument equations were incorrect;
+no draft model code was accepted. The reviewed implementation was independently
+derived from the listing and verified against real callback execution.
+All 341 tests passed; the expanded native cache cases were also rerun afterward.
+Full DSP interpretation, physical precision/timing and hardware deployment stay open.

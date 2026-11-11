@@ -392,14 +392,17 @@ native def/use checks supplied the corrected model, and actual execution
 established exact output agreement. The earlier Qwen native fixture was
 retained after review and remains the execution oracle.
 
-## Native TRANSIENT and conditional output
+## Native TRANSIENT and independent output
 
 The [TRANSIENT fixture](special-ops-and-exp-study.md#native-transient-fixture-and-conditional-envelope-reference)
 extends native execution to a callback with three real math imports. It checks
 peak/log stores, exp/smoothing stages and the final gain against independent
-finite kernels. Its upstream detector arguments remain native-computed.
-The 12,000-frame run matches 84,000 checkpoint values exactly. No additional
-DSP control is admitted by this native reference.
+finite kernels. The [full detector reference](transient-full-reference.md)
+now supplies its exp arguments independently. Fifteen detector values per
+frame and a separate cold-ring output render match the native callback,
+including silence, steps, signed zero and negative live modes. The two
+12,000-frame WAVs are byte-identical. No additional DSP control is admitted
+by this native reference.
 
 ## Original feedback oscillator
 

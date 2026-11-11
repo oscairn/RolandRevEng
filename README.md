@@ -33,7 +33,7 @@ Independent follow-up studies:
 - [Native FETDRIVE fixture](docs/fragment-emulator.md#native-fetdrive-execution-fixture): complete native callback output and per-frame checks of the first shaped stores.
 - [Full FETDRIVE reference](docs/fragment-emulator.md#full-python-fetdrive-reference): exact native output agreement, eight checked history pairs and paired filter-literal ownership.
 - [Late phaser clamps](docs/operand-variants-and-macro-boundaries.md#late-phaser-clamp-stores-and-native-execution): branch-preserving store provenance, native finite-boundary execution and twelve Fantom contexts.
-- [Native TRANSIENT](docs/special-ops-and-exp-study.md#native-transient-fixture-and-conditional-envelope-reference): checked math-call bridge and conditional envelope/output comparison.
+- [Full TRANSIENT reference](docs/transient-full-reference.md): complete independent detector/envelope/output agreement with the pinned native callback, including branch and cache checks.
 - [Original BMC oscillator](docs/original-bmc-allpass-oscillator.md): a static 120-byte feedback core with all sample arithmetic executed by the packet interpreter.
 - [Typed state initialization](docs/state-initialization-and-float-writers.md): enum-0 native ring identity, Fantom float-write apertures, explicit readback rejection and checked source rounding.
 - [Gain controls](docs/alu-controls-study.md): native def/use comparison of selected gain chains.
@@ -165,16 +165,16 @@ The initial 19-note update was applied to the vault on 2026-11-10 through review
 The Roland research and related planning notes are organized in
 `/Users/jacob/Documents/ObsidianVault/Projects/Oscairn/Roland`. All 52 moved notes
 were verified byte for byte; their unique title links remain valid. Continued
-research now covers 61 verified notes in this folder. Future vault
+research now covers 62 verified notes in this folder. Future vault
 updates target this subdirectory. The move manifest is
 `local/obsidian-applied-roland-move-2026-11-10.json`; the latest update manifest
-is `local/obsidian-applied-data-seed-2026-11-10.json`. Current folder and manifest
+is `local/obsidian-applied-transient-full-model-2026-11-10.json`. Current folder and manifest
 are recorded in `local/obsidian-location.json`. Earlier manifests describe historical paths.
 
 The research notes include the functional fragment emulator, official cross-model
 comparisons, key/access studies and corrections to older recovery claims.
-The latest passes add native TRANSIENT execution, an original BMC oscillator and
-typed state-initialization evidence, verifying the 61-note set against staged hashes.
+The latest passes add a complete independent TRANSIENT reference, an original BMC
+oscillator and typed state-initialization evidence, verifying the 62-note set against staged hashes.
 Firmware downloads remain local/ignored.
 Saved hashes were checked before each update; every note was verified byte for byte.
 Original backups, the initial validated patch and the applied hash manifests remain

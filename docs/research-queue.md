@@ -539,10 +539,10 @@ corrected before the execution work recorded below.
 [TRANSIENT execution boundary](special-ops-and-exp-study.md#transient-callback-execution-boundary)
 
 The TRANSIENT callback now executes through a checked three-call libm bridge.
-Its peak/log stores and conditional envelopes/gain/output agree at 84,000
-values across 12,000 frames. The remaining independent-reference gap is the
-upstream detector that produces the two exp arguments. Constructor rates,
-native owner caches and explicit clock assumptions are documented in the
+The [full independent reference](transient-full-reference.md) closes the
+upstream detector gap and matches all stereo output values across 12,000
+frames. Fifteen retained detector writes per frame are also checked. Constructor
+rates, native owner caches and explicit clock assumptions are documented in the
 [execution fixture](special-ops-and-exp-study.md#native-transient-fixture-and-conditional-envelope-reference).
 
 An [original 120-byte feedback oscillator](original-bmc-allpass-oscillator.md)
@@ -551,8 +551,8 @@ It has a reproducible coefficient/seed manifest and no per-sample host phase
 calculation. The next custom-engine steps are owned placement/initialization,
 DSP-side output gain/envelope/routing composition and entry/return validation.
 Hardware precision/cadence and actual loader access remain required. The
-upstream TRANSIENT detector, exact phaser input selection and the broader ISA
-gaps remain open alongside this original-core track.
+exact phaser input selection, TRANSIENT packet semantics and broader ISA gaps
+remain open alongside this original-core track.
 
 The [typed state-writer study](state-initialization-and-float-writers.md)
 joins the native oscillator ring to enum 0 and checks its per-DSP firmware

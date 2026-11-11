@@ -173,8 +173,8 @@ the explicit constant `-22.18070977791825`, equal to `log(2^-32)`.
 The fixture checks both retained stores bit for bit on every frame.
 
 Two independently evaluated kernels then check the exponential envelopes
-and output gain. Let `a/b` be the new envelopes. Their arguments come from
-native cells `24/25` in hexadecimal; previous states are read before invocation
+and output gain. Let `a/b` be the new envelopes. Their arguments are stored in
+cells `24/25` in hexadecimal; previous states are read before invocation
 from `27/29`. Current envelope stores use `26/28`. The native D0 argument
 to the first exp is unchanged after its saved store; the second uses D8,
 whose low 64 bits are also preserved by the libm ABI.
@@ -206,9 +206,12 @@ values bit for bit. Peak stereo output is `0.14596584013287234`; RMS is
 `0.07554220759649252`. Subprocess tests cross sample-ring wrap at 2,056 frames,
 check fresh-render determinism and preserve existing output files.
 
-This is a conditional output reference: upstream detector arguments remain
-native-computed. The JSON keeps `full_output_reference_verified=false` and
-`upstream_arguments_from_native=true`. No BMC instructions run in this native
+The initial output reference was conditional on native upstream arguments.
+The [complete detector reference](transient-full-reference.md) now computes
+those arguments independently, checks fifteen retained detector values per
+frame and matches the entire output from a separate cold-ring render. Current
+JSON reports `full_output_reference_verified=true` and
+`upstream_arguments_from_native=false`. No BMC instructions run in this native
 fixture. Its hardware precision, parent cadence, warm state, sample-rate
 initialization and preset calibration remain unverified.
 
