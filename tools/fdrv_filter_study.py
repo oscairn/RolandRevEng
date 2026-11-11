@@ -94,7 +94,7 @@ def report():
 
 
 def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds=None,
-                  compare_cubic=False):
+                  compare_cubic=False, compare_clip=False):
     import ctypes
     import struct
     import lib
@@ -134,7 +134,7 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
     values[5] = 1.0
     values[10:15] = [-.4973, -.2531, .3737, .1279, -.0623]
     values[15:20] = [-.5, -.25, 0, .5, 0]
-    if compare_cubic:
+    if compare_cubic or compare_clip:
         values[0] = .75
     records = []
     for offset, slot in pointers.items():
@@ -154,6 +154,7 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
     inputs = (ctypes.c_void_p*2)(ctypes.addressof(left), ctypes.addressof(right))
     outputs = (ctypes.c_void_p*2)(ctypes.addressof(out_left), ctypes.addressof(out_right))
     origin, count, cubic_count, cubic_input_values = 0, 0, 0, set()
+    clip_count = 0
     if compare_emulator:
         from bmc_emulator import execute_fragment
         from bmc_subset import assemble_fragment
@@ -166,6 +167,13 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
         cubic_report()
         shape_spec = cubic_spec()
         shape_program = assemble_fragment(shape_spec)
+    if compare_clip:
+        from bmc_emulator import execute_fragment
+        from bmc_subset import assemble_fragment
+        from fdrv_clip_study import clip_reference, half_reference, clip_spec, report as clip_report
+        clip_report()
+        clipped_spec = clip_spec()
+        clipped_program = assemble_fragment(clipped_spec)
     with executable_mapping(lib.Z[entry:checked['callback'][1]]) as address:
         invoke = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p)(address)
         for frame in range(frames):
@@ -204,6 +212,20 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                     if read(target).hex() != expected.hex() or shaped['data'][target].hex() != expected.hex():
                         raise ValueError('Cubic byte window differs from conditional native cutpoints')
                     cubic_count += 1
+            if compare_clip:
+                # The clip checker audits these source/result cutpoints for later overwrites.
+                current_left, current_right = read(0x14), read(0x16)
+                previous_left, previous_right = read(0x15), read(0x17)
+                captured = dict(zip(clipped_spec['sources'],
+                                    (current_left, current_right, previous_left, previous_right)))
+                clipped = execute_fragment(clipped_program, captured, {})
+                expected = (current_left, current_right,
+                            half_reference(current_left, previous_left), clip_reference(current_left),
+                            half_reference(current_right, previous_right), clip_reference(current_right))
+                for target, value in zip(clipped_spec['targets'], expected, strict=True):
+                    if read(target).hex() != value.hex() or clipped['data'][target].hex() != value.hex():
+                        raise ValueError('Clipped-half bytes differ from conditional native cutpoints')
+                    clip_count += 1
             origin = advance_native_origin(origin)
     actual_cursors = tuple(struct.unpack_from('<I', fixture.owner, offset)[0] for offset in (0x98, 0x118))
     if actual_cursors != tuple(cursors):
@@ -215,6 +237,7 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                 explicit_state_seeds=state_seeds,
                 emulator_checked=compare_emulator, native_callback_executed=True,
                 conditional_cubic_values_checked=cubic_count,
+                conditional_clipped_values_checked=clip_count,
                 distinct_cubic_input_values=len(cubic_input_values),
                 bmc_hardware_executed=False, coefficient_sources=values[10:15],
                 coefficients=list(map(_float32, values[10:15])))

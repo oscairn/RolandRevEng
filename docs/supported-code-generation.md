@@ -5,6 +5,12 @@ and explicitly assigned indices into exact packet sequences independently matche
 against native FETDRIVE, LINEDRIVE and FDRV expressions. This is a constrained semantic code emitter and
 inverse decoder, not a general DSP assembler, scheduler or standalone engine.
 
+The [clipped half-sample pair](fdrv-cubic-waveshaping-study.md#stereo-half-sample-interpolation-and-clipping)
+adds an 80-byte `clipped_half_pair` profile and original JSON example. Four sources
+and six targets retain unclipped history, average-before-clip order and the
+checked adjacent history relation. Exact structural decoding separates it from
+the existing 80-byte scratch tail, without admitting general miscellaneous forms.
+
 The [cubic waveshaper](fdrv-cubic-waveshaping-study.md) adds the exact 126-byte
 `cubic_quad` profile and `examples/cubic-quad.json`. Four distinct source cells
 and four distinct target cells supply independent curves; source right2 is also

@@ -48,7 +48,7 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
     spec = disassemble_fragment(program)
     native_coefficient_prefix = spec['kind'] in ('coefficient_shift4', 'register_add_mac_pair',
                                                 'state_variable_pair')
-    if native_coefficient_prefix and not hasattr(math, 'fma'):
+    if (native_coefficient_prefix or spec['kind'] == 'clipped_half_pair') and not hasattr(math, 'fma'):
         raise ValueError('This native-reference profile requires Python 3.13+ math.fma')
     io_addresses = spec.get('input_addresses', DEFAULT_INPUT_ADDRESSES)
     memory = _values(data, 'data', range(0x800))
@@ -91,7 +91,7 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
                 address = pool[index]
                 if port < 8:
                     next_ports[port] = load(address)
-                elif port in (8, 9, 12, 13, 15):
+                elif port in (8, 9, 10, 12, 13, 14, 15):
                     if not 0 <= address < 0x800:
                         raise ValueError('Only data stores below 0x800 are supported')
                     writes[address] = old_value(port - 8)
@@ -156,6 +156,13 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
             elif word == 0x0812 and pool == [0x1500, 0x2800, 0x2800, 0xc000 | spec['coefficient_slots'][0]]:
                 destination = 0
                 value = math.fma(old_value(0), 0.5, old_value(1) * 0.5)
+            elif word in (0x2812, 0x6912):
+                destination, current = (2, 0) if word == 0x2812 else (6, 4)
+                value = math.fma(old_value(current), .5, old_value(destination)*.5)
+            elif word in (0x8ed8, 0xaeda, 0xcedc, 0xeede):
+                destination = (word >> 12) & 7
+                incoming = old_value(destination)
+                value = -1.0 if incoming < -1 else min(incoming, 1.0)
             elif word in (0x080b, 0x490b, 0x0e0b) and pool:
                 destination = 4 if word == 0x490b else 0
                 form = word, pool[0]

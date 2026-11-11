@@ -13,6 +13,12 @@ Next recover another useful exact producer/control context or an owner-proven
 nonempty label/continuation path; retain bounded opcode admission and hardware gates.
 Entry, runtime allocation and hardware calibration remain separate requirements.
 
+Latest emulator result (2026-11-11): exact clipped-half interpolation now executes
+80 bytes with verified unclipped history and average-before-clip order. Isolated
+native arithmetic, all five stock bodies and 12,000-frame callback cutpoints
+match. The earlier drive/resampling producer window remains outside admission;
+recover its inputs and stores next to reduce the conditional full-FDRV gap.
+
 Latest execution-path result (2026-11-11): the separate active DMA drain at 0112f508
 is now tied to manager slot 48; slot 44 starts queued DMA and can process pending
 DRAM-IO state. Queued state 1 and started state 2 require different operations.

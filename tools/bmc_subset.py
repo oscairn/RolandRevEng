@@ -258,6 +258,31 @@ def assemble_cubic_quad(spec):
     ])
 
 
+def assemble_clipped_half_pair(spec):
+    if (not isinstance(spec, dict) or spec.get('kind') != 'clipped_half_pair'
+            or set(spec) != {'kind', 'sources', 'targets'}):
+        raise ValueError('Expected clipped_half_pair sources and targets')
+    for name, count in (('sources', 4), ('targets', 6)):
+        if (not isinstance(spec[name], list) or len(spec[name]) != count
+                or any(type(value) is not int or not 0 <= value < 0x800 for value in spec[name])):
+            raise ValueError('Invalid clipped-half data indices')
+    left, right, previous_left, previous_right = spec['sources']
+    save_left, save_right, average_left, direct_left, average_right, direct_right = spec['targets']
+    if (previous_left != save_left+1 or previous_right != save_right+1
+            or len(set(spec['sources']+spec['targets'])) != 10):
+        raise ValueError('Clipped-half resources violate the checked history/distinctness relations')
+    return assemble([
+        [0x3e07, 0x0fe0, 0x4fe2, 0x2fe4, left, right, previous_left],
+        [0x540a, 0x2812, 0x8ed8, 0x8fe6, 0x6fe8, 0x2500, 0x2800, 0x2800,
+         save_left, previous_right],
+        [0x540a, 0x6912, 0xaeda, 0x8fe6, 0xcfe8, 0x6500, 0x2800, 0x2800,
+         direct_left, save_right],
+        [0x1b04, 0xeede, 0xafe0, average_left],
+        [0x3a06, 0xcedc, 0xefe0, 0x0fe2, average_right, average_left],
+        [0x0c03, 0xcfe0, direct_right],
+    ])
+
+
 def assemble_fragment(spec):
     if not isinstance(spec, dict):
         raise ValueError('Expected a JSON object')
@@ -273,6 +298,8 @@ def assemble_fragment(spec):
         return assemble_state_variable_pair(spec)
     if spec.get('kind') == 'cubic_quad':
         return assemble_cubic_quad(spec)
+    if spec.get('kind') == 'clipped_half_pair':
+        return assemble_clipped_half_pair(spec)
     if spec.get('kind') == 'dry_wet_tail_with_scratch':
         return assemble_tail_with_scratch(spec)
     return assemble_tail(spec)
@@ -328,6 +355,13 @@ def disassemble_fragment(stream):
             raise ValueError('Unsupported stereo input packet')
         return spec
     if len(stream) == 80:
+        rows = [words for _, words in packets(stream)]
+        if [len(row) for row in rows] == [7, 10, 10, 4, 6, 3]:
+            spec = dict(kind='clipped_half_pair', sources=[*rows[0][4:7], rows[1][9]],
+                        targets=[rows[1][8], rows[2][9], rows[3][3], rows[2][8], rows[4][4], rows[5][2]])
+            if assemble_clipped_half_pair(spec) != stream:
+                raise ValueError('Unsupported clipped-half controls, literals, fields or history relations')
+            return spec
         return disassemble_tail_with_scratch(stream)
     if len(stream) == 82:
         return disassemble_allpass(stream)

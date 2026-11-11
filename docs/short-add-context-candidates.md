@@ -7,7 +7,8 @@ inventories independent contexts, and retains the missing arithmetic/port proof.
 This inventory alone admits no opcode. The later
 [auxiliary/add-MAC study](auxiliary-save-restore-and-add-mac.md) binds the first
 FDRV state/filter sums and admits one exact composite profile. It does not define
-these short words globally or admit the unresolved cubic producer sequences.
+these short words globally; the later exact cubic profile supplies its own
+separate producer/port proof.
 
 The [184-byte filter profile](fdrv-state-variable-filter.md) also covers that
 first pair's producer arithmetic and balanced auxiliary saves. It verifies the
@@ -17,7 +18,8 @@ short-add contexts or a universal instruction definition.
 The [FDRV cubic study](fdrv-cubic-waveshaping-study.md) now binds four complete
 waveshaping windows to their source/result stores and checks the native curve
 directly on 1,034 inputs. It locates the two cubic `5d46` candidates among the
-six FDRV observations and retains their unresolved individual port effects.
+six FDRV observations and admits one exact 126-byte profile; arbitrary
+individual-word meanings remain unproved.
 
 `tools/short_add_context_study.py` pins native SHA-256
 `b8ba7f41e26bef91e2cc38e99452e7795cd132e9f2a59695a68a77f18b8a2c30`.

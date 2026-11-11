@@ -16,6 +16,12 @@ now exposes unchecked label capacity and a first-match search that includes
 literal payloads. It verifies the five actual FETDRIVE first packets; it provides
 no halt, continuation or safe running-code replacement guarantee.
 
+The [clipped half-sample profile](fdrv-cubic-waveshaping-study.md#stereo-half-sample-interpolation-and-clipping)
+now executes the 80-byte interpolation/limiter context feeding the cubic stage.
+Unclipped history, six stored values, isolated native arithmetic and all five
+stock body placements are checked. Earlier producers and complete FDRV execution
+remain outside this admission.
+
 The [original filtered voice](original-bmc-filtered-voice.md) now composes
 oscillation, gain and lowpass processing into 384 static bytes. Ten seed values
 and eleven coefficients suffice under the model, with all five Fantom layouts

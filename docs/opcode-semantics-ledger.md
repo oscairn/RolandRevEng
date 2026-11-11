@@ -34,6 +34,8 @@ rounding, saturation, accumulator width or fused evaluation on silicon.
 
 | FDRV `378..3ec` cubic context plus authored preload | Four `x×(x²+3−abs(3x))` curves, with old-value stores and final reloads | [Cubic study](fdrv-cubic-waveshaping-study.md), strict 126-byte profile; six new short multiplies and two exact literal-minus-magnitude forms, no universal masked-class admission |
 
+| FDRV `33c..378` interpolation/clipping context plus authored preload/store | Two half-sample averages followed by clipping, two direct clips and unclipped history stores | [Clipped-half study](fdrv-cubic-waveshaping-study.md#stereo-half-sample-interpolation-and-clipping), exact 80-byte profile; no universal long-form or limiter decoding |
+
 For the first gain row the slash separates two **short controls**. In long rows,
 it separates a base control from its extension. Headers and shared pool layout
 determine which interpretation applies. Read the linked context before using a row.
@@ -99,7 +101,7 @@ the hypothesis, but source-port and co-issued effects prevent isolated admission
 dry/wet tail with scratch transfers, and four-stage allpass. Their
 resource and packet ordering restrictions remain in force. Stereo taps and the
 feedback variation are semantic studies, not new emitter templates. No entry/exit
-wrapper, allocator, general register decoder or custom synth engine follows from
+wrapper, allocator, general register decoder or complete on-device synth engine follows from
 the ledger. Live coefficient smoothing is a separate
 [CORE1 manager interface](coefficient-envelope-and-completion-study.md), not a
 DSP arithmetic opcode or a program-literal write.
@@ -110,22 +112,24 @@ DSP arithmetic opcode or a program-literal write.
 The 84-byte `register_add_mac_pair` profile now admits the exact state-add/MAC
 context above. It supplies its own input data loads, preserves the shared-factor
 constraint and checks binary32/native-FMA behavior. It executes no auxiliary
-save/restore word, and does not admit the cubic producer window.
+save/restore word. The cubic and clipped-half windows have their own separate exact profiles.
 
-The [FDRV cubic window](fdrv-cubic-waveshaping-study.md) now has four constructor-
-bound source/result relations and a directly executed native curve reference.
-Two short `5d46` contexts sit in that window; four others sit in state/filter
-sequences. Whole-window agreement does not admit the individual short controls
-or the miscellaneous producers. All five Fantom placements retain the context.
+The [FDRV cubic window](fdrv-cubic-waveshaping-study.md) has an exact 126-byte
+profile, four constructor-bound source/result relations and directly executed
+native arithmetic. Its upstream interpolation/clipping window now has a separate
+80-byte profile. Both retain complete-context admission; arbitrary short words,
+miscellaneous forms and full-effect execution remain unproved.
 
 The 184-byte `state_variable_pair` profile now executes the first FDRV filter
 block including its producers and one balanced auxiliary save/restore per port.
 Its reference preserves binary64 states, binary32 coefficients, native FMA and
 the verified `FNMSUB` sign. The native callback comparison covers all valid
-cursor pairs and ring wrap. The cubic producer window remains unadmitted.
+cursor pairs and ring wrap. Admission of the separate cubic and clipped-half
+profiles does not generalize the remaining filter or producer contexts.
 
 The [functional fragment interpreter](fragment-emulator.md) now executes only the
-same exact stereo input, dry/wet, scratch, allpass and VSOD coefficient-prefix contexts accepted by the inverse decoder. It steps
+exact stereo-input, mix/scratch, allpass, VSOD coefficient-prefix, add/MAC,
+state-variable, cubic and clipped-half contexts accepted by the inverse decoder. It steps
 packet bytes with old-port arithmetic/stores, next-packet loads and copied trace
 snapshots. [Corpus validation](fragment-emulator-validation.md) checks the actual
 stock spans and native proofs independently. The additional

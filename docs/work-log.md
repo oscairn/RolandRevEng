@@ -1532,3 +1532,31 @@ updated; no executable wrapper, on-device upload, hardware halt or saved-return
 semantics is claimed. Next useful evidence remains an implemented event/mode
 consumer or actual continuation/PC observation, subject to the access/recovery
 requirements already documented.
+
+## Exact half-sample interpolation and clipping (2026-11-11)
+
+The strict emitter/interpreter now admits an 80-byte, six-packet clipped_half_pair:
+14 authored preload bytes, 60 exact FDRV bytes at33c..378 and a six-byte final
+store. It preserves unclipped current-history stores, averages before clipping,
+and produces the four bounded samples feeding the existing cubic quad. The
+following original cubic packet supplies the direct-right store provenance.
+Two half/FMA forms, four exact self-limiters and data stores from ports2/6 execute
+only inside complete checked profiles. The other 80-byte scratch-tail profile
+retains its original exact structure. No general miscellaneous grammar is admitted.
+
+Independent packet snapshots distinguish unclipped history and average-before-clip
+order. Two register-only native extracts (24/40 bytes) match all 2,064 results over
+1,032 input pairs, including signed zero, subnormals, maximum finite inputs and
+random saturation cases. All five pinned Fantom 60-byte bodies and the outside
+history/direct-right fields match. A 12,000-frame callback fixture matches 48,000
+clipped results and 24,000 raw history values using conditional cutpoints, separate
+from the first filter's 96,000 independently modeled values. Earlier resampling/
+drive producers and a complete FDRV byte-execution path remain unresolved.
+
+All436 tests passed in58.147 seconds. Focused tests passed again after adding
+pinned-Fantom identity and changed-native-clamp rejection checks. The original JSON
+example round-trips through the CLI as80 logical/stored bytes. Qwen's9.5-second
+draft calculated the asymmetric example correctly but omitted inputs and assumed
+caller-map mutation; its code was rejected and working tests implemented locally.
+Updated the semantic ledger's stale cubic-admission statements and existing Roland
+notes. No firmware package, live device, output wrapper or silicon-precision claim.

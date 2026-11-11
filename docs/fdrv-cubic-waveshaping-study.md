@@ -1,4 +1,4 @@
-# FDRV cubic waveshaping and short-add cutpoints
+# FDRV cubic waveshaping, interpolation and clipping
 
 2026-11-10. Static Python/Capstone analysis and explicitly isolated native arm64
 execution. Native ZENOLOGY SHA-256:
@@ -184,3 +184,91 @@ implemented and verified independently.
 At the extended 12,000-frame checkpoint, all 48,000 conditional cubic results
 match, with 47,985 distinct captured source values. The independent first-filter
 check matches another 96,000 values in the same fixture.
+
+
+## Stereo half-sample interpolation and clipping
+
+2026-11-11. `tools/fdrv_clip_study.py` now admits an exact **80-byte, six-packet**
+`clipped_half_pair` profile. It supplies a 14-byte authored preload, retains the
+60 stock bytes at FDRV `33c..378`, and appends a six-byte authored store for the
+last direct-right result. The original store is coissued in the following cubic
+packet at `378`; the checker binds its actual field at `382` rather than silently
+assuming the earlier slice already writes that result.
+
+For current samples L/R and previous samples pL/pR, the checked finite policy is:
+
+```text
+averageL = fma(L, 0.5, pL * 0.5)
+averageR = fma(R, 0.5, pR * 0.5)
+outputs  = [clip(averageL), clip(L), clip(averageR), clip(R)]
+clip(x)  = -1 if x < -1 else min(x, 1)
+```
+
+Averaging happens **before clipping**, and the current samples are stored
+**unclipped** for history. With L=2, pL=-.5, the averaged output is .75; averaging
+the already-clipped inputs would incorrectly give .25. Signed zero follows the
+native compare/select behavior. NaN, infinity, booleans and missing data are
+rejected; finite large inputs are accepted without an overflowing add-before-half.
+
+`examples/clipped-half-pair.json` assigns four sources as
+`[currentL,currentR,previousL,previousR]`. Its six targets are
+`[saveL,saveR,averageL,directL,averageR,directR]`. All ten indices must be distinct,
+below `800` hex, with previousL=saveL+1 and previousR=saveR+1. That adjacency
+preserves the checked native-ring history relation; the executor itself neither
+allocates a ring nor advances the origin. No coefficients or implicit port seeds
+are needed. The authored current inputs use synthetic data cells 100/101 hex,
+not a claim that these are available resources in an occupied stock owner.
+
+| Exact controls/extensions | Role in this complete profile |
+|---|---|
+| `2812 / 2500` | I2 = fma(A,.5,I2*.5) |
+| `6912 / 6500` | I6 = fma(B,.5,I6*.5) |
+| `8ed8 / aeda / cedc / eede` | Clamp incoming I0/I2/I4/I6 respectively |
+| `afe0 / efe0` transfers | Store incoming I2/I6 to checked data cells |
+
+All fixed extension/pool words remain protected. The half coefficients are
+established by the actual native arithmetic; decoding an isolated pool halfword
+is not a general interpretation of these long forms. No arbitrary limiter word,
+header variant, different literal or standalone operation is admitted. General
+miscellaneous-header grammar remains opaque. The inverse decoder distinguishes
+this six-packet 80-byte profile from the existing eight-packet 80-byte dry/wet
+scratch profile by exact structure and reassembly.
+
+Native cutpoints `305930..3059ec` bind both history reads, both raw stores and
+all four clipped stores to their constructor records and DSP fields. The checker
+rejects later overwrites before using post-callback snapshots. The four clipped
+cells feed the already-admitted cubic quad in its native order. The earlier
+resampling, drive/gain producers and the remaining effect are still outside this
+new profile, so a cutpoint comparison is conditional rather than a full independent
+FDRV implementation.
+
+Two register-only native probes test the arithmetic independently: a 24-byte
+clip extract and a 40-byte half/clip extract. The latter appends an authored,
+decoded FMOV solely to place the result in the native return register, then RET.
+The original kernels have no memory, calls or external references. Tests run
+these bounded extracts in a subprocess over 1,032 input pairs, including signed
+zero, subnormals, maximum finite values, saturation and asymmetric random inputs.
+All 2,064 native scalar results match. Separate packet tests check every port
+snapshot and old-value store, strict resource/schema/literal boundaries, and the
+other 80-byte profile. All five Fantom stock 60-byte bodies and the outside history
+and direct-right fields match their recorded relative assignments.
+
+A 12,000-frame full-native-callback run matches 48,000 clipped results and 24,000
+raw history-store values using captured current/history cutpoints. This adds
+72,000 conditional stored-value checks, separate from the independently modeled
+first filter's 96,000 values. It does not establish an independent whole-FDRV
+model, physical BMC numeric behavior or sample timing.
+
+```sh
+python3.13 tools/fdrv_clip_study.py --execute-native --native-window-frames 12000
+python3.13 tools/bmc_subset.py assemble examples/clipped-half-pair.json local/clipped-half.bin --stored
+python3.13 -m unittest discover -s tests -p 'test_clipped_half_pair.py' -v
+```
+
+This profile is already word aligned, so logical and stored lengths are both 80.
+The original example, tools and tests require no firmware patch or live device.
+The emitter/interpreter alone need no vendor artifact; the provenance and native
+checks require the pinned local corpus and native probes require macOS ARM64.
+Qwen's 9.5-second test draft had correct asymmetric arithmetic, but omitted input
+values and assumed caller-dictionary mutation. Its code was rejected; actual
+API, signed-zero and native execution tests were implemented and run locally.
