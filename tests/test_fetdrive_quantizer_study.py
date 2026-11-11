@@ -40,6 +40,11 @@ class CorpusTests(unittest.TestCase):
                           for channel in report['quantizers']], [(0x2f7e6c, 0x2f7ee4), (0x2f7fd8, 0x2f8018)])
         self.assertEqual(report['native_defaults']['post_gain'], 1)
         self.assertEqual(report['desktop_packets']['coefficient_slot'], 1)
+        self.assertEqual(report['gain_comparison']['sample_load_ports'], [0, 4])
+        self.assertEqual(report['gain_comparison']['store_ports'], [1, 5])
+        self.assertEqual(report['gain_comparison']['native_stores'], [0x1d6580, 0x1d6594])
+        self.assertEqual(report['quantizer_input_port_candidate'], 1)
+        self.assertFalse(report['isolated_writeback_verified'])
         setup = report['post_gain_setup']
         self.assertEqual((setup['numerator'], setup['initial_divisor']), (44100, 44100))
         self.assertEqual([r['relative_byte'] for r in setup['group']['records']], [0x62, 0xf8])

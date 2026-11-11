@@ -854,3 +854,21 @@ Fantom VSOD placements. Strict DSP admission remains unchanged.
 Qwen reviewed the comparison and correctly cautioned against reading the
 bit-8 difference as an established operand rule. The checked report derives
 its port and value paths from the artifacts.
+
+## FETDRIVE short gain path and first-store renderer
+
+The TRANSIENT short-gain pair `1406/5506` independently anchors A and B
+as input sources and ports 1 and 5 at the following stores. Together with
+the FETDRIVE C1 load and matched native scaled product, this supports
+port 1 as the incoming operand for `9c59`. The pair `9c59/9ed9` still
+lacks an independently observed intermediate, so its exact writeback
+remains open. Qwen reviewed the path. The retained port claims follow
+the packet transfers and matched native constructor records.
+
+`render_fetdrive_window.py` predicts the first stereo stores from a
+pinned stock placement and the native numeric policy. With the stock
+drive scale and supplied C1 of 0.5, mixed input `±2^-24` quantizes to
+zero and `±2^-23` reaches the first nonzero bin. Probes immediately beyond
+each clip limit saturate at the corresponding sign. All five placements
+give the same predicted output for the test fixture. The WAV covers
+only the first stores and uses software-generated input.

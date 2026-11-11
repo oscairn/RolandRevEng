@@ -157,7 +157,7 @@ two channels. The native callback uses the distinct binary64 bias and slope
 | Offset from reload | Controls | Established context |
 |---|---|---|
 | `00` | `0fe0` | Reload the mixed input |
-| `06` | `1405` | Between the load and the standalone family-2 packets |
+| `06` | `1405` | Candidate product of A and indexed port 5, with result on port 1 |
 | `0a/0e` | `9c59`, `9ed9` | Standalone family-2 pair preceding the first affine-literal packet |
 | `12` | `3452 / 0014` | Two width-two literals and a port-0 reference |
 | `1c/20` | `14c3`, `1460` | Short operations before T; `1460` references a width-three literal |
@@ -169,6 +169,16 @@ native equation does not isolate conversion, shift, clamp or special-state
 effects within `9c59/9ed9`. There is no independently anchored observable
 intermediate between those two DSP packets. The strict interpreter still
 rejects the window.
+
+TRANSIENT gives an independent comparison for the short gain form. At
+`2ae`, `0fe2/4fe4` loads fresh left and right inputs into A and B.
+`1406/5506` at `2be` precedes the port-1 and port-5 stores at `2c4`.
+The matched native stores at `1d6580/1d6594` write each input multiplied
+by `1 - data[0x26]`. In FETDRIVE, `5fe4` loads C1 into indexed port 5
+before the `5564` drive-scale packet, and no later indexed port-5 load
+intervenes before `1405`. This makes port 1 the leading input candidate
+for `9c59`. The later `9fe0` anchors port 1 at the first shaped store.
+Writeback, special state and issue timing within `9c59/9ed9` remain open.
 
 All five Fantom FETDRIVE placements retain the same control sequence and have
 distinct input/output data addresses. Their stored values differ from the

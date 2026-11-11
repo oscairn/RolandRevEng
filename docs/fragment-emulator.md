@@ -190,3 +190,25 @@ has one logical state value and two alternating fixture cells. The test
 checks independent channel responses, nonzero state across switches,
 and the zero-feedback case. The fixture addresses and host alternation
 need an owned reservation and a validated schedule for hardware use.
+
+## Experimental FETDRIVE first stores
+
+```sh
+python3.13 tools/render_fetdrive_window.py local/b0c1a.bin \
+  local/fetdrive-first-stores.wav --base 0x4020 > local/fetdrive-first-stores.json
+```
+
+The renderer reads the pinned Fantom CORE1 packet sequence, data addresses,
+drive scale, two affine literals per channel and post gains. It models the
+path from supplied mixed inputs to the first `9fe0` stores using the native
+reference's fixed-point conversion, bipolar clamp, fused affine and square.
+The first affine literal supplies slope and the second supplies bias. The
+two stock values are equal, so exchanging them leaves the prediction equal.
+
+The WAV contains the predicted store values for two sine inputs at a software
+rate of 48 kHz and a supplied live drive of 0.5. The JSON records the predicted
+values at both signs of the first quantizer bin and immediately below, at and
+above both clamp limits. All five stock placements predict the same values
+with this fixture. The model stops at the first stores, before the later
+filter and mixing stages. Isolated opcode semantics and hardware precision
+remain unverified.

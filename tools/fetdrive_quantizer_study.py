@@ -9,6 +9,8 @@ import struct
 from bmc_dsp import literal, packets, swap_words
 from effect_lifecycle_study import IMAGE_SHA256
 from kernel_abi import program_list, read
+from header_study import layout
+from line_mix_variation import packet_literals
 from line_shaping_study import (EPSILON, NATIVE_SHA256, _finite, _float32, decode_constant,
                                 decode_quantizer, quantize_native_reference)
 from weighted_mix_study import require_instructions, require_window, require_words
@@ -40,7 +42,7 @@ def packet_context(stream):
     if coefficient >> 12 != 0xc:
         raise ValueError('FETDRIVE drive coefficient tag differs')
     sources = rows[0x2e][4:6]
-    targets = []
+    targets, affine_fields = [], []
     for start, source in zip((0x3e, 0xd4), sources):
         for delta, words in (
             (0, (0x0c03, 0x0fe0, source)), (6, (0x0902, 0x1405)),
@@ -50,13 +52,59 @@ def packet_context(stream):
         ):
             require_words(rows, start + delta, words)
         targets.append(rows[start + 0x28][2])
+        affine = rows[start + 0x12]
+        if [reg['index'] for reg in layout(affine)['registers']] != [0]:
+            raise ValueError('FETDRIVE affine packet register reference differs')
+        fields = packet_literals(stream, start + 0x12, affine)
+        if len(fields) != 2 or any(field['width'] != 2 for field in fields):
+            raise ValueError('FETDRIVE affine literal references differ')
+        affine_fields.append(fields)
     if len(set(sources + targets)) != 4 or any(address >= 0x800 for address in sources + targets):
         raise ValueError('FETDRIVE mixed-input and shaped-output addresses alias or exceed data range')
     return dict(sources=sources, targets=targets, coefficient_slot=coefficient & 0xfff,
                 scale=literal(stream[0x3a:0x3d]),
-                affine_literals=[[literal(stream[pos:pos+2]) for pos in (0x56, 0x58)],
-                                 [literal(stream[pos:pos+2]) for pos in (0xec, 0xee)]],
+                affine_literals=[[field['value'] for field in fields] for fields in affine_fields],
                 post_gain=[literal(stream[pos:pos+3]) for pos in (0x62, 0xf8)])
+
+
+def transient_gain_report():
+    """Independently anchor the 1406/5506 short-gain pair and next stores."""
+    from condition_return_study import preserved
+    from limit_control_study import native_context
+
+    program, native, _, fields, _ = native_context('SIM_MFX_TRANSIENT')
+    rows = dict(packets(program))
+    require_words(rows, 0x2a4, (0x1e05, 0x3fe0, 0x7fe2, 0x26, 0x28))
+    require_words(rows, 0x2ae, (0x5f08, 0x6ed0, 0x74c7, 0x0fe2, 0x4fe4, 0x3000, 0x2016, 0x2017))
+    require_words(rows, 0x2be, (0x1503, 0x1406, 0x5506))
+    require_words(rows, 0x2c4, (0xb408, 0x1407, 0x5507, 0xbecf, 0x9fe0, 0xdfe2, 8, 9))
+    field, = packet_literals(program, 0x2ae, rows[0x2ae])
+    if field['value'] != 1.0:
+        raise ValueError('TRANSIENT complement literal differs')
+    if [fields[field] for field in (0x214, 0x124, 0x12c)] != [
+            dict(relative=0x27c, address=0x26), dict(relative=0x2d0, address=8),
+            dict(relative=0x2d2, address=9)]:
+        raise ValueError('TRANSIENT gain and store records differ')
+    require_instructions(native, 0x1d6004, (('ldr', 'x21, [x0, #0x28]'), ('ldr', 'x8, [x0, #8]'),
+                                           ('ldr', 'x22, [x8, #0x18]'), ('ldr', 'x8, [x22, #0x10]'),
+                                           ('ldp', 'x25, x26, [x1]')))
+    require_instructions(native, 0x1d6050, (('ldr', 'x23, [x8, #0x18]'),))
+    for reg, start in (('x21', 0x1d6008), ('x25', 0x1d6018), ('x26', 0x1d6018),
+                       ('x23', 0x1d6054), ('w27', 0x1d6228)):
+        preserved([native[pc] for pc in range(start, 0x1d6594, 4)], reg)
+    require_window(native, 0x1d6540, 0x1d6594)
+    require_instructions(native, 0x1d6540, (('ldr', 'w8, [x21, #0x214]'), ('add', 'w8, w27, w8'),
+                                           ('and', 'w8, w8, #0x7ff'), ('ldr', 'd2, [x23, w8, uxtw #3]')))
+    require_instructions(native, 0x1d6560, (
+        ('fmov', 'd4, #1.00000000'), ('fsub', 'd5, d4, d2'), ('ldr', 'd0, [x25]'), ('ldr', 'd1, [x26]'),
+        ('fmul', 'd6, d5, d0'), ('ldr', 'w8, [x21, #0x124]'), ('add', 'w8, w27, w8'),
+        ('and', 'w8, w8, #0x7ff'), ('str', 'd6, [x23, w8, uxtw #3]'), ('fmul', 'd6, d5, d1'),
+        ('ldr', 'w8, [x21, #0x12c]'), ('add', 'w8, w27, w8'), ('and', 'w8, w8, #0x7ff'),
+        ('str', 'd6, [x23, w8, uxtw #3]'),
+    ))
+    return dict(packet=0x2be, controls=[0x1406, 0x5506], sample_load_ports=[0, 4],
+                store_ports=[1, 5], native_stores=[0x1d6580, 0x1d6594],
+                native_factor='1 - data[0x26]')
 
 
 def native_report():
@@ -158,6 +206,8 @@ def native_report():
         raise ValueError('FETDRIVE setup post-gain group differs')
     initial_divisor, = struct.unpack_from('<i', lib.Z, 0xb78af0)
     return dict(native_defaults=defaults, bias=BIAS, slope=SLOPE, quantizers=quantizers,
+                gain_comparison=transient_gain_report(),
+                quantizer_input_port_candidate=1, first_store_port=1, isolated_writeback_verified=False,
                 desktop_packets=context, post_gain_setup=dict(numerator=numerator['value'],
                     initial_divisor=initial_divisor, divisor_field=0xb78af0, group=group))
 
