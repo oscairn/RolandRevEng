@@ -7,6 +7,7 @@ import math
 
 from bmc_dsp import command_count, packets
 from bmc_subset import DEFAULT_INPUT_ADDRESSES, disassemble_fragment
+from line_shaping_study import _float32, quantize_native_reference
 
 
 def _finite(value, label):
@@ -38,6 +39,9 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
     if not isinstance(program, bytes):
         raise ValueError('Program must be logical bytes')
     spec = disassemble_fragment(program)
+    native_coefficient_prefix = spec['kind'] == 'coefficient_shift4'
+    if native_coefficient_prefix and not hasattr(math, 'fma'):
+        raise ValueError('The coefficient shift profile requires Python 3.13+ math.fma')
     io_addresses = spec.get('input_addresses', DEFAULT_INPUT_ADDRESSES)
     memory = _values(data, 'data', range(0x800))
     coefs = _values(coefficients, 'coefficients', range(0x1000))
@@ -55,7 +59,7 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
             raise ValueError('Unsupported transfer address/tag')
         if key not in source:
             raise ValueError(f'Missing {label} value at {key:#x}')
-        return source[key]
+        return _float32(source[key]) if native_coefficient_prefix and source is coefs else source[key]
 
     for offset, words in packets(program):
         count = command_count(words[0])
@@ -75,16 +79,23 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
                 address = pool[index]
                 if port < 8:
                     next_ports[port] = load(address)
-                elif port in (8, 12):
+                elif port in (8, 12, 15):
                     if not 0 <= address < 0x800:
                         raise ValueError('Only data stores below 0x800 are supported')
-                    writes[address] = old_value(0 if port == 8 else 4)
+                    writes[address] = old_value(port - 8)
                 else:
                     raise ValueError('Unsupported transfer port')
                 continue
             if word in (0x0403, 0x4503):
                 destination = 0 if word == 0x0403 else 4
                 value = old_value(destination) * old_value(3)
+            elif word == 0xfdd4:
+                destination = 7
+                # shortcut: native fixed32 policy until BMC conversion measurements are available.
+                value = quantize_native_reference(old_value(7), shift_bits=4)['quantized']
+            elif word == 0x0812 and pool == [0x1500, 0x2800, 0x2800, 0xc000 | spec['coefficient_slots'][0]]:
+                destination = 0
+                value = math.fma(old_value(0), 0.5, old_value(1) * 0.5)
             elif word in (0x080b, 0x490b, 0x0e0b) and pool:
                 destination = 4 if word == 0x490b else 0
                 form = word, pool[0]

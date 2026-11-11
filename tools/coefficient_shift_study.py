@@ -16,6 +16,41 @@ from weighted_mix_study import check_constructor_literal, require_instructions, 
 VSOD_LISTS = {'VSOD': 0x611402f4, 'VSODDSAW': 0x611421fc, 'VSODDSTW': 0x611444e0}
 
 
+def shift_field_candidate(control):
+    """Describe the field pattern in the seven checked conversion controls."""
+    if type(control) is not int or control not in (0xbc12, 0xbcd2, 0xbcd4, 0xfdd2, 0xfdd4, 0x9c59, 0xac99):
+        raise ValueError('Outside the checked shift-control observations')
+    return dict(control=control, source=(control >> 6) & 7,
+                destination=(control >> 12) & 7, shift_bits=(control & 63) - 16)
+
+
+def line_report():
+    from condition_return_study import preserved
+    from line_shaping_study import study
+
+    checked = study()
+    program, native, _, fields, trace = native_context('SIM_MFX_LINEDRIVE')
+    rows = dict(packets(program))
+    require_words(rows, 0x2a, (0x3e07, 0xafe0, 0xbfe2, 0x5fe4, 1, 2, 0xc002))
+    require_words(rows, 0x38, (0x2e08, 0x5562, 0x7065, 0x2fe0, 1))
+    require_words(rows, 0x84, (0x0c03, 0x2fe0, 2))
+    require_instructions(native, 0x2df8fc, (('fmul', 'd0, d2, d0'), ('fmul', 'd1, d1, d0')))
+    require_instructions(native, 0x2df9e0, (('fmul', 'd0, d0, d5'),))
+    preserved([native[pc] for pc in range(0x2df900, 0x2df9e0, 4)], 'd0')
+    source_reads = [checked_access(native, fields, trace, pc, 'read', relative, address)
+                    for pc, relative, address in ((0x2df8f4, 0x32, 1), (0x2df9dc, 0x34, 2))]
+    if dict(pc=0x2df8e0, slot=2, width=4) not in checked['live_coefficient_reads']:
+        raise ValueError('LINE drive coefficient differs')
+    scale, = [row for row in checked['literal_records'] if row['record'] == 0x60]
+    if scale['packet'] != 0x38 or scale['control'] != 0x5562:
+        raise ValueError('LINE drive literal source differs')
+    return dict(control_fields=shift_field_candidate(0xac99), source_reads=source_reads,
+                drive_scale=scale, native_quantizers=checked['quantizers'],
+                native_first_stores=[0x2df9bc, 0x2dfa50],
+                input_port_candidate=2, isolated_writeback_verified=False,
+                first_store_follows_gate_clip_and_smoothing=True)
+
+
 def native_shift4_coefficient(coefficient):
     """Transform one live float under the checked native numeric policy."""
     return quantize_native_reference(_float32(coefficient), shift_bits=4)['quantized']
@@ -76,8 +111,18 @@ def base_report():
 
     program, native, _, fields, trace = native_context('SIM_MFX_VSOD')
     context = packet_context('VSOD', program)
+    require_instructions(native, 0x273908, (
+        ('ldr', 'x8, [x0, #0x28]'), ('ldr', 'x9, [x0, #8]'), ('ldr', 'x9, [x9, #0x18]'),
+        ('ldr', 'x11, [x9, #0x10]'), ('ldr', 'x12, [x9, #0x28]'), ('ldp', 'x9, x10, [x1]'),
+        ('ldr', 'd1, [x9]'), ('ldr', 'd2, [x10]'),
+    ))
     require_window(native, 0x273928, 0x273984)
     require_instructions(native, 0x273930, (('fcvt', 'd3, s0'),))
+    require_instructions(native, 0x27393c, (('fcvt', 'd4, s0'), ('fmov', 'd0, #0.50000000'),
+                                          ('fmul', 'd2, d2, d0'), ('fmadd', 'd1, d1, d0, d2')))
+    require_instructions(native, 0x273964, (('fmul', 'd1, d1, d4'),))
+    require_instructions(native, 0x2739a8, (('str', 'd1, [x10, w13, uxtw #3]'),))
+    preserved([native[pc] for pc in range(0x273968, 0x2739a8, 4)], 'd1')
     preserved([native[pc] for pc in range(0x273934, 0x27394c, 4)], 'd3')
     for pc, slot in ((0x27392c, context['coefficient_slot']), (0x273938, context['coefficient_slot'] - 1)):
         if dict(pc=pc, slot=slot, width=4) not in trace['coefficient_reads']:
@@ -86,7 +131,9 @@ def base_report():
     require_instructions(native, 0x273984, (('str', 'd3, [x10, w14, uxtw #3]'),))
     preserved([native[pc] for pc in range(0x273964, 0x273984, 4)], 'd3')
     store = checked_access(native, fields, trace, 0x273984, 'write', 0x28, context['data_store'])
-    return dict(packets=context, quantizer=quantizer, store=store)
+    sample_store = checked_access(native, fields, trace, 0x2739a8, 'write', 0x34, 0)
+    return dict(packets=context, quantizer=quantizer, store=store, sample_store=sample_store,
+                sample_expression='fma(left, 0.5, right*0.5) * float32(C0)')
 
 
 def coefficient_context(cls):
@@ -236,7 +283,10 @@ def native_report():
     return dict(VSOD=base_report(), VSODDSAW=variant_report('VSODDSAW'),
                 VSODDSTW=variant_report('VSODDSTW'), FORMANT=formant_report(), GASSPH=gassph_report(), VMCP=dict(
                     coefficient_slot=vmcp['packets']['coefficient_slot'], quantizer=vmcp['quantizers'][1],
-                    after_gain=vmcp['after_gain']), strict_dsp_admission=False)
+                    after_gain=vmcp['after_gain']), LINE=line_report(),
+                control_field_candidates=[shift_field_candidate(control) for control in
+                    (0xbc12, 0xbcd2, 0xbcd4, 0xfdd2, 0xfdd4, 0x9c59, 0xac99)],
+                executable_profiles=['coefficient_shift4'], strict_dsp_admission=False)
 
 
 def fantom_report(core):

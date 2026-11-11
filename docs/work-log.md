@@ -881,3 +881,28 @@ reproduce the FETDRIVE gain, conversion candidate and clamp candidate
 in three consecutive packets. The nearby GATE `8ed9` variant appears in a
 three-control bundle. Its native clamp interval also contains a conditional
 selection, leaving it insufficient for an isolated port assignment.
+
+## Stored fixed-point conversion and LINE source trace
+
+The VSOD prefix at logical `004..02a` now has a 38-byte emitter,
+strict inverse decoder and packet execution profile. Native store
+`273984` anchors the converted C1 value to port 7 and store `2739a8`
+anchors the half-sum times C0 to main A. Five Fantom placements match
+the profile with their actual assignments. Boundary checks exercise
+binary32 reads, fixed32 truncation, signed64 wrapping and co-issued
+store order.
+
+LINE source records and native multiply uses strengthen the port-2
+input candidate for `ac99`. The field pattern agrees with six other
+checked shift controls. LINE's first observable store still follows
+other nonlinear operations and smoothing.
+
+GATE's later clamp and store at `313fa8` bind to the next packet's
+main-A store at operand `ba`. That narrows the earlier GATE comparison
+to an observed bundle output while retaining its co-issue ambiguity.
+
+All 284 tests passed. A separate focused pass checks the later GATE store.
+Qwen reviewed the prefix implementation. Its proposed scale mismatch
+misread hexadecimal `0x20` and the verified `2^-32` constant, and its
+store objection extended past the fragment boundary. The checked byte
+slice, native instructions and numeric boundary tests resolve those claims.

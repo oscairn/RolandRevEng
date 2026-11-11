@@ -34,6 +34,26 @@ def assemble_stereo_input(spec):
     return assemble([[0x1e05, 0x0fe0, 0x1fe2, *input_pair(spec['input_addresses'])]])
 
 
+def assemble_coefficient_shift4(spec):
+    if (not isinstance(spec, dict) or set(spec) !=
+            {'kind', 'input_addresses', 'coefficient_slots', 'target'}
+            or spec['kind'] != 'coefficient_shift4'):
+        raise ValueError('Expected coefficient_shift4 with input_addresses, coefficient_slots and target')
+    input_pair(spec['input_addresses'])
+    slots = spec['coefficient_slots']
+    if (not isinstance(slots, list) or len(slots) != 2
+            or any(type(slot) is not int or not 0 <= slot < 0x1000 for slot in slots)
+            or len(set(slots)) != 2
+            or type(spec['target']) is not int or not 0 <= spec['target'] < 0x800):
+        raise ValueError('Expected two distinct coefficient slots and one data target')
+    gain, shift = [0xc000 | slot for slot in slots]
+    return assemble([
+        [0x3e07, 0x0fe0, 0x1fe2, 0x7fe4, *spec['input_addresses'], shift],
+        [0x2808, 0x0812, 0xfdd4, 0x3fe6, 0x1500, 0x2800, 0x2800, gain],
+        [0x1804, 0x0403, 0xffe0, spec['target']],
+    ])
+
+
 def validate(spec):
     if not isinstance(spec, dict) or set(spec) - {'input_addresses'} != {'kind', 'wet_addresses', 'coefficient_slots'}:
         raise ValueError('Expected kind, wet_addresses, coefficient_slots and optional input_addresses')
@@ -159,6 +179,8 @@ def assemble_fragment(spec):
         raise ValueError('Expected a JSON object')
     if spec.get('kind') == 'stereo_input':
         return assemble_stereo_input(spec)
+    if spec.get('kind') == 'coefficient_shift4':
+        return assemble_coefficient_shift4(spec)
     if spec.get('kind') == 'allpass4':
         return assemble_allpass(spec)
     if spec.get('kind') == 'dry_wet_tail_with_scratch':
@@ -167,6 +189,16 @@ def assemble_fragment(spec):
 
 
 def disassemble_fragment(stream):
+    if len(stream) == 38:
+        rows = [words for _, words in packets(stream)]
+        if len(rows) != 3 or [len(row) for row in rows] != [7, 8, 4]:
+            raise ValueError('Not an exact coefficient_shift4 prefix')
+        first, middle, last = rows
+        spec = dict(kind='coefficient_shift4', input_addresses=first[4:6],
+                    coefficient_slots=[middle[7] & 0xfff, first[6] & 0xfff], target=last[3])
+        if assemble_coefficient_shift4(spec) != stream:
+            raise ValueError('Unsupported coefficient-shift controls, literals or tags')
+        return spec
     if len(stream) == 10:
         spec = dict(kind='stereo_input', input_addresses=[
             int.from_bytes(stream[offset:offset+2], 'big') for offset in (6, 8)])

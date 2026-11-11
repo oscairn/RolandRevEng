@@ -280,13 +280,15 @@ six candidate segments that failed framing. The SH-4d inventory excludes one.
 Coverage is limited to the recovered render lists and these prepared artifacts.
 
 The desktop GATE program supplies a related word, `8ed9`, in the
-`3604 8ed8 8ed9 1b12` packet at `a6`. Native code at `313f08..313f18`
-clamps a biased data value to `[-1,+1]`. The same native interval then applies
-a threshold-dependent selection before the data store at `313f50`.
-Constructor field `11c` binds that store to DSP operand `94`, cell `7`,
-which appears in a co-issued store packet at `82`. The clamp and the
-DSP packet are candidates for comparison. The differing store order and
-the other two controls at `a6` leave individual writeback unverified.
+`3604 8ed8 8ed9 1b12` packet at `a6`. Its earlier native clamp at
+`313f08..313f18` precedes a conditional selection and a store to cell 7.
+A later native clamp at `313f88..313f98` follows both paths of an
+increment/decrement branch and writes cell 9 at `313fa8`.
+Constructor field `12c` binds that later store to DSP operand `ba`,
+which is the port-0 `8fe6` store in the next packet at `ae`.
+`limit_control_study.py` checks the native pointer preservation, join,
+clamp and store instructions. This anchors port 0 after the bundle.
+The other two controls at `a6` leave individual writeback unverified.
 
 ```sh
 python tools/quantizer_context_inventory.py \
@@ -302,6 +304,44 @@ python tools/quantizer_context_inventory.py \
 `coefficient_shift_study.py` follows independently identified binary32 live
 coefficient records into the native signed64 fixed32 conversion, wrapping
 left shift, signed conversion back, and multiplication by `2^-32`.
+
+### LINE source and the shift-field candidate
+
+LINE's live C2 read at `2df8e0` feeds a shared scaled gain. The owned
+constructor record `60` supplies the drive-scale literal in `5562`
+at packet `38`. Port 2 loads the mixed left sample in that packet
+and the mixed right sample at `84`. The following `2485` packets
+form each input times the scaled drive before the two `ac99` controls.
+The native source reads at `2df8f4/2df9dc`, multiply order and carried
+gain are checked against their constructor records and instruction uses.
+
+The seven checked controls fit the following candidate fields. `I0`
+here is the entering main-A value in the VMCP `bc12` context.
+
+| Control | Candidate source | Candidate destination | Native shift |
+|---|---|---|---:|
+| `bc12` | I0 | I3 | 2 |
+| `bcd2` | I3 | I3 | 2 |
+| `bcd4` | I3 | I3 | 4 |
+| `fdd2` | I7 | I7 | 2 |
+| `fdd4` | I7 | I7 | 4 |
+| `9c59` | I1 | I1 | 9 |
+| `ac99` | I2 | I2 | 9 |
+
+The source pattern occupies bits `8..6`, the destination pattern
+bits `14..12`, and the amount matches `(control & 63) - 16`.
+The checked controls share `control & 0x0e00 == 0x0c00`.
+These fields are retained as a candidate over the seven observations.
+The checker rejects other words. LINE's first stores at
+`2df9bc/2dfa50` occur after gating, clipping and smoothing, which
+leaves its isolated conversion writeback open.
+
+VSOD provides the tighter boundary. `fdd4` consumes the prior
+port-7 C1 load and the very next packet's `ffe0` stores its value.
+The separate native mixed-sample store at `2739a8` anchors main A
+after multiplying by C0. The exact three-packet prefix is now
+[executable and re-emittable](fragment-emulator.md#stored-fixed-point-coefficient-prefix)
+under the documented native numeric policy.
 
 | DSP context | Live operand | Checked native use |
 |---|---|---|

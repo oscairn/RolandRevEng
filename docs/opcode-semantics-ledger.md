@@ -90,10 +90,13 @@ DSP arithmetic opcode or a program-literal write.
 ## Executable offline subset
 
 The [functional fragment interpreter](fragment-emulator.md) now executes only the
-same exact stereo input, dry/wet, scratch and allpass contexts accepted by the inverse decoder. It steps
+same exact stereo input, dry/wet, scratch, allpass and VSOD coefficient-prefix contexts accepted by the inverse decoder. It steps
 packet bytes with old-port arithmetic/stores, next-packet loads and copied trace
 snapshots. [Corpus validation](fragment-emulator-validation.md) checks the actual
-four stock spans and native proofs independently. Other arithmetic entries above
+stock spans and native proofs independently. The additional
+[`coefficient_shift4` profile](fragment-emulator.md#stored-fixed-point-coefficient-prefix)
+executes `0812/1500`, `fdd4` and the port-7 store under the native
+numeric policy. Other arithmetic entries above
 remain study results, without executable admission. Binary64 reference behavior
 is not calibrated silicon precision or timing. The
 [next-program inventory](emulator-next-program-targets.md) keeps complete-program

@@ -167,3 +167,14 @@ The additional Fantom input pairs are `2000/2001`, `2005/2006`,
 in its recorded channel order. The dry/wet decoder omits
 `input_addresses` when it sees the original default pair.
 [Checked placement and fragment extraction](fragment-emulator.md#linedrive-from-the-fantom-image)
+
+## Fixed-point coefficient prefix
+
+`examples/coefficient_shift4.json` supplies the exact three-packet VSOD
+prefix. Its `coefficient_slots` are ordered as gain C0 followed by converted
+C1. Its `target` receives converted C1. Main A retains the input half-sum
+multiplied by C0. Each slot is a distinct integer in `0..0xfff` and the
+target is an integer in `0..0x7ff`. `input_addresses` selects a checked
+stereo pair. The 38 logical bytes take 40 stored bytes with zero padding.
+The [execution contract](fragment-emulator.md#stored-fixed-point-coefficient-prefix)
+records the native numeric policy and independent store bindings.

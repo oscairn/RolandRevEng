@@ -6,11 +6,21 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/'tools'))
-from coefficient_shift_study import fantom_report, native_report, native_selected_gain, native_shift4_coefficient
+from coefficient_shift_study import (fantom_report, native_report, native_selected_gain,
+                                     native_shift4_coefficient, shift_field_candidate)
 from line_shaping_study import EPSILON, quantize_native_reference
 
 
 class NumericTests(unittest.TestCase):
+    def test_checked_shift_field_pattern_and_unsupported_controls(self):
+        self.assertEqual(shift_field_candidate(0xbc12),
+                         dict(control=0xbc12, source=0, destination=3, shift_bits=2))
+        self.assertEqual(shift_field_candidate(0xac99),
+                         dict(control=0xac99, source=2, destination=2, shift_bits=9))
+        for control in (0xff59, 0xac8e, False):
+            with self.assertRaises(ValueError):
+                shift_field_candidate(control)
+
     def test_native_shift4_and_unity_gate(self):
         self.assertEqual(native_shift4_coefficient(0.03125), 0.5)
         self.assertEqual(native_shift4_coefficient(-0.015625), -0.25)
@@ -34,6 +44,9 @@ class CorpusTests(unittest.TestCase):
     def test_native_conversions_and_distinct_port_observations(self):
         report = native_report()
         self.assertFalse(report['strict_dsp_admission'])
+        self.assertEqual(report['executable_profiles'], ['coefficient_shift4'])
+        self.assertEqual(report['LINE']['input_port_candidate'], 2)
+        self.assertFalse(report['LINE']['isolated_writeback_verified'])
         base = report['VSOD']
         self.assertEqual((base['packets']['load_port'], base['packets']['store_port']), (7, 7))
         self.assertEqual((base['store']['pc'], base['store']['relative']), (0x273984, 0x28))

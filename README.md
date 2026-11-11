@@ -78,7 +78,7 @@ Independent follow-up studies:
 
 This directory contains offline tools and derived research. It does not contain
 a working custom synth engine, full stock-effect emulator, general assembler, flasher or hardware driver. A constrained
-emitter reproduces fixed stereo input, dry/wet, scratch and allpass profiles. Nothing
+emitter reproduces fixed stereo input, dry/wet, scratch, allpass and coefficient-shift profiles. Nothing
 here opens a device or executes Roland's plugin. Production Oscairn code was not changed.
 
 ## Reproduce

@@ -1,9 +1,14 @@
 # Offline functional fragment emulator
 
-2026-11-10. `tools/bmc_emulator.py` executes logical packet bytes for four checked profiles. Stereo input takes 10 bytes, the dry/wet tail
+2026-11-10. `tools/bmc_emulator.py` executes logical packet bytes for five checked profiles. Stereo input takes 10 bytes, the dry/wet tail
 has 60-byte and 80-byte forms, and the four-stage allpass takes 82 bytes. This is a packet-stepping functional model with memory and
 per-packet traces. It is not yet a complete Roland effect or a cycle/bit-accurate
 BMC emulator. No vendor plugin or instrument is executed.
+
+The additional `coefficient_shift4` profile takes 38 logical bytes. Its
+numeric policy follows the checked VSOD native prefix, including binary32
+coefficient reads and signed64/fixed32 conversion. It uses Python 3.13+
+for the native fused input mix.
 
 ## Contract and issue model
 
@@ -42,6 +47,8 @@ value. Co-issued post/master coefficient loads cannot affect the current multipl
 Only the contexts already accepted by the inverse decoder are executable. This
 includes indexed transfers with shared operand pools, the two dry/wet MAC forms,
 `0403/4503` gains and the alternating `0e0b/22c1`, `0e0b/12c2` allpass forms.
+A complete VSOD prefix also executes the exact `0812/1500` half-sum,
+`fdd4` coefficient conversion and `ffe0` store.
 A familiar control word elsewhere is not automatically supported. The
 [semantic ledger](opcode-semantics-ledger.md) lists additional research results
 that are deliberately outside this executable subset.
@@ -75,12 +82,39 @@ packet traces, coefficient timing and all stores against direct equations. Synth
 tests separately cover the public API and rejection/aliasing boundaries. Generating
 bytes with the emitter and decoding them again is not the sole evidence.
 
-Floating arithmetic uses Python binary64 with explicit operation order. Native FMA,
-fixed-point conversions, saturation, rounding, physical registers, issue latency,
+Floating arithmetic uses Python binary64 with explicit operation order. The VSOD
+prefix adds the native FMA and fixed32 shift policy described below. Saturation,
+rounding, physical registers, issue latency,
 clocking, circular indices, reset, routing and call/return state are not inferred.
 The interpreter supplies no automatic history allocation, coefficient smoothing,
 wrapper execution, device connection or loader. Hardware calibration remains a
 separate requirement for fidelity.
+
+## Stored fixed-point coefficient prefix
+
+The exact `coefficient_shift4` profile corresponds to VSOD `004..02a`.
+It loads left and right inputs and coefficient C1, computes the native
+`fma(left, 0.5, right*0.5)` and converted C1 concurrently, then multiplies
+the half-sum by C0 while storing the converted C1 through port 7.
+The native stores at `273984` and `2739a8` independently bind the two
+results to their actual data records. All five Fantom VSOD placements
+reproduce the profile with relocated inputs, coefficient slots and target.
+
+```sh
+python3.13 tools/bmc_subset.py assemble examples/coefficient_shift4.json \
+  local/coefficient-shift4.bin --stored
+python3.13 tools/bmc_subset.py disassemble local/coefficient-shift4.bin \
+  --stored --length 38
+```
+
+The example assigns C0 to slot 0, C1 to slot 1 and the store to data cell 1.
+The executor reads both coefficients as binary32. Conversion truncates
+`C1 * 2^32` toward zero, shifts the signed64 integer left by four with
+wrap, converts back to binary64 and multiplies by `2^-32`. C1 values
+outside the non-overflowing fixed32 conversion range are rejected.
+Near zero this differs from multiplying C1 by sixteen. Positive
+`2^27` wraps to negative `2^31` under the selected native policy.
+BMC conversion precision and exceptions require hardware measurements.
 
 The [next-program inventory](emulator-next-program-targets.md) selects LINEDRIVE
 for the next complete-effect effort and names every remaining region. A successful

@@ -37,6 +37,10 @@ class CorpusTests(unittest.TestCase):
         self.assertEqual([binding['pc'] for binding in vmcp['after_gain']], [0x39dc30, 0x39dc44])
         self.assertEqual(report['ring']['after']['pc'], 0x277e00)
         self.assertEqual(report['ring']['store_operand'], 0x11e)
+        self.assertEqual(report['gate']['native_store'], 0x313fa8)
+        self.assertEqual(report['gate']['dsp_store_operand'], 0xba)
+        self.assertEqual(report['gate']['destination_port_after_bundle'], 0)
+        self.assertFalse(report['gate']['isolated_writeback_verified'])
 
     @unittest.skipUnless((CORPUS/'b0c1a.bin').exists(), 'Recorded Fantom image required')
     def test_fantom_relocations_and_threshold_table(self):

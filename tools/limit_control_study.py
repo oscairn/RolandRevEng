@@ -162,6 +162,37 @@ def ring_report():
     return dict(before=before, after=after, store_operand=0x11e, same_cell_as_field=0xe4)
 
 
+def gate_report():
+    from condition_return_study import preserved
+
+    program, native, _, fields, _ = native_context('SIM_MFX_GATE')
+    rows = dict(packets(program))
+    require_words(rows, 0xa6, (0x3604, 0x8ed8, 0x8ed9, 0x1b12))
+    require_words(rows, 0xae, (0x1407, 0x0412, 0x8fe6, 0x0014, 0x2800, 0x2800, 9))
+    if fields[0x12c] != dict(relative=0xba, address=rows[0xae][6]):
+        raise ValueError('GATE clamp store record differs')
+    require_instructions(native, 0x313dd0, (
+        ('ldr', 'x8, [x0, #0x28]'), ('ldr', 'x9, [x0, #8]'),
+        ('ldr', 'x9, [x9, #0x18]'), ('ldr', 'x11, [x9, #0x10]'),
+    ))
+    require_instructions(native, 0x313e0c, (('ldr', 'x10, [x11, #0x18]'),))
+    require_instructions(native, 0x313e3c, (('sub', 'w13, w13, w15'),))
+    for register, start in (('x8', 0x313dd4), ('x10', 0x313e10), ('w13', 0x313e40)):
+        preserved([native[pc] for pc in range(start, 0x313fa8, 4)], register)
+    require_instructions(native, 0x313f70, (
+        ('b.le', '#0x313f80'), ('ldr', 'd1, [x8, #8]'), ('fadd', 'd0, d0, d1'),
+        ('b', '#0x313f88'), ('ldr', 'd1, [x8, #0xb8]'), ('fsub', 'd0, d0, d1'),
+        ('fmov', 'd1, #1.00000000'), ('fmin', 'd1, d0, d1'),
+        ('fmov', 'd2, #-1.00000000'), ('fcmp', 'd0, d2'), ('fcsel', 'd0, d2, d1, mi'),
+        ('ldr', 'w14, [x8, #0x12c]'), ('add', 'w14, w13, w14'),
+        ('and', 'w14, w14, #0x7ff'), ('str', 'd0, [x10, w14, uxtw #3]'),
+    ))
+    require_window(native, 0x313f88, 0x313fa8)
+    return dict(packet=0xa6, controls=rows[0xa6][1:], native_clamp=[0x313f88, 0x313f98],
+                native_store=0x313fa8, constructor_field=0x12c, dsp_store_operand=0xba,
+                data_address=9, destination_port_after_bundle=0, isolated_writeback_verified=False)
+
+
 def native_report():
     import lib
     from line_prefix_study import descriptor, literal_calls
@@ -184,7 +215,7 @@ def native_report():
     table = struct.pack('<128f', *native_values)
     if struct.unpack('<128f', table) != native_values:
         raise ValueError('Native VMCP threshold values cannot be represented exactly in float32')
-    return dict(vmcp=vmcp_report(), ring=ring_report(), strict_dsp_admission=False,
+    return dict(vmcp=vmcp_report(), ring=ring_report(), gate=gate_report(), strict_dsp_admission=False,
                 threshold=dict(field=0x4a, table_sha256=hashlib.sha256(table).hexdigest(),
                                endpoints=[native_values[0], native_values[-1]]))
 

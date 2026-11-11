@@ -1,0 +1,6 @@
+{
+  "kind": "coefficient_shift4",
+  "input_addresses": [8214, 8215],
+  "coefficient_slots": [0, 1],
+  "target": 1
+}
