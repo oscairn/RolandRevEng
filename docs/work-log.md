@@ -2012,3 +2012,47 @@ under local/eqvg-*-tests.txt. Vendor bytes, raw listings and worker logs stay lo
 Remaining: actual manager wait/literal interpolation processing, the separate
 six-argument predicate/callers, Fantom ARM32 correspondence, physical precision,
 scheduler/history policy, entry/return and safe loading. No instrument accessed.
+
+
+## Coefficient manager processing and connected EqVg waits (2026-11-11)
+
+Linked 19 pinned original manager/core/envelope/scan/interrupt/wait/flag bodies
+into an owned graph. Literal writes and OS mutex/unique-lock/condition-wait/thread
+identity primitives are controlled callbacks; no app, task thread or hardware
+starts. Original descriptor resolution, live setup, active-bank scan, pending
+bitmaps/counts, completion dispatch, task states and sample counter logic execute.
+Explicit fixture ticks run one role4 bank scan and one wait-counter update.
+
+Literal amount normalization is max(abs(amount),1), not milliseconds. Unchanged
+values skip intermediate writes but receive exact final targets. Amount 100 makes
+99 unit-sample wait requests per batch. WaitXsample assigns request+1 to its
+counter, so a fresh request 1 takes two explicit counter updates here. Disabled
+or external-context sample waits return without time progression. Live wait=true
+outside the current subtask takes the original immediate binary32 fallback.
+These are software protocol results, not physical sample/block calibration.
+
+Forty literal context cases and 410 wait-driven ticks match; 12,000 live ticks
+with 95 interrupted writes match 960,000 record fields plus bitmap/task/counter
+state. Source tests span bitmap word boundaries and the final role4 slot 1023.
+Both original EqVg setters now optionally dispatch into the owned manager.
+The fresh live unsafe-path guard waits 530 ticks, finishes at 1060 and retains
+positive sampled Jury margins. Its synthetic preposted-flag counterpart bypasses
+the wait and reaches margin about -1.159796856. This establishes a dependency on
+flag state; it does not prove stock caller misuse or a runtime race. Literal
+batches 1+4 issue 198 wait requests and take 396 explicit fresh-state ticks.
+
+Qwen completed its 111.1-second static pass. Subtask gating/unit wait calls were
+independently verified; zero-normalization and swapped count/amount claims were
+wrong and rejected. Raw listings and worker logs remain ignored locally.
+Eight focused tests pass in 25.376 seconds. All 521 regression tests pass in
+363.671 seconds without retries. A direct five-coefficient amount100 check also
+matches 500 writes, 99 wait requests and 198 explicit fixture ticks. Vendor-free
+scalar/event checks, compilation and diff checks pass. Synced eight changed Roland
+notes with backups and concurrent-edit guards; all 73 notes verified. The attention
+chime failed with AudioQueueStart (-66680). Detailed reports and logs stay ignored
+under local/coefficient-manager-*. The 18 opcode profiles and FDRV
+1,692-byte/104-packet arithmetic chain remain unchanged.
+
+Remaining: real caller/task ownership and sync cadence, Fantom ARM32 cross-check,
+physical precision/interrupt delivery, history policy, entry/return and safe
+loading. No instrument accessed or flashed.

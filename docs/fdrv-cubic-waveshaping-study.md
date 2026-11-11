@@ -1,5 +1,11 @@
 # FDRV cubic waveshaping, interpolation and clipping
 
+The newer [manager processing checkpoint](coefficient-manager-processing-study.md)
+connects original EqVg setters to original manager/wait processing in owned memory.
+It compares record/bitmap/task state, resolves amount100 as an update count, and
+checks a preposted-flag canary. These protocol checks are separate from audio replay
+and do not measure OS or BMC scheduler timing.
+
 The newer [EqVg generation/interpolation checkpoint](eqvg-filter-generation-study.md)
 recovers both live-filter coefficient permutations and the final literal filter.
 Original setters prove damping/g-1 ordering, wait flags and literal batch splitting;

@@ -13,16 +13,24 @@ Next recover another useful exact producer/control context or an owner-proven
 nonempty label/continuation path; retain bounded opcode admission and hardware gates.
 Entry, runtime allocation and hardware calibration remain separate requirements.
 
-The latest bounded filter milestone is complete (2026-11-11): [EqVgCal](eqvg-filter-generation-study.md)
+The latest bounded manager milestone is complete (2026-11-11): [original manager/wait
+processing](coefficient-manager-processing-study.md) now executes in owned memory
+with controlled task primitives. Forty literal context cases, 12,000 explicit
+live ticks and connected EqVg guard cases match the independent model. The raw100
+is an update count; counter/state processing and completion bitmaps are checked.
+A preposted-flag canary bypasses the live guard in the constructed interleaving;
+actual caller ownership and OS/hardware scheduling remain unproved.
+
+Next cross-check the corresponding Fantom ARM32 generator/control path and trace
+actual task/flag ownership and sync cadence. Hardware precision, history setup,
+entry/return and safe loading remain open.
+
+The preceding bounded filter milestone is complete (2026-11-11): [EqVgCal](eqvg-filter-generation-study.md)
 now has native-checked formulas, Q clamping, consumer permutations and UI scaling.
 Original piece setters prove interpolation ordering/wait flags and literal batch
 splitting. Both 12,000-frame immediate-update policies match all audio/ring/cache
 state during 48 events and 240 original setter writes. No new opcode is admitted.
 
-Next recover the manager processing behind live wait flags and literal slotf8
-batches, including raw time argument100 and serialized unsafe transitions. Then
-cross-check EqVg generation/permutations against Fantom ARM32. Scheduler cadence,
-history initialization, physical precision, entry/return and safe loading stay open.
 
 The preceding bounded filter milestone is complete (2026-11-11): EqFaCal's eight
 numbered branches plus bypass fallback are recovered with original native math

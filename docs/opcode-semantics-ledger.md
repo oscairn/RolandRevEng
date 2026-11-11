@@ -14,6 +14,11 @@ rounding, saturation, accumulator width or fused evaluation on silicon.
 
 ## Independently checked arithmetic contexts
 
+The [manager processing checkpoint](coefficient-manager-processing-study.md)
+executes bounded original host/simulation code for interpolation and completion.
+It adds no DSP opcode or physical timing evidence; task primitives are controlled
+and native literal conversion stays outside the fixture.
+
 The [EqVg checkpoint](eqvg-filter-generation-study.md) checks five-coefficient
 producers and stock interpolation decisions without new opcode admission. Native
 setters and descriptor reads independently establish consumer ordering; 48

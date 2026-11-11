@@ -1,5 +1,11 @@
 # EqVg generation and interpolation policy
 
+The newer [manager processing checkpoint](coefficient-manager-processing-study.md)
+executes these requests through original software managers and waits against
+controlled task primitives. It resolves the raw100 count, verifies completion
+state and connects both EqVg paths, including a preposted-flag canary. Real OS
+thread timing and Fantom hardware correspondence remain unverified.
+
 2026-11-11. This recovers the ZENOLOGY native EqVg generator and the stock setter
 decisions used by FDRV. It adds coefficient producers to the existing packet
 model; it does not admit another opcode profile or establish physical BMC
@@ -107,9 +113,10 @@ output setter's stack guard, and never starts manager processing.
 If abs(new b) is smaller than abs(current b), b is first; otherwise g-1 is
 first. The remaining raw-field order is c/e/d. Tests execute both envelope
 choices, both offset flags and both order branches against the original code.
-The batch split and wait flag show the caller's sequencing request. Completion
-timing, raw argument100's runtime interpretation and the real manager's grouped
-write scheduling have not been executed or calibrated here.
+The batch split and wait flag show the caller's sequencing request. The later
+manager checkpoint executes their bounded software processing and identifies
+argument100 as an update count. Actual OS/hardware scheduling and timing remain
+uncalibrated.
 
 FDRV SetFilter indices0/1 tail-call EqVGenv. The wrapper derives its envelope
 argument by XOR1 of the manager query result (`e7550`); actual runtime selection
@@ -169,7 +176,8 @@ writes, ten rather than five writes, and the coefficient permutation. Those
 claims were rejected; native fixtures and descriptor reads establish the
 results above. Worker logs/listings and vendor data remain ignored locally.
 
-Still open: actual manager wait/interpolation processing, the separate
-six-argument stability overload and its callers, cross-checking this generator
+Still open: real task/flag ownership and OS/hardware scheduling beyond the owned
+manager fixture, the separate six-argument stability overload and its callers,
+cross-checking this generator
 against Fantom ARM32 code, physical precision, entry/return, scheduler cadence,
 history initialization and safe loading. No hardware was accessed or flashed.

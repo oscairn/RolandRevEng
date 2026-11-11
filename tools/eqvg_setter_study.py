@@ -2,18 +2,19 @@
 from contextlib import contextmanager,ExitStack
 import struct
 
-from eqvg_study import report,checked_args,native_function,native_interpolation_function,update_plan
+from eqvg_study import report,checked_args,native_function,native_interpolation_function
 from eqfa_study import _adr
 from line_shaping_study import _finite
 
 
 @contextmanager
-def native_function_setter(output=False):
-    """The manager only records; no event loop, interpolation worker or device runs."""
+def native_function_setter(output=False,*,dispatch=None):
+    """Record calls, optionally forwarding them to an explicitly supplied owned fixture."""
     import ctypes
     import lib
     from native_callback_fixture import executable_mapping
     if type(output)is not bool:raise ValueError('Expected explicit output-stage boolean')
+    if dispatch is not None and not callable(dispatch):raise ValueError('Expected an owned manager callback')
     report();start,end=(0x354184,0x354490)if output else(0x19b8ec,0x19bbd4)
     md=lib.md();md.detail=True;code=list(md.disasm(lib.Z[start:end],start))
     if [i.address for i in code]!=list(range(start,end,4)):raise ValueError('Incomplete setter body')
@@ -48,6 +49,11 @@ def native_function_setter(output=False):
                 raise ValueError('Expected explicit envelope/offset booleans')
             if not isinstance(current,(list,tuple))or len(current)!=2:raise ValueError('Expected current stored a/b')
             current=tuple(map(_finite,current));calls=[];errors=[]
+            def emitted(call):
+                calls.append(call)
+                if dispatch is not None:
+                    try:dispatch(call)
+                    except Exception as error:errors.append(f'Owned manager dispatch failed: {error}')
             table=ctypes.create_string_buffer(0x1a0);manager=ctypes.create_string_buffer(8)
             descriptor=ctypes.create_string_buffer(0x30);piece=ctypes.create_string_buffer(0x18)
             struct.pack_into('<B',descriptor,0,int(subtract_one))
@@ -66,13 +72,13 @@ def native_function_setter(output=False):
                     if not 1<=symbol<=5:errors.append('Unexpected coefficient symbol')
                     value=args[-1];selector=args[1]if slot==0x178 else None
                     wait=bool(args[2])if slot==0x178 else False
-                    calls.append(dict(coefficient=symbol-1,value=value,manager_slot=slot,
+                    emitted(dict(coefficient=symbol-1,value=value,manager_slot=slot,
                         time_selector=selector,wait=wait))
                 return capture
             def batch(_,symbols,values,count,selector):
                 if count not in (1,4,5)or selector!=100:
                     errors.append('Unexpected literal interpolation batch');return
-                calls.append(dict(manager_slot=0xf8,coefficients=list(symbols[:count]),
+                emitted(dict(manager_slot=0xf8,coefficients=list(symbols[:count]),
                     values=list(values[:count]),count=count,time_selector=selector))
             signatures=((0x198,ctypes.c_double,(ctypes.c_void_p,ctypes.c_int),read),
                 (0xe0,ctypes.c_double,(ctypes.c_void_p,),read),

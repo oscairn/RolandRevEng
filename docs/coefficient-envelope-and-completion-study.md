@@ -1,5 +1,12 @@
 # Live coefficient envelopes: selector, dispatch and completion
 
+The newer [native manager processing checkpoint](coefficient-manager-processing-study.md)
+executes role4 envelope registration, active scans, pending-bit transitions and
+completion dispatch in owned buffers. It also checks task-flag consumption and
+CDSPWait counters with controlled primitive callbacks. This supplements the native
+software model; it does not turn the CORE1 mappings below into hardware timing
+measurements or prove equivalent completion ownership on Fantom.
+
 2026-11-10. Static follow-up to [kernel/audio ABI](kernel-audio-abi-study.md) and
 [clear completion](clear-completion-interrupt-study.md). Pinned inputs:
 

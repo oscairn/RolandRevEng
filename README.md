@@ -4,6 +4,11 @@ Independent Roland BMC interoperability research, starting with Fantom-0 v1.08 a
 the installed ZENOLOGY plugin. Remote: `https://github.com/jbschooley/RolandRevEng.git`.
 Private visibility was verified on 2026-11-10; keep it private as requested. This is not an official Roland project.
 
+The [manager processing study](docs/coefficient-manager-processing-study.md) executes
+original interpolation/envelope processing with controlled task primitives. It
+checks subdivision counts, wait counters, completion bitmaps and EqVg sequencing;
+actual OS/hardware timing remains unverified.
+
 The [EqVg filter study](docs/eqvg-filter-generation-study.md) now recovers the five-coefficient
 generator, consumer permutations, native UI scaling and stock interpolation sequencing.
 Its 48-event replays retain the complete FDRV audio/state comparisons.

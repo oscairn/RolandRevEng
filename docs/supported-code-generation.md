@@ -5,6 +5,11 @@ and explicitly assigned indices into exact packet sequences independently matche
 against native FETDRIVE, LINEDRIVE and FDRV expressions. This is a constrained semantic code emitter and
 inverse decoder, not a general DSP assembler, scheduler or standalone engine.
 
+The [manager processing checkpoint](coefficient-manager-processing-study.md)
+now checks the software sequencing behind EqVg updates. A preposted completion
+flag can bypass the live guard in the synthetic fixture; actual caller ownership
+and scheduling remain separate prerequisites. No byte-emission rule changed.
+
 The [EqVg producer layer](eqvg-filter-generation-study.md) supplies explicit
 `live_coefficients()` and `output_coefficients()` permutations from the original
 generator. The latter can be quantized explicitly with `encoded_taps()` before

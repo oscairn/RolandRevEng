@@ -1,5 +1,10 @@
 # Offline functional fragment emulator
 
+The [manager processing model](coefficient-manager-processing-study.md) separately
+checks parameter interpolation, envelope completion and task flags against owned
+original software processing. Its explicit ticks do not calibrate audio/device
+cadence or change the admitted packet profiles.
+
 The [EqVg producer layer](eqvg-filter-generation-study.md) adds generated live and
 final-filter coefficients without admitting another opcode. The bounded
 `native_literals` reference policy also accepts the final output profile, checking
