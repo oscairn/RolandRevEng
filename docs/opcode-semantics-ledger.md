@@ -128,6 +128,12 @@ support a bipolar clamp for `9ed9` in two store-bracketed contexts. VMCP's
 shift-by-2 and shift-by-4 reference windows align separately with `bc12` and
 `bcd4`. The precise register and exceptional-state effects remain open.
 
+The [fixed-point shift comparisons](line-prefix-shaping-study.md#fixed-point-shifts-in-vmcp-vsod-formant-and-gassph)
+match `bcd4` to port-3 input across VMCP and both VSOD variants. The base
+VSOD `fdd4` form has a matched port-7 load and result store. FORMANT uses
+`bcd2` in a separate port-3, shift-by-two context. GASSPH pairs `fdd2` with a
+native shift by two and a port-7 result store.
+
 The [conditional LINE render](fragment-emulator.md#conditional-line-reference-pipeline)
 is a host oracle plus supported fragments, with explicit fixture state and
 software timing. It does not skip unknown words to manufacture complete program

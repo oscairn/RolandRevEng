@@ -839,3 +839,18 @@ threshold setter writes the width-three field at `4a` and its 128-entry
 float table matches the native threshold values exactly. Qwen overassigned
 both scaling and clipping to the standalone control. The evidence binds
 the scale to a separate literal and leaves register and issue effects open.
+
+## Live coefficient fixed-point shifts
+
+The VSODDSAW and VSODDSTW native callbacks independently transform C1 with a
+four-bit shift after binary32 conversion. The DSP load before `bcd4` is port 3
+in both cases. Base VSOD uses `fdd4` after a port-7 C1 load and stores the
+converted value through `ffe0` while a separate port-3 path uses C0. FORMANT's
+`bcd2` window traces a different C2 record to a shift by two. GASSPH adds the
+`fdd2` counterpart with a computed input and a port-7 store. The exact
+contexts are checked offline across the native artifacts and 13 stock
+Fantom VSOD placements. Strict DSP admission remains unchanged.
+
+Qwen reviewed the comparison and correctly cautioned against reading the
+bit-8 difference as an established operand rule. The checked report derives
+its port and value paths from the artifacts.

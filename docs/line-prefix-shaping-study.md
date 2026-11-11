@@ -256,6 +256,49 @@ python tools/limit_control_study.py --core1 local/b0c1a.bin > local/limit-contro
 python -m unittest discover -s tests -p test_limit_control_study.py -v
 ```
 
+## Fixed-point shifts in VMCP, VSOD, FORMANT and GASSPH
+
+`coefficient_shift_study.py` follows independently identified binary32 live
+coefficient records into the native signed64 fixed32 conversion, wrapping
+left shift, signed conversion back, and multiplication by `2^-32`.
+
+| DSP context | Live operand | Checked native use |
+|---|---|---|
+| VMCP `108`, `bcd4` | C1 through `3fe0`, port 3 | Shift by four at `39dc10`. The converted coefficient supplies both following `0403/4503` gains, which use port 3. |
+| VSODDSAW `1ac`, `bcd4` | C1 through `3fe4`, port 3 | Shift by four at `1791d4`; `179268` selects the converted value or unity. Both incoming native pointer paths load the same C1 record. |
+| VSODDSTW `1c4`, `bcd4` | C1 through `3fe6`, port 3 | Shift by four at `2813bc`; `28143c` selects the converted value or unity. Native input is in `d7` and the signed conversion back goes to `d4`. |
+| Base VSOD `12`, `fdd4` | C1 through `7fe4`, port 7 | Shift by four at `27394c`. Native `273984` writes the converted coefficient to field `28`, the exact operand of the next `ffe0` port-7 store. |
+| FORMANT `6a`, `bcd2` | C2 through `3fe4`, port 3 | Shift by two at `3cdb34`. At `3cdb54` its result multiplies the independently owned literal at field `80` from the following packet. |
+| GASSPH `28a`, `fdd2` | Computed value `0.25 - d3²` in the native reference | Shift by two begins at `14a6f8`; the result reaches the `14a730` store. The `ffe2` port-7 store in the next DSP packet targets the same data cell (`46`) through field `2a6`. |
+
+In base VSOD, the `fdd4` packet also loads C0 into port 3, and the next packet
+combines the port-7 store with a known port-3 gain. The independently traced
+native C0 path is separate from the C1 value stored at `273984`. This anchors
+the port-7 result and supports the in-place port-3 reading of VMCP's `bcd4`
+counterpart. The two VSOD variants independently agree on the port-3 input,
+conversion, and native selection rule `-2^-32 < mode_delta < 2^-32`.
+
+`bcd2` and `bcd4` differ only in their low nibble, and the FORMANT and VMCP
+windows use shifts of two and four. `fdd2` and `fdd4` likewise differ only in
+the low nibble and both lead to a port-7 store. In GASSPH, the native record
+at field `a2` and the DSP operand at `2a6` independently name cell `46`. The
+native source is computed arithmetic, so the shift operation is also used
+outside a live-coefficient load context. Comparing `fdd4` with `bcd4` changes
+bits beyond the high nibble. These comparisons support the shift counts and
+port roles in the checked contexts.
+The remaining encoding bits, exceptional state, rounding on silicon and
+co-issue effects are still open. The strict interpreter has no new profile.
+
+The Fantom bmc0 lists retain the same controls and operand roles in all five
+base VSOD placements and all four placements of each VSOD variant. The
+checker reads the relocated coefficient operands and the base VSOD store
+addresses separately. No active effect or hardware execution was observed.
+
+```sh
+python tools/coefficient_shift_study.py --core1 local/b0c1a.bin > local/coefficient-shift-study.json
+python -m unittest discover -s tests -p test_coefficient_shift_study.py -v
+```
+
 ## Reproduce and Qwen review
 
 ```sh

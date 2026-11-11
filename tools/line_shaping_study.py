@@ -39,17 +39,19 @@ def _float32(value):
         raise ValueError('Live coefficient exceeds binary32 range') from error
 
 
-def quantize_native_reference(value):
-    """FCVTZS X,D,#32; LSL X,#9; SCVTF D,X; multiply by2^-32.
+def quantize_native_reference(value, *, shift_bits=9):
+    """FCVTZS X,D,#32; LSL X; SCVTF D,X; multiply by 2^-32.
 
     Reject conversion-overflow/exception cases rather than assigning FPCR policy.
     The integer shift itself deliberately wraps in64bits, including its sign bit.
     """
+    if type(shift_bits) is not int or shift_bits not in (2, 4, 9):
+        raise ValueError('Expected a checked native shift of 2, 4 or 9 bits')
     value = _finite(value)
     if not -(2.0 ** 31) <= value < 2.0 ** 31:
         raise ValueError('Outside the non-overflowing signed64 fixed32 conversion domain')
     fixed = math.trunc(math.ldexp(value, 32))
-    shifted = (fixed << 9) & MASK64
+    shifted = (fixed << shift_bits) & MASK64
     if shifted & (1 << 63):
         shifted -= 1 << 64
     return dict(fixed_integer=fixed, shifted_integer=shifted, quantized=float(shifted) * EPSILON)
@@ -109,21 +111,22 @@ def _regs(ins):
     return [ins.reg_name(op.reg) for op in ins.operands if op.type == a64.ARM64_OP_REG]
 
 
-def decode_quantizer(code, *, shift_bits=9):
+def decode_quantizer(code, *, shift_bits=9, output_register=None):
     from capstone import arm64 as a64
     if (len(code) != 3 or [ins.mnemonic for ins in code] != ['fcvtzs', 'lsl', 'scvtf']
             or [ins.address for ins in code] != list(range(code[0].address, code[0].address + 12, 4))):
         raise ValueError('Expected one contiguous signed fixed conversion/shift/conversion kernel')
     first, shift, back = code
     registers = _regs(first)
+    output = output_register if output_register is not None else (registers[1] if len(registers) == 2 else '')
     if (len(first.operands) != 3 or len(registers) != 2
             or not registers[0].startswith('x') or not registers[1].startswith('d')
             or first.operands[2].type != a64.ARM64_OP_IMM or first.operands[2].imm != 32
             or _regs(shift) != [registers[0], registers[0]] or len(shift.operands) != 3
             or shift.operands[2].type != a64.ARM64_OP_IMM or shift.operands[2].imm != shift_bits
-            or _regs(back) != [registers[1], registers[0]] or len(back.operands) != 2):
+            or not output.startswith('d') or _regs(back) != [output, registers[0]] or len(back.operands) != 2):
         raise ValueError('Not the expected signed64/fixed32/shift form')
-    return dict(pc=first.address, integer=registers[0], floating=registers[1],
+    return dict(pc=first.address, integer=registers[0], floating=registers[1], floating_output=output,
                 fraction_bits=32, shift_bits=shift_bits, integer_width=64)
 
 
