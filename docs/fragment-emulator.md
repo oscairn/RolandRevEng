@@ -1,5 +1,11 @@
 # Offline functional fragment emulator
 
+The [EqVg producer layer](eqvg-filter-generation-study.md) adds generated live and
+final-filter coefficients without admitting another opcode. The bounded
+`native_literals` reference policy also accepts the final output profile, checking
+all stereo fields and both occurrences of its first coefficient. Default execution
+still decodes literal bytes; actual manager interpolation is separate.
+
 [EqFaCal and UI-driven filter changes](fdrv-cubic-waveshaping-study.md#three-coefficient-filter-generation-and-ui-dispatch-2026-11-11)
 now cover the input, resampling and two post-cascade stages. Full-precision
 native filter literals can be supplied explicitly for the two checked literal

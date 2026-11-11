@@ -193,7 +193,7 @@ def report():
         filter_coefficient_generation_replayed=False,hardware_timing_verified=False,
         history_reset_performed_in_fixture=False,
         limitations=['Replay selects the with-envelope/no-wait branch explicitly; runtime dispatcher selection is not proved.',
-            'EqFaCal/EqVgCal generation and UI parameter-index conversions are not replayed.',
+            'This drive/wet/level/slope replay does not generate filters; see the separate EqFa/EqVg studies.',
             'One VProcSync call per fixture frame is an explicit test convention, not calibrated hardware cadence.',
             'SetAlg/history initialization and atomic literal-group application remain separate requirements.'])
 

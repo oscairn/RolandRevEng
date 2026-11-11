@@ -1,0 +1,386 @@
+[
+  {
+    "frame": 0,
+    "stage": "live1",
+    "type": 0,
+    "cutoff": 240.0,
+    "gain": 0.0,
+    "q": 0.7070000171661377
+  },
+  {
+    "frame": 0,
+    "stage": "output",
+    "type": 0,
+    "cutoff": 120.0,
+    "gain": -6.0,
+    "q": 0.30000001192092896
+  },
+  {
+    "frame": 0,
+    "stage": "live0",
+    "type": 0,
+    "cutoff": 80.0,
+    "gain": -6.0,
+    "q": 0.25
+  },
+  {
+    "frame": 384,
+    "stage": "live1",
+    "type": 13,
+    "cutoff": 1800.0,
+    "gain": 0.0,
+    "q": 0.7070000171661377
+  },
+  {
+    "frame": 384,
+    "stage": "output",
+    "type": 13,
+    "cutoff": 550.0,
+    "gain": 0.0,
+    "q": 0.699999988079071
+  },
+  {
+    "frame": 384,
+    "stage": "live0",
+    "type": 9,
+    "cutoff": 650.0,
+    "gain": 0.0,
+    "q": 0.707
+  },
+  {
+    "frame": 896,
+    "stage": "live1",
+    "type": 13,
+    "cutoff": 6000.0,
+    "gain": 0.0,
+    "q": 0.7070000171661377
+  },
+  {
+    "frame": 896,
+    "stage": "output",
+    "type": 14,
+    "cutoff": 2200.0,
+    "gain": 3.0,
+    "q": 1.399999976158142
+  },
+  {
+    "frame": 896,
+    "stage": "live0",
+    "type": 10,
+    "cutoff": 2400.0,
+    "gain": 3.0,
+    "q": 2.0
+  },
+  {
+    "frame": 1536,
+    "stage": "live1",
+    "type": 0,
+    "cutoff": 12000.0,
+    "gain": 0.0,
+    "q": 0.7070000171661377
+  },
+  {
+    "frame": 1536,
+    "stage": "output",
+    "type": 16,
+    "cutoff": 7000.0,
+    "gain": 6.0,
+    "q": 4.0
+  },
+  {
+    "frame": 1536,
+    "stage": "live0",
+    "type": 11,
+    "cutoff": 9000.0,
+    "gain": 6.0,
+    "q": 16.0
+  },
+  {
+    "frame": 2047,
+    "stage": "live1",
+    "type": 13,
+    "cutoff": 240.0,
+    "gain": 0.0,
+    "q": 0.7070000171661377
+  },
+  {
+    "frame": 2047,
+    "stage": "output",
+    "type": 9,
+    "cutoff": 120.0,
+    "gain": -6.0,
+    "q": 0.30000001192092896
+  },
+  {
+    "frame": 2047,
+    "stage": "live0",
+    "type": 12,
+    "cutoff": 80.0,
+    "gain": -6.0,
+    "q": 0.25
+  },
+  {
+    "frame": 2048,
+    "stage": "live1",
+    "type": 13,
+    "cutoff": 1800.0,
+    "gain": 0.0,
+    "q": 0.7070000171661377
+  },
+  {
+    "frame": 2048,
+    "stage": "output",
+    "type": 0,
+    "cutoff": 550.0,
+    "gain": 0.0,
+    "q": 0.699999988079071
+  },
+  {
+    "frame": 2048,
+    "stage": "live0",
+    "type": 13,
+    "cutoff": 650.0,
+    "gain": 0.0,
+    "q": 0.707
+  },
+  {
+    "frame": 2050,
+    "stage": "live1",
+    "type": 0,
+    "cutoff": 6000.0,
+    "gain": 0.0,
+    "q": 0.7070000171661377
+  },
+  {
+    "frame": 2050,
+    "stage": "output",
+    "type": 13,
+    "cutoff": 2200.0,
+    "gain": 3.0,
+    "q": 1.399999976158142
+  },
+  {
+    "frame": 2050,
+    "stage": "live0",
+    "type": 14,
+    "cutoff": 2400.0,
+    "gain": 3.0,
+    "q": 2.0
+  },
+  {
+    "frame": 2816,
+    "stage": "live1",
+    "type": 13,
+    "cutoff": 12000.0,
+    "gain": 0.0,
+    "q": 0.7070000171661377
+  },
+  {
+    "frame": 2816,
+    "stage": "output",
+    "type": 14,
+    "cutoff": 7000.0,
+    "gain": 6.0,
+    "q": 4.0
+  },
+  {
+    "frame": 2816,
+    "stage": "live0",
+    "type": 15,
+    "cutoff": 9000.0,
+    "gain": 6.0,
+    "q": 16.0
+  },
+  {
+    "frame": 4095,
+    "stage": "live1",
+    "type": 13,
+    "cutoff": 240.0,
+    "gain": 0.0,
+    "q": 0.7070000171661377
+  },
+  {
+    "frame": 4095,
+    "stage": "output",
+    "type": 16,
+    "cutoff": 120.0,
+    "gain": -6.0,
+    "q": 0.30000001192092896
+  },
+  {
+    "frame": 4095,
+    "stage": "live0",
+    "type": 16,
+    "cutoff": 80.0,
+    "gain": -6.0,
+    "q": 0.25
+  },
+  {
+    "frame": 4096,
+    "stage": "live1",
+    "type": 0,
+    "cutoff": 1800.0,
+    "gain": 0.0,
+    "q": 0.7070000171661377
+  },
+  {
+    "frame": 4096,
+    "stage": "output",
+    "type": 9,
+    "cutoff": 550.0,
+    "gain": 0.0,
+    "q": 0.699999988079071
+  },
+  {
+    "frame": 4096,
+    "stage": "live0",
+    "type": 0,
+    "cutoff": 650.0,
+    "gain": 0.0,
+    "q": 0.707
+  },
+  {
+    "frame": 5600,
+    "stage": "live1",
+    "type": 13,
+    "cutoff": 6000.0,
+    "gain": 0.0,
+    "q": 0.7070000171661377
+  },
+  {
+    "frame": 5600,
+    "stage": "output",
+    "type": 0,
+    "cutoff": 2200.0,
+    "gain": 3.0,
+    "q": 1.399999976158142
+  },
+  {
+    "frame": 5600,
+    "stage": "live0",
+    "type": 9,
+    "cutoff": 2400.0,
+    "gain": 3.0,
+    "q": 2.0
+  },
+  {
+    "frame": 7296,
+    "stage": "live1",
+    "type": 13,
+    "cutoff": 12000.0,
+    "gain": 0.0,
+    "q": 0.7070000171661377
+  },
+  {
+    "frame": 7296,
+    "stage": "output",
+    "type": 13,
+    "cutoff": 7000.0,
+    "gain": 6.0,
+    "q": 4.0
+  },
+  {
+    "frame": 7296,
+    "stage": "live0",
+    "type": 10,
+    "cutoff": 9000.0,
+    "gain": 6.0,
+    "q": 16.0
+  },
+  {
+    "frame": 8192,
+    "stage": "live1",
+    "type": 0,
+    "cutoff": 240.0,
+    "gain": 0.0,
+    "q": 0.7070000171661377
+  },
+  {
+    "frame": 8192,
+    "stage": "output",
+    "type": 14,
+    "cutoff": 120.0,
+    "gain": -6.0,
+    "q": 0.30000001192092896
+  },
+  {
+    "frame": 8192,
+    "stage": "live0",
+    "type": 11,
+    "cutoff": 80.0,
+    "gain": -6.0,
+    "q": 0.25
+  },
+  {
+    "frame": 9600,
+    "stage": "live1",
+    "type": 13,
+    "cutoff": 1800.0,
+    "gain": 0.0,
+    "q": 0.7070000171661377
+  },
+  {
+    "frame": 9600,
+    "stage": "output",
+    "type": 16,
+    "cutoff": 550.0,
+    "gain": 0.0,
+    "q": 0.699999988079071
+  },
+  {
+    "frame": 9600,
+    "stage": "live0",
+    "type": 12,
+    "cutoff": 650.0,
+    "gain": 0.0,
+    "q": 0.707
+  },
+  {
+    "frame": 11008,
+    "stage": "live1",
+    "type": 13,
+    "cutoff": 6000.0,
+    "gain": 0.0,
+    "q": 0.7070000171661377
+  },
+  {
+    "frame": 11008,
+    "stage": "output",
+    "type": 9,
+    "cutoff": 2200.0,
+    "gain": 3.0,
+    "q": 1.399999976158142
+  },
+  {
+    "frame": 11008,
+    "stage": "live0",
+    "type": 13,
+    "cutoff": 2400.0,
+    "gain": 3.0,
+    "q": 2.0
+  },
+  {
+    "frame": 11776,
+    "stage": "live1",
+    "type": 0,
+    "cutoff": 12000.0,
+    "gain": 0.0,
+    "q": 0.7070000171661377
+  },
+  {
+    "frame": 11776,
+    "stage": "output",
+    "type": 0,
+    "cutoff": 7000.0,
+    "gain": 6.0,
+    "q": 4.0
+  },
+  {
+    "frame": 11776,
+    "stage": "live0",
+    "type": 14,
+    "cutoff": 9000.0,
+    "gain": 6.0,
+    "q": 16.0
+  }
+]

@@ -49,15 +49,17 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
     literal_values={}
     if native_literals is not None:
         from bmc_dsp import encode_literal
-        fields={'resample_drive_pair':(32,56,72),'cascaded_history_pair':(32,56,72,92,116,140)}
+        fields={'resample_drive_pair':(32,56,72),'cascaded_history_pair':(32,56,72,92,116,140),
+                'fdrv_output_pair':((38,114),66,78,98,148)}
         expected=fields.get(spec['kind'])
         if expected is None or not isinstance(native_literals,(list,tuple))or len(native_literals)!=len(expected):
-            raise ValueError('Native literals require a checked resample/cascade coefficient list')
-        for field,value in zip(expected,native_literals,strict=True):
+            raise ValueError('Native literals require a checked resample/cascade/output coefficient list')
+        for locations,value in zip(expected,native_literals,strict=True):
             value=_finite(value,'Native literal')
-            if encode_literal(value,3)!=program[field:field+3]or program[field:field+3]!=program[field+3:field+6]:
-                raise ValueError('Native literal does not encode to the checked stereo fields')
-            literal_values[field]=literal_values[field+3]=value
+            for field in locations if isinstance(locations,tuple)else(locations,):
+                if encode_literal(value,3)!=program[field:field+3]or program[field:field+3]!=program[field+3:field+6]:
+                    raise ValueError('Native literal does not encode to the checked stereo fields')
+                literal_values[field]=literal_values[field+3]=value
     native_coefficient_prefix = spec['kind'] in ('coefficient_shift4', 'register_add_mac_pair',
                                                 'state_variable_pair', 'stereo_prefilter',
                                                 'state_variable_pair_with_output', 'state_variable_recombine_pair',
@@ -121,8 +123,7 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
                 continue
             if word in (0x0ca4,0x4da7,0x0ca8,0x4dab,0x0c24,0x4d27):
                 destination=0 if word<0x4000 else 4
-                raw=b''.join(value.to_bytes(2,'big')for value in pool)
-                factor=literal(raw[word&15:(word&15)+3])
+                factor=pool_literal(word&15)
                 if word in (0x0ca4,0x4da7):
                     value=_fma(old_value(destination+2),factor,old_value(destination+2))+old_value(destination)
                 elif word in (0x0ca8,0x4dab):
@@ -131,8 +132,7 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
                     value=_fma(old_value(destination),factor,old_value(destination))+old_value(destination+2)
             elif word in (0x2420,0x6523,0x1426,0x5529):
                 destination,source=(word>>12)&7,(word>>6)&7
-                raw=b''.join(value.to_bytes(2,'big')for value in pool)
-                factor=literal(raw[word&15:(word&15)+3])
+                factor=pool_literal(word&15)
                 value=(old_value(source)*factor if word in (0x2420,0x6523)else
                        _fma(old_value(source),factor,old_value(destination)))
             elif word in (0x0c02,0x4d06):

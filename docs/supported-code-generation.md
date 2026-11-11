@@ -5,6 +5,12 @@ and explicitly assigned indices into exact packet sequences independently matche
 against native FETDRIVE, LINEDRIVE and FDRV expressions. This is a constrained semantic code emitter and
 inverse decoder, not a general DSP assembler, scheduler or standalone engine.
 
+The [EqVg producer layer](eqvg-filter-generation-study.md) supplies explicit
+`live_coefficients()` and `output_coefficients()` permutations from the original
+generator. The latter can be quantized explicitly with `encoded_taps()` before
+strict assembly. Its source offset g-1 and last-three-field orders differ between
+consumers; copying the raw tuple directly is incorrect. No emitter gate is relaxed.
+
 The [EqFaCal control layer](fdrv-cubic-waveshaping-study.md#three-coefficient-filter-generation-and-ui-dispatch-2026-11-11)
 generates arbitrary native triples in `(a, feedback, delayed-input)` order.
 Its `taps()` reorders them for the checked stages; `encoded_taps()` explicitly

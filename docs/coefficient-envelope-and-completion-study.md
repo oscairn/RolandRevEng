@@ -156,6 +156,13 @@ or executable engine was added.
 
 ## FDRV control-path replay (2026-11-11)
 
+The newer [EqVg study](eqvg-filter-generation-study.md) executes original piece
+setters against recording callbacks: the live path requests a wait on its first
+write when simultaneous interpolation is unsafe; the literal path splits a batch
+into 1 then 4 writes. Those calls prove requested sequencing, not completion timing.
+Its full-audio replay selects immediate frame-boundary groups and does not claim
+to execute those waits or the manager interpolation worker.
+
 The newer [EqFaCal control layer](fdrv-cubic-waveshaping-study.md#three-coefficient-filter-generation-and-ui-dispatch-2026-11-11)
 also generates C5/C6/C7 targets from the native UI's input shelf parameters and
 compares their envelope evolution during full audio replay. Resampling and post

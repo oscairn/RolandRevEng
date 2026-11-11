@@ -100,7 +100,7 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                   resample_drive_literal='0656d2', compare_post_mix=False,
                   compare_cascade=False,cascade_coefficients=(.5,.25,-.125,.75,-.1875,.0625),
                   compare_full=False,output_coefficients=(.125,-.25,.5,.75,-.1875),parameter_events=None,
-                  filter_events=None,filter_literal_policy='native'):
+                  filter_events=None,filter_literal_policy='native',vg_events=None):
     import ctypes
     from contextlib import ExitStack
     import struct
@@ -136,6 +136,15 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
             report as eqfa_report)
         eqfa_report();eq_events=validate_filters(filter_events,frames)
     else:eq_events=[]
+    if vg_events is not None:
+        if not compare_full or parameter_events is not None or filter_literal_policy not in ('native','encoded'):
+            raise ValueError('EqVg replay requires a separate full immediate-update fixture and explicit precision policy')
+        from eqvg_study import (native_function as vg_native_function,validate_events as validate_vg,
+            live_coefficients,output_coefficients as vg_output)
+        from eqvg_setter_study import native_function_setter
+        from eqfa_study import encoded_taps
+        checked_vg=validate_vg(vg_events,frames)
+    else:checked_vg=[]
     if parameter_events is not None and not compare_full:
         raise ValueError('Setter replay requires the complete FDRV comparison')
     _, constructor, pointers, entry, instructions = coefficient_context('SIM_MFX_FDRV')
@@ -242,6 +251,7 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
     model_caches=[([-11.,23.,-37.],cursor)for cursor in cursors]
     filter_index=0;filter_values=0;nonexact_literals=0;max_literal_error=0.;native_literals={}
     raw_cascade=list(cascade_coefficients)
+    vg_index=0;vg_values=0;vg_setter_calls=0
     if compare_input_stage:
         from bmc_emulator import execute_fragment
         from bmc_subset import assemble_fragment
@@ -298,8 +308,42 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
             native_increment,native_step=stack.enter_context(native_envelope_functions())
             target_functions=stack.enter_context(native_target_functions())
         if filter_events is not None:eqfa_native=stack.enter_context(native_function())
+        if vg_events is not None:
+            vg_native=stack.enter_context(vg_native_function())
+            vg_live_setter=stack.enter_context(native_function_setter())
+            vg_output_setter=stack.enter_context(native_function_setter(True))
         invoke = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p)(address)
         for frame in range(frames):
+            while vg_index<len(checked_vg)and checked_vg[vg_index][0]==frame:
+                _,which,raw=checked_vg[vg_index];event=vg_events[vg_index]
+                generated=vg_native(event['type'],event['cutoff'],event['gain'],event['q'])
+                if [v.hex()for v in generated]!=[v.hex()for v in raw]:
+                    raise ValueError('EqVg generator differs before immediate parameter application')
+                vg_values+=5
+                if which=='output':
+                    expected=vg_output(raw);packed=encoded_taps(expected)
+                    nonexact_literals+=sum(a.hex()!=b.hex()for a,b in zip(expected,packed,strict=True))
+                    max_literal_error=max(max_literal_error,*(abs(a-b)for a,b in zip(expected,packed,strict=True)))
+                    stage_specs[10]=dict(stage_specs[10],filter_coefficients=list(packed))
+                    stage_programs[10]=assemble_fragment(stage_specs[10])
+                    if filter_literal_policy=='native':native_literals[10]=expected
+                    current=tuple(struct.unpack_from('<d',context,f)[0]for f in (0xe8,0x108))
+                    calls=vg_output_setter(event['type'],event['cutoff'],event['gain'],event['q'],current=current,envelope=False)
+                    for call in calls:
+                        field=(0xe8,0x108,0x118,0xf8,0xd8)[call['coefficient']]
+                        value=call['value']if filter_literal_policy=='native'else encoded_taps([call['value']])[0]
+                        struct.pack_into('<d',context,field,value)
+                else:
+                    base=10 if which=='live0'else 15
+                    values[base:base+5]=list(map(_float32,live_coefficients(raw)))
+                    current=tuple(struct.unpack_from('<f',r,0x28)[0]for r in records[base:base+2])
+                    calls=vg_live_setter(event['type'],event['cutoff'],event['gain'],event['q'],current=current,envelope=False)
+                    pointers=struct.unpack_from('<5Q',lib.Z,0x9e32a8 if which=='live0'else 0x9e32d8)
+                    for call in calls:
+                        slot=struct.unpack_from('<I',lib.Z,pointers[call['coefficient']]+12)[0]
+                        struct.pack_into('<f',records[slot],0x28,_float32(call['value']))
+                vg_setter_calls+=len(calls)
+                vg_index+=1
             while event_index<len(events)and events[event_index][0]==frame:
                 _,targets=events[event_index];event=parameter_events[event_index]
                 native_targets=native_live_targets(event['method'],event['args'],target_functions,level_table)
@@ -508,7 +552,10 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                 parameter_event_count=event_index,coefficient_envelope_values_checked=envelope_values,
                 native_envelope_updates_per_fixture_frame=1 if parameter_events is not None else 0,
                 filter_event_count=filter_index,filter_native_coefficients_checked=filter_values,
-                filter_literal_policy=filter_literal_policy if filter_events is not None else None,
+                filter_literal_policy=filter_literal_policy if filter_events is not None or vg_events is not None else None,
+                vg_event_count=vg_index,vg_native_coefficients_checked=vg_values,
+                vg_original_setter_writes_checked=vg_setter_calls,
+                vg_update_policy='immediate frame-boundary groups; no manager wait/envelope scheduling'if vg_events is not None else None,
                 nonexact_generated_literals=nonexact_literals,max_literal_quantization_error=max_literal_error,
                 resample_fixture_taps=list(resample_taps) if compare_resample else None,
                 resample_fixture_drive=values[0] if compare_resample else None,

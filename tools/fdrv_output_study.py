@@ -54,8 +54,8 @@ def execute_frame(programs,ring,origin,coefficients,samples,auxiliary,*,native_l
         slots,cursor=bank;caches.append((_cache(slots,cursor),cursor))
     specs=[disassemble_fragment(p)for p in programs]
     if native_literals is None:native_literals={}
-    if not isinstance(native_literals,dict)or any(type(k)is not int or k not in (5,9)for k in native_literals):
-        raise ValueError('Native literal lists are restricted to the resample/cascade fragments')
+    if not isinstance(native_literals,dict)or any(type(k)is not int or k not in (5,9,10)for k in native_literals):
+        raise ValueError('Native literal lists are restricted to the resample/cascade/output fragments')
     if [s['kind']for s in specs]!=[s['kind']for s in program_specs()]:
         raise ValueError('Expected the complete ordered FDRV arithmetic chain')
     expected=program_specs(specs[5]['tap_coefficients'],specs[5]['drive_literal'],

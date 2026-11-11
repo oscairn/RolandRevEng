@@ -1,5 +1,10 @@
 # FDRV cubic waveshaping, interpolation and clipping
 
+The newer [EqVg generation/interpolation checkpoint](eqvg-filter-generation-study.md)
+recovers both live-filter coefficient permutations and the final literal filter.
+Original setters prove damping/g-1 ordering, wait flags and literal batch splitting;
+immediate 48-event fixtures match full native audio/state under two precision policies.
+
 The [EqFaCal control checkpoint](#three-coefficient-filter-generation-and-ui-dispatch-2026-11-11)
 now recovers three-coefficient generation, checks the original UI dispatcher and
 compares cutoff/type changes through full audio/state replay. Constructor-double
@@ -8,7 +13,8 @@ and encoded-literal precision are separate, explicit policies.
 The [parameter-control checkpoint](#setter-derived-live-updates-2026-11-11) now
 traces live/literal descriptors and replays drive, wet, level and slope changes
 through native coefficient envelopes. Complete audio/state comparisons remain
-exact during interrupted ramps. Full EQ generation and hardware timing remain open.
+exact during interrupted ramps. The later checkpoints above cover EQ generation;
+hardware timing remains open.
 
 The [complete arithmetic/output milestone](#complete-arithmetic-and-output-milestone-2026-11-11)
 now matches final stereo audio and all persistent ring/cache state against native

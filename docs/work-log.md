@@ -1960,3 +1960,55 @@ logs stay local.
 EqVgCal/interpolation stability, physical UI routing, scheduler timing, literal
 bus precision, entry/return and safe loading remain open. No instrument was
 accessed or flashed.
+
+
+## EqVg generation, setter sequencing and immediate replay (2026-11-11)
+
+Recovered EqVgCal types 0/9..16, the seven active filter formulas, bypass behavior,
+Q clamp 0.25..128 and source cutoff assertion boundary. The native oracle contains
+only audited original math, copied constants, explicit rate and verified host-libm
+imports. The matrix matches 5,400 coefficient values at 44100/48000. Irregular
+inputs exposed a one-ULP difference between Darwin combined sincos and separate
+sin/cos; the model now preserves the original combined operation. Other platforms'
+fallback remains uncalibrated for bit identity. The checked API excludes subnormal
+cutoff/rate arithmetic, assertion paths and nonfinite input.
+
+Checked descriptor permutations: raw (g,b,c,d,e) maps to live (g-1,b,c,e,d) at
+C10..14/C15..19 and output (g-1,b,d,c,e). Original EqVGenv and EqVG setters run
+against owned recording callbacks, including the original generator and
+four-argument interpolation predicate. A real pair of stable low-pass endpoints
+has an unstable simultaneous interpolation path. The live setter chooses order
+by damping change and requests a wait on the first update for unsafe paths. The
+literal setter splits unsafe interpolated batches 1+4 versus safe 5, with raw
+time argument 100. These are caller decisions; no manager scheduler ran.
+
+Original UI dispatch verifies output table 0/13/14/16/9, binary32 gain/Q divide10,
+and live1's fixed Q 0.7070000171661377. Companion slope calls are recorded and
+checked. The live0 UI route remains unknown. The 48-event example contains 32
+calls from 16 native UI snapshots plus 16 explicit live0 setter inputs. This
+filter-only fixture retains fixed slope/wet/drive/level and ZENOLOGY scales;
+companion slope changes are not applied. Fantom UI/MIDI/SysEx mapping is unproved.
+
+Both 12,000-frame immediate-policy runs match 24,696,000 audio/ring/cache values,
+240 generator coefficients and 240 original setter writes each, ending at origin
+1760 through five wraps. Original setter records and source descriptors route
+native writes; pure generated coefficients drive the independent packet model.
+Thirty-eight output literals differ after explicit encoding; maximum absolute
+error is 7.599686759895974e-6. The bounded native-literal reference validates both
+occurrences of output coefficient a. No opcode profile or relaxed assembler gate
+is introduced; the 1,692-byte/104-packet FDRV chain remains unchanged.
+
+Qwen saved a report but timed out after 220.2 seconds. Several claimed proofs
+were wrong (selector behavior, write count and permutation) and were rejected.
+Parent independently checked source and executed bounded native fixtures.
+All 513 tests pass in 158.000 seconds, without retries. The final nine-test pass
+after the subnormal-domain guard also passes in 12.062 seconds. Vendor-free
+coefficient/assembly/execution checks, compilation and diff checks pass. Synced
+seven changed Roland notes with backups and concurrent-edit guards; all 72 vault
+notes verified. The attention chime failed with AudioQueueStart (-66680).
+Detailed validation reports remain ignored under local/eqvg-*.json and test logs
+under local/eqvg-*-tests.txt. Vendor bytes, raw listings and worker logs stay local.
+
+Remaining: actual manager wait/literal interpolation processing, the separate
+six-argument predicate/callers, Fantom ARM32 correspondence, physical precision,
+scheduler/history policy, entry/return and safe loading. No instrument accessed.

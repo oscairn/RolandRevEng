@@ -13,7 +13,18 @@ Next recover another useful exact producer/control context or an owner-proven
 nonempty label/continuation path; retain bounded opcode admission and hardware gates.
 Entry, runtime allocation and hardware calibration remain separate requirements.
 
-The latest bounded filter milestone is complete (2026-11-11): EqFaCal's eight
+The latest bounded filter milestone is complete (2026-11-11): [EqVgCal](eqvg-filter-generation-study.md)
+now has native-checked formulas, Q clamping, consumer permutations and UI scaling.
+Original piece setters prove interpolation ordering/wait flags and literal batch
+splitting. Both 12,000-frame immediate-update policies match all audio/ring/cache
+state during 48 events and 240 original setter writes. No new opcode is admitted.
+
+Next recover the manager processing behind live wait flags and literal slotf8
+batches, including raw time argument100 and serialized unsafe transitions. Then
+cross-check EqVg generation/permutations against Fantom ARM32. Scheduler cadence,
+history initialization, physical precision, entry/return and safe loading stay open.
+
+The preceding bounded filter milestone is complete (2026-11-11): EqFaCal's eight
 numbered branches plus bypass fallback are recovered with original native math
 checks. Setter reordering and UI indices/scaling are independently checked by
 executing the original native UI dispatcher against owned recording callbacks.
@@ -22,9 +33,6 @@ three-coefficient stages. Both native-double and explicitly quantized coefficien
 policies match full audio/ring/cache state during 12,000-frame replays. This does
 not identify actual Fantom UI routing or physical literal precision.
 
-Next recover EqVgCal's five-coefficient generation and interpolation-stability
-policy. Then extend UI mapping to those state-variable/final EQ controls. Hardware
-entry/return, scheduler cadence, numeric calibration and safe loading stay open.
 
 The preceding bounded control milestone is complete (2026-11-11): native FDRV
 descriptors cover all 20 local live slots and 14 literal groups. Drive, wet, level
@@ -39,9 +47,9 @@ through wrap. Encoded versus native constructor scale changes 3,255 of 4,112 sha
 outputs; the worker's scale-insensitivity claim is rejected. Prefix source/alias
 gaps still prevent new opcode admission.
 
-Next recover EqFaCal/EqVgCal coefficient generation/interpolation and UI unit
-conversions; then resolve runtime with/without-envelope selection and scheduler
-cadence. Physical target precision, history initialization, entry/return and safe
+EqFaCal/EqVgCal generation and selected native UI conversions are covered by
+the later checkpoints above. Resolve actual runtime with/without-envelope
+selection and scheduler cadence next. Physical target precision, history initialization, entry/return and safe
 loading remain open. Do not describe the selected live-control replay as complete
 parameter support or a hardware envelope measurement.
 

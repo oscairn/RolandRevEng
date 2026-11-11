@@ -1,4 +1,4 @@
-"""FDRV EqFa UI indices/scaling and an owned VUpdatePrm dispatch fixture."""
+"""FDRV EqFa/EqVg UI indices/scaling and an owned dispatch fixture."""
 from contextlib import contextmanager
 import hashlib
 import struct
@@ -10,6 +10,31 @@ TYPE_MAP=(0,6,7,3,4)
 GROUPS=(('input',(0,1),0x20,2),('resample',(4,5,6),0x30,0),
         ('post0',(8,9,10),0x40,0),('post1',(11,12,13),0x40,1))
 FIELDS={v for _,indices,_,_ in GROUPS for v in indices}
+VG_TYPE_MAP=(0,13,14,16,9)
+VG_FIELDS={2,3,14,15,16,17}
+VG_FIXED_Q=struct.unpack('<d',bytes.fromhex('00000080be9fe63f'))[0]
+
+
+def vg_events(values,changed,frame=0):
+    if (not isinstance(values,dict)or not isinstance(changed,(list,tuple,set))
+            or type(frame)is not int or frame<0):raise ValueError('Expected EqVg UI snapshot/changes/frame')
+    if (any(type(k)is not int or k not in VG_FIELDS or type(v)is not int or not -(1<<31)<=v<(1<<31)
+            for k,v in values.items())or any(type(k)is not int or k not in VG_FIELDS for k in changed)):
+        raise ValueError('Unsupported EqVg UI field/value')
+    result=[]
+    for stage,indices in (('live1',(2,3)),('output',(14,15,16,17))):
+        if not set(indices)&set(changed):continue
+        if any(k not in values for k in indices):raise ValueError('Changed EqVg group needs complete snapshot')
+        if stage=='live1':
+            selector,cutoff=(values[k]for k in indices)
+            if selector not in (0,1,2):raise ValueError('Outside checked bypass/slope modes0..2')
+            kind=13 if selector else 0;gain=0.;q=VG_FIXED_Q
+        else:
+            selector,cutoff,gain,q=(values[k]for k in indices)
+            if not 0<=selector<len(VG_TYPE_MAP):raise ValueError('EqVg UI type selector outside table')
+            kind=VG_TYPE_MAP[selector];gain=_float32(_float32(gain)/10.);q=_float32(_float32(q)/10.)
+        result.append(dict(frame=frame,stage=stage,type=kind,cutoff=float(cutoff),gain=gain,q=q))
+    return result
 
 
 def events(values,changed,frame=0):
@@ -32,7 +57,7 @@ def events(values,changed,frame=0):
     return result
 
 
-def report():
+def report(*,eqvg=False):
     import lib
     from weighted_mix_study import require_instructions
     if hashlib.sha256(lib.Z).hexdigest()!=NATIVE_SHA256:raise ValueError('Expected pinned native image')
@@ -47,6 +72,15 @@ def report():
         require_instructions(instructions,pc,(('scvtf','s0, w0'),('fmov','s1, #10.00000000'),
             ('fdiv','s0, s0, s1'),('fcvt','d1, s0')))
     require_instructions(instructions,0x352ffc,(('mov','w1, #2'),('mov','w2, #3')))
+    if eqvg:
+        if struct.unpack_from('<5i',lib.Z,0x83d000)!=VG_TYPE_MAP:raise ValueError('EqVg UI table changed')
+        require_instructions(instructions,0x353090,(('movi','d1, #0000000000000000'),
+            ('mov','w1, #1'),('mov','x2, x20')))
+        require_instructions(instructions,0x35345c,(('scvtf','s0, w0'),('fmov','s10, #10.00000000'),
+            ('fdiv','s0, s0, s10'),('fcvt','d9, s0')))
+        return dict(native_sha256=NATIVE_SHA256,function=[START,END],ui_type_map=VG_TYPE_MAP,
+            fields=sorted(VG_FIELDS),live1_fixed_q=VG_FIXED_Q,global_ui_ranges_proved=False,
+            live0_ui_routing_proved=False,hardware_execution_verified=False)
     return dict(native_sha256=NATIVE_SHA256,function=[START,END],ui_type_map=TYPE_MAP,
         type_table=0x83d014,type_table_sha256=hashlib.sha256(raw).hexdigest(),
         groups=[dict(stage=s,indices=i,setter_slot=slot,selector=selector)for s,i,slot,selector in GROUPS],
@@ -57,12 +91,12 @@ def report():
 
 
 @contextmanager
-def native_function():
+def native_function(*,eqvg=False):
     import ctypes
     import lib
     from eqfa_study import _adr
     from native_callback_fixture import executable_mapping
-    report();blob=bytearray(lib.Z[START:END]);blob.extend(bytes(-len(blob)%8))
+    report(eqvg=eqvg);blob=bytearray(lib.Z[START:END]);blob.extend(bytes(-len(blob)%8))
     table=len(blob);blob.extend(lib.Z[0x83d000:0x83d028])
     md=lib.md();md.detail=True
     for ins in md.disasm(lib.Z[START:END],START):
@@ -73,7 +107,7 @@ def native_function():
     with executable_mapping(bytes(blob))as address:
         invoke=ctypes.CFUNCTYPE(None,ctypes.c_void_p)(address)
         def calculate(values,changed,frame=0):
-            expected=events(values,changed,frame);result=[];errors=[]
+            expected=(vg_events if eqvg else events)(values,changed,frame);result=[];errors=[]
             getter_table=ctypes.create_string_buffer(0x20);getter=ctypes.create_string_buffer(8)
             setter_table=ctypes.create_string_buffer(0x58);setter=ctypes.create_string_buffer(8)
             parent=ctypes.create_string_buffer(0x90)
@@ -89,6 +123,11 @@ def native_function():
             for offset in range(0,0x58,8):struct.pack_into('<Q',setter_table,offset,ctypes.cast(unexpected,ctypes.c_void_p).value)
             def recorder(method):
                 def record(_,selector,kind,cutoff,gain,unused):
+                    if eqvg:
+                        stage='live1'if method=='input'and selector==1 else'output'if method=='post'and selector==2 else None
+                        if stage is None:errors.append('Unexpected EqVg setter selector')
+                        result.append(dict(frame=frame,stage=stage,type=kind,cutoff=cutoff,gain=gain,q=unused))
+                        return
                     if method=='input':stage='input';valid=selector==2
                     elif method=='resample':stage='resample';valid=selector==0
                     else:stage='post0'if selector==0 else'post1';valid=selector in (0,1)
@@ -99,6 +138,11 @@ def native_function():
                 callback=ctypes.CFUNCTYPE(None,ctypes.c_void_p,ctypes.c_int,ctypes.c_int,
                     ctypes.c_double,ctypes.c_double,ctypes.c_double)(recorder(method));callbacks.append(callback)
                 struct.pack_into('<Q',setter_table,slot,ctypes.cast(callback,ctypes.c_void_p).value)
+            if eqvg:
+                def slope(_,selector,value):
+                    if selector!=1 or 2 not in changed or value!=values[2]-1:errors.append('Unexpected companion slope update')
+                callback=ctypes.CFUNCTYPE(None,ctypes.c_void_p,ctypes.c_int,ctypes.c_int)(slope);callbacks.append(callback)
+                struct.pack_into('<Q',setter_table,0x28,ctypes.cast(callback,ctypes.c_void_p).value)
             for buffer,offset,target in ((getter,0,getter_table),(setter,0,setter_table),
                 (parent,8,getter),(parent,0x88,setter)):
                 struct.pack_into('<Q',buffer,offset,ctypes.addressof(target))
