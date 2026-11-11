@@ -98,7 +98,8 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                   compare_second_stage=False, compare_filterbank=False,
                   compare_resample=False, resample_taps=(.5,.25,-.125),
                   resample_drive_literal='0656d2', compare_post_mix=False,
-                  compare_cascade=False,cascade_coefficients=(.5,.25,-.125,.75,-.1875,.0625)):
+                  compare_cascade=False,cascade_coefficients=(.5,.25,-.125,.75,-.1875,.0625),
+                  compare_full=False,output_coefficients=(.125,-.25,.5,.75,-.1875)):
     import ctypes
     import struct
     import lib
@@ -108,6 +109,7 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
     from native_callback_fixture import RingFixture, executable_mapping
     from transfer_study import constructor_memory
 
+    compare_cascade = compare_cascade or compare_full
     compare_post_mix = compare_post_mix or compare_cascade
     compare_resample = compare_resample or compare_post_mix
     compare_filterbank = compare_filterbank or compare_resample
@@ -159,6 +161,12 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
         assemble_fragment(cascade_spec(coefficients=cascade_coefficients))
         for offset,value in zip((0x78,0x88,0x98,0xa8,0xb8,0xc8),cascade_coefficients,strict=True):
             struct.pack_into('<d',context,offset,value)
+    if compare_full:
+        from fdrv_output_study import output_spec,report as output_report
+        output_report()
+        assemble_fragment(output_spec(coefficients=output_coefficients))
+        for offset,value in zip((0xe8,0x108,0xf8,0x118,0xd8),output_coefficients,strict=True):
+            struct.pack_into('<d',context,offset,value)
     values = [0.0]*20
     values[5] = 1.0
     values[10:15] = [-.4973, -.2531, .3737, .1279, -.0623]
@@ -177,6 +185,8 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
         values[0] = _float32(8192.)
     if compare_post_mix:
         values[1] = _float32(.7313)
+    if compare_full:
+        values[2:5]=list(map(_float32,(.4137,.7313,.8279)))
     records = []
     for offset, slot in pointers.items():
         record = ctypes.create_string_buffer(0x48)
@@ -202,6 +212,8 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
     resample_count,clipped_values = 0,0
     post_count=0
     cascade_count=0
+    full_count=0
+    model_caches=[([-11.,23.,-37.],cursor)for cursor in cursors]
     if compare_input_stage:
         from bmc_emulator import execute_fragment
         from bmc_subset import assemble_fragment
@@ -221,6 +233,9 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
         if compare_cascade:
             from fdrv_cascade_study import program_specs as cascade_specs
             stage_specs = cascade_specs(resample_taps,resample_drive_literal,cascade_coefficients)
+        if compare_full:
+            from fdrv_output_study import execute_frame,program_specs as full_specs
+            stage_specs=full_specs(resample_taps,resample_drive_literal,cascade_coefficients,output_coefficients)
         stage_programs = [assemble_fragment(spec) for spec in stage_specs]
         model_ring = list(fixture.ring)
     if compare_emulator:
@@ -259,7 +274,11 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                      for old1, old2, sample in ((0x1f, 0x20, left.value), (0x22, 0x23, right.value))]
             model = [filter_step(y, read(s), read(s+1), *values[10:15])
                      for y, s in zip(mixed, (0x29, 0x2c), strict=True)]
-            if compare_input_stage:
+            if compare_full:
+                full_stage=execute_frame(stage_programs,model_ring,origin,dict(enumerate(values)),
+                    [left.value,right.value],model_caches)
+                model_ring,model_caches=full_stage['ring'],full_stage['auxiliary']
+            elif compare_input_stage:
                 for fragment, assignment in zip(stage_programs, stage_specs, strict=True):
                     data = {cell: model_ring[native_ring_index(cell, 0, origin)]
                             for cell in assignment['sources']}
@@ -280,6 +299,17 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                             raise ValueError('Byte-emulated filter differs from independent reference')
             struct.pack_into('<I', fixture.ring_context, 0x20, origin)
             invoke(ctypes.addressof(fixture.wrapper), ctypes.addressof(inputs), ctypes.addressof(outputs))
+            if compare_full:
+                if bytes(fixture.ring)!=struct.pack('<2048d',*model_ring):
+                    different=[i for i in range(2048)if fixture.ring[i].hex()!=model_ring[i].hex()]
+                    raise ValueError(f'Full FDRV ring differs at frame {frame}, physical cells {different[:8]}')
+                for port,actual in enumerate((out_left.value,out_right.value)):
+                    if actual.hex()!=full_stage['output'][port].hex():
+                        raise ValueError(f'Full FDRV output differs at frame {frame}, port {port}')
+                for bank,(slots,cursor)in enumerate(model_caches):
+                    if bytes(fixture.owner)[0x80+0x80*bank:0x9c+0x80*bank]!=struct.pack('<3dI',*slots,cursor):
+                        raise ValueError(f'Full FDRV auxiliary state differs at frame {frame}, bank {bank}')
+                full_count+=2058
             if compare_input_stage:
                 for cell in (0x1e, 0x21, 0x1f, 0x22, 0x28, 0x29, 0x2b, 0x2c):
                     if read(cell).hex() != model_ring[native_ring_index(cell, 0, origin)].hex():
@@ -386,6 +416,11 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                 independent_packet_cascade_chain_values=(stage_count+second_count+filterbank_count+
                     resample_count+post_count+cascade_count)if compare_cascade else 0,
                 cascade_fixture_coefficients=list(cascade_coefficients)if compare_cascade else None,
+                independent_full_state_and_output_values=full_count,
+                full_ring_cells_per_frame=2048 if compare_full else 0,
+                full_auxiliary_values_per_frame=8 if compare_full else 0,
+                final_stereo_output_checked=compare_full,
+                output_fixture_coefficients=list(output_coefficients)if compare_full else None,
                 resample_fixture_taps=list(resample_taps) if compare_resample else None,
                 resample_fixture_drive=values[0] if compare_resample else None,
                 resample_fixture_drive_literal=resample_drive_literal if compare_resample else None,

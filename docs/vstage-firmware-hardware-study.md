@@ -11,6 +11,10 @@ now finds exact Fantom service windows, shared candidate DSP segments and a
 relocated FDRV post-cubic body in V-STAGE. It also records unseen packet contexts
 without assigning new opcode meanings.
 
+The [caller/ownership study](#shared-program-callers-and-ownership-2026-11-11)
+now links the matching FDRV list to a RTTI-backed class callback and separates
+diagnostic/test reuse from larger bootstrap-list references.
+
 ## Source and identity
 
 - [Official update page](https://www.roland.com/global/support/by_product/v-stage_88/updates_drivers/d33f4b4f-4ca5-4a6a-9703-8fb3ef3a3354/).
@@ -187,3 +191,78 @@ python3.13 -m unittest discover -s tests -p 'test_vstage_core1_comparison.py' -v
 Next useful work is caller/class ownership for the shared DSP contents, and
 independent semantic evidence for selected unseen contexts. Exact host CPU,
 physical package count, available capacity and safe device loading remain open.
+
+
+## Shared program callers and ownership (2026-11-11)
+
+`tools/vstage_program_ownership.py` extends the pinned comparison into descriptor
+and caller provenance. It checks actual list/table rows, full framed-segment
+hashes, mapped source offsets, PC-relative literal loads and bounded Thumb
+instruction shapes. Both ITCM and ERAM code are considered. V-STAGE bmc1 and
+bmc2 have identical images, so their shared representative is sufficient here.
+
+### FDRV class callback and dispatch
+
+| Evidence | Fantom | V-STAGE bmc1/2 |
+|---|---|---|
+| Containing program list | `610e5a94` | `611008a8` |
+| List DSP / row index | 1 / 1 | 4 / 0 |
+| Render base / length / capacity | `8040` / 1420 / 4096 | `7000` / 1420 / 1792 |
+| Source runtime | `610e6440` | `61100cc8` |
+| List-pointer literal pool | `6104a248` | `610542ec` |
+| Literal load / indirect call | `61049e72` / `61049e74` | `61053f26` / `61053f28` |
+| Callback entry | `61049e68` | `61053f1c` |
+| RTTI typeinfo | `61171a58` | `611c75a0` |
+| Vtable address point | `61176adc` | `611cc3ec` |
+
+The exact RTTI name `11CFspMfxFDRV` links through typeinfo/vtable records to
+callback slot +8. Its checked prologue obtains the object at +4, reads that
+object's vtable slot **+28**, loads the program-list pointer into **r1**, then
+calls through r2. This is direct static caller evidence for the list containing
+the previously verified 90-byte relocated body, beyond a numeric/string match.
+The indirect target still depends on runtime object identity; no loader is run.
+The two complete 1,420-byte contents have different hashes, so this does not
+assert complete program identity or host/loading compatibility.
+
+### Large shared programs have different roles
+
+| Shared bytes | Fantom list / DSP | V-STAGE bmc0 list / DSP | V-STAGE bmc1/2 list / DSP |
+|---|---|---|---|
+| 11,572 | `610c59c8` / 4 | `610ed280` / 4 | `610d4458` / 5 |
+| 51,542 | `61085de4` / 6 | `610982f4` / 6 | No match in the comparison |
+
+The 11,572-byte list is passed through object vtable slot **+18**. Loads/calls
+are Fantom `6103f4f0/6103f4f2`, bmc0 `61044b20/61044b22`, and bmc1/2
+`61049844/61049846`. Nearby checked literal readers reference the assertion
+`CFspDspTest::EResult CFspDspTest::TestEram()`. The method name is inferred from
+that assertion and the nearby dispatch, rather than recovered from a symbol
+table. This is diagnostic/test-associated reuse, not evidence for an additional
+unidentified synthesizer engine.
+
+The 51,542-byte list has two checked references in both images. Fantom
+`610010f6` and V-STAGE bmc0 `61001926` load it into r1 on a selected-list path
+that subsequently calls object slot +18. A separate reader at `61001178` /
+`610019a8` loads the list into r6, reads count at +2 and table at +4, and walks
+16-byte segment records. These establish actual code use of the structural
+list. Exact class/function ownership and the interpretation of its DSP6 code
+remain unresolved; bootstrap/list-selection context alone does not name it.
+
+Qwen's 230.2-second pass produced local intermediate scripts and records but
+left its report at the initial status. Its list/row and pointer locations were
+checked independently. The worker's ITCM-only literal scan missed the ERAM
+callers, and some listings decoded literal pools as if they were code. None of
+those listings establishes ownership. The committed tool instead requires the
+RTTI chain/exact FDRV caller shape, exact diagnostic dispatch shape and explicit
+large-list row-reader instructions. No worker script or vendor listing is
+committed. Three tests cover narrow/wide/negative Thumb literal references,
+changed-target/shape rejection, the pinned real caller chains and altered-input
+rejection.
+
+```sh
+python3.13 tools/vstage_program_ownership.py local/vstage-worker/VSTAGE_UPA.BIN local/b0c1a.bin --out local/vstage-program-ownership.json
+python3.13 -m unittest discover -s tests -p 'test_vstage_program_ownership.py' -v
+```
+
+Next trace the runtime dispatch target/object and the remaining large program's
+owner before transferring loading rules or engine-capacity assumptions. Physical
+package count, UI host, device execution and new ISA meanings remain unverified.

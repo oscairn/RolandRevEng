@@ -51,7 +51,7 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
                                                 'state_variable_pair_with_output', 'state_variable_recombine_pair',
                                                 'state_variable_recombine_pair_with_output',
                                                 'state_variable_terminal_pair_with_output', 'resample_drive_pair',
-                                                'post_cubic_mix_pair','cascaded_history_pair')
+                                                'post_cubic_mix_pair','cascaded_history_pair','fdrv_output_pair')
     if (native_coefficient_prefix or spec['kind'] == 'clipped_half_pair') and not hasattr(math, 'fma'):
         raise ValueError('This native-reference profile requires Python 3.13+ math.fma')
     io_addresses = spec.get('input_addresses', DEFAULT_INPUT_ADDRESSES)
@@ -102,11 +102,34 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
                 else:
                     raise ValueError('Unsupported transfer port')
                 continue
-            if word in (0x14a8,0x55ab,0x1464,0x5567,0x1424,0x5527):
+            if word in (0x0ca4,0x4da7,0x0ca8,0x4dab,0x0c24,0x4d27):
+                destination=0 if word<0x4000 else 4
+                raw=b''.join(value.to_bytes(2,'big')for value in pool)
+                factor=literal(raw[word&15:(word&15)+3])
+                if word in (0x0ca4,0x4da7):
+                    value=_fma(old_value(destination+2),factor,old_value(destination+2))+old_value(destination)
+                elif word in (0x0ca8,0x4dab):
+                    value=_fma(old_value(destination+2),factor,-old_value(destination))+old_value(destination+1)
+                else:
+                    value=_fma(old_value(destination),factor,old_value(destination))+old_value(destination+2)
+            elif word in (0x2420,0x6523,0x1426,0x5529):
+                destination,source=(word>>12)&7,(word>>6)&7
+                raw=b''.join(value.to_bytes(2,'big')for value in pool)
+                factor=literal(raw[word&15:(word&15)+3])
+                value=(old_value(source)*factor if word in (0x2420,0x6523)else
+                       _fma(old_value(source),factor,old_value(destination)))
+            elif word in (0x0c02,0x4d06):
+                destination=0 if word==0x0c02 else 4
+                value=old_value(destination)+old_value(destination+2)
+            elif word in (0x08c1,0x48c5):
+                destination=0 if word==0x08c1 else 4
+                value=_fma(old_value(destination),old_value(3),old_value(destination+1))
+            elif word in (0x14a8,0x55ab,0x1464,0x5567,0x1424,0x5527):
                 destination,source=(word>>12)&7,(word>>6)&7
                 raw=b''.join(value.to_bytes(2,'big')for value in pool)
                 index=word&15;factor=literal(raw[index:index+3])
-                value=(old_value(source)*factor if word in (0x14a8,0x55ab,0x1464,0x5567)
+                value=(_fma(old_value(source),factor,old_value(destination+1))if words[0]==0x420a else
+                       old_value(source)*factor if word in (0x14a8,0x55ab,0x1464,0x5567)
                        else _fma(old_value(source),factor,old_value(destination)))
             elif word in (0x04a4,0x45a7,0x0468,0x456b,0x2466,0x6569):
                 destination,source=(word>>12)&7,(word>>6)&7
@@ -133,7 +156,7 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
                 # Native constructor double differs from the encoded DSP literal.
                 value=old_value(destination)*DRIVE_SCALES[spec['drive_literal']]
             elif word in (0x0403, 0x4503, 0x2443, 0x6547, 0x2410, 0x6510,
-                        0x1400, 0x5504, 0x1440, 0x5544, 0x2403, 0x6503,0x2483,0x6583):
+                        0x1400, 0x5504, 0x1440, 0x5544, 0x2403, 0x6503,0x2483,0x6583,0x1443,0x5543):
                 destination, source, operand = (word >> 12) & 7, (word >> 6) & 7, word & 63
                 if operand < 8:
                     factor = old_value(operand)

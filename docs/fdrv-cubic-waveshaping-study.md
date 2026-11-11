@@ -1,5 +1,10 @@
 # FDRV cubic waveshaping, interpolation and clipping
 
+The [complete arithmetic/output milestone](#complete-arithmetic-and-output-milestone-2026-11-11)
+now matches final stereo audio and all persistent ring/cache state against native
+callbacks through five wraps. Its 1,692-byte composed packet reference excludes
+the unresolved DSP return/control contract and hardware loading.
+
 The [cascaded history filters](#cascaded-history-filter-milestone-2026-11-11)
 extend the chain to 1,504 logical/stored bytes and 92 packets. Both nondegenerate
 scale-pair fixtures match 552,000 native values. The final state-variable filter
@@ -562,3 +567,86 @@ Default-coefficient composed logical SHA-256:
 Next is `4e0..58c`: **11 stock packets, 172 bytes**, containing the final
 state-variable/auxiliary section and output tail. Hardware precision, allocation,
 entry/return and safe loading remain unverified. No instrument was accessed.
+
+
+## Complete arithmetic and output milestone (2026-11-11)
+
+The remaining arithmetic now runs as `fdrv_output_pair`: **188 bytes, twelve
+packets**, including 28 authored preload bytes, 154 exact stock bytes at
+`4e0..57a`, and a six-byte authored final multiply. All five Fantom placements
+match the stock body with their actual data/live-coefficient relocations.
+The eleven-fragment chain is **1,692 logical/stored bytes and 104 packets**.
+
+The final filter uses incoming y at 8/c, S at 41/44 and T at 42/45. With five
+fixed literal coefficients a/b/c/d/e, the checked native operation order is:
+
+```text
+nextT       = fma(S, a, S) + T
+high        = fma(S, b, -nextT) + y
+preliminary = fma(y, d, high*c)
+nextS       = fma(high, a, high) + S
+filtered    = fma(nextS + S, e, preliminary)
+output      = fma(dry, float32(C2), filtered*float32(C3)) * float32(C4)
+```
+
+Store nextT at 41/44 and nextS at 40/43. Under the existing fixture's origin
+increment, these become next frame's T/S inputs. Dry values come from 0/3, whose
+producer-side native records point at `2e6/2ea`; final DSP operands at `56a/56e`
+name the same cells. Earlier cascade S/T prefetches are now covered through the
+complete state comparison.
+
+The exact `420a` packet is significant: controls `1464/5567` fuse y*d with
+incoming I2/I6 (high*c) while auxiliary restores replace those ports for the
+following packet. Under the earlier cascade's `5f0a`, the same controls perform
+plain products. Treating the control word alone as a universal multiply would
+produce the wrong FMA order. Other admitted contexts cover literal accumulation,
+pre-add state stores, live wet/dry/master gains and final main-port outputs.
+
+Stock a/b/c/d/e are **0/0/0/1/0**. The owned native fixture patches constructor
+doubles +e8/+108/+f8/+118/+d8 to **.125/-.25/.5/.75/-.1875**. Earlier resampling
+and cascade coefficients remain nonzero. Live C2/C3/C4 use binary32 versions of
+.4137/.7313/.8279. These substitutions expose hidden arithmetic; they are not
+claims about Roland's parameter setters. Pure tests also exercise zero wet,
+zero dry, zero master, asymmetric/random inputs, signed zeros and stock defaults.
+
+`tools/fdrv_output_study.py:execute_frame()` is a packet-only, nonmutating frame
+runner. It needs assembled supported fragments, an explicit 2,048-cell ring,
+origin, live coefficients, stereo samples and two three-slot/cursor auxiliary
+banks. It returns new ring/cache state and stereo audio. Fragment resources and
+order must match the checked chain. The caller advances origin using the
+existing fixture convention; physical sample cadence is still unverified.
+
+All four authored bridge cells **60..63** are frame-local software temporaries.
+They are no longer written into the persistent ring in this complete reference.
+This matters because a rotating ring containing synthetic bridge histories would
+fail a full-state comparison even when selected stock cutpoints matched. Cache
+push/pop state is reconstructed from the packet controls and interpreter traces,
+using only the model's own values. No captured native intermediate seeds it.
+
+Each 12,000-frame scale-pair run matches, bit for bit, **two final audio values,
+all 2,048 ring cells, six auxiliary slots and two cursors every frame**. That is
+24,696,000 scalar comparisons per variant, ending at origin 1760 through five
+wraps. One variant uses ZENOLOGY constructor precision; the other patches the
+owned callback to the Fantom fixed drive/post scale pair. Three 2,056-frame tests
+cross wrap with cursor pairs 0/1, 1/2 and 2/0, covering stock and nonzero final
+filter coefficients. Both original JSON examples roundtrip as 188 stored bytes.
+
+This completes the recovered **arithmetic/output reference**, not a DSP control
+emulator. Stock `57a` includes `00f8` alongside the final multiplies; our authored
+packet retains only the arithmetic. Stock `582` transfers main ports to
+`2018/2019`; the offline runner returns their final stereo values to its caller.
+It does not invent return-PC storage, pipeline drain or external IO timing.
+The source callback's two output stores are independently checked and executed
+in owned memory. Hardware numeric precision, allocation, entry/return and safe
+loading remain separate requirements. No instrument was accessed.
+
+```sh
+python3.13 tools/fdrv_output_study.py --execute-native --frames 12000
+python3.13 -m unittest discover -s tests -p 'test_fdrv_output.py' -v
+python3.13 tools/bmc_subset.py assemble examples/fdrv-output-nonzero.json local/fdrv-output.bin --stored
+```
+
+Default-coefficient composed logical SHA-256:
+
+- ZENOLOGY scale pair: `d9e40b0e93ca42f8d8326f53b473bcd1081d74c951209d91589e2bb0827a9e3f`.
+- Fantom scale pair: `29ea7bfcccab4836d8f2663ee0f5bc3c3c2c5ad9a35c812c839771d6c59cbd62`.

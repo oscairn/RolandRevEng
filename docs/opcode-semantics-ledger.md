@@ -14,6 +14,15 @@ rounding, saturation, accumulator width or fused evaluation on silicon.
 
 ## Independently checked arithmetic contexts
 
+The [complete FDRV arithmetic checkpoint](fdrv-cubic-waveshaping-study.md#complete-arithmetic-and-output-milestone-2026-11-11)
+adds long literal filter contexts `0ca4/4da7`, `0ca8/4dab`, `0c24/4d27`,
+literal products `2420/6523`, literal accumulation `1426/5529`, additions
+`0c02/4d06`, live products `1443/5543` and dry/wet accumulation `08c1/48c5`.
+Crucially, `1464/5567` under header `420a` fuses the product with incoming I2/I6;
+the same words under cascade header `5f0a` are plain products. Exact profile
+admission protects that distinction. Complete final audio/ring/cache comparisons
+are native-policy evidence, not proof of silicon precision or `00f8` semantics.
+
 The [cascade checkpoint](fdrv-cubic-waveshaping-study.md#cascaded-history-filter-milestone-2026-11-11)
 adds contextual short products `14a8/55ab` and `1464/5567`, plus long
 `1424/5527` with extensions `0001/0005`. Repeated `1428/552b` accumulates the

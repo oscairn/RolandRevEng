@@ -1802,3 +1802,48 @@ concurrent-edit guards/backups; all 71 vault notes are verified. This checkpoint
 contains only research tools, original examples, tests and documentation.
 Physical hardware precision, timing, allocation, entry/return and safe loading
 remain unresolved. No instrument was accessed or flashed.
+
+
+## Complete FDRV arithmetic and V-STAGE caller provenance (2026-11-11)
+
+Completed both bounded tasks. The strict fdrv_output_pair adds 188 bytes/twelve
+packets, preserving 154 exact stock bytes at 4e0..57a with authored preloads and
+final multiplies. All five Fantom relocations match. The eleven-fragment chain
+is 1,692 logical/stored bytes and 104 packets. Final filter literals use distinct
+nonzero constructor substitutions; live wet/dry/master gains are nonzero.
+Contextual 1464/5567 under 420a performs FMA with incoming I2/I6, unlike plain
+multiplication under cascade 5f0a. Exact inverse admission protects the distinction.
+
+The standalone packet-only execute_frame runner returns new state/audio without
+mutating inputs. Four synthetic bridges 60..63 are software temporaries, kept
+outside the persistent ring; this is an arithmetic composition, not a hardware
+wrapper. Independent cache contents/cursors follow packet save/restore controls.
+Both 12,000-frame scale-pair runs match all 2,048 ring cells, six cache slots/two
+cursors and final stereo audio bit for bit every frame: 24,696,000 scalar values
+per variant, five wraps, final origin 1760. No native intermediate feeds the
+packet model. Default/nonzero final filters cross wrap with all valid cursor
+values, and pure tests cover signed zeros, asymmetric/random inputs and zero/
+nonzero gain paths. Both original examples roundtrip as 188 stored bytes.
+
+Qwen's 230.2-second caller study left an initial report and intermediate records.
+Independently verified the list/table and pointer locations, then corrected its
+ITCM-only scan and literal-pool disassembly mistakes. A pinned tool now proves
+the matching bmc1/2 list611008a8 belongs to a RTTI-linked CFspMfxFDRV callback at
+61053f1c: it passes the list in r1 through object vtable slot28. The parallel
+Fantom callback/list chain is also checked. This proves static class/caller
+provenance for the shared body, not whole-program or loading compatibility.
+
+Shared 11,572-byte contents have slot18 dispatch with nearby TestEram assertion
+readers, identifying diagnostic-associated reuse. The 51,542-byte program has
+checked selected-list dispatch and a 16-byte segment-row reader in both Fantom
+and V-STAGE bmc0. Its exact class/function owner remains unresolved. Three tests
+check narrow/wide/negative literal loads, real caller/RTTI chains, diagnostic
+and row-reader shapes, and changed-input rejection. No worker code was adopted.
+
+All 486 tests pass in 114.547 seconds. Native output/full-state comparisons are
+in local/fdrv-output-12000.json; caller evidence is in
+local/vstage-program-ownership.json. Vendor files, raw listings, Qwen logs and
+reports stay ignored. Synced the six changed Roland vault notes with backups
+and concurrent-edit guards; all 71 notes are verified.
+Stock 00f8, external IO-store timing, hardware arithmetic, allocation, entry/
+return and safe loading are still unverified. No instrument was accessed.

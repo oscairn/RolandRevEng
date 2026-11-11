@@ -1,9 +1,20 @@
 # Offline functional fragment emulator
 
-2026-11-11. `tools/bmc_emulator.py` executes logical packet bytes for seventeen checked profiles. Stereo input takes 10 bytes, the dry/wet tail
+2026-11-11. `tools/bmc_emulator.py` executes logical packet bytes for eighteen checked profiles. Stereo input takes 10 bytes, the dry/wet tail
 has 60-byte and 80-byte forms, and the four-stage allpass takes 82 bytes. This is a packet-stepping functional model with memory and
-per-packet traces. It is not yet a complete Roland effect or a cycle/bit-accurate
-BMC emulator. No vendor plugin or instrument is executed.
+per-packet traces. A complete FDRV arithmetic reference now composes these profiles;
+cycle/bit-accurate BMC execution and device loading remain unverified. Native checks
+execute isolated original callbacks in owned buffers, without launching a plugin
+or accessing an instrument.
+
+The [complete FDRV arithmetic path](fdrv-cubic-waveshaping-study.md#complete-arithmetic-and-output-milestone-2026-11-11)
+adds `fdrv_output_pair` (188 bytes). `fdrv_output_study.execute_frame()` runs the
+eleven-fragment, 1,692-byte chain without native/vendor inputs, taking explicit
+ring, origin, stereo samples, live coefficients and auxiliary cache state. It
+returns new ring/cache state and final audio without mutating its arguments.
+Bridge cells 60..63 stay ephemeral. Both 12,000-frame scale-pair fixtures match
+all 2,048 ring cells, six cache slots/two cursors and stereo output every frame.
+The stock `00f8` and IO-store timing remain outside this arithmetic model.
 
 The [cascaded history filters](fdrv-cubic-waveshaping-study.md#cascaded-history-filter-milestone-2026-11-11)
 add a strict 164-byte profile, extending the chain to 1,504 logical/stored bytes.

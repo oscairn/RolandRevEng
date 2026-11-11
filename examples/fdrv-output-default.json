@@ -1,0 +1,31 @@
+{
+  "kind": "fdrv_output_pair",
+  "sources": [
+    8,
+    65,
+    66,
+    12,
+    68,
+    69,
+    0,
+    3
+  ],
+  "targets": [
+    65,
+    68,
+    64,
+    67
+  ],
+  "coefficient_slots": [
+    3,
+    2,
+    4
+  ],
+  "filter_coefficients": [
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0
+  ]
+}

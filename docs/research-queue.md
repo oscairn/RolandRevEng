@@ -13,7 +13,22 @@ Next recover another useful exact producer/control context or an owner-proven
 nonempty label/continuation path; retain bounded opcode admission and hardware gates.
 Entry, runtime allocation and hardware calibration remain separate requirements.
 
-The latest bounded milestone is complete (2026-11-11): two cascaded history
+The latest bounded milestone is complete (2026-11-11): the final FDRV literal
+filter and gain tail complete an offline arithmetic/output reference. Eleven
+fragments total 1,692 bytes and 104 packets. Both 12,000-frame scale pairs match
+final stereo audio, all 2,048 ring cells and six cache slots/two cursors every
+frame. `00f8`, device IO timing, physical precision and safe loading remain open.
+Next choose a second complete effect or parameter-update provenance to challenge
+the inferred arithmetic policy; hardware entry/return remains a separate gate.
+
+V-STAGE ownership now reaches a RTTI-linked CFspMfxFDRV callback passing the
+matching list to vtable slot28. The shared 11,572-byte program has diagnostic
+TestEram-associated dispatch; the 51,542-byte program has verified list-selection
+dispatch and a 16-byte-row reader, with exact class owner unresolved. Prioritize
+semantic leads supported by these callers rather than treating shared test code
+as an unidentified synth engine.
+
+The preceding bounded milestone is complete (2026-11-11): two cascaded history
 filters extend the independent chain to 1,504 logical/stored bytes and 92 packets.
 Distinct nonzero coefficients match 552,000 native values per scale-pair run.
 Next recover the final state-variable/auxiliary region and output tail at 4e0;

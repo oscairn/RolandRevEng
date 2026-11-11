@@ -406,6 +406,45 @@ def assemble_cascaded_history_pair(spec):
     ])
 
 
+def assemble_fdrv_output_pair(spec):
+    from bmc_dsp import encode_literal,literal
+    if (not isinstance(spec,dict) or spec.get('kind')!='fdrv_output_pair'
+            or set(spec)!={'kind','sources','targets','coefficient_slots','filter_coefficients'}):
+        raise ValueError('Expected exact FDRV output resources and coefficients')
+    for name,count,limit in (('sources',8,0x800),('targets',4,0x800),('coefficient_slots',3,0x1000)):
+        if (not isinstance(spec[name],list) or len(spec[name])!=count
+                or any(type(v)is not int or not 0<=v<limit for v in spec[name])):
+            raise ValueError(f'Expected {count} valid {name} indices')
+    y,s,t,yr,sr,tr,dry,dryr=spec['sources']
+    if (len(set(spec['sources']))!=8 or t!=s+1 or tr!=sr+1 or min(s,sr)<1
+            or spec['targets']!=[s,sr,s-1,sr-1]
+            or set((s-1,sr-1))&set(spec['sources']) or len(set(spec['coefficient_slots']))!=3):
+        raise ValueError('FDRV output resources violate checked state/alias rules')
+    values=spec['filter_coefficients']
+    if not isinstance(values,list) or len(values)!=5:
+        raise ValueError('Expected five exactly representable 24-bit filter coefficients')
+    encoded=[encode_literal(v,3)for v in values]
+    if any(literal(data).hex()!=float(v).hex()for data,v in zip(encoded,values,strict=True)):
+        raise ValueError('Output filter coefficients must be exactly representable')
+    a,b,c,d,e=[[int.from_bytes((data+data)[i:i+2],'big')for i in range(0,6,2)]for data in encoded]
+    wet,dry_gain,master=[0xc000|v for v in spec['coefficient_slots']]
+    return assemble([
+        [0x3e07,0x1fe0,0x2fe2,0x0fe4,y,s,t],
+        [0x3e07,0x5fe0,0x6fe2,0x4fe4,yr,sr,tr],
+        [0x1008,0x0ca4,0x4da7,0x2000,0x6004,*a],
+        [0x884e,0x0ca8,0x4dab,0xaf60,0xef60,0x8fe4,0xcfe6,0x8001,0xc005,s,sr,*b],
+        [0x1506,0x2420,0x6523,*c],
+        [0x420a,0x1464,0x5567,0xaf61,0xef61,0x0002,0x0006,*d],
+        [0x1008,0x0c24,0x4d27,0x0002,0x4006,*a],
+        [0x5f07,0x0c02,0x4d06,0x8fe0,0xcfe2,s-1,sr-1],
+        [0x220a,0x1426,0x5529,0x3fe4,0x0001,0x0005,wet,*e],
+        [0xb809,0x1443,0x5543,0x0fe0,0x3fe2,0x4fe4,dry,dry_gain,dryr],
+        [0x2e05,0x08c1,0x48c5,0x3fe0,master],
+        # The stock coissued 00f8 return is outside the arithmetic profile.
+        [0x1503,0x0403,0x4503],
+    ])
+
+
 def assemble_cubic_quad(spec):
     if (not isinstance(spec, dict) or spec.get('kind') != 'cubic_quad'
             or set(spec) != {'kind', 'sources', 'targets'}):
@@ -512,6 +551,8 @@ def assemble_fragment(spec):
         return assemble_post_cubic_mix_pair(spec)
     if spec.get('kind') == 'cascaded_history_pair':
         return assemble_cascaded_history_pair(spec)
+    if spec.get('kind') == 'fdrv_output_pair':
+        return assemble_fdrv_output_pair(spec)
     if spec.get('kind') == 'cubic_quad':
         return assemble_cubic_quad(spec)
     if spec.get('kind') == 'clipped_half_pair':
@@ -524,6 +565,19 @@ def assemble_fragment(spec):
 
 
 def disassemble_fragment(stream):
+    if len(stream)==188:
+        from bmc_dsp import literal
+        rows=packets(stream)
+        if [len(w)for _,w in rows]!=[7,7,8,14,6,10,8,7,10,9,5,3]:
+            raise ValueError('Not an exact FDRV output profile')
+        a,b,c,d,e,f,g,h,i,j,k,l=[w for _,w in rows]
+        spec=dict(kind='fdrv_output_pair',sources=a[4:7]+b[4:7]+[j[6],j[8]],
+            targets=d[9:11]+h[5:7],coefficient_slots=[i[6]&0xfff,j[7]&0xfff,k[4]&0xfff],
+            filter_coefficients=[literal(stream[o+n:o+n+3])for o,n in
+                ((rows[2][0],10),(rows[3][0],22),(rows[4][0],6),(rows[5][0],14),(rows[8][0],14))])
+        if assemble_fdrv_output_pair(spec)!=stream:
+            raise ValueError('Unsupported FDRV output controls, coefficients, tags or aliases')
+        return spec
     if len(stream)==164:
         from bmc_dsp import literal
         rows=packets(stream)

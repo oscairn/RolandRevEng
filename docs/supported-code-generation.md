@@ -5,6 +5,15 @@ and explicitly assigned indices into exact packet sequences independently matche
 against native FETDRIVE, LINEDRIVE and FDRV expressions. This is a constrained semantic code emitter and
 inverse decoder, not a general DSP assembler, scheduler or standalone engine.
 
+The [complete FDRV arithmetic milestone](fdrv-cubic-waveshaping-study.md#complete-arithmetic-and-output-milestone-2026-11-11)
+adds `fdrv_output_pair` (188 bytes): eight sources, four state-store aliases,
+three live gain slots and five exactly representable 24-bit fixed coefficients.
+It preserves the 154 stock bytes at 4e0..57a and appends arithmetic without the
+stock coissued `00f8`. The eleven-fragment chain is 1,692 logical/stored bytes.
+Examples are `examples/fdrv-output-default.json` and `examples/fdrv-output-nonzero.json`.
+Returned stereo ports replace the external IO sink only in the offline reference;
+this is not a loadable firmware/engine wrapper.
+
 The [cascade milestone](fdrv-cubic-waveshaping-study.md#cascaded-history-filter-milestone-2026-11-11)
 adds `cascaded_history_pair` (164 bytes), with twelve data sources including four
 prefetches, four checked state-store aliases and six exactly representable 24-bit
