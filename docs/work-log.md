@@ -939,3 +939,29 @@ hardware scheduling and silicon precision remain unverified.
 All 287 tests passed. Qwen's optional Python-only review of the native
 fixture timed out at 180 seconds. The callback execution, memory-lifetime
 checks and numeric comparisons were verified locally.
+
+## OSC phase boundary and frequency ownership
+
+The MFX OSC phase interval now has a native instruction/constructor
+checker, a bounded numeric reference and a subprocess execution comparison.
+All 272 native probes agree, including the asymmetric negative-odd
+boundary and signed32 normalizer wrapping near the conversion limit.
+Four Fantom placements retain the checked packet sequence. Their
+stored increments support the existing 48 kHz rate hypothesis.
+
+Qwen drafted the phase rule and tests. Its duplicated validator was
+replaced with the existing finite-number helper and its positive-odd
+expected values were corrected. Direct native probes then supported
+extension through the non-overflowing signed32 conversion domain.
+The executable-memory lifetime helper is shared with the LINE fixture.
+
+An ignored whole-OSC native experiment, `local/native-osc-errors.py`,
+exhibited sign changes at some waveform extrema under its chosen
+constructor overrides. Later waveform folding and parameter calibration
+need further analysis before that experiment becomes an audio reference.
+USB registry inspection found no Roland/Fantom-named device in the
+current host view. Instrument loading and calibration remain pending.
+
+All 292 tests passed. The remaining offline work includes later OSC
+waveform folding, a complete native FETDRIVE fixture and independent
+contexts for the phase controls' other state effects.

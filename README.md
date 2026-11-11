@@ -79,6 +79,8 @@ Independent follow-up studies:
 The [native LINE fixture](docs/fragment-emulator.md#direct-native-line-callback)
 runs the pinned translated sample callback in an isolated macOS ARM64 process
 and compares its audio against the conditional Python reference.
+The [OSC phase study](docs/oscillator-phase-study.md) checks an owned
+frequency field, four Fantom placements and a native phase-step boundary.
 
 This directory contains offline tools and derived research. It does not contain
 a working custom synth engine, full stock-effect emulator, general assembler, flasher or hardware driver. A constrained

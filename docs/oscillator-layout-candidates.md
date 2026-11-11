@@ -163,3 +163,6 @@ six owner-proven corpus anchors. Four tests run without the vendor corpus or Cap
 
 The production layout decoder and emitter are unchanged. A complete engine, hardware
 precision/timing, safe loading and physical audio routing remain unverified.
+
+The separate [MFX OSC phase study](oscillator-phase-study.md) binds a
+stored phase step, its owned frequency field and four Fantom placements.

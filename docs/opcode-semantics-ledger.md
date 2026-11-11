@@ -72,6 +72,7 @@ unchanged register/alias provenance is required instead of matching equal expres
 | `20a0/20a4/20a5/30a0/30a2` | [Exceptional-op study](special-ops-and-exp-study.md) excludes misleading literal aliases; whole exponential windows are not single-op semantics |
 | `3074`, `2d64/0c3b`, remaining oscillator forms | [Oscillator comparison](oscillator-layout-candidates.md#cross-context-reuse-of-3074) finds 119 short `3074` contexts and literal/store bindings. The `2d64/0c3b` extension owner and oscillator recurrence remain open |
 | `ff70/ff71/ff75` and entry wrappers | Stock mutability/placement is mapped; safe standalone execution and universal stop/run meanings are not proved |
+| OSC `0c30 / 1410 / 8ee0 / 3c10 / 8ee1` window | [Phase study](oscillator-phase-study.md) binds the stored phase rule and owned frequency field. Individual exceptional state and port effects remain open |
 | DRAM-IO records, bulk clearing | Owners, addresses and completion paths are mapped; cadence, exact extent/count units and selective-reset safety remain open |
 | Arbitrary scheduling, numeric behavior | No hardware timing, hazard, precision or clipping calibration exists |
 

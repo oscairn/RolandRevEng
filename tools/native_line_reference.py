@@ -4,7 +4,6 @@ import ctypes
 import hashlib
 import json
 import math
-import mmap
 import platform
 from pathlib import Path
 import struct
@@ -12,6 +11,7 @@ import wave
 
 from line_shaping_study import NATIVE_SHA256
 from line_state_study import advance_native_origin
+from native_callback_fixture import executable_mapping
 from render_fragment_demo import SAMPLE_RATE, metrics, pcm16
 from render_line_reference import PARAMETERS, render_reference
 
@@ -88,18 +88,7 @@ def render_native(frames):
     if [(ins.mnemonic, ins.op_str) for ins in decoder.disasm(fpcr_reader, 0)] != [
             ('mrs', 'x0, fpcr'), ('ret', '')]:
         raise ValueError('Host FPCR reader encoding differs')
-    size = (len(callback) + len(fpcr_reader) + mmap.PAGESIZE - 1) // mmap.PAGESIZE * mmap.PAGESIZE
-    with mmap.mmap(-1, size, prot=mmap.PROT_READ | mmap.PROT_WRITE) as mapping:
-        mapping.write(callback + fpcr_reader)
-        address = ctypes.addressof(ctypes.c_char.from_buffer(mapping))
-        system = ctypes.CDLL(None, use_errno=True)
-        system.mprotect.argtypes = (ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int)
-        system.mprotect.restype = ctypes.c_int
-        if system.mprotect(address, size, mmap.PROT_READ | mmap.PROT_EXEC):
-            raise OSError(ctypes.get_errno(), 'Could not make the callback fixture executable')
-        system.sys_icache_invalidate.argtypes = (ctypes.c_void_p, ctypes.c_size_t)
-        system.sys_icache_invalidate.restype = None
-        system.sys_icache_invalidate(address, len(callback) + len(fpcr_reader))
+    with executable_mapping(callback + fpcr_reader) as address:
         invoke = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p)(address)
         read_fpcr = ctypes.CFUNCTYPE(ctypes.c_uint64)(address + len(callback))
         fpcr = read_fpcr()
