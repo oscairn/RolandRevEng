@@ -1,5 +1,10 @@
 # Offline functional fragment emulator
 
+[Setter-derived FDRV updates](fdrv-cubic-waveshaping-study.md#setter-derived-live-updates-2026-11-11)
+now exercise drive, wet, level and slope through independent native-policy
+envelopes while complete audio/ring/cache comparisons remain exact. Physical
+control timing and full EQ generation remain unverified.
+
 2026-11-11. `tools/bmc_emulator.py` executes logical packet bytes for eighteen checked profiles. Stereo input takes 10 bytes, the dry/wet tail
 has 60-byte and 80-byte forms, and the four-stage allpass takes 82 bytes. This is a packet-stepping functional model with memory and
 per-packet traces. A complete FDRV arithmetic reference now composes these profiles;
@@ -490,3 +495,34 @@ the host performs no per-sample phase or waveform synthesis. It runs without
 vendor artifacts and retains the explicit native-ring cadence assumption.
 It still needs hardware data encoding, ownership, wrapper, timing and output
 routing before it can serve as an instrument engine.
+
+
+## Independent FETDRIVE cross-check (2026-11-11)
+
+`tools/fetdrive_crosscheck.py` independently rebuilds the scalar input-mix and
+first-shaped-store expressions and executes the complete original FETDRIVE
+callback in owned memory. Its 2,056-frame fixture checks **8,224** mixed/shaped
+values through wrap, with 1,370 nonzero input-mix cases, asymmetric inputs, six
+nonzero drive values and three post gains. These are numeric cutpoint checks,
+not a second complete packet effect or new opcode admission.
+
+Qwen's 126.5-second review delivered a report and scalar probe. Independent
+checking corrected several errors: packets 3e/d4 loads mixed state, while 66/fc
+stores the shaped result; `afe0/bfe2` at 2e are store forms, not incoming loads.
+Two-byte BMC literals are not IEEE half precision. Fixed32 truncation followed
+by LSL 9 has gain 512 and a nominal post-shift grid 2^-23, not 2^-9. The worker's
+asserted one-step/scale-insensitivity conclusion did not follow from its output
+mismatches and is rejected.
+
+Using the native constructor scale versus the encoded three-byte DSP value
+changes **3,255 of 4,112** checked shaped outputs. These source precisions are not
+interchangeable. The independent probe matches original native execution using
+constructor precision; it does not settle physical DSP precision. The input-mix
+literal alias/control source relation and prefix writeback are still unresolved,
+so the worker's candidate contexts were not admitted to the packet interpreter.
+No worker code, vendor listings or raw binary data is committed.
+
+```sh
+python3.13 tools/fetdrive_crosscheck.py --frames 2056
+python3.13 -m unittest discover -s tests -p 'test_fetdrive_crosscheck.py' -v
+```

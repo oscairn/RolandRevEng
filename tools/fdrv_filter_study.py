@@ -99,8 +99,9 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                   compare_resample=False, resample_taps=(.5,.25,-.125),
                   resample_drive_literal='0656d2', compare_post_mix=False,
                   compare_cascade=False,cascade_coefficients=(.5,.25,-.125,.75,-.1875,.0625),
-                  compare_full=False,output_coefficients=(.125,-.25,.5,.75,-.1875)):
+                  compare_full=False,output_coefficients=(.125,-.25,.5,.75,-.1875),parameter_events=None):
     import ctypes
+    from contextlib import ExitStack
     import struct
     import lib
     from coefficient_shift_study import coefficient_context
@@ -126,6 +127,8 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
             raise ValueError('Expected four explicit initial S/T values')
         state_seeds = list(map(_finite, state_seeds))
     checked = report()
+    if parameter_events is not None and not compare_full:
+        raise ValueError('Setter replay requires the complete FDRV comparison')
     _, constructor, pointers, entry, instructions = coefficient_context('SIM_MFX_FDRV')
     if (entry, instructions[-1].address+4) != tuple(checked['callback']) or pointers != {
             0x820+8*slot: slot for slot in range(20)}:
@@ -187,6 +190,20 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
         values[1] = _float32(.7313)
     if compare_full:
         values[2:5]=list(map(_float32,(.4137,.7313,.8279)))
+    events=[];event_index=0;envelope_values=0
+    if parameter_events is not None:
+        from fdrv_parameter_study import (TIMES_MS,envelope_state,envelope_step,native_envelope_functions,
+            native_target_functions,native_live_targets,validate_events,report as parameter_report)
+        parameter_report()
+        level_table=list(struct.unpack_from('<128d',lib.Z,0x818d20))
+        events=validate_events(parameter_events,frames,level_table)
+        values=list(map(_float32,values))
+        envelope_states=[envelope_state(value,value)for value in values]
+        envelope_records=[ctypes.create_string_buffer(struct.pack('<ffIf',*state),16)for state in envelope_states]
+        envelope_owners=[ctypes.create_string_buffer(0x48)for _ in values]
+        for owner,record in zip(envelope_owners,envelope_records,strict=True):
+            struct.pack_into('<Q',owner,0x20,ctypes.addressof(record))
+        times=(ctypes.c_double*16)(*TIMES_MS)
     records = []
     for offset, slot in pointers.items():
         record = ctypes.create_string_buffer(0x48)
@@ -264,9 +281,32 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
     if compare_filterbank and not compare_resample:
         from fdrv_filterbank_study import prefix_code as bank_prefix_code
         code = bank_prefix_code()
-    with executable_mapping(code) as address:
+    with ExitStack()as stack:
+        address=stack.enter_context(executable_mapping(code))
+        if parameter_events is not None:
+            native_increment,native_step=stack.enter_context(native_envelope_functions())
+            target_functions=stack.enter_context(native_target_functions())
         invoke = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p)(address)
         for frame in range(frames):
+            while event_index<len(events)and events[event_index][0]==frame:
+                _,targets=events[event_index];event=parameter_events[event_index]
+                native_targets=native_live_targets(event['method'],event['args'],target_functions,level_table)
+                for slot,target in targets.items():
+                    envelope_states[slot]=envelope_state(envelope_states[slot][0],target)
+                    current=struct.unpack_from('<f',envelope_records[slot])[0]
+                    initial=envelope_state(current,native_targets[slot])
+                    struct.pack_into('<ffIf',envelope_records[slot],0,initial[0],0.,initial[2],initial[3])
+                    native_increment(ctypes.addressof(envelope_records[slot]),ctypes.addressof(times))
+                event_index+=1
+            if parameter_events is not None:
+                for slot,(owner,record)in enumerate(zip(envelope_owners,envelope_records,strict=True)):
+                    envelope_states[slot]=envelope_step(envelope_states[slot])
+                    native_step(ctypes.addressof(owner))
+                    if bytes(record)!=struct.pack('<ffIf',*envelope_states[slot]):
+                        raise ValueError(f'Coefficient envelope differs at frame {frame}, slot {slot}')
+                    values[slot]=envelope_states[slot][0]
+                    struct.pack_into('<f',records[slot],0x28,struct.unpack_from('<f',record)[0])
+                    envelope_values+=4
             left.value = .08*math.sin(2*math.pi*220*frame/48000)
             right.value = -.06*math.cos(2*math.pi*337*frame/48000)
             read = lambda cell: fixture.ring[native_ring_index(cell, 0, origin)]
@@ -421,6 +461,8 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                 full_auxiliary_values_per_frame=8 if compare_full else 0,
                 final_stereo_output_checked=compare_full,
                 output_fixture_coefficients=list(output_coefficients)if compare_full else None,
+                parameter_event_count=event_index,coefficient_envelope_values_checked=envelope_values,
+                native_envelope_updates_per_fixture_frame=1 if parameter_events is not None else 0,
                 resample_fixture_taps=list(resample_taps) if compare_resample else None,
                 resample_fixture_drive=values[0] if compare_resample else None,
                 resample_fixture_drive_literal=resample_drive_literal if compare_resample else None,

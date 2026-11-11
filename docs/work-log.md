@@ -1847,3 +1847,48 @@ reports stay ignored. Synced the six changed Roland vault notes with backups
 and concurrent-edit guards; all 71 notes are verified.
 Stock 00f8, external IO-store timing, hardware arithmetic, allocation, entry/
 return and safe loading are still unverified. No instrument was accessed.
+
+
+## FDRV live controls and independent FETDRIVE cross-check (2026-11-11)
+
+Traced all 20 native live slots and 14 grouped literal descriptors. The final
+filter a group declares 4 copies at 4ea/4ed/536/539; grouped updates are no longer
+inferred solely from equal defaults. The direct native live paths pass EnvTC 10
+and wait=false. Checked setter target math for drive, wet balance, level and
+slope, including Mach-O import metadata identifying dB2Gain's target as pow,
+the cubic normalization/FMA order and the pinned 128-entry level table.
+
+Added bounded scalar envelope behavior and owned native increment/VProcSync
+fixtures. They cover all 16 selectors, rising/falling ramps, signed zeros,
+endpoint/control clearing, interrupted ramps and float32 one-ULP stall escape.
+Wait/event processing and synchronization registration remain disabled. Applying
+one update before each audio fixture frame is an explicit test convention.
+Both 12,000-frame scale pairs match 960,000 envelope fields and 24,696,000 complete
+final audio/ring/cache values during 13 setter-derived events, five wraps,
+final origin 1760. Native and model envelopes advance independently. The owned
+adapter updates native callback coefficient records; it never feeds native
+coefficients/intermediates into the packet model.
+
+Fantom's actual RTTI-linked setters confirm local slots 0..4,8,9 and manager
+slot b0; its level table equals the desktop table after float32 conversion.
+Observed binary32 VMUL/VMLS/VMLA/VDIV target arithmetic differs from desktop
+binary64/FMA. No equivalence of target values, execution of ARM32 setters or
+hardware envelope timing is claimed. EqFaCal/EqVgCal coefficient generation,
+interpolation policy and UI conversions are mapped as remaining work rather
+than advertised as implemented control support.
+
+Qwen's 126.5-second independent FETDRIVE review produced a report and scalar
+probe. Corrected its packet load/store locations, transfer direction, IEEE-half
+wording and fixed32 grid/gain statements. Its scale-insensitivity conclusion was
+unsupported. A compact independent scalar/native cross-check now matches 8,224
+mixed/shaped values over 2,056 frames, with 1,370 nonzero input-mix cases and
+asymmetric inputs. Encoded versus constructor scale changes 3,255 of 4,112 shaped
+outputs. No new opcode profile is admitted because the DSP prefix source/alias
+and writeback relation remains unresolved. No worker code or raw vendor listing
+is committed.
+
+All 496 tests pass in 132.081 seconds. Detailed results are local/fdrv-dynamic-12000.json,
+local/fdrv-parameter-static.json and local/fetdrive-independent-crosscheck.json.
+Synced five changed Roland notes with backups and concurrent-edit guards;
+all 71 vault notes are verified. Hardware loading, control flow, precision, scheduler
+cadence and history initialization remain unresolved. No instrument was accessed.

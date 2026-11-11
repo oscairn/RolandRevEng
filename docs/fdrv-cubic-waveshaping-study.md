@@ -1,5 +1,10 @@
 # FDRV cubic waveshaping, interpolation and clipping
 
+The [parameter-control checkpoint](#setter-derived-live-updates-2026-11-11) now
+traces live/literal descriptors and replays drive, wet, level and slope changes
+through native coefficient envelopes. Complete audio/state comparisons remain
+exact during interrupted ramps. Full EQ generation and hardware timing remain open.
+
 The [complete arithmetic/output milestone](#complete-arithmetic-and-output-milestone-2026-11-11)
 now matches final stereo audio and all persistent ring/cache state against native
 callbacks through five wraps. Its 1,692-byte composed packet reference excludes
@@ -650,3 +655,105 @@ Default-coefficient composed logical SHA-256:
 
 - ZENOLOGY scale pair: `d9e40b0e93ca42f8d8326f53b473bcd1081d74c951209d91589e2bb0827a9e3f`.
 - Fantom scale pair: `29ea7bfcccab4836d8f2663ee0f5bc3c3c2c5ad9a35c812c839771d6c59cbd62`.
+
+
+## Setter-derived live updates (2026-11-11)
+
+`tools/fdrv_parameter_study.py` replaces ad hoc changes to four live-control
+families with source-checked setter target calculations and envelope trajectories.
+This is a bounded desktop control-path reference. It maps the other filter
+coefficient groups statically; it does not yet implement every EQ generator or
+UI parameter conversion.
+
+### Live and literal ownership
+
+| Native setter/piece | Local live slots | Checked path |
+|---|---|---|
+| SetDrive(db0, db1) | C0, C1 | dB2Gain, cubic normalization, manager slot 160 |
+| SetDriveWetRatio(ratio, db) | C2 dry, C3 wet | clamp ratio, dB2Gain, manager slot 160 |
+| SetLevel(integer) | C4 | clamp 0..127, pinned 128-double table, manager slot 160 |
+| SetFilter(index 2, ...) | C5, C6, C7 | EqFaCal stack results, manager slot 160 |
+| SetFilterSlope(index 0/1, slope) | C8, C9 | zero/nonzero selection, manager slot 160 |
+| First state-filter piece | C10..C14 | descriptor order10,11,12,14,13 |
+| Second state-filter piece | C15..C19 | descriptor order15,16,17,19,18 |
+
+The direct live calls pass **EnvTC selector 10 and wait=false**. They are
+with/without-envelope-capable dispatches; replay explicitly chooses the
+with-envelope branch. The runtime dispatch choice is not inferred from the name.
+Native descriptors are checked as kind6, with the expected local slot fields.
+
+Fourteen literal groups map to the constructor-double representatives used by
+the packet arithmetic: three resampling taps, six cascade coefficients and five
+final-filter coefficients. Native direct literal setters use manager slot c8.
+The three taps come from SetPreFilter index 0; SetPostFilter indices 0/1 write the
+three coefficients of each cascaded section. Its index 2 delegates to the final
+EQ piece. The final filter's a descriptor at `9e3598` declares **four** width3
+records: `4ea,4ed,536,539`, proving the repeated a fields belong to one declared
+write. The other groups each declare two width3 records. The native manager
+updates one representative double; firmware's previously checked writer walks
+the declared count. This does not establish atomic application or silicon rounding.
+
+For the replayed setters, let g0=10^(db0/20), g1=10^(db1/20), and
+v=min(g0*g1,1). SetDrive sends C0=g0 and C1=g1/(3v-3v²+v³), evaluated in the
+actual multiplication/FMA order. SetDriveWetRatio sends C2=1-clamp(ratio,0,1)
+and C3=clamp(ratio,0,1)*10^(db/20). The Mach-O indirect-symbol table independently
+identifies dB2Gain's tail target `6d8c98` as `_pow`. Original owned native math
+slices check the normalization and wet arithmetic; host libm supplies pow inputs.
+Level's native table at `818d20` has SHA-256
+`a4218b6632614d7d49d228d1b6e7db535bd3dadcb3b016fa97799fee6c87a9e4`.
+
+### Native envelope behavior and dynamic comparison
+
+The reference preserves binary32 subtraction, multiplication, accumulation and
+stored target/current values. Selector 10 selects nominal12 ms in the pinned
+16-entry table. Mode2 increment preparation computes float32(target-current),
+multiplies by 1000 in float32, divides in binary64 by time_ms*44100, then converts
+the increment to float32. The original VProcSync code clamps at the endpoint and
+clears its active control fields. When a float32 addition stalls despite a
+nonzero increment, it advances one representable float toward the target.
+A generic double-precision linear ramp would miss that behavior.
+
+Owned native increment/VProcSync buffers and an independent scalar model match
+all selectors, rising/falling ramps, signed-zero cases and one-ULP stall escape.
+The fixture keeps wait/event processing disabled and the synchronization-owner
+flag zero; it does not register native scheduler callbacks or touch hardware.
+One VProcSync update occurs before each fixture audio frame by explicit policy.
+That convention and the native 44100 constant do not calibrate Fantom cadence.
+
+The original event example contains **13** drive/wet/level/slope changes, with
+multiple events at frame 0, updates near 2048-cell wraps and retargeting before a
+ramp finishes. The selected controls update 7 distinct live slots. Both
+12,000-frame fixed scale-pair variants match **960,000 envelope fields** plus
+**24,696,000 final audio/ring/cache values each**, ending at origin 1760 through
+five wraps. The model receives no native current coefficient, audio or ring
+intermediate. An owned adapter copies native envelope current values into the
+native callback's coefficient records; the model advances its own envelopes.
+No history reset is inserted into this fixture.
+
+### Fantom correspondence and remaining boundaries
+
+The actual Fantom RTTI-linked FDRV callbacks independently confirm local
+C0/C1 drive, C2/C3 wet, C4 level and C8/C9 slope descriptors, dispatched through
+manager slot b0. Drive loads occur at `6104a0d2/6104a0e8`; wet at
+`6104a21c/6104a232`; level at `6104a2e8`; slope dispatch is `61049fb4`.
+The level table at `610bc584` equals the native table after binary32 conversion.
+
+Fantom's setter target arithmetic uses binary32 VFP instructions, including
+VMUL/VMLS/VMLA/VDIV in drive normalization; the desktop uses binary64 and FMA.
+Their computed targets are **not assumed bit-identical**. The Fantom-scale replay
+still executes the desktop callback with fixed scale substitutions. It is not
+execution of ARM32 setters or a hardware envelope measurement.
+
+Still open: EqFaCal/EqVgCal coefficient generation and interpolation stability,
+UI index/unit conversions, actual with/without-envelope selection and scheduler
+cadence, SetAlg/history initialization, grouped literal timing, physical
+precision and safe loading. The selected setter mapping and dynamic arithmetic
+check do not close those requirements.
+
+```sh
+python3.13 tools/fdrv_parameter_study.py --core1 local/b0c1a.bin
+python3.13 tools/fdrv_parameter_study.py --execute-native --events examples/fdrv-parameter-events.json --frames 12000
+python3.13 -m unittest discover -s tests -p 'test_fdrv_parameters.py' -v
+```
+
+The event example is original research input, not a Roland parameter dump. Detailed static/dynamic reports remain local.

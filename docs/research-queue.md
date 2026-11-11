@@ -13,7 +13,26 @@ Next recover another useful exact producer/control context or an owner-proven
 nonempty label/continuation path; retain bounded opcode admission and hardware gates.
 Entry, runtime allocation and hardware calibration remain separate requirements.
 
-The latest bounded milestone is complete (2026-11-11): the final FDRV literal
+The latest bounded control milestone is complete (2026-11-11): native FDRV
+descriptors cover all 20 local live slots and 14 literal groups. Drive, wet, level
+and slope targets are independently replayed through original native envelope
+math. Both 12,000-frame scale pairs match 960,000 envelope fields and 24,696,000
+audio/ring/cache values during 13 setter events. Actual Fantom live-slot dispatch
+and level-table correspondence are checked, while binary32 VFP target arithmetic
+is not treated as identical to desktop binary64/FMA calculations.
+
+The second-effect review independently matches 8,224 FETDRIVE mixed/shaped values
+through wrap. Encoded versus native constructor scale changes 3,255 of 4,112 shaped
+outputs; the worker's scale-insensitivity claim is rejected. Prefix source/alias
+gaps still prevent new opcode admission.
+
+Next recover EqFaCal/EqVgCal coefficient generation/interpolation and UI unit
+conversions; then resolve runtime with/without-envelope selection and scheduler
+cadence. Physical target precision, history initialization, entry/return and safe
+loading remain open. Do not describe the selected live-control replay as complete
+parameter support or a hardware envelope measurement.
+
+The preceding bounded milestone is complete (2026-11-11): the final FDRV literal
 filter and gain tail complete an offline arithmetic/output reference. Eleven
 fragments total 1,692 bytes and 104 packets. Both 12,000-frame scale pairs match
 final stereo audio, all 2,048 ring cells and six cache slots/two cursors every

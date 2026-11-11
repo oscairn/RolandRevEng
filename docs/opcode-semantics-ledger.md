@@ -14,6 +14,15 @@ rounding, saturation, accumulator width or fused evaluation on silicon.
 
 ## Independently checked arithmetic contexts
 
+The [FDRV setter checkpoint](fdrv-cubic-waveshaping-study.md#setter-derived-live-updates-2026-11-11)
+adds descriptor/control provenance and dynamic coefficient tests, without adding
+an opcode profile. In particular the final filter's repeated a fields
+`4ea/4ed/536/539` have one declared four-record write group. An
+[independent FETDRIVE check](fragment-emulator.md#independent-fetdrive-cross-check-2026-11-11)
+matches native mixed/shaped cutpoints but retains the prefix source/alias gap.
+Fixed32 truncation plus LSL 9 has gain 512 and nominal scaled grid 2^-23; the native
+constructor scale and encoded DSP value produce distinguishable outputs.
+
 The [complete FDRV arithmetic checkpoint](fdrv-cubic-waveshaping-study.md#complete-arithmetic-and-output-milestone-2026-11-11)
 adds long literal filter contexts `0ca4/4da7`, `0ca8/4dab`, `0c24/4d27`,
 literal products `2420/6523`, literal accumulation `1426/5529`, additions

@@ -152,3 +152,28 @@ counterexamples, invalid/unknown inputs, the six real interrupt bindings and
 source-pinned native table/branch arithmetic. The report emits metadata, not keys,
 firmware excerpts or hardware commands. No numerical hardware model, live writer
 or executable engine was added.
+
+
+## FDRV control-path replay (2026-11-11)
+
+The [FDRV parameter checkpoint](fdrv-cubic-waveshaping-study.md#setter-derived-live-updates-2026-11-11)
+now connects checked setter arguments/descriptors to four replayed control
+families and compares the original native envelope arithmetic during audio.
+Selector 10 remains nominal12 ms; physical timing is still unverified.
+
+The scalar model reproduces original `CBMCEnv::VProcSync()` at `3463d8..346518`,
+including binary32 step accumulation, endpoint/control clearing and the one-ULP
+escape when addition stalls. A separate owned fixture executes the original
+mode2 increment math and VProcSync against explicit records. No manager/event
+callbacks are registered; wait is zero and the synchronization flag is zero.
+Thus successful trajectories establish the numeric branch under those guards,
+not the complete scheduler or hardware completion protocol.
+
+The dynamic FDRV fixture applies one envelope update before each audio frame.
+Its independent model and native records match during 13 setter-derived events,
+including interrupted ramps and ring wraps. Both 12,000-frame fixed scale pairs
+match 960,000 envelope record fields plus complete final audio/ring/cache state.
+The actual Fantom setter slots correspond, but their binary32 VFP target math
+is not presumed equivalent to the desktop's binary64/FMA calculations. EQ
+coefficient generation, UI conversion, runtime branch choice and hardware cadence
+remain open; no physical envelope timing or reset behavior is inferred.
