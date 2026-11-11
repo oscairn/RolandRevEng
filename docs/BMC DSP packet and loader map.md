@@ -11,6 +11,11 @@ locations, and a concrete CORE1 program-loading map. It does **not** yet support
 an arbitrary C/C++ synth to the render DSPs. Most arithmetic opcodes, scheduling, precision
 and resource rules remain unresolved.
 
+The [exact stock mute check](kernel-audio-abi-study.md#exact-stock-mute-search-and-its-limits-2026-11-11)
+now exposes unchecked label capacity and a first-match search that includes
+literal payloads. It verifies the five actual FETDRIVE first packets; it provides
+no halt, continuation or safe running-code replacement guarantee.
+
 The [original filtered voice](original-bmc-filtered-voice.md) now composes
 oscillation, gain and lowpass processing into 384 static bytes. Ten seed values
 and eleven coefficients suffice under the model, with all five Fantom layouts

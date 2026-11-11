@@ -13,6 +13,12 @@ Next recover another useful exact producer/control context or an owner-proven
 nonempty label/continuation path; retain bounded opcode admission and hardware gates.
 Entry, runtime allocation and hardware calibration remain separate requirements.
 
+Latest stock-control result (2026-11-11): the mute method's resolver omits capacity
+checks and its raw halfword search includes literal payloads. An exact offline
+checker covers first-match replacement, all four matching words, compact framing
+and all five actual FETDRIVE entries. This constrains future probes but does not
+establish halt or safe program replacement. Nonempty label shapes remain unproved.
+
 Latest entry-boundary result: [CORE1 label targets](label-target-encoding-study.md)
 proves the halfword scaling and counted record layout, verifies five existing
 parent numeric fields, and checks the actual FETDRIVE entry label has no incoming

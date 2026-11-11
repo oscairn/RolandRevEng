@@ -73,6 +73,67 @@ stub from `0x610a8bcc` is six bytes: a packet containing `00f8`, then compact
 initial `ff71` in its `0x37e`-byte implementation. These are counterexamples to
 making an executable wrapper from a universal `ff71/body/00f8` recipe.
 
+## Exact stock mute search and its limits (2026-11-11)
+
+`tools/mute_mode_study.py` now checks the actual CORE1 resolver/search instructions
+and the first FETDRIVE packet in each of the five recorded effect placements.
+This is a static/file analysis and original pure-Python model; no instrument,
+firmware routine or plugin is executed.
+
+The label resolver at `01133b7a..ba6` differs from the counted label-target writer.
+With a null render pointer it uses the representative absolute u16. Otherwise it
+checks only the signed reservation count against the unsigned segment selector,
+loads the selected base and adds the relative u16 with 32-bit wrap. **It never
+loads or compares the reservation capacity**, and checks no entry parity. The
+offline helper must not reuse the stricter `label_target_study.resolve` behavior.
+This models firmware behavior; it is not validation of a safe entry address.
+
+After the first width-two raw read, `01133bb8` takes **header & 31**. The loop
+starts at word one and continues while index < that count. Its byte address is
+entry + 2×index. At `01133bde..be4`, `(word >> 2) & 3fff == 3fdc` means
+`word & fffc == ff70`. There is no operation-family or control/payload check.
+A matching literal payload can therefore be selected. The **first** match is
+written and the function returns; later matches are not changed.
+
+The replacement at `01133be6..bfc` is exactly `ff70 | bool`, width two with raw
+alignment enabled. Both `ff72` and `ff73` qualify, and either is rewritten to
+`ff70` or `ff71`; bit one is not preserved. This is a host-manager mutation
+rule, not evidence for the silicon meaning of these four words. `ff75` does
+not qualify. Neither standalone `00f8` nor the coissued return/output packet
+supplies a match. The real FETDRIVE entries `4020/8040/9040/a040/3020` all have
+opening `ff71` at entry+2 and produce the expected bool-false plan.
+
+The firmware loop does not implement the generic framer's compact-`001f` rule:
+it would request 30 following halfwords. The offline checker rejects that
+compact first-packet form rather than silently limiting the scan to zero reads.
+It also requires one complete supported packet and a true Python boolean; these
+are explicit offline input restrictions, not extra firmware checks.
+
+The guard is set before resolving the label. Its invalid-segment error path
+restores the stack and tailbranches to the assertion handler without clearing
+the guard in this body. Search failure calls the assertion handler and has a
+subsequent guard clear if that call returns. This is not a mutex, a scheduler
+fence, a proof of halt, or a demonstrated way to replace running program bytes.
+Recovery from firmware assertions and actual mute effects remain unobserved.
+
+```sh
+python3.13 tools/mute_mode_study.py local/b0c1a.bin
+python3.13 -m unittest discover -s tests -p 'test_mute_mode_study.py' -v
+```
+
+Seven tests check actual instruction anchors and five stock packets, first-match
+order, all four matching words, payload collisions, excluded return/ff75 forms,
+compact-framing disagreement, missing matches, wrap and unchecked capacity,
+strict offline inputs and mutated evidence. Qwen's supplied-trace review returned
+in 3.0 seconds. It correctly identified first-match replacement, but confused
+header/control/payload roles and called the 14-bit extraction 20 bits. Those
+claims were corrected against the instructions; no worker code was adopted.
+
+The exploratory nonempty-label scan remains ignored under `local/`: shape-only
+candidates do not establish LabelSym type or ownership, and none is admitted as
+an incoming parent-call handle. No CALL/RETURN, continuation or loading gate is
+closed by either investigation.
+
 ## `2016..2019` belong to a shared routing context
 
 In native `CSimDSP4Routing::VSubProc` (`0x000413d0`), the path at

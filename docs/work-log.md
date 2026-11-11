@@ -1418,3 +1418,36 @@ packet timing, native/independent comparisons, strict boundaries, relocation,
 padding, capacities, initialization and output preservation. Physical precision,
 issue budget, live ownership, entry/return, output routing and usable transport
 remain unverified. No device was accessed and no firmware package was built.
+
+## Exact stock mute resolver/search limits (2026-11-11)
+
+Focused on an execution gate rather than another audio block. The implemented
+CORE1 SetMuteMode body at01133b38 and slot+e0 now has an offline checker with
+instruction anchors and five actual FETDRIVE first-packet comparisons. Its label
+resolution checks segment count but never reads capacity or verifies parity;
+base+relative follows uint32 wrap. This differs from the counted label writer,
+so the stricter resolver cannot be reused as a firmware behavior model.
+
+The actual raw scan uses header&31, starts at following word one, and selects
+the first word masked byfffc equaltoff70. It scans controls and payloads alike,
+and replaces ff70/71/72/73 with ff70|bool, clearing bitone. FF75 and the return
+forms do not supply a gate. Generic compact001f framing disagrees with the
+firmware's 30 subsequent raw reads, so the offline checker rejects that input.
+The invalid-segment assertion tailpath has no guard clear in this body; search
+failure has a clear only if its assertion call returns. None of this proves
+hardware halt, atomic exclusion, actual mute effects or safe live code replacement.
+
+A bounded exploratory nonempty-label scan returned shape-only candidates without
+label-type/caller ownership. Those remain local and unadmitted; no parent target
+or continuation inference was accepted. Qwen's no-tool trace review returned in
+3.0 seconds, correctly noting first-match replacement but confusing the header
+and payload roles and the 14-bit extraction width. Actual instructions supplied
+all accepted conclusions; no worker code was adopted.
+
+Seven new tests cover the actual five entries, instruction mutations, all four
+masked words, first-match order, payload collisions, excluded forms, missing
+matches, compact framing, unchecked capacity, wrap and strict offline types.
+All422 tests passed in58.036 seconds. Updated existing studies and queue; no new
+opcode admission, firmware mutation or device access. Next useful evidence remains
+an owner-proven incoming label/flow implementation or a controlled Fantom PC/state
+observation, retaining the separately documented access/recovery prerequisites.

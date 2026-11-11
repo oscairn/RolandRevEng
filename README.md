@@ -37,6 +37,7 @@ Independent follow-up studies:
 - [Original BMC oscillator](docs/original-bmc-allpass-oscillator.md): a static 120-byte feedback core with all sample arithmetic executed by the packet interpreter.
 - [Stereo oscillator voice](docs/original-bmc-stereo-voice.md): a 200-byte body with packet-executed output gain and a checked static fit against five Fantom owners.
 - [Fantom voice resource plans](docs/fantom-voice-resource-plans.md): explicit data/coefficient/IO substitutions, protected non-address bytes, six-seed dependencies and identical output across all five layouts.
+- [Exact stock mute search](docs/kernel-audio-abi-study.md#exact-stock-mute-search-and-its-limits-2026-11-11): raw first-match mutation, payload collisions, unchecked capacity and five verified FETDRIVE first packets; hardware halt remains unproved.
 - [Label target encoding](docs/label-target-encoding-study.md): firmware-proved halfword scaling, counted reference records and five parent numeric matches; call ownership and return state remain open.
 - [Short-add candidates](docs/short-add-context-candidates.md): nine-class inventory, constructor/literal binding and retained source-port ambiguity.
 - [FDRV cubic waveshaping](docs/fdrv-cubic-waveshaping-study.md): exact 126-byte four-curve profile, bit-exact native checks, partial short-control fields and five Fantom placements.

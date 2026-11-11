@@ -143,3 +143,13 @@ record offsets, register roles, width bounds and guard behavior. Those claims
 were rejected against the original instructions. A separate bounded test draft
 was reviewed and corrected locally; its generated expectations are not firmware
 evidence. No unreviewed worker result is used.
+
+
+### Mute entry resolution is a distinct interface
+
+The [exact mute checker](kernel-audio-abi-study.md#exact-stock-mute-search-and-its-limits-2026-11-11)
+shows that `SetMuteMode` does not perform this writer's reservation-start capacity
+check. It searches all following halfwords in the first header's raw low-five-bit
+extent, including payloads, and rewrites only the first `ff70..ff73` match.
+These differences are tested independently; sharing a LabelSym record does not
+make the methods interchangeable or prove safe running-code replacement.
