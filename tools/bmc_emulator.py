@@ -47,7 +47,8 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
         raise ValueError('Program must be logical bytes')
     spec = disassemble_fragment(program)
     native_coefficient_prefix = spec['kind'] in ('coefficient_shift4', 'register_add_mac_pair',
-                                                'state_variable_pair', 'stereo_prefilter')
+                                                'state_variable_pair', 'stereo_prefilter',
+                                                'state_variable_pair_with_output', 'state_variable_recombine_pair')
     if (native_coefficient_prefix or spec['kind'] == 'clipped_half_pair') and not hasattr(math, 'fma'):
         raise ValueError('This native-reference profile requires Python 3.13+ math.fma')
     io_addresses = spec.get('input_addresses', DEFAULT_INPUT_ADDRESSES)
@@ -148,6 +149,12 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
             elif word in (0x1c42, 0x5d46):
                 destination = 1 if word == 0x1c42 else 5
                 value = old_value(destination) + old_value(destination+1)
+            elif word in (0x1bc1, 0x5bc5):
+                destination = 1 if word == 0x1bc1 else 5
+                value = _fma(-old_value(destination), old_value(7), old_value(destination))
+            elif word in (0x09c1, 0x49c5):
+                destination = 0 if word == 0x09c1 else 4
+                value = _fma(old_value(destination), old_value(7), old_value(destination+1))
             elif word in (0x044b, 0x454f) and pool[:2] == [0, 4]:
                 destination = 0 if word == 0x044b else 4
                 # Both possible coefficient ports carry the same value in this exact profile.

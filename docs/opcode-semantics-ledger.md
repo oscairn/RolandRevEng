@@ -38,6 +38,8 @@ rounding, saturation, accumulator width or fused evaluation on silicon.
 
 | FDRV input `0..4c`, plus authored mixed stores | Per channel, input×C5 followed by two ordered FMAs; raw/history stores and coissued prefetches | [Input stage](fdrv-state-variable-filter.md#completed-input-to-first-filter-stage-2026-11-11), exact 86-byte `stereo_prefilter`; combined 270-byte stage checked against native execution, no general opcode admission |
 
+| FDRV f8..1aa second-filter/recombination context plus authored preloads | Second stereo filter then fma(wet,g,fma(-dry,g,dry)); old g survives coissued future loads | [Second-filter milestone](fdrv-state-variable-filter.md#second-filter-and-recombination-milestone-2026-11-11), exact 216-byte profile; FMSUB sign checked by native execution, with no word-only admission |
+
 For the first gain row the slash separates two **short controls**. In long rows,
 it separates a base control from its extension. Headers and shared pool layout
 determine which interpretation applies. Read the linked context before using a row.

@@ -5,6 +5,13 @@ and explicitly assigned indices into exact packet sequences independently matche
 against native FETDRIVE, LINEDRIVE and FDRV expressions. This is a constrained semantic code emitter and
 inverse decoder, not a general DSP assembler, scheduler or standalone engine.
 
+The [second-filter milestone](fdrv-state-variable-filter.md#second-filter-and-recombination-milestone-2026-11-11)
+adds 194-byte `state_variable_pair_with_output` and 216-byte
+`state_variable_recombine_pair` forms. The latter retains 178 exact stock bytes,
+seven distinct coefficient slots, checked state aliases and a future coefficient
+load whose value cannot affect the current recombination. Both are exact profiles,
+with original JSON examples; no general subtraction/MAC decoder is added.
+
 The [input-stage milestone](fdrv-state-variable-filter.md#completed-input-to-first-filter-stage-2026-11-11)
 adds `stereo_prefilter` and `examples/stereo-prefilter.json`: 86 logical bytes,
 three coefficient slots, exact raw/mixed history aliases and explicit prefetches.

@@ -1594,3 +1594,37 @@ The immediate milestone is complete. Broader research pauses after this verified
 commit and note sync, per Jacob's requested stopping point. No full-FDRV,
 physical-precision, live-loading or entry/return claim is made, and no device
 was accessed. Saved earlier WIP is historical and is superseded by this checkpoint.
+
+## Completed second-filter/recombination milestone (2026-11-11)
+
+Extended the input chain through the second stereo state-variable filter and its
+recombination, stopping before the following filter. The composed496-byte body
+uses86/194/216-byte exact profiles. The194-byte first-filter form supplies explicit
+main-port data stores; the216-byte second form retains all178 stock bytes at
+f8..1aa after authored preloads. All five pinned Fantom body substitutions match.
+Four new arithmetic words execute only in the complete recombination profile.
+
+Original native FMSUB/FMADD execution establishes fma(wet,g,fma(-dry,g,dry)), with
+g read as binary32. Its dry2/wet5/g.25 result is2.75, and numerical endpoint
+results are2/5. The future coefficient load cannot affect the current packet.
+Pure tests compare independent filter states, recombination, incoming-port timing
+and changed future coefficients. Qwen's6.3-second review got the arithmetic and
+signs wrong; its conclusions were rejected against actual execution.
+
+The extended native oracle is deliberately a prefix fixture:276 original sample
+instructions through30553c plus the six original output/epilogue instructions.
+Checks preserve x2 and the stack-pointer lifetime and bind the callee-save ABI;
+no third-filter or later effect arithmetic executes. A mutation-test instruction
+initially lacked Capstone detail metadata; that fixture was corrected, and both
+output-pointer and stack clobber rejection are now exercised before execution.
+
+The separate persistent packet ring matches192,000 native-prefix state/output
+values over12,000 frames and five wraps, ending at origin1760. A2056-frame test
+uses cursors2/1;1,029 native register-only boundary/random probes match the scalar
+reference. All446 tests pass in59.860 seconds. Original JSON examples, reproduction
+commands and local496-byte logical/stored bodies are saved. Body hash:
+2501fa7b8c39b306d190478fdd6ede532ddf2689ba967f6d02813e235b738dd9.
+
+This bounded milestone is complete. Broader research pauses after the verified
+commit and Obsidian sync. Full FDRV, hardware precision, entry/return, ownership
+and safe live loading remain unresolved; no instrument was accessed.

@@ -1,5 +1,10 @@
 # A byte-executed stereo state-variable filter
 
+The [second-filter extension](#second-filter-and-recombination-milestone-2026-11-11)
+now forms a 496-byte packet-executed input/two-filter/recombination chain, checked
+against an explicitly bounded native prefix. The earlier 270-byte stage remains
+covered by its original full-callback comparison.
+
 The [original filtered voice](original-bmc-filtered-voice.md) now composes this
 component with the packet-executed oscillator/gain body and verifies shared
 state, ten seeds, eleven coefficients and all five recorded owner layouts.
@@ -218,3 +223,76 @@ on-device engine. Outputs are functional A/B, with no entry/return wrapper or
 hardware output routing. BMC precision, cadence, live loading and ownership remain
 unverified. Qwen checked the asymmetric numbers; its loose state/rounding language
 was corrected against the actual packet trace and native callback.
+
+
+## Second filter and recombination milestone (2026-11-11)
+
+The next bounded milestone is complete: input → prefilter → first stereo filter
+→ second stereo filter → recombination executes through **496 logical bytes**.
+The three profiles are 86-byte `stereo_prefilter`, 194-byte
+`state_variable_pair_with_output`, and 216-byte `state_variable_recombine_pair`.
+The composed body is word aligned; do not concatenate individually padded forms.
+Its logical SHA-256 is
+`2501fa7b8c39b306d190478fdd6ede532ddf2689ba967f6d02813e235b738dd9`.
+
+The 194-byte form appends two main-port data stores to the existing 184-byte filter,
+preserving its original state operations. Those stores supply the first result
+at 24/25 for the next independently initialized fragment. The 216-byte profile
+contains 38 authored preload bytes and the exact 178 stock bytes at FDRV f8..1aa.
+That body includes input writebacks, the second filter, its complement products,
+recombination and next-section prefetches. All five pinned Fantom bodies match
+with their actual data/coefficient substitutions. Duplicate unchanged input stores
+in the composed functional body are not a claim of stock cycle timing.
+
+The second filter uses the same a/b/c/d/e slots 10..14, state pairs 2f/30 and 32/33,
+and next-state stores at 2e/2f and 31/32. Its following g slot is 8. The exact new
+arithmetic contexts are:
+
+| Controls | Role in the complete 216-byte profile |
+|---|---|
+| `1bc1 / 5bc5` | I1/I5 = fma(-incoming I1/I5, incoming I7, incoming I1/I5) |
+| `09c1 / 49c5` | A/B = fma(incoming A/B, incoming I7, incoming I1/I5) |
+
+Thus the recombination is `fma(wet,g,fma(-dry,g,dry))`, with g read as binary32
+and signal arithmetic binary64. **FMSUB supplies dry − dry×g**, unlike the
+FNMSUB sign in the filter recurrence. The actual register-only native probe
+returns 2.75 for dry 2/wet 5/g .25, 2 for g 0 and 5 for g 1. Signed-zero and random
+cases are compared by bit pattern rather than replacing the FMAs with an
+algebraically rearranged expression. The final coissued coefficient load selects
+slot 15 for a later section and must not affect this packet's g multiplication.
+All constants, resource relations, duplicate fields and tags remain protected;
+none of these words is admitted outside complete recognized profiles.
+
+The extended native oracle is explicitly a **prefix fixture**, not the complete
+sample callback: original instructions 3050ec..30553c followed by the original
+output-store/epilogue instructions 305e90..305ea8. Checks bind the prologue and
+restores, verify that the output-pointer register x2 survives, and reject any
+additional stack-pointer write. The existing callback whitelist and owned buffer
+graph remain in force. The appended epilogue records the current recombined d1/d0
+before the next filter begins. No firmware or plugin is loaded as a whole.
+
+The separate persistent packet ring receives only declared initial state, external
+test inputs and packet writes. In 12,000 frames, 120,000 earlier-stage values plus
+72,000 second-state/recombined values match the native prefix: **192,000 total**,
+five wraps, final origin 1760. A 2,056-frame subprocess with cursors 2/1 crosses wrap.
+A separate native FMSUB/FMADD probe matches 1,029 boundary/random triples. Pure
+reference tests independently check second-filter states, both final products,
+old-port timing and the harmlessness of changing the coissued future coefficient.
+
+```sh
+python3.13 tools/fdrv_second_stage_study.py --execute-native --frames 12000
+python3.13 -m unittest discover -s tests -p 'test_fdrv_second_stage.py' -v
+```
+
+Original JSON assignments are `examples/state-variable-with-output.json` and
+`examples/state-variable-recombine-pair.json`. The emitter/interpreter can use
+them without vendor artifacts; corpus proofs and native probes need the pinned
+local inputs, with native execution restricted to macOS ARM64. Tests reject
+altered arithmetic, output ABI, clobbered output pointers, resource/literal changes
+and incompatible requests to check later clipping with this shortened fixture.
+
+Qwen's 6.3-second recombination review made arithmetic/sign mistakes and was
+rejected. The accepted signs and values come from actual native execution and
+independent references. This milestone stops before the next filter section;
+full FDRV, silicon precision, live loading and entry/return remain open. Broader
+research pauses after saving this checkpoint, as requested.

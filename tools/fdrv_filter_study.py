@@ -94,7 +94,8 @@ def report():
 
 
 def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds=None,
-                  compare_cubic=False, compare_clip=False, compare_input_stage=False):
+                  compare_cubic=False, compare_clip=False, compare_input_stage=False,
+                  compare_second_stage=False):
     import ctypes
     import struct
     import lib
@@ -104,6 +105,9 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
     from native_callback_fixture import RingFixture, executable_mapping
     from transfer_study import constructor_memory
 
+    if compare_second_stage and (compare_cubic or compare_clip):
+        raise ValueError('The native prefix fixture stops before clipping and cubic stages')
+    compare_input_stage = compare_input_stage or compare_second_stage
     if type(frames) is not int or not 1 <= frames <= 1000000 or len(cursors) != 2:
         raise ValueError('Expected 1..1000000 frames and two valid cursors')
     for cursor in cursors:
@@ -137,6 +141,8 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
     if compare_input_stage:
         prefilter_report()
         values[5:8] = list(map(_float32, (.7313, .1279, .0623)))
+    if compare_second_stage:
+        values[8] = _float32(.3737)
     if compare_cubic or compare_clip:
         values[0] = .75
     records = []
@@ -159,10 +165,14 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
     origin, count, cubic_count, cubic_input_values = 0, 0, 0, set()
     clip_count = 0
     stage_count = 0
+    second_count = 0
     if compare_input_stage:
         from bmc_emulator import execute_fragment
         from bmc_subset import assemble_fragment
         stage_specs = [prefilter_spec(), filter_spec()]
+        if compare_second_stage:
+            from fdrv_second_stage_study import first_spec, second_spec
+            stage_specs = [prefilter_spec(), first_spec(), second_spec()]
         stage_programs = [assemble_fragment(spec) for spec in stage_specs]
         model_ring = list(fixture.ring)
     if compare_emulator:
@@ -184,7 +194,11 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
         clip_report()
         clipped_spec = clip_spec()
         clipped_program = assemble_fragment(clipped_spec)
-    with executable_mapping(lib.Z[entry:checked['callback'][1]]) as address:
+    code = lib.Z[entry:checked['callback'][1]]
+    if compare_second_stage:
+        from fdrv_second_stage_study import prefix_code
+        code = prefix_code()
+    with executable_mapping(code) as address:
         invoke = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p)(address)
         for frame in range(frames):
             left.value = .08*math.sin(2*math.pi*220*frame/48000)
@@ -221,9 +235,20 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                         raise ValueError('Independent packet input-stage state differs from native callback')
                     stage_count += 1
                 for cell, port in ((0x24, 0), (0x25, 4)):
-                    if read(cell).hex() != stage['ports'][port].hex():
+                    expected_output = (model_ring[native_ring_index(cell,0,origin)]
+                                       if compare_second_stage else stage['ports'][port])
+                    if read(cell).hex() != expected_output.hex():
                         raise ValueError('Independent packet input-stage output differs from native callback')
                     stage_count += 1
+            if compare_second_stage:
+                for cell in (0x2e,0x2f,0x31,0x32):
+                    if read(cell).hex() != model_ring[native_ring_index(cell,0,origin)].hex():
+                        raise ValueError('Second packet filter state differs from native prefix')
+                    second_count += 1
+                for port, actual in ((0,out_left.value),(4,out_right.value)):
+                    if actual.hex() != stage['ports'][port].hex():
+                        raise ValueError('Packet recombination differs from native prefix output')
+                    second_count += 1
             for index, item in enumerate(model):
                 for cell, expected in ((0x1f+3*index, mixed[index]), (0x28+3*index, item['state_s']),
                                        (0x29+3*index, item['state_t']), (0x24+index, item['output'])):
@@ -263,10 +288,13 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
     return dict(frames=frames, identical_native_values=count, final_origin=origin,
                 initial_cursors=list(cursors), final_cursors=list(actual_cursors),
                 explicit_state_seeds=state_seeds,
-                emulator_checked=compare_emulator, native_callback_executed=True,
+                emulator_checked=compare_emulator, native_callback_executed=not compare_second_stage,
+                native_prefix_executed=compare_second_stage,
                 conditional_cubic_values_checked=cubic_count,
                 conditional_clipped_values_checked=clip_count,
                 independent_packet_input_stage_values=stage_count,
+                independent_packet_second_stage_values=second_count,
+                independent_packet_two_filter_values=(stage_count+second_count) if compare_second_stage else 0,
                 distinct_cubic_input_values=len(cubic_input_values),
                 bmc_hardware_executed=False, coefficient_sources=values[10:15],
                 coefficients=list(map(_float32, values[10:15])))

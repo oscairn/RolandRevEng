@@ -13,6 +13,12 @@ Next recover another useful exact producer/control context or an owner-proven
 nonempty label/continuation path; retain bounded opcode admission and hardware gates.
 Entry, runtime allocation and hardware calibration remain separate requirements.
 
+The next bounded milestone is complete (2026-11-11): the second filter and its
+recombination now form a 496-byte packet-only chain from the input. A separate
+native prefix captures the recombination output before the next filter begins;
+192,000 compared values match through five wraps. Save/sync this checkpoint and
+pause broader research as requested. Full FDRV and physical execution remain open.
+
 Tonight's bounded input-stage milestone is complete (2026-11-11): the 86-byte
 stereo prefilter and 184-byte first filter execute entirely from packet bytes.
 The independent persistent model ring matches 120,000 native values through five

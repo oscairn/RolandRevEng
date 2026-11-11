@@ -231,6 +231,51 @@ def assemble_state_variable_pair(spec):
     ])
 
 
+def assemble_filter_with_output(spec):
+    if (not isinstance(spec, dict) or spec.get('kind') != 'state_variable_pair_with_output'
+            or 'output_addresses' not in spec):
+        raise ValueError('Expected filter output_addresses')
+    base = dict(spec); outputs = base.pop('output_addresses')
+    base['kind'] = 'state_variable_pair'
+    program = assemble_state_variable_pair(base)
+    if (not isinstance(outputs, list) or len(outputs) != 2
+            or any(type(value) is not int or not 0 <= value < 0x800 for value in outputs)
+            or len(set(outputs)) != 2
+            or set(outputs) & set(base['sources']+base['targets'])):
+        raise ValueError('Expected two distinct filter output cells outside its state/sources')
+    return program+assemble([[0x1e05, 0x8fe0, 0xcfe2, *outputs]])
+
+
+def assemble_filter_recombine(spec):
+    if (not isinstance(spec, dict) or spec.get('kind') != 'state_variable_recombine_pair'
+            or set(spec) != {'kind', 'sources', 'targets', 'coefficient_slots'}):
+        raise ValueError('Expected state_variable_recombine_pair resource assignment')
+    slots = spec['coefficient_slots']
+    if (not isinstance(slots, list) or len(slots) != 7
+            or any(type(value) is not int or not 0 <= value < 0x1000 for value in slots)
+            or len(set(slots)) != 7):
+        raise ValueError('Expected seven distinct coefficient slots')
+    assemble_state_variable_pair(dict(spec, kind='state_variable_pair', coefficient_slots=slots[:5]))
+    y, t, s, yr, tr, sr, next_s, next_sr, next_t, next_tr = spec['sources']
+    a, b, c, d, e, g, following = [0xc000 | value for value in slots]
+    return assemble([
+        [0x3e07, 0x0fe0, 0x1fe2, 0x2fe4, y, t, s],
+        [0x3e07, 0x4fe0, 0x5fe2, 0x6fe4, yr, tr, sr],
+        [0x1e05, 0x3fe0, 0x7fe2, a, a],
+        [0x8f4d, 0x1c8b, 0x5d8f, 0x8fe4, 0xcfe6, 0x3fe8, 0x7fea, 0x2001, 0x6005, y, yr, b, b],
+        [0x88cf, 0x1c8b, 0x5d8f, 0xaf60, 0xef60, 0x9fe4, 0x3fe6, 0xdfe8, 0x7fea,
+         0x9000, 0xd004, s, e, sr, e],
+        [0x5f07, 0x2443, 0x6547, 0x3fe0, 0x7fe2, c, c],
+        [0xb149, 0x08c2, 0x49c6, 0xaf61, 0xef61, 0x3fe0, 0x7fe2, a, a],
+        [0x1005, 0x1c4b, 0x5d4f, 0x1002, 0x5006],
+        [0xb84b, 0x1c42, 0x5d46, 0x9fe0, 0x3fe2, 0xdfe4, 0x7fe6, s-1, d, sr-1, d],
+        [0x8f0b, 0x044b, 0x454f, 0x1fe4, 0x5fe6, 0x7fe8, 0, 4, y, yr, g],
+        [0x5f07, 0x1bc1, 0x5bc5, 0x2fe0, 0x6fe2, next_s, next_sr],
+        [0xb84b, 0x09c1, 0x49c5, 0x1fe0, 0x3fe2, 0x5fe4, 0x7fe6,
+         next_t, following, next_tr, following],
+    ])
+
+
 def assemble_cubic_quad(spec):
     if (not isinstance(spec, dict) or spec.get('kind') != 'cubic_quad'
             or set(spec) != {'kind', 'sources', 'targets'}):
@@ -325,6 +370,10 @@ def assemble_fragment(spec):
         return assemble_register_add_mac_pair(spec)
     if spec.get('kind') == 'state_variable_pair':
         return assemble_state_variable_pair(spec)
+    if spec.get('kind') == 'state_variable_pair_with_output':
+        return assemble_filter_with_output(spec)
+    if spec.get('kind') == 'state_variable_recombine_pair':
+        return assemble_filter_recombine(spec)
     if spec.get('kind') == 'cubic_quad':
         return assemble_cubic_quad(spec)
     if spec.get('kind') == 'clipped_half_pair':
@@ -337,6 +386,27 @@ def assemble_fragment(spec):
 
 
 def disassemble_fragment(stream):
+    if len(stream) == 194:
+        base = disassemble_fragment(stream[:184])
+        rows = packets(stream[184:])
+        if len(rows) != 1 or len(rows[0][1]) != 5:
+            raise ValueError('Expected one exact filter output-store packet')
+        spec = dict(base, kind='state_variable_pair_with_output', output_addresses=rows[0][1][3:5])
+        if assemble_filter_with_output(spec) != stream:
+            raise ValueError('Unsupported filter output stores')
+        return spec
+    if len(stream) == 216:
+        rows = [words for _, words in packets(stream)]
+        if [len(row) for row in rows] != [7, 7, 5, 13, 15, 7, 9, 5, 11, 11, 7, 11]:
+            raise ValueError('Not an exact filter/recombination profile')
+        spec = dict(kind='state_variable_recombine_pair',
+                    sources=rows[0][4:7]+rows[1][4:7]+rows[10][5:7]+[rows[11][7], rows[11][9]],
+                    targets=[rows[4][11], rows[4][13], rows[8][7], rows[8][9]],
+                    coefficient_slots=[rows[i][j] & 0xfff for i,j in
+                                       ((2,3),(3,11),(5,5),(8,8),(4,12),(9,10),(11,8))])
+        if assemble_filter_recombine(spec) != stream:
+            raise ValueError('Unsupported filter/recombination controls, aliases or tags')
+        return spec
     if len(stream) == 86:
         rows = [words for _, words in packets(stream)]
         if [len(row) for row in rows] != [7, 13, 11, 7, 5]:
