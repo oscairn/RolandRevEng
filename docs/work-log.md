@@ -1451,3 +1451,45 @@ All422 tests passed in58.036 seconds. Updated existing studies and queue; no new
 opcode admission, firmware mutation or device access. Next useful evidence remains
 an owner-proven incoming label/flow implementation or a controlled Fantom PC/state
 observation, retaining the separately documented access/recovery prerequisites.
+
+## Exact render-write geometry and queued-only completion (2026-11-11)
+
+The pinned StackWriteDspProg and listed-copy bodies now have a pure offline
+geometry checker. Destination word+2 uses the source word's low half and advances
+the source by four bytes; a trailing halfword uses a full-word read with low bits
+cleared. Both raw edges occur before the aligned bulk copy, whose post-edge
+64-byte threshold selects CPU versus DMA. Descriptor lengths are bounded to4095
+words, with32 shared slots including already queued descriptors.
+
+For the original shaped voice, logical count510 reads a512-byte backing source,
+writes the tail at421c first, then queues508 bytes at4020. Source padding is not
+written. Passing count512 writes two additional bytes instead. A word+2 start
+needs a two-byte logical source prefix before stored-word reversal; a four-byte
+payload then requires eight source bytes. The two-byte-only edge reads only two
+bytes despite a convenient four-byte stored buffer. Tests replay both alignments
+and every even count0..130 with independent asymmetric bytes and neighbour canaries.
+
+The completion helper at0112f6a4 returns immediately unless its initial state is1,
+before examining wait. State1 clears event4, sets state2 and starts the list;
+wait=true then polls a new event, clears it and resets state0. The callback only
+sets event4. Thus a nonwaiting start followed by helper(true) is not an active
+DMA drain, even with completion already signaled. The initial state2 assertion
+in StackWriteDspProg is not treated as a synchronization API. No live exclusion,
+source-cache policy, source lifetime or real-time completion was established.
+
+Voice-plan manifests now include recorded-base write geometry and retain null
+load/entry/return addresses and execution_ready=false. Program capacity uses
+logical destination length again; the previous512-byte requirement was an
+explicit conservative policy before this exact510-byte write was proved. A fresh
+DSP4 export retains the prior logical/stored hashes and includes the new geometry.
+The five relocation/canary checks pass with the metadata integration.
+
+Qwen returned its supplied-trace review in4.1 seconds but confused source read
+extent and halves, the state2 early return and the padded-count counterexample.
+Those claims were rejected; actual instruction anchors and independent byte
+replay supply accepted evidence. All429 tests passed in57.339 seconds. After
+adding the explicit literal-address-window alias guard, all seven focused tests
+passed again. This helper assumes an otherwise empty shared DMA list, restricts
+nonwrapping/no-alias geometry, provides no live caller and performs no device IO.
+Next trace SetExeMode callers and packed stock event/mode/start values, keeping
+scheduler control separate from still-unproved render CALL/RETURN semantics.

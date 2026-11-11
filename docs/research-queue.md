@@ -13,6 +13,14 @@ Next recover another useful exact producer/control context or an owner-proven
 nonempty label/continuation path; retain bounded opcode admission and hardware gates.
 Entry, runtime allocation and hardware calibration remain separate requirements.
 
+Latest loader result (2026-11-11): exact halfword source geometry, edge-before-bulk
+ordering and queued-only completion behavior are checked. A 510-byte body reads
+512 source bytes but writes 510. Starting without wait and later calling the same
+helper with wait does not drain state 2. Planner manifests now retain geometry;
+source lifetime, runtime exclusion, entry and continuation remain unproved.
+Next trace SetExeMode callers and packed event/mode/start arguments to distinguish
+stock scheduler-control sequences from the unproved render CALL/RETURN semantics.
+
 Latest stock-control result (2026-11-11): the mute method's resolver omits capacity
 checks and its raw halfword search includes literal payloads. An exact offline
 checker covers first-match replacement, all four matching words, compact framing

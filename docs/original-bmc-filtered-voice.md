@@ -170,8 +170,10 @@ Independent relocation verifies **70 two-byte address fields**, protecting
 transfer walk through mixed packets. All fragments are joined before the
 single final storage padding/conversion; inserting two padding bytes after
 the cubic would shift and corrupt the following filter. Export manifests
-record both logical and stored lengths/hashes. The capacity check conservatively
-requires room for all 512 stored bytes; this is not a recovered loader ABI.
+record both logical and stored lengths/hashes. The [render-write study](kernel-audio-abi-study.md#render-write-source-extent-and-completion-state-2026-11-11)
+now distinguishes the 512-byte backing source from the exact 510-byte destination
+write. Numerical program capacity uses the logical write length; planner manifests
+include the recorded-base geometry without selecting a live load address.
 
 The 12,000-frame original render matches a separately rendered oscillator
 voice followed by independent scalar cubic and filter references for all

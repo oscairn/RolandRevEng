@@ -235,6 +235,102 @@ non-unique path checks length but trusts destination base: the new offline
 inspector additionally requires it to match the owner reservation. This stricter
 policy is explicit; it is not an undocumented firmware guarantee.
 
+## Render-write source extent and completion state (2026-11-11)
+
+`tools/program_write_study.py` checks the pinned CORE1 `StackWriteDspProg`
+(`0112f582`), listed-copy builder (`0112f290`), completion helper (`0112f6a4`)
+and callback (`0112f42c`). These are static instruction/byte checks and an
+original offline geometry/state model; no firmware routine or instrument runs.
+
+### Halfword edges precede the bulk copy
+
+The writer requires an even destination/count. It adds the selected program
+aperture, then handles a destination at word+2 by reading **LE16[source]**, writing
+that value through the width-two raw port with alignment true, subtracting two
+bytes, advancing destination by two and source by **four**. Thus this source is
+not an arbitrary tightly packed halfword stream.
+
+If the remaining count has bit one set, the writer next reads a **full source
+word** at index `((remaining+3)>>2)-1`, clears its low sixteen bits, and writes
+it to destination + (remaining & ~3) with raw alignment false. It subtracts two
+more bytes. Only then does it copy the remaining aligned bulk bytes unchanged.
+Bulk below 64 bytes uses the CPU loop; bulk of at least 64 is queued for DMA.
+The threshold is evaluated **after** removing both edges. These are write-order
+facts; no atomic program replacement or live exclusion follows from them.
+
+For the original shaped voice at recorded base `4020`:
+
+| Step, in actual call order | Destination | Written bytes | Source read |
+|---|---|---:|---|
+| Raw tail | `421c` | 2 | Full word at source+508, high half retained |
+| Queued bulk | `4020` | 508 | Source bytes 0..507 |
+| Total | `4020..421d` | **510** | Backing source extent **512** |
+
+Addresses are hexadecimal; sizes and source offsets in this table are decimal.
+The final two source padding bytes are read in the last word but discarded from
+the raw value. They are not written when the caller supplies count 510. Passing
+the stored size 512 as the count instead requests two additional destination bytes.
+The raw tail can be updated before any queued bulk starts; a source-buffer hash
+or completed function call by itself does not establish an atomic replacement.
+
+For a destination at word+2, encode the source by adding **two logical prefix
+bytes before reversing four-byte storage words**, then pad at the end. Four
+requested destination bytes need an eight-byte backing buffer: the leading read
+uses source+0..1, and the trailing read uses source+4..7. For a two-byte-only write,
+the convenient stored buffer still has four bytes but the actual read extent is
+two. The checker reports both values instead of treating every source byte as a
+destination write. All current recorded owner bases are word aligned, so exported
+voice bodies require no leading prefix. The planner now records their exact
+`recorded_base_write_geometry`, retaining null load/entry/return addresses.
+
+The listed-copy builder uses at most 4095 words per sixteen-byte DMA descriptor.
+The shared list limit is 32 descriptors, including those already queued. The
+geometry helper assumes an otherwise empty list, rejects writes exceeding it,
+and rejects literal-port aliases, 19-bit window crossings and aperture/end wrap. These are declared offline restrictions; the
+checker does not assert that the hardware program RAM is that large or available.
+DMA retains source addresses, so source and descriptor storage must remain valid
+until actual completion. Nothing here supplies those lifetimes on a running unit.
+
+### This completion helper is not an active-transfer drain
+
+| Initial state byte at `200847f0` | Wait false | Wait true |
+|---|---|---|
+| 0 | Immediate return | Immediate return |
+| 1, queued | Clear event 4, set state 2, start list, return | Same start, then wait for a new event 4, clear it and set state 0 |
+| 2, started | Immediate return | **Immediate return** |
+
+`0112f6ac..6b0` tests state 1 and returns before inspecting the wait argument.
+The callback at `0112f42c` only ORs 4 into the event word at state+8; it does
+not reset the state byte. Therefore **start(false), then call this helper(true)
+is not a drain**, even after the callback has set its event bit. A waiting
+state 1 path clears a stale event before starting, so its successful return needs
+a subsequent completion event under the declared no-other-writer model. These
+paths do not establish DMA visibility, source cache handling, task ownership,
+bounded completion time or a safe external calling context.
+
+The stack writer also asserts on state 2 before its zero-count early return.
+Its later large-copy branch contains a state 2 wait/reset path if that earlier
+assertion returns. The checker does not treat an assertion path as an authorized
+synchronization method. The program guard and this queue state remain distinct.
+
+```sh
+python3.13 tools/program_write_study.py local/b0c1a.bin
+python3.13 -m unittest discover -s tests -p 'test_program_write_study.py' -v
+```
+
+Tests independently replay asymmetric stored bytes into canary-surrounded logical
+memory for both destination alignments and every even count 0..130. They check
+the real 510-byte voice, full-word tail read, discarded source padding, CPU/DMA
+thresholds, 4095-word splitting, shared-list bounds, all completion-state paths
+and modified firmware anchors. Voice-plan tests verify the new geometry across
+all five recorded assignments. Numerical program capacity again uses logical
+write length 510; the previous512-byte requirement was a conservative policy,
+now distinguished from the proved 512-byte source footprint.
+
+Qwen's no-tool review returned in 4.1 seconds but confused source read extent,
+source halves and the state 2 early return. Those claims were rejected against
+the instructions and independent replay; no worker code was used.
+
 ## Stock effect lifecycle and state boundaries
 
 The exact RTTI `15CFspMfxFETDRIVE` points to vtable group `0x6117a0fc`, whose

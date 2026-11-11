@@ -508,7 +508,7 @@ addresses with bit 0 clear. These are disassembly results, not a tested injectio
 |---|---|---|
 | `GetDspProgAdrs` | `0112f92a` | Returns the aperture below plus a byte address; checks DSP index and even address |
 | `StackWriteDspProg` | `0112f582` | `r0=dsp`, `r1=byte address`, `r2=byte count`, `r3=stored-word source`; even address/count; direct copy or queued DMA |
-| DMA completion helper | `0112f6a4` | Starts queued transfer and, for nonzero argument, waits for completion; name is inferred |
+| DMA completion helper | `0112f6a4` | Acts only from queued state1; optionally waits during that start; returns immediately from state2 |
 | `WriteLiteralRaw` | `0112f528` | Writes a width/address command and a raw value via the DSP's literal port |
 | `WriteLiteralFloat` | `0112ff4e` | Same address/width command; writes float from `s0` to the hardware conversion port |
 | `WriteDspProgAllImpl` | `01131c4e` | Walks the CORE1 program-list records, calls `StackWriteDspProg` per segment, optionally completes DMA |
@@ -518,6 +518,10 @@ addresses with bit 0 clear. These are disassembly results, not a tested injectio
 `StackWriteDspProg` is not an instruction translator. For aligned bulk data it copies
 the supplied 32-bit storage words unchanged, either with a CPU loop or
 `DSP_listed_memcpy` at `0x0112f290`. It uses the raw literal port for halfword edges.
+The [exact write/completion study](kernel-audio-abi-study.md#render-write-source-extent-and-completion-state-2026-11-11)
+now proves leading/trailing source selection and raw-edge-before-bulk ordering.
+A 510-byte body reads a 512-byte backing source but writes only 510 bytes.
+The completion helper cannot drain state 2 by calling it again with wait enabled.
 Therefore the packets being decoded are genuinely what the stock loader writes to
 program RAM, subject to hardware interpretation, rather than a desktop-only format.
 

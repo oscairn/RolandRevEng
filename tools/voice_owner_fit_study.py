@@ -34,8 +34,8 @@ def fit(owner, fragments=None):
     if any(len(group) != 1 for group in (owner['render'], owner['memories'][0], owner['memories'][6])):
         raise ValueError('Expected one render, enum-0 and enum-6 reservation')
     program, data, coefficients = owner['render'][0], owner['memories'][0][0], owner['memories'][6][0]
-    fits = dict(program=needed['stored_bytes'] <= program['capacity'] and 0 <= program['base']
-                     and program['base']+needed['stored_bytes'] <= 2**32,
+    fits = dict(program=needed['body_bytes'] <= program['capacity'] and 0 <= program['base']
+                     and program['base']+needed['body_bytes'] <= 2**32,
                 data=needed['data_extent'] <= data['length'] and 0 <= data['base']
                      and data['base']+needed['data_extent'] <= 0x800,
                 coefficients=needed['coefficient_extent'] <= coefficients['length']

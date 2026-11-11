@@ -16,8 +16,10 @@ six-seed/thirty-field scope; the linked filtered study records the new variant.
 With `--cutoff ... --waveshape`, the optional cubic stage makes a 510-byte
 logical / 512-byte stored voice. Seventy two-byte transfer fields are relocated,
 370 other bytes are protected, and the ten seeds/eleven coefficients are unchanged.
-Data extent is 150. The capacity check includes final storage padding, and
-manifests retain separate logical/stored sizes and hashes. The
+Data extent is 150. The capacity check uses the exact logical destination write length; manifests
+retain separate logical/stored sizes and hashes plus recorded-base write geometry.
+Source padding is read but excluded from the destination when using the logical
+count, as proved by the [loader study](kernel-audio-abi-study.md#render-write-source-extent-and-completion-state-2026-11-11). The
 [filtered voice study](original-bmc-filtered-voice.md#optional-cubic-waveshaping-before-the-filter)
 records all inputs, boundaries, independent renders and hardware limits.
 

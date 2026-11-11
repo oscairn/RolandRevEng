@@ -60,13 +60,13 @@ class VoiceTests(unittest.TestCase):
         spec = disassemble_fragment(fragments[-1]); spec['sources'][0] -= 1
         self.assertRaises(ValueError, verify_relocation, (*fragments[:-1], assemble_fragment(spec)),
                           0, 0, [0x2016, 0x2017], fragments)
-        # Storage alignment must also fit; 510 logical bytes occupy 512 in the export.
-        owner = dict(address=0, dsp=4, render=[dict(base=0x4020, capacity=512)],
+        # Source padding is read but not written when the driver receives the logical count.
+        owner = dict(address=0, dsp=4, render=[dict(base=0x4020, capacity=510)],
                      memories={0: [dict(base=0x100, length=150)], 6: [dict(base=0x190, length=11)]})
         self.assertTrue(fit(owner, fragments)['body_capacity_fits'])
         for resource in ('program', 'data', 'coefficients'):
             changed = copy.deepcopy(owner)
-            if resource == 'program': changed['render'][0]['capacity'] = 510
+            if resource == 'program': changed['render'][0]['capacity'] = 509
             else: changed['memories'][0 if resource == 'data' else 6][0]['length'] -= 1
             self.assertFalse(fit(changed, fragments)['fits'][resource])
 
@@ -111,6 +111,11 @@ class CorpusTests(unittest.TestCase):
             fragments, result = render_check(self.core, owner, cutoff=1000, waveshape=True)
             self.assertEqual(result['fragment_sizes'], [38, 82, 80, 126, 184])
             self.assertEqual((result['body_bytes'], result['stored_bytes']), (510, 512))
+            geometry = result['recorded_base_write_geometry']
+            self.assertEqual(geometry['byte_count'], 510)
+            self.assertEqual(geometry['actual_source_read_extent'], 512)
+            self.assertEqual([step['kind'] for step in geometry['steps']], ['raw_tail', 'dma_queue'])
+            self.assertFalse(geometry['execution_ready'])
             self.assertEqual(len(result['address_changes']), 70)
             self.assertEqual(len(result['initial_data']), 10)
             self.assertEqual(result['reference_check']['identical_output_values'], 4112)

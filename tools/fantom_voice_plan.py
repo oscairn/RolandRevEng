@@ -18,6 +18,7 @@ from header_study import families
 from kernel_abi import segment_info
 from line_shaping_study import _finite, _float32
 from line_state_study import advance_native_origin, native_ring_index
+from program_write_study import write_geometry
 from voice_owner_fit_study import fit
 
 
@@ -140,6 +141,9 @@ def build_plan(core, owner_address, frequency=440, gain=0.5, amplitude=0.25,
     if sorted(initial_data) != needed:
         raise ValueError('Seed manifest differs from proved read-before-write dependencies')
     logical = b''.join(fragments)
+    geometry = write_geometry(resources['dsp'], resources['program']['base'], len(logical))
+    if geometry['logical_source_prefix_bytes']:
+        raise ValueError('Recorded base requires an unsupported source prefix in this export')
     result = dict(payload_sha256=stock['payload_sha256'], owner_descriptor=owner_address,
                   dsp=resources['dsp'], stock_placement=stock['placement'],
                   render_reservation=resources['program'], enum0=resources['enum0'], enum6=resources['enum6'],
@@ -147,6 +151,7 @@ def build_plan(core, owner_address, frequency=440, gain=0.5, amplitude=0.25,
                   specs=specs, fragment_sizes=list(map(len, fragments)), body_bytes=len(logical),
                   logical_sha256=hashlib.sha256(logical).hexdigest(),
                   stored_bytes=(len(logical)+3)&~3, waveshape=waveshape,
+                  recorded_base_write_geometry=geometry,
                   stored_sha256=hashlib.sha256(swap_words(logical+bytes(-len(logical) % 4))).hexdigest(),
                   address_changes=changes, non_address_bytes_verified=True,
                   initial_data=initial_data, required_initial_data=needed, coefficients=coefficients,
