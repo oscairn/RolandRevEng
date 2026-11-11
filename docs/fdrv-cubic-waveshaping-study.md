@@ -1,5 +1,10 @@
 # FDRV cubic waveshaping, interpolation and clipping
 
+The [EqFaCal control checkpoint](#three-coefficient-filter-generation-and-ui-dispatch-2026-11-11)
+now recovers three-coefficient generation, checks the original UI dispatcher and
+compares cutoff/type changes through full audio/state replay. Constructor-double
+and encoded-literal precision are separate, explicit policies.
+
 The [parameter-control checkpoint](#setter-derived-live-updates-2026-11-11) now
 traces live/literal descriptors and replays drive, wet, level and slope changes
 through native coefficient envelopes. Complete audio/state comparisons remain
@@ -757,3 +762,138 @@ python3.13 -m unittest discover -s tests -p 'test_fdrv_parameters.py' -v
 ```
 
 The event example is original research input, not a Roland parameter dump. Detailed static/dynamic reports remain local.
+
+
+## Three-coefficient filter generation and UI dispatch (2026-11-11)
+
+`tools/eqfa_study.py` recovers `CDSPCtrlEq::EqFaCal` at `20ae90..20b494`.
+Its native oracle clones only this audited function, relocates the switch table
+and sample-rate load into owned buffers, and binds its imported cos/tan/pow
+calls to host libm. No plugin, native manager or hardware is initialized. Error/
+assertion calls are trapped and excluded by argument guards. The complete original
+arithmetic and internal control flow execute in the valid checked domain.
+
+### Type dispatch and coefficients
+
+The eight halfword switch records at `7c660c` select the branches below. Names
+for types 2..8 are also checked against assertion-linked strings in the artifact.
+
+| EqType | Recovered branch |
+|---:|---|
+| 0 | Bypass fallback, triple (1,0,0) |
+| 1 | Zero, triple (0,0,0) |
+| 2 | EqFcLowPassCal, cosine-derived pole |
+| 3 | EqFaLowShelvingCalNew |
+| 4 | EqFaHighShelvingCalNew |
+| 5 | EqFaHighShelvingCalTrad |
+| 6 | EqFaLowPassCal, tangent/bilinear form |
+| 7 | EqFaHighPassCal |
+| 8 | EqFaAllPassCal |
+
+The helper returns structure order **(a, feedback, delayed-input)**. Actual
+SetPreFilter/SetPostFilter calls read its stack results in order+8/+18/+10,
+so the DSP recurrence receives **(a, delayed-input, feedback)**. Confusing these
+orders changes the filter. Both cascaded stages use the same reordered triple;
+the input live-coefficient path similarly selects C5/C6/C7. The zero and bypass
+branches are distinct. Cutoff 0 bypasses types 2..8; type 1 still returns zero.
+
+The code uses exact native multiplication/division order, FMA in the cosine
+pole discriminant and low/high-pass feedback terms, and gain branches based on
+10^(gain/20). The cosine and tangent arguments use the original pi constants.
+The source's upper frequency guard is sample_rate*0.5*0.9900000095367432, including
+that binary32-derived factor. The supported API rejects that boundary and above
+rather than inventing assertion/logging behavior. Checked inputs are types 0..8,
+finite nonnegative cutoff, finite gain within +/-96, and positive signed32-bit
+rate. Literal emission separately rejects values outside its representable range.
+The source rate is 44100; controlled native/math tests also supply 48000.
+
+The CLI matrix matches **972 native coefficient values** over both rates, all
+nine admitted types, zero/nonzero cutoffs and negative/zero/positive gains.
+Additional irregular-input and near-boundary tests use bitwise double comparisons.
+This is native arithmetic evidence, not physical BMC filter calibration.
+
+### Native UI dispatcher and units
+
+Qwen's 220.2-second pass did not save its requested report. Its attempted tools
+included interpreter/path failures; no worker mapping was accepted. The independent
+checker `tools/eqfa_ui_study.py` instead executes the original
+`CMfxFDRVPrm::VUpdatePrm` body at `352f60..3535b0` against owned getter/setter
+recording callbacks, with all non-EqFa change flags false. The actual five-entry
+type table at `83d014..83d028` is **0,6,7,3,4**. Its end is independently bounded
+by the following named RTTI string. The target method slots are verified against
+the CFspMfxFDRV vtable address point at `9e3240`.
+
+| Stage | Raw parameter indices | Native setter slot / selector | EqType |
+|---|---|---|---|
+| Input | cutoff 0, gain 1 | SetFilter+20 / index 2 | Fixed 3 (low shelf) |
+| Resampling/pre-drive | type 4, cutoff 5, gain 6 | SetPreFilter+30 / index 0 | Lookup 0/6/7/3/4 |
+| First post cascade | type 8, cutoff 9, gain 10 | SetPostFilter+40 / index 0 | Same lookup |
+| Second post cascade | type 11, cutoff 12, gain 13 | SetPostFilter+40 / index 1 | Same lookup |
+
+These are internal indices in this native class, not a proved Fantom front-panel,
+MIDI or SysEx parameter schema. A logical changed-index set selects each group;
+changing any checked member causes its complete setter call. No raw change-flag
+word protocol or global UI min/max range is inferred.
+
+Cutoff converts directly from a signed integer to binary64. Its frequency unit is
+inferred from cutoff/sample-rate arithmetic. Gain first converts the signed raw
+integer to **binary32**, divides by 10 in binary32, then promotes to double. For
+example raw -31 becomes -3.0999999046325684 rather than the binary64 value -3.1.
+The gain's dB interpretation follows the generator's 10^(gain/20) calculation.
+Both lookup and conversion are checked using original dispatcher execution,
+including every recovered field and all five selectors.
+
+### Dynamic grouped writes and precision boundary
+
+The original example `examples/fdrv-eqfa-events.json` contains **38 setter events
+from 35 UI snapshots** across all four stages. Each flat event is independently
+reconstructed through the native UI fixture. It includes cutoff sweeps, type
+changes and updates at 2047/2048/2050 around ring wrap. Input targets use the
+existing C5/C6/C7 envelope path. The three literal families update their declared
+stereo groups before the next fixture sample. History is retained; no reset is
+inserted. These frame-boundary updates do not prove atomic hardware group writes.
+
+Generated doubles usually do not fit an exact 24-bit BMC literal. The existing
+emitter's exact-input restriction remains intact: `encoded_taps()` explicitly
+quantizes using its documented nearest/ties-to-even software policy, then strict
+assembly/inverse checks protect the resulting bytes. Two numeric policies are
+therefore tested separately:
+
+- **native:** the model receives explicit full-precision literal values for only
+  the checked resampling/cascade fields. Every value must encode to its actual
+  serialized stereo fields. This matches the original native constructor-double
+  semantics after the recovered generator. It is a reference policy, not a claim
+  that physical DSP literals preserve the source double.
+- **encoded:** both the packet model and owned native callback use the explicitly
+  quantized generated filter coefficients. This checks emitted-byte arithmetic under the selected
+  software policy; it does not observe Roland's hardware conversion or rounding.
+
+Both 12,000-frame runs match **24,696,000 audio/ring/cache values and 960,000 envelope
+fields each**, through five wraps, ending at origin 1760. Each run also checks 114
+raw generator coefficients against the original function. **70** generated
+literal coefficients differ from their encoded values; maximum absolute error
+is 4.6971220202252084e-7. Passing these two conditioned comparisons does not mean
+the two precision policies produce identical audio.
+The policy switch concerns generated EqFa coefficients; the documented fixed
+drive/post native-reference scales remain unchanged in these runs.
+
+The new `native_literals` argument is restricted to resampling/cascade profiles
+and to their coefficient fields; values with a different encoding, nonfinite
+values, wrong counts or other profile/fragment targets fail closed. It cannot
+alter resource indices, unrelated literals, headers or arithmetic controls.
+Default interpretation still uses encoded values. Tests cover both policies
+through wrap, the reordered recurrence, native UI calls, malformed events,
+source mutations, invalid precision substitutions and frequency-domain guards.
+
+```sh
+python3.13 tools/eqfa_study.py --execute-native
+python3.13 tools/eqfa_ui_study.py --execute-native
+python3.13 tools/eqfa_study.py --execute-native --events examples/fdrv-eqfa-events.json --frames 12000 --literal-policy native
+python3.13 tools/eqfa_study.py --execute-native --events examples/fdrv-eqfa-events.json --frames 12000 --literal-policy encoded
+python3.13 -m unittest discover -s tests -p 'test_eqfa.py' -v
+```
+
+EqVgCal/five-coefficient generation and interpolation-stability policy remain
+next. Actual Fantom UI routing, native scheduler cadence, literal bus conversion,
+physical arithmetic precision, entry/return and safe loading remain unverified.
+No instrument was accessed and no firmware was flashed.

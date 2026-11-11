@@ -99,7 +99,8 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                   compare_resample=False, resample_taps=(.5,.25,-.125),
                   resample_drive_literal='0656d2', compare_post_mix=False,
                   compare_cascade=False,cascade_coefficients=(.5,.25,-.125,.75,-.1875,.0625),
-                  compare_full=False,output_coefficients=(.125,-.25,.5,.75,-.1875),parameter_events=None):
+                  compare_full=False,output_coefficients=(.125,-.25,.5,.75,-.1875),parameter_events=None,
+                  filter_events=None,filter_literal_policy='native'):
     import ctypes
     from contextlib import ExitStack
     import struct
@@ -127,6 +128,14 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
             raise ValueError('Expected four explicit initial S/T values')
         state_seeds = list(map(_finite, state_seeds))
     checked = report()
+    if filter_events is not None:
+        if not compare_full or filter_literal_policy not in ('native','encoded'):
+            raise ValueError('EqFa events require full comparison and a native/encoded literal policy')
+        if parameter_events is None:parameter_events=[]
+        from eqfa_study import (native_function,encoded_taps,validate_events as validate_filters,
+            report as eqfa_report)
+        eqfa_report();eq_events=validate_filters(filter_events,frames)
+    else:eq_events=[]
     if parameter_events is not None and not compare_full:
         raise ValueError('Setter replay requires the complete FDRV comparison')
     _, constructor, pointers, entry, instructions = coefficient_context('SIM_MFX_FDRV')
@@ -231,6 +240,8 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
     cascade_count=0
     full_count=0
     model_caches=[([-11.,23.,-37.],cursor)for cursor in cursors]
+    filter_index=0;filter_values=0;nonexact_literals=0;max_literal_error=0.;native_literals={}
+    raw_cascade=list(cascade_coefficients)
     if compare_input_stage:
         from bmc_emulator import execute_fragment
         from bmc_subset import assemble_fragment
@@ -286,6 +297,7 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
         if parameter_events is not None:
             native_increment,native_step=stack.enter_context(native_envelope_functions())
             target_functions=stack.enter_context(native_target_functions())
+        if filter_events is not None:eqfa_native=stack.enter_context(native_function())
         invoke = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p)(address)
         for frame in range(frames):
             while event_index<len(events)and events[event_index][0]==frame:
@@ -298,6 +310,38 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                     struct.pack_into('<ffIf',envelope_records[slot],0,initial[0],0.,initial[2],initial[3])
                     native_increment(ctypes.addressof(envelope_records[slot]),ctypes.addressof(times))
                 event_index+=1
+            while filter_index<len(eq_events)and eq_events[filter_index][0]==frame:
+                _,which,raw=eq_events[filter_index];event=filter_events[filter_index]
+                generated=eqfa_native(event['type'],event['cutoff'],event['gain'])
+                native_raw=(generated[0],generated[2],generated[1])
+                if [v.hex()for v in native_raw]!=[v.hex()for v in raw]:
+                    raise ValueError('EqFa generator differs before parameter application')
+                filter_values+=3
+                if which=='input':
+                    for slot,target,actual in zip((5,6,7),raw,native_raw,strict=True):
+                        envelope_states[slot]=envelope_state(envelope_states[slot][0],target)
+                        current=struct.unpack_from('<f',envelope_records[slot])[0]
+                        initial=envelope_state(current,actual)
+                        struct.pack_into('<ffIf',envelope_records[slot],0,initial[0],0.,initial[2],initial[3])
+                        native_increment(ctypes.addressof(envelope_records[slot]),ctypes.addressof(times))
+                else:
+                    packed=encoded_taps(raw)
+                    nonexact_literals+=sum(a.hex()!=b.hex()for a,b in zip(raw,packed,strict=True))
+                    max_literal_error=max(max_literal_error,*(abs(a-b)for a,b in zip(raw,packed,strict=True)))
+                    applied=native_raw if filter_literal_policy=='native'else packed
+                    if which=='resample':
+                        fields=(0x48,0x58,0x68);index=5
+                        stage_specs[index]=dict(stage_specs[index],tap_coefficients=list(packed))
+                        if filter_literal_policy=='native':native_literals[index]=raw
+                    else:
+                        half=0 if which=='post0'else 3;index=9
+                        fields=(0x78,0x88,0x98)if half==0 else(0xa8,0xb8,0xc8)
+                        raw_cascade[half:half+3]=raw
+                        stage_specs[index]=dict(stage_specs[index],filter_coefficients=list(encoded_taps(raw_cascade)))
+                        if filter_literal_policy=='native':native_literals[index]=tuple(raw_cascade)
+                    for field,value in zip(fields,applied,strict=True):struct.pack_into('<d',context,field,value)
+                    stage_programs[index]=assemble_fragment(stage_specs[index])
+                filter_index+=1
             if parameter_events is not None:
                 for slot,(owner,record)in enumerate(zip(envelope_owners,envelope_records,strict=True)):
                     envelope_states[slot]=envelope_step(envelope_states[slot])
@@ -316,7 +360,7 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                      for y, s in zip(mixed, (0x29, 0x2c), strict=True)]
             if compare_full:
                 full_stage=execute_frame(stage_programs,model_ring,origin,dict(enumerate(values)),
-                    [left.value,right.value],model_caches)
+                    [left.value,right.value],model_caches,native_literals=native_literals)
                 model_ring,model_caches=full_stage['ring'],full_stage['auxiliary']
             elif compare_input_stage:
                 for fragment, assignment in zip(stage_programs, stage_specs, strict=True):
@@ -463,6 +507,9 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                 output_fixture_coefficients=list(output_coefficients)if compare_full else None,
                 parameter_event_count=event_index,coefficient_envelope_values_checked=envelope_values,
                 native_envelope_updates_per_fixture_frame=1 if parameter_events is not None else 0,
+                filter_event_count=filter_index,filter_native_coefficients_checked=filter_values,
+                filter_literal_policy=filter_literal_policy if filter_events is not None else None,
+                nonexact_generated_literals=nonexact_literals,max_literal_quantization_error=max_literal_error,
                 resample_fixture_taps=list(resample_taps) if compare_resample else None,
                 resample_fixture_drive=values[0] if compare_resample else None,
                 resample_fixture_drive_literal=resample_drive_literal if compare_resample else None,

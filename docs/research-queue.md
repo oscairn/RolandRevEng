@@ -13,7 +13,20 @@ Next recover another useful exact producer/control context or an owner-proven
 nonempty label/continuation path; retain bounded opcode admission and hardware gates.
 Entry, runtime allocation and hardware calibration remain separate requirements.
 
-The latest bounded control milestone is complete (2026-11-11): native FDRV
+The latest bounded filter milestone is complete (2026-11-11): EqFaCal's eight
+numbered branches plus bypass fallback are recovered with original native math
+checks. Setter reordering and UI indices/scaling are independently checked by
+executing the original native UI dispatcher against owned recording callbacks.
+Thirty-eight events from 35 UI updates exercise cutoff/type changes in all four
+three-coefficient stages. Both native-double and explicitly quantized coefficient
+policies match full audio/ring/cache state during 12,000-frame replays. This does
+not identify actual Fantom UI routing or physical literal precision.
+
+Next recover EqVgCal's five-coefficient generation and interpolation-stability
+policy. Then extend UI mapping to those state-variable/final EQ controls. Hardware
+entry/return, scheduler cadence, numeric calibration and safe loading stay open.
+
+The preceding bounded control milestone is complete (2026-11-11): native FDRV
 descriptors cover all 20 local live slots and 14 literal groups. Drive, wet, level
 and slope targets are independently replayed through original native envelope
 math. Both 12,000-frame scale pairs match 960,000 envelope fields and 24,696,000

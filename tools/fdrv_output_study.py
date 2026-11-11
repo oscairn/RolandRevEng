@@ -37,7 +37,7 @@ def output_reference(y,s,t,dry,wet_gain,dry_gain,master,coefficients=DEFAULT_COE
     return dict(state_s=next_s,state_t=next_t,output=_finite(mixed*master))
 
 
-def execute_frame(programs,ring,origin,coefficients,samples,auxiliary):
+def execute_frame(programs,ring,origin,coefficients,samples,auxiliary,*,native_literals=None):
     """Run the complete checked arithmetic chain; return new state without device IO."""
     from bmc_dsp import command_count,packets
     from bmc_emulator import execute_fragment
@@ -53,16 +53,20 @@ def execute_frame(programs,ring,origin,coefficients,samples,auxiliary):
         if not isinstance(bank,(list,tuple))or len(bank)!=2:raise ValueError('Expected cache slots/cursor pairs')
         slots,cursor=bank;caches.append((_cache(slots,cursor),cursor))
     specs=[disassemble_fragment(p)for p in programs]
+    if native_literals is None:native_literals={}
+    if not isinstance(native_literals,dict)or any(type(k)is not int or k not in (5,9)for k in native_literals):
+        raise ValueError('Native literal lists are restricted to the resample/cascade fragments')
     if [s['kind']for s in specs]!=[s['kind']for s in program_specs()]:
         raise ValueError('Expected the complete ordered FDRV arithmetic chain')
     expected=program_specs(specs[5]['tap_coefficients'],specs[5]['drive_literal'],
         specs[9]['filter_coefficients'],specs[10]['filter_coefficients'])
     if specs!=expected:raise ValueError('FDRV fragment resources do not match the checked chain')
     bridge={}
-    for program,spec in zip(programs,specs,strict=True):
+    for index,(program,spec)in enumerate(zip(programs,specs,strict=True)):
         data={cell:(bridge[cell]if cell in (0x60,0x61,0x62,0x63)else
             memory[native_ring_index(cell,0,origin)])for cell in spec['sources']}
-        stage=execute_fragment(program,data,coefficients,dict(zip((0x2016,0x2017),samples)))
+        stage=execute_fragment(program,data,coefficients,dict(zip((0x2016,0x2017),samples)),
+            native_literals=native_literals.get(index))
         for (_,words),trace in zip(packets(program),stage['trace'],strict=True):
             for cell,value in trace['writes'].items():
                 if cell in (0x60,0x61,0x62,0x63):bridge[cell]=value

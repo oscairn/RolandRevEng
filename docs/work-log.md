@@ -1892,3 +1892,71 @@ local/fdrv-parameter-static.json and local/fetdrive-independent-crosscheck.json.
 Synced five changed Roland notes with backups and concurrent-edit guards;
 all 71 vault notes are verified. Hardware loading, control flow, precision, scheduler
 cadence and history initialization remain unresolved. No instrument was accessed.
+
+
+## EqFaCal generation, UI dispatch and dynamic filter replay (2026-11-11)
+
+Recovered the eight numbered EqFaCal branches plus bypass fallback at
+20ae90..20b494, including cosine/tangent low-pass forms, shelving variants,
+high-pass/all-pass, zero/default behavior and the upper cutoff guard. Scalar
+math preserves original division/FMA order. The bounded native oracle executes
+the audited original function with owned rate/output buffers, copied switch data
+and host libm targets verified through Mach-O indirect symbols. Assertion paths
+are excluded; no application, scheduler or hardware is initialized. The CLI
+matrix matches 972 coefficient values; irregular-input tests cover both 44100 and
+48000 rates. Checked setter stack reads prove structure order a/feedback/delayed
+input becomes a/delayed input/feedback in all four three-coefficient stages.
+
+Qwen's 220.2-second UI pass did not save a report and encountered interpreter/
+path errors. No worker inference was accepted. Independently executed the original
+CMfxFDRVPrm::VUpdatePrm against owned getter/setter recording callbacks. The
+five-entry type table is 0/6/7/3/4. Input uses indices 0/1 and fixed type 3; resampling
+uses 4/5/6, post0 uses 8/9/10 and post1 uses 11/12/13. Gain division occurs in
+binary32 before double promotion; cutoff converts directly from signed integer.
+Native checks cover every recovered changed field and all five selectors. The
+indices are not claimed as Fantom front-panel or SysEx routing. Future local
+worker launches now inherit the checked interpreter and module path.
+
+Generated 38 original filter events from 35 source-checked UI updates, including
+changes around 2048-cell wrap. Input C5/C6/C7 uses the existing envelope branch;
+resampling/cascades update literal groups before the next fixture sample while
+history is retained. The exact-input byte emitter is unchanged. Generated
+nonrepresentable values are explicitly quantized before assembly; an optional
+native reference policy accepts source doubles only when they encode to the
+actual checked stereo fields. Wrong fields, encodings, profiles and nonfinite
+substitutions fail closed. No new opcode profile is admitted.
+
+Both 12,000-frame policy runs match 24,696,000 audio/ring/cache values and 960,000
+envelope fields, plus 114 source-generator coefficients per run, ending at
+origin 1760 through five wraps. Seventy generated literal coefficients differ
+from their encoded values; maximum error 4.6971220202252084e-7. Native-double policy
+matches the constructor semantics. Encoded policy also quantizes the owned
+native callback coefficients; this is not proof of the hardware converter.
+The two policies are not asserted to produce identical audio. Existing fixed
+drive/post ZENOLOGY native scales stay unchanged; these two runs do not repeat
+the preceding Fantom fixed-scale substitution checks. No native audio/state
+intermediate feeds the independent packet model.
+
+Eight focused tests pass in 83.952 seconds. The dual-wrap regression needed a
+120-second budget: both 60-second attempts reached their time limit; profiling
+identified repeated Capstone/constructor/export checks as significant setup work
+in addition to sample stepping. No numerical comparison was removed.
+
+The full 504-test run took 862.193 seconds: 499 passed, five older native replay
+tests reached their existing 45/60-second subprocess limits. All five errors
+were TimeoutExpired. Targeted reruns with unchanged assertions and a local-only
+sixfold deadline allowance passed: four in 141.748 seconds, the resampling test
+in 24.490 seconds. Thus all 504 tests' assertions passed across the run and
+retries; the original full-suite invocation was not a clean pass. Existing
+committed regression deadlines were not relaxed. Vendor-free coefficient/UI/
+assembly/execution smoke checks and git diff checks also pass.
+
+Synced six changed Roland notes with backups and concurrent-edit guards; all 71
+vault notes verified. The attention chime failed with AudioQueueStart (-66680).
+Source/numeric/UI reports remain ignored under local/eqfa-*.json; test logs are
+local/eqfa-full-tests.txt, local/eqfa-timeout-rerun-tests.txt and
+local/eqfa-resample-timeout-rerun-tests.txt. Vendor bytes, raw listings and worker
+logs stay local.
+EqVgCal/interpolation stability, physical UI routing, scheduler timing, literal
+bus precision, entry/return and safe loading remain open. No instrument was
+accessed or flashed.

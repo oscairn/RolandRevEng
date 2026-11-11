@@ -156,6 +156,12 @@ or executable engine was added.
 
 ## FDRV control-path replay (2026-11-11)
 
+The newer [EqFaCal control layer](fdrv-cubic-waveshaping-study.md#three-coefficient-filter-generation-and-ui-dispatch-2026-11-11)
+also generates C5/C6/C7 targets from the native UI's input shelf parameters and
+compares their envelope evolution during full audio replay. Resampling and post
+cascade groups use literal writes instead, applied at explicit fixture frame
+boundaries. Group atomicity and real scheduler interleaving remain unverified.
+
 The [FDRV parameter checkpoint](fdrv-cubic-waveshaping-study.md#setter-derived-live-updates-2026-11-11)
 now connects checked setter arguments/descriptors to four replayed control
 families and compares the original native envelope arithmetic during audio.

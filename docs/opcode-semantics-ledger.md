@@ -14,6 +14,14 @@ rounding, saturation, accumulator width or fused evaluation on silicon.
 
 ## Independently checked arithmetic contexts
 
+The [EqFaCal checkpoint](fdrv-cubic-waveshaping-study.md#three-coefficient-filter-generation-and-ui-dispatch-2026-11-11)
+checks generated coefficients, setter reordering and native UI calls without new
+opcode admission. Input/resampling/cascade controls now receive cutoff/type/gain
+updates. Nonrepresentable source doubles are handled through explicit precision
+policies: either evaluate verified-bin-compatible source values, or compare both
+model and owned native fixture after software quantization. Neither establishes
+the physical DSP converter's rounding or arithmetic precision.
+
 The [FDRV setter checkpoint](fdrv-cubic-waveshaping-study.md#setter-derived-live-updates-2026-11-11)
 adds descriptor/control provenance and dynamic coefficient tests, without adding
 an opcode profile. In particular the final filter's repeated a fields

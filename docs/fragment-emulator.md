@@ -1,5 +1,13 @@
 # Offline functional fragment emulator
 
+[EqFaCal and UI-driven filter changes](fdrv-cubic-waveshaping-study.md#three-coefficient-filter-generation-and-ui-dispatch-2026-11-11)
+now cover the input, resampling and two post-cascade stages. Full-precision
+native filter literals can be supplied explicitly for the two checked literal
+profiles; every value must encode to the actual serialized stereo fields.
+Default interpretation still reads encoded values. Separate 12,000-frame runs
+check native-double and explicitly quantized filter coefficients, with matched
+audio/ring/cache state under each policy. No new opcode profile is admitted.
+
 [Setter-derived FDRV updates](fdrv-cubic-waveshaping-study.md#setter-derived-live-updates-2026-11-11)
 now exercise drive, wet, level and slope through independent native-policy
 envelopes while complete audio/ring/cache comparisons remain exact. Physical

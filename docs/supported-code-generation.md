@@ -5,6 +5,14 @@ and explicitly assigned indices into exact packet sequences independently matche
 against native FETDRIVE, LINEDRIVE and FDRV expressions. This is a constrained semantic code emitter and
 inverse decoder, not a general DSP assembler, scheduler or standalone engine.
 
+The [EqFaCal control layer](fdrv-cubic-waveshaping-study.md#three-coefficient-filter-generation-and-ui-dispatch-2026-11-11)
+generates arbitrary native triples in `(a, feedback, delayed-input)` order.
+Its `taps()` reorders them for the checked stages; `encoded_taps()` explicitly
+applies the existing nearest/ties-to-even software encoding policy before strict
+assembly. Exact-input emitter validation is unchanged. Optional `native_literals`
+are a bounded reference-evaluation policy, never proof of hardware literal
+precision or a way to alter instruction/resource fields.
+
 The [complete FDRV arithmetic milestone](fdrv-cubic-waveshaping-study.md#complete-arithmetic-and-output-milestone-2026-11-11)
 adds `fdrv_output_pair` (188 bytes): eight sources, four state-store aliases,
 three live gain slots and five exactly representable 24-bit fixed coefficients.

@@ -1,0 +1,268 @@
+[
+  {
+    "frame": 0,
+    "stage": "input",
+    "type": 3,
+    "cutoff": 200.0,
+    "gain": 1.7000000476837158
+  },
+  {
+    "frame": 0,
+    "stage": "resample",
+    "type": 6,
+    "cutoff": 4000.0,
+    "gain": -3.0999999046325684
+  },
+  {
+    "frame": 0,
+    "stage": "post0",
+    "type": 3,
+    "cutoff": 600.0,
+    "gain": 6.300000190734863
+  },
+  {
+    "frame": 0,
+    "stage": "post1",
+    "type": 7,
+    "cutoff": 90.0,
+    "gain": 0.0
+  },
+  {
+    "frame": 256,
+    "stage": "resample",
+    "type": 0,
+    "cutoff": 100.0,
+    "gain": -6.0
+  },
+  {
+    "frame": 640,
+    "stage": "post0",
+    "type": 7,
+    "cutoff": 500.0,
+    "gain": 0.0
+  },
+  {
+    "frame": 1024,
+    "stage": "post1",
+    "type": 4,
+    "cutoff": 900.0,
+    "gain": 4.5
+  },
+  {
+    "frame": 1408,
+    "stage": "input",
+    "type": 3,
+    "cutoff": 2000.0,
+    "gain": 6.0
+  },
+  {
+    "frame": 1792,
+    "stage": "resample",
+    "type": 4,
+    "cutoff": 8000.0,
+    "gain": 6.0
+  },
+  {
+    "frame": 2047,
+    "stage": "post1",
+    "type": 6,
+    "cutoff": 1000.0,
+    "gain": 0.0
+  },
+  {
+    "frame": 2048,
+    "stage": "post1",
+    "type": 0,
+    "cutoff": 1000.0,
+    "gain": 0.0
+  },
+  {
+    "frame": 2050,
+    "stage": "post1",
+    "type": 7,
+    "cutoff": 1000.0,
+    "gain": 0.0
+  },
+  {
+    "frame": 2176,
+    "stage": "post0",
+    "type": 6,
+    "cutoff": 500.0,
+    "gain": 0.0
+  },
+  {
+    "frame": 2560,
+    "stage": "post1",
+    "type": 3,
+    "cutoff": 900.0,
+    "gain": 4.5
+  },
+  {
+    "frame": 2944,
+    "stage": "input",
+    "type": 3,
+    "cutoff": 2000.0,
+    "gain": 6.0
+  },
+  {
+    "frame": 3328,
+    "stage": "resample",
+    "type": 3,
+    "cutoff": 4000.0,
+    "gain": 4.5
+  },
+  {
+    "frame": 3712,
+    "stage": "post0",
+    "type": 0,
+    "cutoff": 500.0,
+    "gain": 0.0
+  },
+  {
+    "frame": 4096,
+    "stage": "post1",
+    "type": 7,
+    "cutoff": 900.0,
+    "gain": 4.5
+  },
+  {
+    "frame": 4480,
+    "stage": "input",
+    "type": 3,
+    "cutoff": 2000.0,
+    "gain": 6.0
+  },
+  {
+    "frame": 4864,
+    "stage": "resample",
+    "type": 7,
+    "cutoff": 1000.0,
+    "gain": 0.0
+  },
+  {
+    "frame": 5248,
+    "stage": "post0",
+    "type": 4,
+    "cutoff": 500.0,
+    "gain": 0.0
+  },
+  {
+    "frame": 5632,
+    "stage": "post1",
+    "type": 6,
+    "cutoff": 900.0,
+    "gain": 4.5
+  },
+  {
+    "frame": 6016,
+    "stage": "input",
+    "type": 3,
+    "cutoff": 2000.0,
+    "gain": 6.0
+  },
+  {
+    "frame": 6400,
+    "stage": "resample",
+    "type": 6,
+    "cutoff": 300.0,
+    "gain": -3.0
+  },
+  {
+    "frame": 6784,
+    "stage": "post0",
+    "type": 3,
+    "cutoff": 500.0,
+    "gain": 0.0
+  },
+  {
+    "frame": 7168,
+    "stage": "post1",
+    "type": 0,
+    "cutoff": 900.0,
+    "gain": 4.5
+  },
+  {
+    "frame": 7552,
+    "stage": "input",
+    "type": 3,
+    "cutoff": 2000.0,
+    "gain": 6.0
+  },
+  {
+    "frame": 7936,
+    "stage": "resample",
+    "type": 0,
+    "cutoff": 100.0,
+    "gain": -6.0
+  },
+  {
+    "frame": 8320,
+    "stage": "post0",
+    "type": 7,
+    "cutoff": 500.0,
+    "gain": 0.0
+  },
+  {
+    "frame": 8704,
+    "stage": "post1",
+    "type": 4,
+    "cutoff": 900.0,
+    "gain": 4.5
+  },
+  {
+    "frame": 9088,
+    "stage": "input",
+    "type": 3,
+    "cutoff": 2000.0,
+    "gain": 6.0
+  },
+  {
+    "frame": 9472,
+    "stage": "resample",
+    "type": 4,
+    "cutoff": 8000.0,
+    "gain": 6.0
+  },
+  {
+    "frame": 9856,
+    "stage": "post0",
+    "type": 6,
+    "cutoff": 500.0,
+    "gain": 0.0
+  },
+  {
+    "frame": 10240,
+    "stage": "post1",
+    "type": 3,
+    "cutoff": 900.0,
+    "gain": 4.5
+  },
+  {
+    "frame": 10624,
+    "stage": "input",
+    "type": 3,
+    "cutoff": 2000.0,
+    "gain": 6.0
+  },
+  {
+    "frame": 11008,
+    "stage": "resample",
+    "type": 3,
+    "cutoff": 4000.0,
+    "gain": 4.5
+  },
+  {
+    "frame": 11392,
+    "stage": "post0",
+    "type": 0,
+    "cutoff": 500.0,
+    "gain": 0.0
+  },
+  {
+    "frame": 11776,
+    "stage": "post1",
+    "type": 7,
+    "cutoff": 900.0,
+    "gain": 4.5
+  }
+]
