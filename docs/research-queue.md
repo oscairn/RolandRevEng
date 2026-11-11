@@ -553,3 +553,11 @@ DSP-side output gain/envelope/routing composition and entry/return validation.
 Hardware precision/cadence and actual loader access remain required. The
 upstream TRANSIENT detector, exact phaser input selection and the broader ISA
 gaps remain open alongside this original-core track.
+
+The [typed state-writer study](state-initialization-and-float-writers.md)
+joins the native oscillator ring to enum 0 and checks its per-DSP firmware
+binary32 write apertures. All three stock per-DSP readers reject enum 0/1;
+the global IDM/EDM portal has no proved address join to this ring. The six-seed
+CPU-rounding experiment passes through ring wrap, but hardware conversion,
+owned initialization and readback remain open. Qwen's bounded portal analysis
+was reviewed; incorrect literal and call-search conclusions were rejected.

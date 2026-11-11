@@ -97,6 +97,14 @@ Their values follow the native-policy binary64 model; hardware data encoding
 is still unverified. Frequency changes and reseeding during a running voice
 are outside this prototype.
 
+The [typed initialization study](state-initialization-and-float-writers.md)
+now identifies this native ring as enum 0 and checks the Fantom's corresponding
+binary32 writer. Rounding only the six seeds to CPU binary32 changes the
+12,000-frame software output by less than `7e-9` in two checked pitches.
+The chip's conversion remains unverified, and the stock per-DSP readers reject
+this enum. These findings narrow initialization without supplying ownership,
+a readback path or load-ready bytes.
+
 ## Measured offline behavior
 
 At requested 440 Hz, the quantized factor predicts `440.000197628852 Hz`.

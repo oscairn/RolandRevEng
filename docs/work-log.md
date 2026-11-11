@@ -1117,3 +1117,25 @@ vendor-corpus-free operation and existing-output preservation.
 All 327 tests passed. This is a synthesis-core candidate, with hardware data
 encoding, owned resources, task wrapper, output routing and calibration
 still pending. The complete-program and general ISA goals remain open.
+
+## Typed state initialization and native enum-0 identity
+
+The native core's checked vtable/dispatch identifies the packet fixture's
+double ring as memory enum 0. Fantom's actual manager and driver expose a
+binary32 write path for that enum, with 2048 exposed elements per DSP and
+separate typed apertures. The checker preserves the important counterexample:
+all three stock per-DSP read methods explicitly reject enums 0 and 1.
+No join to the global IDM/EDM portal or safe original-engine owner is claimed.
+
+The source-buffer helper reports CPU binary32 rounding, including signed zero,
+without labeling those bytes raw DSP state. Two original packet-oscillator
+experiments use rounded seeds through ring wrap. Across 12,000 frames their
+maximum differences from the binary64-seeded reference are 6.7324744390528934e-9
+(440 Hz) and 5.929301521989672e-9 (9600 Hz). Hardware conversion is not modeled.
+
+Qwen returned a portal review in 92.2 seconds. Independent review accepted its
+ABI, element-stride and float-transfer observations, rejected a wrong timer
+literal, an assumed vtable terminator and a broken no-call result, then derived
+and tested the native/per-DSP join locally. Worker outputs stay ignored/local.
+All 331 tests passed. Hardware placement, cadence, conversion, entry/return and
+actual host loader access still prevent a deployable engine.
