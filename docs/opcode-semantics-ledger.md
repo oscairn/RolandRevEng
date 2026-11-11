@@ -14,6 +14,13 @@ rounding, saturation, accumulator width or fused evaluation on silicon.
 
 ## Independently checked arithmetic contexts
 
+The [cascade checkpoint](fdrv-cubic-waveshaping-study.md#cascaded-history-filter-milestone-2026-11-11)
+adds contextual short products `14a8/55ab` and `1464/5567`, plus long
+`1424/5527` with extensions `0001/0005`. Repeated `1428/552b` accumulates the
+other terms inside the same exact 164-byte profile. Prefetched future state cannot
+affect the current outputs. [V-STAGE unseen contexts](vstage-firmware-hardware-study.md#core1-and-candidate-dsp-comparison-2026-11-11)
+remain inventory observations with no new semantic admission.
+
 The [post-cubic mix checkpoint](fdrv-cubic-waveshaping-study.md#post-cubic-history-mix-milestone-2026-11-11)
 admits paired literal half gain `04a4/45a7`, quarter accumulations
 `0468/456b` and `2466/6569`, live gain `2483/6583`, and fixed post gain

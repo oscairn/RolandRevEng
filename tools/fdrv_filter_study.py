@@ -97,7 +97,8 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                   compare_cubic=False, compare_clip=False, compare_input_stage=False,
                   compare_second_stage=False, compare_filterbank=False,
                   compare_resample=False, resample_taps=(.5,.25,-.125),
-                  resample_drive_literal='0656d2', compare_post_mix=False):
+                  resample_drive_literal='0656d2', compare_post_mix=False,
+                  compare_cascade=False,cascade_coefficients=(.5,.25,-.125,.75,-.1875,.0625)):
     import ctypes
     import struct
     import lib
@@ -107,6 +108,7 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
     from native_callback_fixture import RingFixture, executable_mapping
     from transfer_study import constructor_memory
 
+    compare_post_mix = compare_post_mix or compare_cascade
     compare_resample = compare_resample or compare_post_mix
     compare_filterbank = compare_filterbank or compare_resample
     compare_second_stage = compare_second_stage or compare_filterbank
@@ -151,6 +153,12 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
         from fdrv_post_cubic_study import report as post_report,POST_SCALES,DRIVE_TO_POST
         post_report()
         struct.pack_into('<d',context,0x38,POST_SCALES[DRIVE_TO_POST[resample_drive_literal]])
+    if compare_cascade:
+        from fdrv_cascade_study import cascade_spec,report as cascade_report
+        cascade_report()
+        assemble_fragment(cascade_spec(coefficients=cascade_coefficients))
+        for offset,value in zip((0x78,0x88,0x98,0xa8,0xb8,0xc8),cascade_coefficients,strict=True):
+            struct.pack_into('<d',context,offset,value)
     values = [0.0]*20
     values[5] = 1.0
     values[10:15] = [-.4973, -.2531, .3737, .1279, -.0623]
@@ -193,6 +201,7 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
     filterbank_count = 0
     resample_count,clipped_values = 0,0
     post_count=0
+    cascade_count=0
     if compare_input_stage:
         from bmc_emulator import execute_fragment
         from bmc_subset import assemble_fragment
@@ -209,6 +218,9 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
         if compare_post_mix:
             from fdrv_post_cubic_study import program_specs as post_specs
             stage_specs = post_specs(resample_taps,resample_drive_literal)
+        if compare_cascade:
+            from fdrv_cascade_study import program_specs as cascade_specs
+            stage_specs = cascade_specs(resample_taps,resample_drive_literal,cascade_coefficients)
         stage_programs = [assemble_fragment(spec) for spec in stage_specs]
         model_ring = list(fixture.ring)
     if compare_emulator:
@@ -312,6 +324,11 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                     if read(cell).hex()!=model_ring[native_ring_index(cell,0,origin)].hex():
                         raise ValueError(f'Packet post-cubic mix differs at frame {frame}, cell {cell:#x}')
                     post_count+=1
+            if compare_cascade:
+                for cell in (7,0xb,8,0xc):
+                    if read(cell).hex()!=model_ring[native_ring_index(cell,0,origin)].hex():
+                        raise ValueError(f'Packet cascade differs at frame {frame}, cell {cell:#x}')
+                    cascade_count+=1
             for index, item in enumerate(model):
                 for cell, expected in ((0x1f+3*index, mixed[index]), (0x28+3*index, item['state_s']),
                                        (0x29+3*index, item['state_t']), (0x24+index, item['output'])):
@@ -366,6 +383,9 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                 independent_packet_post_mix_chain_values=(stage_count+second_count+filterbank_count+resample_count+post_count)
                     if compare_post_mix else 0,
                 post_mix_fixture_gain=values[1] if compare_post_mix else None,
+                independent_packet_cascade_chain_values=(stage_count+second_count+filterbank_count+
+                    resample_count+post_count+cascade_count)if compare_cascade else 0,
+                cascade_fixture_coefficients=list(cascade_coefficients)if compare_cascade else None,
                 resample_fixture_taps=list(resample_taps) if compare_resample else None,
                 resample_fixture_drive=values[0] if compare_resample else None,
                 resample_fixture_drive_literal=resample_drive_literal if compare_resample else None,

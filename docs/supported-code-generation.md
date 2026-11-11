@@ -5,6 +5,12 @@ and explicitly assigned indices into exact packet sequences independently matche
 against native FETDRIVE, LINEDRIVE and FDRV expressions. This is a constrained semantic code emitter and
 inverse decoder, not a general DSP assembler, scheduler or standalone engine.
 
+The [cascade milestone](fdrv-cubic-waveshaping-study.md#cascaded-history-filter-milestone-2026-11-11)
+adds `cascaded_history_pair` (164 bytes), with twelve data sources including four
+prefetches, four checked state-store aliases and six exactly representable 24-bit
+coefficients. It retains 154 exact stock bytes. The complete chain is 1,504 bytes;
+unknown following-filter arithmetic and hardware scheduling remain excluded.
+
 The [post-cubic mix milestone](fdrv-cubic-waveshaping-study.md#post-cubic-history-mix-milestone-2026-11-11)
 adds `post_cubic_mix_pair` (110 bytes), with six sources, two raw mix stores,
 two final stores, a live gain slot and an explicit checked post-scale variant.

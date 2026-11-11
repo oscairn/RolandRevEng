@@ -374,6 +374,38 @@ def assemble_post_cubic_mix_pair(spec):
     ])
 
 
+def assemble_cascaded_history_pair(spec):
+    from bmc_dsp import encode_literal,literal
+    if (not isinstance(spec,dict) or spec.get('kind')!='cascaded_history_pair'
+            or set(spec)!={'kind','sources','targets','filter_coefficients'}):
+        raise ValueError('Expected exact cascaded-history resources and coefficients')
+    for name,count in (('sources',12),('targets',4)):
+        if (not isinstance(spec[name],list) or len(spec[name])!=count
+                or any(type(v)is not int or not 0<=v<0x800 for v in spec[name])):
+            raise ValueError(f'Expected {count} valid {name} indices')
+    x,h1,h2,h3,xr,r1,r2,r3,ns,nsr,nt,ntr=spec['sources']
+    if ([h1,h2,h3,r1,r2,r3]!=[x+1,x+2,x+3,xr+1,xr+2,xr+3]
+            or len(set(spec['sources']))!=12 or spec['targets']!=[h1,r1,h2,r2]):
+        raise ValueError('Cascaded-history resources violate checked adjacency/alias rules')
+    values=spec['filter_coefficients']
+    if not isinstance(values,list) or len(values)!=6:
+        raise ValueError('Expected six exactly representable 24-bit filter coefficients')
+    encoded=[encode_literal(v,3)for v in values]
+    if any(literal(data).hex()!=float(v).hex()for data,v in zip(encoded,values,strict=True)):
+        raise ValueError('Filter coefficients must be exactly representable as 24-bit literals')
+    pairs=[[int.from_bytes((data+data)[i:i+2],'big')for i in range(0,6,2)]for data in encoded]
+    return assemble([
+        [0x1e05,0x2fe0,0x6fe2,x,xr],
+        [0xb84e,0x14a8,0x55ab,0x0fe0,0xafe2,0x4fe4,0xefe6,h1,x,r1,xr,*pairs[0]],
+        [0x470c,0x1428,0x552b,0x0fe4,0x4fe6,1,5,h2,r2,*pairs[1]],
+        [0x1008,0x1424,0x5527,1,5,*pairs[2]],
+        [0x5f0a,0x1464,0x5567,0x9fe0,0xdfe2,h1,r1,*pairs[3]],
+        [0x470c,0x1428,0x552b,0x0fe4,0x4fe6,1,5,h3,r3,*pairs[4]],
+        [0x470c,0x1428,0x552b,0x2fe4,0x6fe6,1,5,ns,nsr,*pairs[5]],
+        [0x7809,0x9fe0,0xdfe2,0x0fe4,0x4fe6,h2,r2,nt,ntr],
+    ])
+
+
 def assemble_cubic_quad(spec):
     if (not isinstance(spec, dict) or spec.get('kind') != 'cubic_quad'
             or set(spec) != {'kind', 'sources', 'targets'}):
@@ -478,6 +510,8 @@ def assemble_fragment(spec):
         return assemble_resample_drive_pair(spec)
     if spec.get('kind') == 'post_cubic_mix_pair':
         return assemble_post_cubic_mix_pair(spec)
+    if spec.get('kind') == 'cascaded_history_pair':
+        return assemble_cascaded_history_pair(spec)
     if spec.get('kind') == 'cubic_quad':
         return assemble_cubic_quad(spec)
     if spec.get('kind') == 'clipped_half_pair':
@@ -490,6 +524,20 @@ def assemble_fragment(spec):
 
 
 def disassemble_fragment(stream):
+    if len(stream)==164:
+        from bmc_dsp import literal
+        rows=packets(stream)
+        if [len(w)for _,w in rows]!=[5,14,12,8,10,12,12,9]:
+            raise ValueError('Not an exact cascaded-history profile')
+        a,b,c,d,e,f,g,h=[w for _,w in rows]
+        spec=dict(kind='cascaded_history_pair',
+            sources=[a[3],b[7],c[7],f[7],a[4],b[9],c[8],f[8],g[7],g[8],h[7],h[8]],
+            targets=e[5:7]+h[5:7],filter_coefficients=[literal(stream[o+i:o+i+3])
+                for o,i in ((rows[1][0],22),(rows[2][0],18),(rows[3][0],10),
+                            (rows[4][0],14),(rows[5][0],18),(rows[6][0],18))])
+        if assemble_cascaded_history_pair(spec)!=stream:
+            raise ValueError('Unsupported cascade controls, coefficients, tags or aliases')
+        return spec
     if len(stream)==110:
         rows=packets(stream)
         if [len(words)for _,words in rows]!=[5,10,12,10,7,6,5]:

@@ -1,9 +1,15 @@
 # Offline functional fragment emulator
 
-2026-11-11. `tools/bmc_emulator.py` executes logical packet bytes for sixteen checked profiles. Stereo input takes 10 bytes, the dry/wet tail
+2026-11-11. `tools/bmc_emulator.py` executes logical packet bytes for seventeen checked profiles. Stereo input takes 10 bytes, the dry/wet tail
 has 60-byte and 80-byte forms, and the four-stage allpass takes 82 bytes. This is a packet-stepping functional model with memory and
 per-packet traces. It is not yet a complete Roland effect or a cycle/bit-accurate
 BMC emulator. No vendor plugin or instrument is executed.
+
+The [cascaded history filters](fdrv-cubic-waveshaping-study.md#cascaded-history-filter-milestone-2026-11-11)
+add a strict 164-byte profile, extending the chain to 1,504 logical/stored bytes.
+Nonzero coefficients expose both recurrences; each scale-pair fixture matches
+552,000 native memory values through five wraps. Current first/second stores are
+checked; the following filter's evolving prefetch values are explicitly excluded.
 
 The [post-cubic mix](fdrv-cubic-waveshaping-study.md#post-cubic-history-mix-milestone-2026-11-11)
 adds a strict 110-byte profile and extends the input chain to 1,340 logical/stored

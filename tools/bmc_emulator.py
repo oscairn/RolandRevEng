@@ -51,7 +51,7 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
                                                 'state_variable_pair_with_output', 'state_variable_recombine_pair',
                                                 'state_variable_recombine_pair_with_output',
                                                 'state_variable_terminal_pair_with_output', 'resample_drive_pair',
-                                                'post_cubic_mix_pair')
+                                                'post_cubic_mix_pair','cascaded_history_pair')
     if (native_coefficient_prefix or spec['kind'] == 'clipped_half_pair') and not hasattr(math, 'fma'):
         raise ValueError('This native-reference profile requires Python 3.13+ math.fma')
     io_addresses = spec.get('input_addresses', DEFAULT_INPUT_ADDRESSES)
@@ -102,7 +102,13 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
                 else:
                     raise ValueError('Unsupported transfer port')
                 continue
-            if word in (0x04a4,0x45a7,0x0468,0x456b,0x2466,0x6569):
+            if word in (0x14a8,0x55ab,0x1464,0x5567,0x1424,0x5527):
+                destination,source=(word>>12)&7,(word>>6)&7
+                raw=b''.join(value.to_bytes(2,'big')for value in pool)
+                index=word&15;factor=literal(raw[index:index+3])
+                value=(old_value(source)*factor if word in (0x14a8,0x55ab,0x1464,0x5567)
+                       else _fma(old_value(source),factor,old_value(destination)))
+            elif word in (0x04a4,0x45a7,0x0468,0x456b,0x2466,0x6569):
                 destination,source=(word>>12)&7,(word>>6)&7
                 raw=b''.join(value.to_bytes(2,'big')for value in pool)
                 index=word&15

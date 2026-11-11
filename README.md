@@ -50,6 +50,8 @@ Independent follow-up studies:
 - [Stage keyboard targets for Oscairn](docs/stage-keyboard-oscairn-targets.md): sourced comparison of V-STAGE, Nord, Yamaha CK, Kronos and other panels, separating internal-host evidence from MIDI-controller suitability.
 - [Post-cubic history mix](docs/fdrv-cubic-waveshaping-study.md#post-cubic-history-mix-milestone-2026-11-11): 1,340 packet-executed bytes, with 504,000 native comparisons per scale pair.
 - [V-STAGE firmware hardware evidence](docs/vstage-firmware-hardware-study.md): official update targets bmc0..bmc4, three image groups and reusable CORE1 layouts; UI/host identity remains unresolved.
+- [Cascaded history filters](docs/fdrv-cubic-waveshaping-study.md#cascaded-history-filter-milestone-2026-11-11): 1,504 packet-executed bytes and 552,000 native comparisons per scale pair, leaving 11 stock packets.
+- [V-STAGE/Fantom code comparison](docs/vstage-firmware-hardware-study.md#core1-and-candidate-dsp-comparison-2026-11-11): exact service windows, large shared candidate DSP segments and one relocated FDRV body; unseen contexts remain unassigned.
 - [Completed stereo input/filter stage](docs/fdrv-state-variable-filter.md#completed-input-to-first-filter-stage-2026-11-11): 270 packet-executed bytes, a separate model ring and 120,000 matching native callback values through five wraps.
 - [Stereo state-variable filter](docs/fdrv-state-variable-filter.md): a complete 184-byte filter component, explicit state recurrence and exact native/byte comparisons through ring wrap and all cursor pairs.
 - [Original filtered voice](docs/original-bmc-filtered-voice.md): 384-byte filtered and 510-byte cubic-shaped oscillator bodies, ten seeds, eleven coefficients and checked relocation into all five recorded resource layouts.

@@ -7,7 +7,6 @@ import struct
 
 from bmc_dsp import assemble, command_count, literal, packets, swap_words
 from core1 import Core1
-import lib
 
 
 def core_lists(core):
@@ -77,6 +76,7 @@ def coefficient_widths(inventory):
 
     Numeric agreement is a cross-check, never a way to choose a candidate width.
     """
+    import lib
     data = lib.Z
     image_starts = sorted({s[3] for item in inventory['lists'] for s in item[3] if s[1]})
     counts, rows = collections.Counter(), []
@@ -128,6 +128,7 @@ def coefficient_widths(inventory):
 
 
 def paired_layout():
+    import lib
     counts = collections.Counter()
     for cls, (defaults, driver, lists) in lib.pairs().items():
         render = [item for item in lists or [] if item[1] == 0]
@@ -164,6 +165,7 @@ def paired_layout():
 
 
 def main():
+    import lib
     root = Path(__file__).resolve().parents[1]
     out = root / 'evidence'
     out.mkdir(exist_ok=True)

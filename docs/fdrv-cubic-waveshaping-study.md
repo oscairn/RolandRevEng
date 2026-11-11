@@ -1,5 +1,10 @@
 # FDRV cubic waveshaping, interpolation and clipping
 
+The [cascaded history filters](#cascaded-history-filter-milestone-2026-11-11)
+extend the chain to 1,504 logical/stored bytes and 92 packets. Both nondegenerate
+scale-pair fixtures match 552,000 native values. The final state-variable filter
+and output region remain outside packet execution.
+
 The [post-cubic history mix](#post-cubic-history-mix-milestone-2026-11-11)
 now extends the independent chain to 1,340 logical bytes, including live gain and
 the paired Fantom/ZENOLOGY post scales. The following filter/output region remains
@@ -475,3 +480,85 @@ The next unmapped stock region starts at `446`: **18 packets, 326 bytes through
 58c**. That boundary includes the stock packet whose final-input stores are
 represented by our authored suffix; the full packet still needs mapping. Hardware
 calibration, allocation, entry/return and safe loading remain open.
+
+## Cascaded history filter milestone (2026-11-11)
+
+The next post-shaping window is now executed as `cascaded_history_pair`: **164
+bytes, eight packets**, comprising ten authored input-load bytes and the exact
+154 stock bytes at `446..4e0`. The complete ten-fragment chain is **1,504
+logical/stored bytes and 92 packets**, without end padding. All five pinned
+Fantom bodies match with their actual data substitutions.
+
+For one channel, x is the current post-mix/gain input and h1/h2/h3 are incoming
+history cells. The native operation order is:
+
+```text
+first  = fma(h2, c, fma(h1, b, x*a))
+second = fma(h3, f, fma(h2, e, first*d))
+```
+
+The left source cells are 6/7/8/9, right a/b/c/d (all addresses hexadecimal).
+Raw x is stored at 6/a, first at 7/b, and second at 8/c. Under the fixture's
+origin increment, next frame's h1 reads the preceding x, h2 the preceding first,
+and h3 the preceding second. In particular, h2 is reused by both equations; it
+is not an independently invented third raw-input delay. Both cascaded sections
+have feedback for the nonzero fixture, without claiming physical sample cadence.
+
+| Exact context | Controls | Functional role |
+|---|---|---|
+| short `b84e` | `14a8 / 55ab` | I1/I5 = incoming I2/I6 × a; raw input stores retain incoming I2/I6 |
+| long `470c`, extensions `0001/0005` | `1428 / 552b` | I1/I5 = fma(incoming A/B, the encoded coefficient, incoming I1/I5) |
+| long `1008`, extensions `0001/0005` | `1424 / 5527` | Same accumulated form, selecting c at a different literal-pool offset |
+| short `5f0a` | `1464 / 5567` | I1/I5 × d; coissued first-history stores retain the pre-multiply first result |
+| transfer `7809` | `9fe0 / dfe2` plus loads | Store second at 8/c; preload next-filter T values |
+
+The repeated long form selects b, e and f in distinct packets. Resource indices,
+six stereo-duplicated 24-bit coefficients, adjacency, aliases, headers and
+extension values are protected by exact inverse assembly. Coefficients must be
+exactly representable; inexact values, nonfinite values, booleans and negative
+zero are rejected. Only this complete profile is admitted, not arbitrary uses
+of these control words or a general filter scheduler.
+
+Stock a/b/c/d/e/f are **1/0/0/1/0/0**, which hide all history arithmetic. The owned
+native fixture instead patches its six constructor doubles at +78/+88/+98/+a8/
++b8/+c8 to distinct exactly representable values **.5/.25/-.125/.75/-.1875/.0625**.
+These are explicit test substitutions, not observed Roland parameter-setter
+behavior. The earlier nonzero drive, post gain and both fixed scale pairs remain
+in force. Native defaults are also tested separately.
+
+Each 12,000-frame run matches **552,000 memory values** through five wraps, ending
+at origin 1760: the preceding 42 comparisons plus four first/second result stores
+per frame. Both scale-pair runs supply **1,104,000 comparisons total**. The oracle
+executes the complete original callback; the packet model receives no captured
+native intermediate. Whole-FDRV and final audio-output comparison remain open.
+Three 2,056-frame subprocess cases cross wrap with cursors 1/2: stock cascade,
+nonzero cascade, and nonzero cascade with the Fantom scale pair.
+
+The profile retains following S/T prefetches at 41/44 and 42/45. Static native
+data paths are checked, but these ports' evolving values are **not** compared
+against the full callback: the following filter's state writes are not modeled
+yet. Pure tests change all four prefetch values and show that the current first/
+second stores stay identical. Only current outputs/history are claimed by this
+milestone. No additional scratch bridge cells are allocated.
+
+Pure tests check explicit asymmetric packet traces, incoming-port stores,
+FMA order, signed zeros, random inputs and nonbinary representable coefficients.
+Native mutation tests reject changed arithmetic, even sub-quantum changes to the
+exact default constructor constants, and later state overwrites. Original JSON
+assignments are `examples/cascaded-history-default.json` and
+`examples/cascaded-history-nonzero.json`.
+
+```sh
+python3.13 tools/fdrv_cascade_study.py --execute-native --frames 12000
+python3.13 -m unittest discover -s tests -p 'test_fdrv_cascade.py' -v
+python3.13 tools/bmc_subset.py assemble examples/cascaded-history-nonzero.json local/cascade.bin --stored
+```
+
+Default-coefficient composed logical SHA-256:
+
+- ZENOLOGY scale pair: `1a1bc3fa5fd188a4729bba7f3cf189409e5521c9ff5b413050c33af2d097c623`.
+- Fantom scale pair: `38cefe2683622577e9784f650d33430f367fead8bf07f19dd4447fb81954469e`.
+
+Next is `4e0..58c`: **11 stock packets, 172 bytes**, containing the final
+state-variable/auxiliary section and output tail. Hardware precision, allocation,
+entry/return and safe loading remain unverified. No instrument was accessed.

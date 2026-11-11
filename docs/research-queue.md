@@ -13,7 +13,20 @@ Next recover another useful exact producer/control context or an owner-proven
 nonempty label/continuation path; retain bounded opcode admission and hardware gates.
 Entry, runtime allocation and hardware calibration remain separate requirements.
 
-The latest bounded milestone is complete (2026-11-11): the first post-cubic mix
+The latest bounded milestone is complete (2026-11-11): two cascaded history
+filters extend the independent chain to 1,504 logical/stored bytes and 92 packets.
+Distinct nonzero coefficients match 552,000 native values per scale-pair run.
+Next recover the final state-variable/auxiliary region and output tail at 4e0;
+11 stock packets/172 bytes remain through 58c. Future prefetch values and hardware
+numeric/loading behavior remain outside current comparison.
+
+V-STAGE/Fantom comparison now has four exact service-window matches in groups
+0 and 1/2, shared candidate DSP contents up to 51,542 bytes, and one relocated
+FDRV post-cubic body match. Unseen encoding contexts are catalogued without
+semantic claims. Next prove ownership/callers of useful shared contents and
+select independently corroborated new contexts; do not transfer host/load rules.
+
+The preceding bounded milestone is complete (2026-11-11): the first post-cubic mix
 and gain extend the independent chain to 1,340 logical/stored bytes and 84 packets.
 Each scale-pair fixture matches 504,000 native data cutpoints through five wraps.
 Next recover the first following filter at 446; 18 stock packets/326 bytes remain

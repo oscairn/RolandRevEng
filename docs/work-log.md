@@ -1763,3 +1763,42 @@ distinguish verified BMC target names from unresolved physical/host identity.
 Save the private checkpoint and sync Roland notes plus the separate cross-vendor
 Obsidian note. Full FDRV, host/load compatibility, allocation and silicon behavior
 remain open; no instrument was accessed.
+
+## Cascaded FDRV filters and V-STAGE comparison (2026-11-11)
+
+Completed both requested bounded tasks. The strict cascaded_history_pair profile
+contains 164 bytes/eight packets, including 154 exact stock bytes at 446..4e0.
+The composed independent packet chain is 1,504 logical/stored bytes, ten fragments
+and 92 packets. All five actual Fantom relocations match. Six distinct nonzero
+constructor coefficients expose both recurrences and old-port stores rather than
+the stock identity defaults. Both fixed scale-pair runs match 552,000 memory
+values over 12,000 frames/five wraps, ending at origin 1760. Native full callbacks
+provide the oracle; their intermediate values never feed the packet model.
+Current first/second stores are compared; evolving next-filter prefetch values
+and final audio output remain explicitly outside coverage. Eleven stock packets/
+172 bytes remain at 4e0..58c. Both original JSON examples assemble and inversely
+decode exactly as 164 stored bytes.
+
+Qwen's 110.2-second V-STAGE pass produced scripts/JSON but no final narrative.
+Independently rebuilt the comparison with existing bounded mapping/scanner
+helpers. Corrected a failed-candidate hash that inflated one distinct-content
+count, and a raw/unrelocated FDRV search that missed the real relocated match.
+Four exact service windows occur in groups 0 and 1/2. Shared whole-content hashes
+include 11,572- and 51,542-byte candidate DSP segments; one real Fantom base8040
+post-cubic body matches a bmc1/2 candidate at packet boundaries. Framing alone
+does not establish caller/class ownership. Unseen encoding contexts are counted
+and exemplified, without claiming new instruction meanings. Failed candidates
+remain recorded but excluded from hashes/contexts. C1A source offsets include
+the prefix, distinct from outer-tar offsets.
+
+The structural scanner now loads native-image helpers only in native-specific
+analysis functions. A regression checks it with an empty corpus directory, so
+the firmware comparison requires no ZENOLOGY image. Native mutation, random
+scalar, signed-zero, packet timing, wrap and pinned real-corpus checks cover
+the new behavior. No Qwen implementation or vendor binary is committed.
+
+All 477 tests pass in 90.751 seconds. Synced the six changed Roland notes with
+concurrent-edit guards/backups; all 71 vault notes are verified. This checkpoint
+contains only research tools, original examples, tests and documentation.
+Physical hardware precision, timing, allocation, entry/return and safe loading
+remain unresolved. No instrument was accessed or flashed.
