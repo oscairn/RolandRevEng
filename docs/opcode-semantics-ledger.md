@@ -14,6 +14,11 @@ rounding, saturation, accumulator width or fused evaluation on silicon.
 
 ## Independently checked arithmetic contexts
 
+The [Fantom ARM32 control checkpoint](fantom-eqvg-control-study.md) verifies
+selected original CPU math, setters and manager completion in private memory.
+Its four active types, fallback, float32 rounding and pre-arm flag clearing differ
+from desktop assumptions. It adds no BMC opcode or physical timing evidence.
+
 The [manager processing checkpoint](coefficient-manager-processing-study.md)
 executes bounded original host/simulation code for interpolation and completion.
 It adds no DSP opcode or physical timing evidence; task primitives are controlled
@@ -23,8 +28,8 @@ The [EqVg checkpoint](eqvg-filter-generation-study.md) checks five-coefficient
 producers and stock interpolation decisions without new opcode admission. Native
 setters and descriptor reads independently establish consumer ordering; 48
 immediate filter changes match full audio/state over 12,000 frames under each
-explicit output-literal precision policy. Manager processing and BMC calibration
-remain open.
+explicit output-literal precision policy. Manager processing has separate bounded
+checks; actual task ownership and BMC calibration remain open.
 
 The [EqFaCal checkpoint](fdrv-cubic-waveshaping-study.md#three-coefficient-filter-generation-and-ui-dispatch-2026-11-11)
 checks generated coefficients, setter reordering and native UI calls without new

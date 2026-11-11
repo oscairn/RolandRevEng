@@ -4,6 +4,11 @@ Independent Roland BMC interoperability research, starting with Fantom-0 v1.08 a
 the installed ZENOLOGY plugin. Remote: `https://github.com/jbschooley/RolandRevEng.git`.
 Private visibility was verified on 2026-11-10; keep it private as requested. This is not an official Roland project.
 
+The [Fantom EqVg/control study](docs/fantom-eqvg-control-study.md) checks the original
+ARM32 generator, setters and selected manager paths in isolated CPU memory. It
+recovers four active filter types, fixed 48 kHz math, float32 rounding and the
+pre-arm completion clear. Actual task exclusion and hardware timing remain open.
+
 The [manager processing study](docs/coefficient-manager-processing-study.md) executes
 original interpolation/envelope processing with controlled task primitives. It
 checks subdivision counts, wait counters, completion bitmaps and EqVg sequencing;

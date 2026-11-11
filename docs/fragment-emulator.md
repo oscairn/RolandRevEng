@@ -1,5 +1,10 @@
 # Offline functional fragment emulator
 
+The [Fantom ARM32 control fixture](fantom-eqvg-control-study.md) separately checks
+the original CPU coefficient producers and selected manager paths. Its fallback,
+float32 rounding and pre-arm completion clear differ from desktop assumptions.
+This is selected CPU execution; it adds no BMC opcode or hardware calibration.
+
 The [manager processing model](coefficient-manager-processing-study.md) separately
 checks parameter interpolation, envelope completion and task flags against owned
 original software processing. Its explicit ticks do not calibrate audio/device

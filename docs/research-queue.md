@@ -21,9 +21,18 @@ is an update count; counter/state processing and completion bitmaps are checked.
 A preposted-flag canary bypasses the live guard in the constructed interleaving;
 actual caller ownership and OS/hardware scheduling remain unproved.
 
-Next cross-check the corresponding Fantom ARM32 generator/control path and trace
-actual task/flag ownership and sync cadence. Hardware precision, history setup,
-entry/return and safe loading remain open.
+The Fantom correspondence milestone is complete (2026-11-11): [bounded ARM32
+EqVg/control execution](fantom-eqvg-control-study.md) matches 4,580 coefficient
+fields, 2,000 stability decisions, 48 setters, 48 completion cases and 20 literal
+cases. Fantom has four active types, a different fallback and float32 rounding.
+Its waited driver clears stale completion before arming, so the desktop canary
+does not transfer. Stock literal amount100 matches; negative amounts are modeled
+statically but excluded from CPU execution pending a Unicorn fixture/IT-path fix.
+
+Next trace the manager query and concrete task callers selecting live envelope
+mode, plus sample-wait/interrupt ownership and sync cadence. The shared busy byte
+is an assertion marker, not proved atomic exclusion. Hardware precision, history
+setup, entry/return and safe loading remain open.
 
 The preceding bounded filter milestone is complete (2026-11-11): [EqVgCal](eqvg-filter-generation-study.md)
 now has native-checked formulas, Q clamping, consumer permutations and UI scaling.

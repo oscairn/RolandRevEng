@@ -1,5 +1,11 @@
 # Coefficient manager processing and waits
 
+The subsequent [Fantom ARM32 check](fantom-eqvg-control-study.md) verifies selected
+generator/setter/manager correspondence and differences. In particular, its
+waited driver clears stale completion before arming; the desktop preposted-flag
+canary below does not establish the same behavior on Fantom. Task exclusion and
+physical cadence remain open.
+
 2026-11-11. The earlier [EqVg study](eqvg-filter-generation-study.md) recovered
 setter requests. This checkpoint executes their manager/wait processing in
 owned buffers and compares it to an independent scalar/event model. It uses

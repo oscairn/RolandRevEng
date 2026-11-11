@@ -7,7 +7,9 @@ inverse decoder, not a general DSP assembler, scheduler or standalone engine.
 
 The [manager processing checkpoint](coefficient-manager-processing-study.md)
 now checks the software sequencing behind EqVg updates. A preposted completion
-flag can bypass the live guard in the synthetic fixture; actual caller ownership
+flag can bypass the live guard in that desktop fixture. The [Fantom ARM32
+check](fantom-eqvg-control-study.md) instead verifies a stale-bit clear before
+arming, plus distinct type/fallback/float32 behavior. Actual caller ownership
 and scheduling remain separate prerequisites. No byte-emission rule changed.
 
 The [EqVg producer layer](eqvg-filter-generation-study.md) supplies explicit

@@ -1,3 +1,5 @@
 # Analysis dependencies; vendor binaries are supplied locally by the user.
 capstone==5.0.7
 pyelftools==0.33
+# Optional selected-entry Fantom Thumb execution; no firmware startup or device access.
+unicorn==2.1.4

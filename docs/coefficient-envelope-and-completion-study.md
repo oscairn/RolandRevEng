@@ -1,5 +1,11 @@
 # Live coefficient envelopes: selector, dispatch and completion
 
+The later [Fantom EqVg/control fixture](fantom-eqvg-control-study.md) executes the
+selected adapter, generic manager, driver, wait and original completion callback
+in private emulated memory. It verifies pre-arm clearing of bit1, preservation of
+bit0 and marker release after synthetic completion. This supplements the static
+maps below; it does not measure interrupt cadence or prove task exclusion.
+
 The newer [native manager processing checkpoint](coefficient-manager-processing-study.md)
 executes role4 envelope registration, active scans, pending-bit transitions and
 completion dispatch in owned buffers. It also checks task-flag consumption and

@@ -1,10 +1,16 @@
 # EqVg generation and interpolation policy
 
+The subsequent [Fantom ARM32 study](fantom-eqvg-control-study.md) checks original
+generator and setter execution. Fantom supports four active branches here,
+uses fixed 48 kHz and float32 storage, and has a different fallback and immediate
+write order. The desktop formulas and fallback below must not be transferred
+unchanged. Physical BMC precision and scheduling remain unresolved.
+
 The newer [manager processing checkpoint](coefficient-manager-processing-study.md)
 executes these requests through original software managers and waits against
 controlled task primitives. It resolves the raw100 count, verifies completion
 state and connects both EqVg paths, including a preposted-flag canary. Real OS
-thread timing and Fantom hardware correspondence remain unverified.
+thread timing and physical Fantom behavior remain unverified.
 
 2026-11-11. This recovers the ZENOLOGY native EqVg generator and the stock setter
 decisions used by FDRV. It adds coefficient producers to the existing packet

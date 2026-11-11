@@ -2056,3 +2056,59 @@ under local/coefficient-manager-*. The 18 opcode profiles and FDRV
 Remaining: real caller/task ownership and sync cadence, Fantom ARM32 cross-check,
 physical precision/interrupt delivery, history policy, entry/return and safe
 loading. No instrument accessed or flashed.
+
+
+## Fantom ARM32 EqVg and completion correspondence (2026-11-11)
+
+Added a hash-pinned selected-entry Thumb oracle and independent scalar reference.
+The original Fantom software binary64 arithmetic/libm helpers execute, then store
+five floats. Four active types (9/13/14/16), fixed 48000, Q clamp .25..128 and
+fallback (0,0,1,0,0) differ from transferring the desktop generator unchanged.
+Float g rounds before subtracting 1. The four-argument stability predicate and
+literal interpolation use non-fused binary32 operations. Actual descriptors,
+manager slots and FDRV live/postfilter branches are checked; immediate setters
+always write g first. The specific FDRV postfilter call selects immediate mode.
+
+The oracle compares 4,080 regular and 500 irregular coefficient fields, 2,000
+stability decisions, 48 setters, 48 live-control cases and 20 literal cases. The
+latter match 2,160 physical-copy writes and 408 unit-sample wait requests. Original
+manager/driver/poll/callback execution confirms stale bit1 clears before control
+and target stores; the waited flags3 trace is 1/3/1, preserving bit0. A busy marker
+remains 1 without delivered completion and returns 0 after synthetic callback.
+This does not transfer the desktop preposted-flag counterexample to Fantom or
+prove that the next untagged interrupt belongs to a particular caller.
+
+Unicorn2.1.4 is pinned and kept project-local in this session. RX code, nonexecute
+private RAM, fixed entries, write/access guards, assertion traps and a 250k
+instruction cap bound execution. No firmware startup, OS task, interrupt
+controller or physical MMIO runs. A sandbox SIGILL also reproduces with a
+synthetic MOV/BX; execution requires the approved JIT scope. Initial automatic
+review rejection was resolved by documenting existing user emulator authorization
+and tightening the bounds. No permission or sandbox configuration was changed.
+
+An unresolved negative-amount Thumb IT-path fault is explicitly excluded from
+CPU execution; scalar normalization and positive stock amount 100 remain checked.
+The fixture versus emulator cause is not isolated. A separate repeat-call fault
+is avoided by clearing translation state between selected entries. Firmware bytes
+and memory guards were not patched to make these cases pass.
+
+Qwen completed a 43.1-second bounded static review on the Mac Studio. Its bit1
+clear/ownership observations were independently verified; its nearby bit2 waiter
+was not accepted as the requested bit0 mapping. No raw worker report or listing
+is committed. Detailed checks stay ignored under local/fantom-eqvg-*.
+
+Eight focused tests pass in 5.131 seconds. The full snapshot ran 528 tests in
+543.402 seconds: 526 passed, and two existing cascade/output replay subprocesses
+hit their 45/60-second deadlines. Only those two were rerun, with the same
+workloads and assertions and a local 300-second deadline; both pass in 46.209
+seconds combined. Repository test deadlines were not changed. The final
+admission-only test added after full-suite discovery is included in the eight
+focused checks. Vendor-free scalar checks pass (six tests, two corpus skips);
+syntax, diff and changed-document links check clean. Eight unique Roland notes
+were synced with backups/concurrent-edit guards; all 74 current hashes verify.
+The attention chime failed with AudioQueueStart (-66680).
+
+Remaining: concrete manager-query/task callers, actual sample-wait/IRQ ownership
+and cadence, physical BMC precision, history policy, entry/return and safe
+loading. The 18 opcode profiles and 1,692-byte/104-packet FDRV arithmetic chain
+are unchanged. No instrument was accessed or flashed.
