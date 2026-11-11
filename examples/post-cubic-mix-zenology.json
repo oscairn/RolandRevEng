@@ -1,0 +1,23 @@
+{
+  "kind": "post_cubic_mix_pair",
+  "sources": [
+    18,
+    24,
+    25,
+    19,
+    26,
+    27
+  ],
+  "targets": [
+    28,
+    29
+  ],
+  "output_addresses": [
+    6,
+    10
+  ],
+  "coefficient_slots": [
+    1
+  ],
+  "post_scale_literal": "628624"
+}

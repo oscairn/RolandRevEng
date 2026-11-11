@@ -7,6 +7,11 @@ internal port needs compatible CPU/OS, sufficient working RAM, boot/recovery
 access, audio/display/panel drivers and measured realtime performance. Putting a
 DSP algorithm on a coprocessor is separate from running the CLAP/LV2 host there.
 
+Update: the [V-STAGE firmware inventory](vstage-firmware-hardware-study.md) now
+verifies five named BMC update targets, bmc0..bmc4, in the official 1.11 package.
+Targets 1/2 and 3/4 share identical images. The UI/host CPU and physical package
+count remain unverified; no Linux/i.MX8 assumption follows from those filenames.
+
 ## What physical Fantom hardware would add
 
 Firmware and paired native code let us recover used instruction contexts,
@@ -31,7 +36,7 @@ brands or similar keyboards.
 | Keyboard | Processor/platform evidence | Stage controls and Oscairn assessment |
 |---|---|---|
 | Fantom-07 | Existing repository firmware research: i.MX8M Linux host plus Roland BMC DSPs. Safe custom loading and hardware calibration remain open. | Most useful continuation of our existing Roland work; no tested Oscairn port yet. See the access and packet/loader studies. |
-| Roland V-STAGE 76/88 | Exact host, DSP model/count, RAM and boot access remain unverified in this pass. ZEN-Core/V-Piano/VTW names do not establish them. | Dedicated engine/effect sections and USB audio/MIDI make its panel worth investigating. Do not transfer the Fantom loading path or assert five BMCs without primary evidence. [Roland product](https://www.roland.com/global/products/v-stage_88/), [connections](https://static.roland.com/manuals/v-stage_reference/en-US/143855755.html). |
+| Roland V-STAGE 76/88 | Official 1.11 firmware targets bmc0..bmc4, with three distinct code/content groups. Exact physical chips, UI/host, RAM and boot access remain unverified. | Dedicated engine/effect sections and USB audio/MIDI make its panel worth investigating. The new [archive evidence](vstage-firmware-hardware-study.md) supports BMC-family research, without establishing a whole Oscairn host or Fantom-compatible loading. [Roland product](https://www.roland.com/global/products/v-stage_88/), [connections](https://static.roland.com/manuals/v-stage_reference/en-US/143855755.html). |
 | Nord Stage 3 | A firsthand Stage 3 repair identifies AM1705DPTP4; TI documents AM1705 as ARM9. Clavia's May 2023 parts list names an ARM host and SHARC DSPs for NS3; exact DSP model/count not established. | Rich dedicated panel. Physical drawbars are specific to Compact; 88/HP76 have LED/button drawbars. Standard ARM/SHARC documentation helps, but a whole Oscairn host port, boot access and drivers are unproved. [Repair](https://www.reddit.com/r/nordkeyboards/comments/1j6utsx/fixed_my_dead_stage_3_mainboard/), [TI](https://www.ti.com/product/AM1705), [manufacturer parts list mirror](https://device.report/m/0cd5cc22278a8379320e6ecf27ef13cc9397080614ffbb69498135b6195a76fb.pdf), [model differences](https://www.nordkeyboards.com/legacy-products/nord-stage-3/overview/). |
 | Nord Stage 4 | Exact CPU/DSP unverified here. A distinct mainboard part number does not identify the chips or prove Stage 3 compatibility. | All models have physical drawbars, dedicated layer faders and extensive synth/effect controls. Its documented CC/NRPN protocol is useful for an external Oscairn adapter; internal loading is a different research problem. [Product](https://www.nordkeyboards.com/products/nord-stage-4/), [manual](https://www.nordkeyboards.com/wt/documents/951/Nord%20Stage%204%20User%20Manual%20v1.6X-Edition-N.pdf). |
 | Yamaha CK76 | Exact CK76 silicon unverified. The CK61 service manual names SWX09 tone-generator initialization; that proves a CK61 subsystem, not CK76's board or CPU core. | Real model announced October 21, 2026: 76 semi-weighted FSB keys, 6.7 kg, drawbars, filter/effect controls, speakers and battery operation. Strong portable-panel candidate; no internal general-purpose host path established. [Yamaha release](https://www.yamaha.com/en/news_release/2026/26102101/), [original CK61 service manual mirror](https://www.manualslib.com/manual/4649084/Yamaha-Ck61.html). |
@@ -75,4 +80,5 @@ establishing class compliance. Those claims are rejected. Only the general
 distinction between host ports, DSP kernels and external controllers was retained.
 Worker logs remain ignored under local/; temporary public downloads are not
 committed. No downloaded code was run and
-no device was accessed. Exact V-STAGE, Stage 4 and CK76 silicon remains unresolved.
+no device was accessed. V-STAGE BMC target names are now verified in the follow-up;
+its exact physical chips/host, and Stage 4/CK76 silicon, remain unresolved.

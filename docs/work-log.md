@@ -1721,3 +1721,45 @@ Pause broader research after the private commit and note sync. Full FDRV still
 has 23 downstream packets/416 stock bytes at 3ec..58c. Broader ISA/control-flow
 mapping, parameter behavior, numeric/timing calibration, entry/return, allocation
 and safe loading remain unresolved. No instrument was accessed.
+
+## Post-cubic mix and V-STAGE hardware inventory (2026-11-11)
+
+Completed the two requested bounded tasks. The strict 110-byte post-cubic profile
+retains 90 exact stock bytes at 3ec..446, mixing current averaged/direct cubic
+values and preceding direct history with .5/.25/.25 weights. Raw mixed stores
+precede binary32 live C1 gain and the fixed post scale. Explicit final stores at
+6/a match cutpoints from the following stock packet without admitting that
+packet's other operations. No new synthetic bridge cells are needed.
+
+Fantom's five bodies use the exact 500000/16.0 scale; ZENOLOGY uses 628624 with
+native constructor double 40.384 rather than decoded 40.3837890625. Both complete
+input-chain fixtures match 504,000 data comparisons over 12,000 frames and five
+wraps, ending at origin 1760. The chain is 1,340 logical/stored bytes and 84
+packets. Two wrap-crossing subprocess cases use cursors 2/1; pure reference and
+packet-trace tests retain signed-zero, gain/timing/store and resource checks.
+There are now 18 stock packets/326 bytes remaining from 446 through 58c.
+
+Qwen's 90.1-second V-STAGE pass found official update 1.11 and retained its ZIP
+and UPA payload, but timed out with an interim report and unbounded-looking string
+output. Its strings were not accepted as chip identification. Independently
+retrieved the linked official page and ZIP, verified the same hashes, and parsed
+the archive with the existing bounded member reader. ZIP hash:
+8e883fa00fd083926716d2fd0f0cac6744eebda7f50fb905dc04ca4844ae6572.
+UPA hash:145262c536dec1928c4652bec6c5c84318374445219832c34e864760377644a8.
+
+The update has 15 components addressing bmc0..bmc4. Three distinct image groups
+exist:0,1/2,3/4; all C0A/C1A/C1C images match within each paired group. The existing
+CORE1 mapper accepts all three distinct vector/scatter layouts. C0A encrypted
+header key-index b6 is not a recovered key. No separately named host/Linux image
+identifies the UI processor; opaque CORE0 content remains unresolved. Roland's
+engineering photograph was retrieved and inspected, but its obscured/unreadable
+markings cannot verify exact chips or a physical five-package count.
+
+Added a pinned read-only V-STAGE inventory tool and three tests for actual target
+groups, hash-first rejection, missing members and changed footers. All 467 tests
+pass in 77.501 seconds. No vendor images, photographs or raw listings are committed;
+no firmware/updater was executed. The comparative keyboard note is updated to
+distinguish verified BMC target names from unresolved physical/host identity.
+Save the private checkpoint and sync Roland notes plus the separate cross-vendor
+Obsidian note. Full FDRV, host/load compatibility, allocation and silicon behavior
+remain open; no instrument was accessed.

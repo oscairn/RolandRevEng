@@ -14,6 +14,12 @@ rounding, saturation, accumulator width or fused evaluation on silicon.
 
 ## Independently checked arithmetic contexts
 
+The [post-cubic mix checkpoint](fdrv-cubic-waveshaping-study.md#post-cubic-history-mix-milestone-2026-11-11)
+admits paired literal half gain `04a4/45a7`, quarter accumulations
+`0468/456b` and `2466/6569`, live gain `2483/6583`, and fixed post gain
+`24a0/65a3` only inside the exact 110-byte profile. Raw stores precede gain,
+loads become visible next packet, and native/encoded scale precision stays explicit.
+
 The [resampling/drive checkpoint](fdrv-cubic-waveshaping-study.md#connected-resampling-and-drive-milestone-2026-11-11)
 adds bounded short/long roles for `1428/552b`, long `0424/4527` with extensions
 `0001/0005`, and short literal gain `0426/4529`. Arithmetic and history stores

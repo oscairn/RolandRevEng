@@ -97,7 +97,7 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                   compare_cubic=False, compare_clip=False, compare_input_stage=False,
                   compare_second_stage=False, compare_filterbank=False,
                   compare_resample=False, resample_taps=(.5,.25,-.125),
-                  resample_drive_literal='0656d2'):
+                  resample_drive_literal='0656d2', compare_post_mix=False):
     import ctypes
     import struct
     import lib
@@ -107,6 +107,7 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
     from native_callback_fixture import RingFixture, executable_mapping
     from transfer_study import constructor_memory
 
+    compare_resample = compare_resample or compare_post_mix
     compare_filterbank = compare_filterbank or compare_resample
     compare_second_stage = compare_second_stage or compare_filterbank
     if compare_second_stage and (compare_cubic or compare_clip):
@@ -146,6 +147,10 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
         for offset,value in zip((0x48,0x58,0x68),resample_taps,strict=True):
             struct.pack_into('<d',context,offset,value)
         struct.pack_into('<d',context,0x28,DRIVE_SCALES[resample_drive_literal])
+    if compare_post_mix:
+        from fdrv_post_cubic_study import report as post_report,POST_SCALES,DRIVE_TO_POST
+        post_report()
+        struct.pack_into('<d',context,0x38,POST_SCALES[DRIVE_TO_POST[resample_drive_literal]])
     values = [0.0]*20
     values[5] = 1.0
     values[10:15] = [-.4973, -.2531, .3737, .1279, -.0623]
@@ -162,6 +167,8 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
         values[0] = .75
     if compare_resample:
         values[0] = _float32(8192.)
+    if compare_post_mix:
+        values[1] = _float32(.7313)
     records = []
     for offset, slot in pointers.items():
         record = ctypes.create_string_buffer(0x48)
@@ -185,6 +192,7 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
     second_count = 0
     filterbank_count = 0
     resample_count,clipped_values = 0,0
+    post_count=0
     if compare_input_stage:
         from bmc_emulator import execute_fragment
         from bmc_subset import assemble_fragment
@@ -198,6 +206,9 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
         if compare_resample:
             from fdrv_resample_study import program_specs as resample_specs
             stage_specs = resample_specs(resample_taps,resample_drive_literal)
+        if compare_post_mix:
+            from fdrv_post_cubic_study import program_specs as post_specs
+            stage_specs = post_specs(resample_taps,resample_drive_literal)
         stage_programs = [assemble_fragment(spec) for spec in stage_specs]
         model_ring = list(fixture.ring)
     if compare_emulator:
@@ -296,6 +307,11 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                 for cell in (0xe,0x10,0xf,0x11):
                     cubic_input_values.add(read(cell).hex())
                     clipped_values += abs(read(cell))==1
+            if compare_post_mix:
+                for cell in (0x1c,0x1d,6,0xa):
+                    if read(cell).hex()!=model_ring[native_ring_index(cell,0,origin)].hex():
+                        raise ValueError(f'Packet post-cubic mix differs at frame {frame}, cell {cell:#x}')
+                    post_count+=1
             for index, item in enumerate(model):
                 for cell, expected in ((0x1f+3*index, mixed[index]), (0x28+3*index, item['state_s']),
                                        (0x29+3*index, item['state_t']), (0x24+index, item['output'])):
@@ -347,6 +363,9 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                     if compare_filterbank and not compare_resample else 0,
                 independent_packet_resample_chain_values=(stage_count+second_count+filterbank_count+resample_count)
                     if compare_resample else 0,
+                independent_packet_post_mix_chain_values=(stage_count+second_count+filterbank_count+resample_count+post_count)
+                    if compare_post_mix else 0,
+                post_mix_fixture_gain=values[1] if compare_post_mix else None,
                 resample_fixture_taps=list(resample_taps) if compare_resample else None,
                 resample_fixture_drive=values[0] if compare_resample else None,
                 resample_fixture_drive_literal=resample_drive_literal if compare_resample else None,

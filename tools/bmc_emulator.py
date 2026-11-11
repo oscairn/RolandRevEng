@@ -50,7 +50,8 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
                                                 'state_variable_pair', 'stereo_prefilter',
                                                 'state_variable_pair_with_output', 'state_variable_recombine_pair',
                                                 'state_variable_recombine_pair_with_output',
-                                                'state_variable_terminal_pair_with_output', 'resample_drive_pair')
+                                                'state_variable_terminal_pair_with_output', 'resample_drive_pair',
+                                                'post_cubic_mix_pair')
     if (native_coefficient_prefix or spec['kind'] == 'clipped_half_pair') and not hasattr(math, 'fma'):
         raise ValueError('This native-reference profile requires Python 3.13+ math.fma')
     io_addresses = spec.get('input_addresses', DEFAULT_INPUT_ADDRESSES)
@@ -101,7 +102,19 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
                 else:
                     raise ValueError('Unsupported transfer port')
                 continue
-            if word in (0x1428,0x552b,0x0424,0x4527):
+            if word in (0x04a4,0x45a7,0x0468,0x456b,0x2466,0x6569):
+                destination,source=(word>>12)&7,(word>>6)&7
+                raw=b''.join(value.to_bytes(2,'big')for value in pool)
+                index=word&15
+                factor=literal(raw[index:index+3])
+                value=(old_value(source)*factor if words[0]==0x5f0a else
+                       _fma(old_value(source),factor,old_value(0 if destination<4 else 4)))
+            elif word in (0x24a0,0x65a3):
+                from fdrv_post_cubic_study import POST_SCALES
+                destination=2 if word==0x24a0 else 6
+                # Native constructor policy until silicon literal precision is measured.
+                value=old_value(destination)*POST_SCALES[spec['post_scale_literal']]
+            elif word in (0x1428,0x552b,0x0424,0x4527):
                 destination,source=(word>>12)&7,(word>>6)&7
                 raw=b''.join(value.to_bytes(2,'big') for value in pool)
                 index=word&15
@@ -114,7 +127,7 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
                 # Native constructor double differs from the encoded DSP literal.
                 value=old_value(destination)*DRIVE_SCALES[spec['drive_literal']]
             elif word in (0x0403, 0x4503, 0x2443, 0x6547, 0x2410, 0x6510,
-                        0x1400, 0x5504, 0x1440, 0x5544, 0x2403, 0x6503):
+                        0x1400, 0x5504, 0x1440, 0x5544, 0x2403, 0x6503,0x2483,0x6583):
                 destination, source, operand = (word >> 12) & 7, (word >> 6) & 7, word & 63
                 if operand < 8:
                     factor = old_value(operand)

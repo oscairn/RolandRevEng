@@ -1,5 +1,10 @@
 # FDRV cubic waveshaping, interpolation and clipping
 
+The [post-cubic history mix](#post-cubic-history-mix-milestone-2026-11-11)
+now extends the independent chain to 1,340 logical bytes, including live gain and
+the paired Fantom/ZENOLOGY post scales. The following filter/output region remains
+outside packet admission.
+
 The [connected resampling/drive milestone](#connected-resampling-and-drive-milestone-2026-11-11)
 now supplies clipping and cubic inputs from an independent 1,230-byte packet
 chain, including the four earlier filter sections. Both recorded drive-literal
@@ -396,3 +401,77 @@ later feedback/filter/output stages. State initialization, parameter-update
 behavior, hardware numeric/timing calibration, entry/return, allocation and safe
 loading remain separate work. Broader research pauses at this saved checkpoint;
 no instrument was accessed.
+
+## Post-cubic history mix milestone (2026-11-11)
+
+The independent input chain now reaches the first post-cubic history mix and gain:
+**1,340 logical/stored bytes, nine fragments and 84 packets**. Its new
+`post_cubic_mix_pair` profile is 110 bytes: ten authored preload bytes, the exact
+90 stock bytes at `3ec..446`, and ten explicit output-store bytes. Concatenate
+logical fragments first; this complete body needs no final padding.
+
+For each channel, let A be the current averaged/clipped cubic result, D the
+current direct/clipped cubic result, and H the previous direct result:
+
+```text
+mixed = fma(H, .25, fma(D, .25, A*.5))
+output = (mixed * float32(C1)) * fixed_post_scale
+```
+
+Sources are 12/18/19 for left and 13/1a/1b for right (hexadecimal data addresses).
+The consecutive direct/history relation is checked. Under the fixture's origin
+increment of one, the history read recovers the preceding direct cubic store.
+Raw mixed values go to 1c/1d **before** C1 multiplication. Final values go to 6/a.
+These final stores correspond to native cutpoints from the following stock DSP
+packet, whose other arithmetic/prefetches remain outside this new profile. No
+additional synthetic bridge cells are required. Existing 60..63 bridge allocation
+still needs hardware proof.
+
+| Exact context | Controls | Functional result |
+|---|---|---|
+| short `5f0a` | `04a4 / 45a7` | main A/B = incoming I2/I6 × .5; coissued loads select current direct values |
+| long `470c`, extensions `0000/0004` | `0468 / 456b` | main A/B = fma(incoming I1/I5, .25, incoming A/B); loads select prior direct history |
+| long `220a`, extensions `0000/0004` | `2466 / 6569` | I2/I6 = fma(incoming I1/I5, .25, incoming A/B); C1 load is for the next packet |
+| short `5f07` | `2483 / 6583` | I2/I6 × incoming I3; coissued stores retain the raw mixed values |
+| short `1506` | `24a0 / 65a3` | I2/I6 × fixed post scale |
+
+All admission remains contextual: exact headers, controls, extensions, duplicate
+literals, tags and alias relations are protected by inverse reassembly. There is
+no general short/long decoder or scheduling claim.
+
+The scale difference found before clipping has a matching post-scale difference.
+All five Fantom bodies use duplicated **`500000`** literals, exactly **16.0**.
+ZENOLOGY uses duplicated **`628624`**, decoding to **40.3837890625**, while its
+constructor double is **`0x1.43126e978d4fep+5`** (40.384). The emulator uses that
+explicit native-reference double for the ZENOLOGY variant and 16.0 for Fantom.
+This does not establish literal arithmetic or precision on BMC silicon. All five
+Fantom 90-byte bodies match with their actual scale/data/coefficient substitutions.
+
+`tools/fdrv_post_cubic_study.py` checks the data paths, arithmetic, live gain,
+constructor constants and register preservation through the final stores at
+305bd8/305c00. Later overwrites of the four compared cells fail. Both 12,000-frame
+scale-pair runs match **504,000 values each** through five wraps, ending at origin
+1760: the earlier 38 memory comparisons plus raw mix 1c/1d and final stores 6/a
+per frame. C1 is nonzero binary32 0.7313, rather than the earlier fixture's zero.
+The complete native callback supplies the oracle; packet coverage and final audio
+output remain incomplete. No captured native intermediate feeds the packet model.
+Two 2,056-frame subprocess cases cross wrap with cursors 2/1. Pure scalar and
+trace tests cover asymmetric terms, signed zeros, zero/nonzero gain, delayed
+coefficient visibility, pre-gain stores and both post-scale precision policies.
+
+```sh
+python3.13 tools/fdrv_post_cubic_study.py --execute-native --frames 12000
+python3.13 -m unittest discover -s tests -p 'test_fdrv_post_cubic.py' -v
+python3.13 tools/bmc_subset.py assemble examples/post-cubic-mix-fantom.json local/post-mix.bin --stored
+```
+
+Original examples are `examples/post-cubic-mix-zenology.json` and
+`examples/post-cubic-mix-fantom.json`. Default-tap composed logical SHA-256:
+
+- ZENOLOGY pair: `f7651e5e2249b90343a720ecf550c0dc32cffb899e3d05a4c21430ead072284c`.
+- Fantom pair: `25c5de6b032abab0295be9190871b3bfa9d525c257280399a8278d395be007ef`.
+
+The next unmapped stock region starts at `446`: **18 packets, 326 bytes through
+58c**. That boundary includes the stock packet whose final-input stores are
+represented by our authored suffix; the full packet still needs mapping. Hardware
+calibration, allocation, entry/return and safe loading remain open.

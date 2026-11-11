@@ -5,6 +5,12 @@ and explicitly assigned indices into exact packet sequences independently matche
 against native FETDRIVE, LINEDRIVE and FDRV expressions. This is a constrained semantic code emitter and
 inverse decoder, not a general DSP assembler, scheduler or standalone engine.
 
+The [post-cubic mix milestone](fdrv-cubic-waveshaping-study.md#post-cubic-history-mix-milestone-2026-11-11)
+adds `post_cubic_mix_pair` (110 bytes), with six sources, two raw mix stores,
+two final stores, a live gain slot and an explicit checked post-scale variant.
+The 1,340-byte chain requires no final padding. Literal values, resource adjacency
+and pre-gain/coissued-store semantics remain constrained by exact templates.
+
 The [resampling/drive milestone](fdrv-cubic-waveshaping-study.md#connected-resampling-and-drive-milestone-2026-11-11)
 adds `resample_drive_pair` (122 bytes) and separate Fantom/ZENOLOGY JSON examples.
 Seven sources include a real next-packet prefetch; output cells are distinct, tap

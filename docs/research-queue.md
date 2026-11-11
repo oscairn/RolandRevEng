@@ -13,7 +13,18 @@ Next recover another useful exact producer/control context or an owner-proven
 nonempty label/continuation path; retain bounded opcode admission and hardware gates.
 Entry, runtime allocation and hardware calibration remain separate requirements.
 
-The latest bounded milestone is complete (2026-11-11): resampling/drive now
+The latest bounded milestone is complete (2026-11-11): the first post-cubic mix
+and gain extend the independent chain to 1,340 logical/stored bytes and 84 packets.
+Each scale-pair fixture matches 504,000 native data cutpoints through five wraps.
+Next recover the first following filter at 446; 18 stock packets/326 bytes remain
+through 58c. The represented next-packet output stores do not admit that full packet.
+
+The parallel V-STAGE inventory found official 1.11 components for bmc0..bmc4,
+with three distinct code/content groups. It is now a concrete BMC-family corpus
+lead. Its UI/host CPU, physical chip count and loading compatibility remain open;
+seek readable processor markings or service/GPL evidence before assuming Linux.
+
+The preceding bounded milestone is complete (2026-11-11): resampling/drive now
 connects the filter bank to clipping and cubic shaping in a 1,230-byte packet
 chain. Both native-reference drive variants match 456,000 data cutpoints each
 through five wraps; all five Fantom bodies retain their distinct 0.0625 scale.

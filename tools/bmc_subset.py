@@ -345,6 +345,35 @@ def assemble_resample_drive_pair(spec):
     ])
 
 
+def assemble_post_cubic_mix_pair(spec):
+    if (not isinstance(spec,dict) or spec.get('kind')!='post_cubic_mix_pair'
+            or set(spec)!={'kind','sources','targets','output_addresses','coefficient_slots','post_scale_literal'}):
+        raise ValueError('Expected exact post-cubic mix resources and scale')
+    for name,count,maximum in (('sources',6,0x800),('targets',2,0x800),
+                              ('output_addresses',2,0x800),('coefficient_slots',1,0x1000)):
+        if (not isinstance(spec[name],list) or len(spec[name])!=count
+                or any(type(v)is not int or not 0<=v<maximum for v in spec[name])):
+            raise ValueError(f'Expected {count} valid {name} indices')
+    av,direct,history,ar,dr,hr=spec['sources']
+    if (history!=direct+1 or hr!=dr+1
+            or len(set(spec['sources']+spec['targets']+spec['output_addresses']))!=10):
+        raise ValueError('Post-cubic history/resources violate checked adjacency or alias rules')
+    value=spec['post_scale_literal']
+    if not isinstance(value,str) or value not in ('628624','500000'):
+        raise ValueError('Expected a checked ZENOLOGY or Fantom post-scale literal')
+    raw=bytes.fromhex(value)*2
+    scale=[int.from_bytes(raw[i:i+2],'big')for i in range(0,6,2)]
+    return assemble([
+        [0x1e05,0x2fe0,0x6fe2,av,ar],
+        [0x5f0a,0x04a4,0x45a7,0x1fe0,0x5fe2,direct,dr,0x2800,0x0028,0],
+        [0x470c,0x0468,0x456b,0x1fe4,0x5fe6,0,4,history,hr,0x2400,0x0024,0],
+        [0x220a,0x2466,0x6569,0x3fe4,0,4,0xc000|spec['coefficient_slots'][0],0x2400,0x0024,0],
+        [0x5f07,0x2483,0x6583,0xafe0,0xefe2,*spec['targets']],
+        [0x1506,0x24a0,0x65a3,*scale],
+        [0x1e05,0xafe0,0xefe2,*spec['output_addresses']],
+    ])
+
+
 def assemble_cubic_quad(spec):
     if (not isinstance(spec, dict) or spec.get('kind') != 'cubic_quad'
             or set(spec) != {'kind', 'sources', 'targets'}):
@@ -447,6 +476,8 @@ def assemble_fragment(spec):
         return assemble_terminal_filter(spec)
     if spec.get('kind') == 'resample_drive_pair':
         return assemble_resample_drive_pair(spec)
+    if spec.get('kind') == 'post_cubic_mix_pair':
+        return assemble_post_cubic_mix_pair(spec)
     if spec.get('kind') == 'cubic_quad':
         return assemble_cubic_quad(spec)
     if spec.get('kind') == 'clipped_half_pair':
@@ -459,6 +490,17 @@ def assemble_fragment(spec):
 
 
 def disassemble_fragment(stream):
+    if len(stream)==110:
+        rows=packets(stream)
+        if [len(words)for _,words in rows]!=[5,10,12,10,7,6,5]:
+            raise ValueError('Not an exact post-cubic mix profile')
+        a,b,c,d,e,f,g=[words for _,words in rows]
+        spec=dict(kind='post_cubic_mix_pair',sources=[a[3],b[5],c[7],a[4],b[6],c[8]],
+                  targets=e[5:7],output_addresses=g[3:5],coefficient_slots=[d[6]&0xfff],
+                  post_scale_literal=stream[rows[5][0]+6:rows[5][0]+9].hex())
+        if assemble_post_cubic_mix_pair(spec)!=stream:
+            raise ValueError('Unsupported post-cubic controls, literals, tags or aliases')
+        return spec
     if len(stream) == 122:
         from bmc_dsp import literal
         rows=packets(stream)
