@@ -1,4 +1,4 @@
-"""Render an original LINE-shaped reference pipeline; unknown DSP prefix is not executed."""
+"""Render the LINE-shaped reference with strict fragments and optional mix prediction."""
 import argparse
 import json
 import math
@@ -7,6 +7,7 @@ import wave
 
 from bmc_emulator import execute_fragment
 from bmc_subset import DEFAULT_INPUT_ADDRESSES, assemble_allpass, assemble_fragment, disassemble_fragment
+from line_mix_probe import predict_fantom_mix
 from line_state_study import advance_native_origin, native_ring_index
 from render_fragment_demo import SAMPLE_RATE, metrics, pcm16
 
@@ -22,6 +23,7 @@ def render_reference(frames, *, firmware_context=None, mono=0.0, stereo=1.0):
     from line_shaping_study import native_channel_reference, native_stereo_mix
     if type(frames) is not int or not 128 <= frames <= 1000000:
         raise ValueError('Expected 128..1000000 frames')
+    mix_candidate = None
     if firmware_context is None:
         input_program = assemble_fragment(dict(kind='stereo_input', input_addresses=list(DEFAULT_INPUT_ADDRESSES)))
         left_program, right_program = assemble_allpass(LEFT), assemble_allpass(RIGHT)
@@ -29,10 +31,16 @@ def render_reference(frames, *, firmware_context=None, mono=0.0, stereo=1.0):
                                       coefficient_slots=[3, 4, 5, 0], scratch_addresses=[0x2b, 0x2c]))
         shape_addresses = [(4, 3), (7, 6)]
     else:
-        programs, shape_addresses, _ = firmware_context
+        programs, shape_addresses, report = firmware_context
         input_program, left_program, right_program, tail = programs
+        mix_candidate = report.get('experimental_mix')
     input_addresses = disassemble_fragment(input_program)['input_addresses']
     chains = [disassemble_fragment(program) for program in (left_program, right_program)]
+    if mix_candidate is not None:
+        if [chain['sources'][0] for chain in chains] != mix_candidate['targets']:
+            raise ValueError('Experimental mix targets do not feed the allpass chains')
+        if (mono, stereo) != (0.0, 1.0):
+            raise ValueError('Experimental mix uses the stock literal values')
     mix_coefficients = dict(zip(disassemble_fragment(tail)['coefficient_slots'], (0.5, 0.5, 1, 1)))
     # Explicit experiment: fixed P=0, cold zero ring, one origin step per generated frame.
     ring, origin, rows = [0.0]*2048, 0, []
@@ -44,7 +52,8 @@ def render_reference(frames, *, firmware_context=None, mono=0.0, stereo=1.0):
         inputs = dict(zip(input_addresses, (left, right)))
         ports = execute_fragment(input_program, {}, {}, inputs)['ports']
         data = {address: ring[native_ring_index(address, 0, origin)] for address in source_addresses}
-        mixed_inputs = native_stereo_mix(*ports[:2], mono=mono, stereo=stereo)
+        mixed_inputs = (native_stereo_mix(*ports[:2], mono=mono, stereo=stereo) if mix_candidate is None
+                        else predict_fantom_mix(*ports[:2], mix_candidate['literal_values']))
         for mixed, chain, (history_address, saved) in zip(mixed_inputs, chains, shape_addresses):
             current, _, _, factor_address, *_ = chain['sources']
             history = ring[native_ring_index(history_address, 0, origin)]
@@ -70,6 +79,9 @@ def render_reference(frames, *, firmware_context=None, mono=0.0, stereo=1.0):
                 factor_peak=factor_peak, **metrics(rows))
     if firmware_context is not None:
         info['firmware_context'] = firmware_context[2]
+    if mix_candidate is not None:
+        info['model'] = 'experimental stock-byte input mix + native shaping + strict packet interpreter'
+        del info['native_mix']
     return rows, info
 
 
@@ -92,15 +104,19 @@ if __name__ == '__main__':
     parser.add_argument('--frames', type=int, default=12000)
     parser.add_argument('--core1', type=Path, help='Use stock fragments from the pinned Fantom image')
     parser.add_argument('--owner', type=lambda value: int(value, 0), help='Fantom effect owner descriptor')
+    parser.add_argument('--experimental-mix', action='store_true', help='Predict the input mix from stock packet literals')
     args = parser.parse_args()
     if args.owner is not None and args.core1 is None:
         parser.error('--owner requires --core1')
+    if args.experimental_mix and args.core1 is None:
+        parser.error('--experimental-mix requires --core1')
     try:
         context = None
         if args.core1 is not None:
             from core1 import Core1
             from fantom_line_context import OWNERS, load_context
-            context = load_context(Core1(args.core1), OWNERS[0] if args.owner is None else args.owner)
+            context = load_context(Core1(args.core1), OWNERS[0] if args.owner is None else args.owner,
+                                   experimental_mix=args.experimental_mix)
         print(json.dumps(write_reference(args.output, args.frames, firmware_context=context),
                          indent=2, allow_nan=False))
     except (OSError, ValueError) as error:

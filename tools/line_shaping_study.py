@@ -109,7 +109,7 @@ def _regs(ins):
     return [ins.reg_name(op.reg) for op in ins.operands if op.type == a64.ARM64_OP_REG]
 
 
-def decode_quantizer(code):
+def decode_quantizer(code, *, shift_bits=9):
     from capstone import arm64 as a64
     if (len(code) != 3 or [ins.mnemonic for ins in code] != ['fcvtzs', 'lsl', 'scvtf']
             or [ins.address for ins in code] != list(range(code[0].address, code[0].address + 12, 4))):
@@ -120,11 +120,33 @@ def decode_quantizer(code):
             or not registers[0].startswith('x') or not registers[1].startswith('d')
             or first.operands[2].type != a64.ARM64_OP_IMM or first.operands[2].imm != 32
             or _regs(shift) != [registers[0], registers[0]] or len(shift.operands) != 3
-            or shift.operands[2].type != a64.ARM64_OP_IMM or shift.operands[2].imm != 9
+            or shift.operands[2].type != a64.ARM64_OP_IMM or shift.operands[2].imm != shift_bits
             or _regs(back) != [registers[1], registers[0]] or len(back.operands) != 2):
-        raise ValueError('Not the checked signed64/fixed32/shift9 form')
+        raise ValueError('Not the expected signed64/fixed32/shift form')
     return dict(pc=first.address, integer=registers[0], floating=registers[1],
-                fraction_bits=32, shift_bits=9, integer_width=64)
+                fraction_bits=32, shift_bits=shift_bits, integer_width=64)
+
+
+def dsp_quantizer_windows(decoded):
+    """Frame the two LINE candidate windows without assigning exceptional semantics."""
+    from header_study import families
+
+    expected = ((0, (0x3105, 0x2485, 0xfe10, 0xb9b2, 0)),
+                (0xa, (0x0a02, 0xac99)), (0xe, (0x1a03, 0xaed2, 0x1e10)),
+                (0x14, (0x0903, 0x2490, 0x32d0)), (0x1a, (0x0a02, 0xaeda)))
+    rows = dict(decoded)
+    result = []
+    for start in (0x48, 0x8a):
+        window = []
+        for delta, words in expected:
+            offset = start + delta
+            if tuple(rows.get(offset, ())) != words:
+                raise ValueError(f'LINE shaping context changed at {offset:#x}')
+            kinds = families(words[0])
+            window.append(dict(offset=offset, header=words[0],
+                               operations=list(zip(words[1:1 + len(kinds)], kinds))))
+        result.append(window)
+    return result
 
 
 def decode_constant(code):
@@ -214,7 +236,7 @@ def study():
     import lib
     import parse
     from alu_study import coefficient_pointer_fields
-    from bmc_dsp import literal, packets
+    from bmc_dsp import command_count, literal, packets
     from condition_return_study import preserved
     from header_study import layout, UnsupportedLayout
     from operand_variants_study import check_bindings
@@ -329,8 +351,49 @@ def study():
         if len(anchors) != 1:
             raise ValueError('No unique owned literal reference')
         literal_records.append(dict(record=record, native_load=pc, default=value, **anchors[0]))
+    bitcrush = 'SIM_MFX_BITCRUSH'
+    bitcrush_length, bitcrush_program, *_ = parse.program(bitcrush)
+    shift_controls = [offset for offset, words in packets(bitcrush_program[:bitcrush_length])
+                      if 0xac8e in words[1:1 + command_count(words[0])]]
+    _, _, bitcrush_native = parse.disasm_meth(bitcrush, 'VSubProc(double const**, double**)')
+    fixed_conversions = [ins.address for ins in bitcrush_native
+                         if ins.mnemonic == 'fcvtzs' and ins.op_str.endswith(', #0x20')
+                         and ins.op_str.startswith('x')]
+    if shift_controls != [0x128, 0x278] or len(fixed_conversions) != 16:
+        raise ValueError('BITCRUSH shift comparison inventory changed')
+    fet = 'SIM_MFX_FETDRIVE'
+    fet_length, fet_program, *_ = parse.program(fet)
+    fet_rows = dict(packets(fet_program[:fet_length]))
+    fet_windows = ((0x48, 0x4c), (0xde, 0xe2))
+    for first, second in fet_windows:
+        if fet_rows[first] != [0x0a02, 0x9c59] or fet_rows[second] != [0x0a02, 0x9ed9]:
+            raise ValueError('FETDRIVE exceptional context changed')
+    if any(0xac99 in words[1:1 + command_count(words[0])] for words in fet_rows.values()):
+        raise ValueError('Unexpected AC99 in FETDRIVE')
+    _, _, fet_native = parse.disasm_meth(fet, 'VSubProc(double const**, double**)')
+    fet_quantizers = [decode_quantizer([ins for ins in fet_native if start <= ins.address < start+12])
+                      for start in (0x2f7e74, 0x2f7fe0)]
+    vmcp = 'SIM_MFX_VMCP'
+    vmcp_length, vmcp_program, *_ = parse.program(vmcp)
+    vmcp_rows = dict(packets(vmcp_program[:vmcp_length]))
+    if vmcp_rows[0x4e] != [0x0a02, 0x9ed9]:
+        raise ValueError('VMCP exceptional context changed')
+    _, _, vmcp_native = parse.disasm_meth(vmcp, 'VSubProc(double const**, double**)')
+    vmcp_fixed = [ins.address for ins in vmcp_native if ins.mnemonic == 'fcvtzs'
+                  and ins.op_str.startswith('x') and ins.op_str.endswith(', #0x20')]
+    if vmcp_fixed != [0x39dbac, 0x39dc10]:
+        raise ValueError('VMCP fixed conversion inventory changed')
+    vmcp_quantizers = [decode_quantizer([ins for ins in vmcp_native if start <= ins.address < start+12],
+                                      shift_bits=shift) for start, shift in zip(vmcp_fixed, (2, 4))]
     return dict(native_sha256=NATIVE_SHA256, cls=cls, native_callback=[start, end],
                 constants=constants, quantizers=quantizers, gates=gates, smoothing=smoothing,
+                dsp_quantizer_windows=dsp_quantizer_windows(decoded),
+                bitcrush_comparison=dict(control=0xac8e, packet_offsets=shift_controls,
+                                          native_fixed32_conversions=fixed_conversions),
+                fetdrive_comparison=dict(controls=[0x9c59, 0x9ed9], windows=fet_windows,
+                                         native_quantizers=fet_quantizers),
+                vmcp_comparison=dict(control=0x9ed9, packet_offset=0x4e,
+                                     native_quantizers=vmcp_quantizers),
                 rational=rational, carried_registers=[dict(register=r, start=lo, end=hi) for r, lo, hi in carried],
                 channel_bindings=channel_bindings, literal_records=literal_records,
                 live_coefficient_reads=coefficient_reads,

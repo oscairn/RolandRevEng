@@ -13,7 +13,7 @@ from kernel_abi import placements, program_list, read, segment_info
 LINE_LIST = 0x611084fc
 
 
-def load_context(core, owner_address):
+def load_context(core, owner_address, *, experimental_mix=False):
     if hashlib.sha256(core.data).hexdigest() != IMAGE_SHA256:
         raise ValueError('Expected the recorded Fantom bmc0 CORE1 image')
     if owner_address not in OWNERS:
@@ -94,6 +94,10 @@ def load_context(core, owner_address):
                   checked_fragment_bytes=sum(item['size'] for item in fragment_report),
                   smoother_history=shape_addresses, output_operand_candidates=output_packet[4:],
                   runtime_selection_verified=False, hardware_execution_verified=False)
+    if experimental_mix:
+        from line_mix_probe import decode_fantom_mix
+
+        report['experimental_mix'] = decode_fantom_mix(logical[0xe:0x38])
     return fragments, shape_addresses, report
 
 

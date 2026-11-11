@@ -146,6 +146,52 @@ emitter or strict fragment-interpreter admission changed. Even a native-referenc
 composition using the proven allpass/mix fragments remains distinct from running
 the complete stock BMC byte stream.
 
+## DSP quantizer window and BITCRUSH comparison
+
+`dsp_quantizer_windows()` checks the repeated left and right packet shapes at
+logical `48..66` and `8a..a8`. The existing header classification keeps the
+operations separate:
+
+| Relative to each channel start | Controls | Header-classified families |
+|---|---|---|
+| `0` | `2485`, `fe10`, `b9b2` | Short arithmetic, family 2, transfer family |
+| `a` | `ac99` | Family 2 |
+| `e` | `aed2`, `1e10` | Families 2 and 3 |
+| `14` | `2490` with its literal | Short arithmetic |
+| `1a` | `aeda` | Family 2 |
+
+`b9b2` has a transfer slot in the LINE header and in 41 classified occurrences
+across the local ZENOLOGY render segments. Another 150 occurrences have an
+unclassified header. Its transfer address, side effects and connection to
+exceptional state remain unknown. In particular, the family assignment supplies
+no basis for labeling it the native left shift.
+
+BITCRUSH has related-looking `ac8e` at only two logical packet starts, `128` and
+`278`, while its native callback has 16 signed fixed32 conversions with variable
+shift logic. It cannot provide a one-occurrence-per-conversion alignment for that
+control. LINE's isolated `ac99` is a candidate immediate shift or shift-state
+operation. A second exact-context case with another fixed shift count, or a capture
+of the input and output around that packet, could distinguish those roles. Neither
+the control's low nibble nor the matching native shift-by-nine is sufficient alone.
+
+A scan of framed CORE1 render segments, deduplicated by stored source within
+each image, found 10 `ac99` occurrences in Fantom bmc0, 22 in JUPITER-X and
+22 in SH-4d. All have the same preceding `3105` packet and following `1a03`
+packet shown above. Fantom bmc1 and MC-101 have zero in this scan. Relocated
+copies therefore add coverage across builds and still leave one local encoding
+context for the exact `ac99` control.
+
+FETDRIVE has the same native fixed32 conversion, shift by nine, and signed
+conversion back at `2f7e74..2f7e80` and `2f7fe0..2f7fec`, with half-open
+ranges. Its matching DSP quantizer windows use `9c59` followed by `9ed9`
+at `48/4c` and `de/e2`. The primary FETDRIVE segment contains no `ac99`.
+This gives two different DSP contexts for the same native numeric primitive.
+`9c59`, `9ed9`, and `ac99` all have low six bits `19`. VMCP also has an exact
+standalone `9ed9` at `4e`, while its native callback's two signed64/fixed32
+conversion windows use shifts of 2 and 4. The checked VMCP inventory supplies no
+one-to-one relationship between its `9ed9` and either native conversion. These
+comparisons leave the role of the shared low bits and any special state open.
+
 ## Reproduce and Qwen review
 
 ```sh

@@ -790,3 +790,20 @@ OMP/Qwen returned a bounded review. It correctly flagged the opaque BITCRUSH
 interval. Its generic call for a BITCRUSH trace was narrowed to a JUPITER-X
 observation of the exact target form with unequal literals. The symbolic
 comparisons were checked directly and no generated code was used.
+
+## Executable stock-mix prediction and quantizer boundaries
+
+The stock JUPITER-X probe reads both relocated copies and predicts `0.25` at
+the following B store for unequal inputs `(0.25, -0.125)`. The experimental
+Fantom render uses the original four stock literals. All five bank outputs
+match the native-mix reference through ring wrap. The 12,000-frame WAV is
+byte-identical. No hardware trace entered the comparison.
+
+The LINEDRIVE quantizer study checks both packet windows and separates the
+transfer-family `b9b2` from the exceptional `ac99`. BITCRUSH contains two `ac8e`
+packets and 16 native fixed32 conversions, which prevents a one-to-one match.
+FETDRIVE uses the same native fixed shift by nine with `9c59/9ed9` in its
+corresponding DSP windows, providing another encoding to compare.
+Qwen reviewed the argument and proposed an asymmetric capture. Its claim
+that the native mix treats the two inputs independently is contradicted by
+the native shared term at `2df898`. No generated code was used.

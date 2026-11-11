@@ -337,7 +337,21 @@ would distinguish swapped operands, an alternate destination and capture of the
 next operation's result. No DSP trace or hardware arithmetic was measured.
 The strict emulator's admissions are unchanged.
 
+`line_mix_probe.py` now checks the pinned JUPITER-X source and reads the actual
+predecessor load, the two literal fields and the successor store for each bank.
+For `(0.25, -0.125)` it predicts `0.25` in the following store. Base `2020` uses
+sources `2008/2009` and target `200e`. Base `7020` uses sources `2078/2079`
+and target `207e`. This supplies an exact test vector for a future
+capture. The tool operates on the local container and has no acquisition path.
+
+An additional scan of the installed ZENOLOGY Audio Unit arm64 slice found zero
+`0806 / 4822 / 1940` instances in 11,827 framed packets from 167 candidate
+segments. The Audio Unit exposes one symbol, so the scan had no named native
+effect pairing. Its SHA-256 is
+`9033fe8a6df5885361a6c82dca55d367452b770e92b7efedbd9453cdd7c5096a`.
+
 ```sh
 python tools/weighted_mix_study.py > local/weighted-mix-study.json
 python -m unittest discover -s tests -p test_weighted_mix_study.py -v
+python tools/line_mix_probe.py local/crossmodel/jupiter-x/MI077_C1A_up.bin
 ```

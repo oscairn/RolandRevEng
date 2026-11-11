@@ -54,6 +54,14 @@ class CorpusTests(unittest.TestCase):
                 frames, info = render_reference(2056, firmware_context=context)
                 self.assertEqual(frames, expected)
                 self.assertEqual(info['final_origin'], 8)
+                experimental = load_context(core, owner, experimental_mix=True)
+                candidate = experimental[2]['experimental_mix']
+                self.assertEqual(candidate['literal_values'], [0, 0, 1, 1])
+                self.assertEqual(candidate['targets'], [data_base+1, data_base+2])
+                predicted, info = render_reference(2056, firmware_context=experimental)
+                self.assertEqual(predicted, expected)
+                self.assertFalse(info['whole_dsp_program_executed'])
+                self.assertNotIn('native_mix', info)
 
     def test_unknown_owner_and_image_are_rejected(self):
         from types import SimpleNamespace

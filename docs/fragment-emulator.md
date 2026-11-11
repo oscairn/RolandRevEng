@@ -160,6 +160,20 @@ scaled by `stereo`, matching native `2df890..2df8a4`. These coefficients affect 
 wet path only. They do not patch the firmware or resolve how its four fields are
 bound. The default 12,000-frame Fantom reference WAV remains byte-identical.
 
+With `--experimental-mix`, the renderer uses all four width-three literals and
+the store operands from the stock `00e..038` packet slice. It computes the shared
+B candidate and both per-channel candidate sums from those fields. All five
+Fantom placements match the native-reference fixture through ring wrap at the
+stock `(0, 0, 1, 1)` values. An asymmetric synthetic fixture distinguishes all
+four operands. The match at stock defaults cannot establish hardware port state,
+precision or behavior under unequal coefficients. The option covers the input
+mix and its output samples. Native shaping still supplies the drive stage.
+
+```sh
+python tools/render_line_reference.py local/fantom-mix-experiment.wav \
+  --core1 local/b0c1a.bin --experimental-mix
+```
+
 ## Original one-pole kernel
 
 `bmc_one_pole.programs()` assembles two 80-byte variants of the checked
