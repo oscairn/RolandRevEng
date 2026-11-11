@@ -51,15 +51,15 @@ def scan(data, segments):
     return dict(counts=dict(counts), matches=matches)
 
 
-def core_report(core):
+def core_report(core, scan_segments=scan):
     from analyze import core_lists
 
     segments = [(core.address(row['payload_offset']), segment)
                 for row in core_lists(core) for segment in row['segments']]
-    return scan(core.data, segments)
+    return scan_segments(core.data, segments)
 
 
-def study(firmware, qspi):
+def study(firmware, qspi, *, scan_segments=scan):
     import lib
     from core1 import Core1
     from jupiter_c1_study import original_span
@@ -71,11 +71,11 @@ def study(firmware, qspi):
         raise ValueError('ZENOLOGY inventory hash differs from prepared image')
     segments = [(row[0], segment) for row in inventory['lists'] if row[1] == 0
                 for segment in row[3]]
-    result = dict(zenology=dict(sha256=native_digest, **scan(lib.Z, segments)))
+    result = dict(zenology=dict(sha256=native_digest, **scan_segments(lib.Z, segments)))
     for path in firmware:
         core = Core1(path)
         result[path.name] = dict(payload_sha256=hashlib.sha256(core.data).hexdigest(),
-                                 **core_report(core))
+                                 **core_report(core, scan_segments))
     for path in qspi:
         manifest, view = read_c1(path)
         with TemporaryDirectory(prefix='line-mix-') as directory:
@@ -84,7 +84,7 @@ def study(firmware, qspi):
             core = Core1(analysis)
         if core.eram_offset != manifest['regions'][1]['analysis_offset']:
             raise ValueError('CORE1 bootstrap disagrees with split-member mapping')
-        report = core_report(core)
+        report = core_report(core, scan_segments)
         for match in report['matches']:
             # Logical offsets within swapped words are distinct from original-file offsets.
             match['original_source'] = original_span(
@@ -93,12 +93,16 @@ def study(firmware, qspi):
     return result
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=__doc__)
+def main(scan_segments=scan, description=__doc__):
+    parser = argparse.ArgumentParser(description=description)
     parser.add_argument('--core1', type=Path, action='append', default=[])
     parser.add_argument('--qspi', type=Path, action='append', default=[])
     args = parser.parse_args()
     names = [path.name for path in args.core1 + args.qspi]
     if len(names) != len(set(names)) or 'zenology' in names:
         parser.error('Supply distinct artifact basenames')
-    print(json.dumps(study(args.core1, args.qspi), indent=2))
+    print(json.dumps(study(args.core1, args.qspi, scan_segments=scan_segments), indent=2))
+
+
+if __name__ == '__main__':
+    main()

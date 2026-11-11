@@ -872,3 +872,12 @@ zero and `±2^-23` reaches the first nonzero bin. Probes immediately beyond
 each clip limit saturate at the corresponding sign. All five placements
 give the same predicted output for the test fixture. The WAV covers
 only the first stores and uses software-generated input.
+
+## Stock search for an intermediate `9c59` result
+
+The framed control-slot search covered 241,742 packets in ZENOLOGY and
+the recovered Fantom, JUPITER-X, MC-101 and SH-4d CORE1 lists. All 58 hits
+reproduce the FETDRIVE gain, conversion candidate and clamp candidate
+in three consecutive packets. The nearby GATE `8ed9` variant appears in a
+three-control bundle. Its native clamp interval also contains a conditional
+selection, leaving it insufficient for an isolated port assignment.

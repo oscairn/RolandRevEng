@@ -127,6 +127,9 @@ The [VMCP and RING comparisons](line-prefix-shaping-study.md#vmcp-and-ring-separ
 support a bipolar clamp for `9ed9` in two store-bracketed contexts. VMCP's
 shift-by-2 and shift-by-4 reference windows align separately with `bc12` and
 `bcd4`. The precise register and exceptional-state effects remain open.
+The [stock context inventory](line-prefix-shaping-study.md#stock-contexts-of-9c59)
+finds the same `1405`, `9c59`, `9ed9` sequence at all 58 exact hits.
+An intermediate result for `9c59` remains open.
 
 The [fixed-point shift comparisons](line-prefix-shaping-study.md#fixed-point-shifts-in-vmcp-vsod-formant-and-gassph)
 match `bcd4` to port-3 input across VMCP and both VSOD variants. The base

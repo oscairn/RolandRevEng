@@ -256,6 +256,47 @@ python tools/limit_control_study.py --core1 local/b0c1a.bin > local/limit-contro
 python -m unittest discover -s tests -p test_limit_control_study.py -v
 ```
 
+## Stock contexts of `9c59`
+
+`quantizer_context_inventory.py` searches only the control slots identified
+by the packet header. It records both neighboring packets for every exact
+`9c59` hit, including the source span in the original member of a split
+CORE1 image.
+
+| Prepared artifact | Framed segments | Packets | `9c59` hits | List with hits |
+|---|---:|---:|---:|---|
+| ZENOLOGY native inventory | 177 | 12,365 | 4 | `a50cf0` |
+| Fantom BMC0 CORE1 | 377 | 36,793 | 10 | `610e7b88` |
+| Fantom BMC1 CORE1 | 34 | 12,176 | 0 | |
+| JUPITER-X CORE1 | 979 | 86,857 | 22 | `61123594` |
+| MC-101 CORE1 | 59 | 13,639 | 0 | |
+| SH-4d CORE1 | 909 | 79,912 | 22 | `6110e55c` |
+
+All 58 hits occupy offsets `48` or `de` of a 458-byte render segment.
+Every hit has the same three packets, `0902 1405`, `0a02 9c59`, and
+`0a02 9ed9`. The extra JUPITER-X and SH-4d placements reproduce the
+FETDRIVE window without an intervening store. The MC-101 inventory excludes
+six candidate segments that failed framing. The SH-4d inventory excludes one.
+Coverage is limited to the recovered render lists and these prepared artifacts.
+
+The desktop GATE program supplies a related word, `8ed9`, in the
+`3604 8ed8 8ed9 1b12` packet at `a6`. Native code at `313f08..313f18`
+clamps a biased data value to `[-1,+1]`. The same native interval then applies
+a threshold-dependent selection before the data store at `313f50`.
+Constructor field `11c` binds that store to DSP operand `94`, cell `7`,
+which appears in a co-issued store packet at `82`. The clamp and the
+DSP packet are candidates for comparison. The differing store order and
+the other two controls at `a6` leave individual writeback unverified.
+
+```sh
+python tools/quantizer_context_inventory.py \
+  --core1 local/b0c1a.bin --core1 local/b1c1a.bin \
+  --qspi local/crossmodel/jupiter-x/MI077_C1A_up.bin \
+  --qspi local/crossmodel/mc101/RPG69_C1A_up.bin \
+  --qspi local/crossmodel/sh-4d/DD013_C1A_up.bin \
+  > local/quantizer-context-inventory.json
+```
+
 ## Fixed-point shifts in VMCP, VSOD, FORMANT and GASSPH
 
 `coefficient_shift_study.py` follows independently identified binary32 live
