@@ -13,6 +13,14 @@ All other body bytes are preserved, and the default 200-byte behavior remains
 covered by its existing tests. The unfiltered details below retain their own
 six-seed/thirty-field scope; the linked filtered study records the new variant.
 
+With `--cutoff ... --waveshape`, the optional cubic stage makes a 510-byte
+logical / 512-byte stored voice. Seventy two-byte transfer fields are relocated,
+370 other bytes are protected, and the ten seeds/eleven coefficients are unchanged.
+Data extent is 150. The capacity check includes final storage padding, and
+manifests retain separate logical/stored sizes and hashes. The
+[filtered voice study](original-bmc-filtered-voice.md#optional-cubic-waveshaping-before-the-filter)
+records all inputs, boundaries, independent renders and hardware limits.
+
 These are executable **offline fragment bodies**, not load-ready instrument
 programs. The builder emits no entry/return wrapper or output-IO stores and
 assigns no body load address. It performs no device access. Runtime ownership,

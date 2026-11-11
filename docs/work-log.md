@@ -1372,3 +1372,49 @@ are already binary32. Composition, dataflow, byte protection, relocation and
 independent renders were implemented and checked locally. All 403 tests passed in
 45.987 seconds. Load/entry/return remain null, ownership/output routing and physical
 timing/precision remain unverified, and no firmware package or device write is made.
+
+## Cubic packet execution and original shaped/filter voice (2026-11-11)
+
+The FDRV cubic producer window is now an exact 126-byte/eleven-packet profile:
+10 authored preload bytes plus the stock 116-byte body at 378..3ec. Four
+independent sources feed four x*(x*x+(3-abs(3*x))) results, preserving old-port
+stores, shared literals and final reloads. All five Fantom FDRV bodies match.
+Six additional short multiplies and two literal-minus-magnitude forms execute
+only inside the strict checked profile. Destination/source/operand fields and
+masked multiplication/add classes are recorded as partial maps; arbitrary class
+matches and miscellaneous header grammar remain outside admission. The earlier
+6547 coefficient-port ambiguity is retained because its candidate values coincide.
+
+Every packet is checked with four asymmetric inputs. Native curve comparisons
+cover 1,032 independent values, including signed zero and minimum subnormals.
+A separate 12,000-frame full-callback fixture with declared .75 input gain supplies
+four cubic input/result cutpoints: all 48,000 conditional results match, with
+47,985 distinct input values. A provenance audit excludes later overwrites. These
+captured inputs are not a new independent complete-FDRV reference. The existing
+first-filter check independently matches another 96,000 values in that fixture.
+
+The original filtered voice now has optional cubic shaping between gain and
+lowpass. The five profiles occupy 510 logical bytes and 39 packets, stored as
+512 bytes with padding only at the full body's end. Data extent 150 fits the
+smallest recorded reservation exactly; ten initial data values and eleven
+coefficients are unchanged. Amplitude is bounded to 0..0.5 for headroom and
+actual shaper reads retain the checked [-1,1] domain. No sample-rate arithmetic
+is performed on the host outside the packet interpreter.
+
+The independent original-voice + scalar-cubic/filter render matches all 24,000
+channel samples through 12,000 frames. Five owner-specific canary-ring renders
+match another 120,000 values. The planner verifies 70 two-byte address fields,
+protects 370 other bytes, exports distinct logical/stored sizes and hashes, and
+includes storage alignment in the capacity check. Default 200-byte unfiltered
+and 384-byte filtered behavior remain tested. Original local WAV and five plans
+were generated and their exported sizes and hashes verified.
+
+Qwen's read-only attempt hit its 60.2-second bound without review artifacts.
+A smaller no-tool review completed in 6.3 seconds but miscopied right inputs and
+made arithmetic errors; none of its code or conclusions were accepted. The
+implementation, provenance and native/scalar checks were completed locally.
+All 415 tests passed in 57.989 seconds. Twelve new tests cover actual byte windows,
+packet timing, native/independent comparisons, strict boundaries, relocation,
+padding, capacities, initialization and output preservation. Physical precision,
+issue budget, live ownership, entry/return, output routing and usable transport
+remain unverified. No device was accessed and no firmware package was built.

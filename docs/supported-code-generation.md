@@ -5,6 +5,12 @@ and explicitly assigned indices into exact packet sequences independently matche
 against native FETDRIVE, LINEDRIVE and FDRV expressions. This is a constrained semantic code emitter and
 inverse decoder, not a general DSP assembler, scheduler or standalone engine.
 
+The [cubic waveshaper](fdrv-cubic-waveshaping-study.md) adds the exact 126-byte
+`cubic_quad` profile and `examples/cubic-quad.json`. Four distinct source cells
+and four distinct target cells supply independent curves; source right2 is also
+written back unchanged. Only the complete checked packet sequence is admitted.
+It takes 128 stored bytes with two final zeros and explicit `--length 126`.
+
 The [auxiliary/add-MAC study](auxiliary-save-restore-and-add-mac.md) adds an
 84-byte `register_add_mac_pair` profile. Its ten sources supply
 `[A,W1,S2,B,W5,S6,next_S2,next_S6,next_W1,next_W5]`, its two targets capture
@@ -28,6 +34,8 @@ profiles into 384 bytes with ten seeds and eleven coefficients. The resource
 planner's optional `--cutoff` mode relocates only 58 checked transfer fields;
 the other 268 bytes remain protected. This adds a complete offline voice body
 without a general compiler, runtime allocation or executable wrapper.
+Its `--waveshape` mode inserts the exact cubic quad for 510 logical / 512 stored
+bytes, 70 address fields, data extent 150 and the same seeds/coefficients.
 
 The [original stereo oscillator voice](original-bmc-stereo-voice.md) composes
 three existing profiles into a static 200-byte body. Its resource-fit checker

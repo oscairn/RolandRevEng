@@ -4,6 +4,15 @@ Queued 2026-11-10 at Jacob's request. Starting research checkpoint: `80b740b`.
 The practical target is a small custom engine running on the BMC render DSPs, with
 the i.MX8M handling UI/control. Current emitters produce verified fragments only.
 
+Latest arithmetic result (2026-11-11): the exact 126-byte cubic quad executes
+four independently checked waveshaping curves, matching all five Fantom bodies.
+It now composes between the original oscillator/gain and lowpass filter: 510
+logical bytes, 512 stored, 39 packets, data extent 150 and the same ten seeds.
+Independent scalar and five relocated checks cover the voice through wrap.
+Next recover another useful exact producer/control context or an owner-proven
+nonempty label/continuation path; retain bounded opcode admission and hardware gates.
+Entry, runtime allocation and hardware calibration remain separate requirements.
+
 Latest entry-boundary result: [CORE1 label targets](label-target-encoding-study.md)
 proves the halfword scaling and counted record layout, verifies five existing
 parent numeric fields, and checks the actual FETDRIVE entry label has no incoming

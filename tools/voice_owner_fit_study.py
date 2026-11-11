@@ -12,17 +12,19 @@ def requirements(fragments=None):
     specs = [disassemble_fragment(program) for program in fragments]
     kinds = [spec['kind'] for spec in specs]
     base_kinds = ['coefficient_shift4', 'allpass4', 'dry_wet_tail_with_scratch']
-    if kinds not in (base_kinds, base_kinds+['state_variable_pair']):
-        raise ValueError('Expected an original voice with its optional state-variable filter')
+    if kinds not in (base_kinds, base_kinds+['state_variable_pair'],
+                     base_kinds+['cubic_quad', 'state_variable_pair']):
+        raise ValueError('Expected an original voice with optional cubic shaping and state-variable filter')
     prefix, allpass, tail = specs[:3]
     data = [prefix['target'], *allpass['sources'], *allpass['targets'],
             *tail['wet_addresses'], *tail['scratch_addresses']]
     coefficients = prefix['coefficient_slots']+tail['coefficient_slots']
-    if len(specs) == 4:
-        data += specs[3]['sources']+specs[3]['targets']
-        coefficients += specs[3]['coefficient_slots']
+    for spec in specs[3:]:
+        data += spec['sources']+spec['targets']
+        coefficients += spec.get('coefficient_slots', [])
     data, coefficients = sorted(set(data)), sorted(set(coefficients))
-    return dict(body_bytes=sum(map(len, fragments)), data_indices=data,
+    body_bytes = sum(map(len, fragments))
+    return dict(body_bytes=body_bytes, stored_bytes=(body_bytes+3)&~3, data_indices=data,
                 coefficient_indices=coefficients, data_extent=max(data)+1,
                 coefficient_extent=max(coefficients)+1)
 
@@ -32,8 +34,8 @@ def fit(owner, fragments=None):
     if any(len(group) != 1 for group in (owner['render'], owner['memories'][0], owner['memories'][6])):
         raise ValueError('Expected one render, enum-0 and enum-6 reservation')
     program, data, coefficients = owner['render'][0], owner['memories'][0][0], owner['memories'][6][0]
-    fits = dict(program=needed['body_bytes'] <= program['capacity'] and 0 <= program['base']
-                     and program['base']+needed['body_bytes'] <= 2**32,
+    fits = dict(program=needed['stored_bytes'] <= program['capacity'] and 0 <= program['base']
+                     and program['base']+needed['stored_bytes'] <= 2**32,
                 data=needed['data_extent'] <= data['length'] and 0 <= data['base']
                      and data['base']+needed['data_extent'] <= 0x800,
                 coefficients=needed['coefficient_extent'] <= coefficients['length']

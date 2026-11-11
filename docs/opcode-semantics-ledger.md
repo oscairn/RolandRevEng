@@ -32,6 +32,8 @@ rounding, saturation, accumulator width or fused evaluation on silicon.
 | `1c42 / 5d46` short pair, then `044b/0000` + `454f/0004` long pair | In the exact FDRV context, sum I1+I2 and I5+I6, store incoming I1/I5, then accumulate the sums into A/B with a shared coefficient | [Auxiliary/add-MAC study](auxiliary-save-restore-and-add-mac.md), strict 84-byte profile; coefficient-port ambiguity retained |
 | FDRV `66..f8` filter context | Two coupled state updates, a weighted output, and balanced port-2/port-6 saves/restores | [State-variable filter](fdrv-state-variable-filter.md), strict 184-byte profile; no word-only decoding or physical stack-depth claim |
 
+| FDRV `378..3ec` cubic context plus authored preload | Four `x×(x²+3−abs(3x))` curves, with old-value stores and final reloads | [Cubic study](fdrv-cubic-waveshaping-study.md), strict 126-byte profile; six new short multiplies and two exact literal-minus-magnitude forms, no universal masked-class admission |
+
 For the first gain row the slash separates two **short controls**. In long rows,
 it separates a base control from its extension. Headers and shared pool layout
 determine which interpretation applies. Read the linked context before using a row.

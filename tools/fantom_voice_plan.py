@@ -22,18 +22,19 @@ from voice_owner_fit_study import fit
 
 
 def transfer_fields(fragments):
-    """Read transfer fields only within exact voice/optional filter profiles."""
+    """Read transfer fields only within exact voice, cubic and filter profiles."""
     kinds = [disassemble_fragment(fragment)['kind'] for fragment in fragments]
     base_kinds = ['coefficient_shift4', 'allpass4', 'dry_wet_tail_with_scratch']
-    if kinds not in (base_kinds, base_kinds+['state_variable_pair']):
-        raise ValueError('Expected the original voice with its optional state-variable filter')
+    if kinds not in (base_kinds, base_kinds+['state_variable_pair'],
+                     base_kinds+['cubic_quad', 'state_variable_pair']):
+        raise ValueError('Expected the original voice with optional cubic shaping and state-variable filter')
     stream = b''.join(fragments)
-    filter_start = sum(map(len, fragments[:3]))
+    extra_start = sum(map(len, fragments[:3]))
     result = []
     for packet, words in packets(stream):
         count = command_count(words[0])
-        if len(fragments) == 4 and packet >= filter_start:
-            # The exact filter recognizer gates this walk; miscellaneous grammar stays opaque.
+        if len(fragments) >= 4 and packet >= extra_start:
+            # Exact extra-profile recognizers gate this walk; miscellaneous grammar stays opaque.
             types = [4 if control & 0xff0 == 0xfe0 and not control & 1 else None
                      for control in words[1:1+count]]
         else:
@@ -96,11 +97,13 @@ def verify_relocation(fragments, data_base, coefficient_base, inputs, original=N
 
 
 def build_plan(core, owner_address, frequency=440, gain=0.5, amplitude=0.25,
-               cutoff=None, damping=math.sqrt(2)):
+               cutoff=None, damping=math.sqrt(2), waveshape=False):
     if type(owner_address) is not int:
         raise ValueError('Expected an integer owner descriptor address')
     if cutoff is None and damping != math.sqrt(2):
         raise ValueError('A damping control requires a filter cutoff')
+    if type(waveshape) is not bool or (waveshape and cutoff is None):
+        raise ValueError('Boolean waveshaping requires a filter cutoff')
     _, _, stock = load_context(core, owner_address)
     if cutoff is None:
         original = voice.programs()
@@ -111,8 +114,8 @@ def build_plan(core, owner_address, frequency=440, gain=0.5, amplitude=0.25,
         coefficients.update({2: 0.0, 3: _float32(gain), 4: 1.0, 5: 1.0})
     else:
         import bmc_filtered_voice as filtered
-        original = filtered.programs()
-        _, coefficients, seed = filtered.initialize(frequency, amplitude, gain, cutoff, damping)
+        original = filtered.programs(waveshape)
+        _, coefficients, seed = filtered.initialize(frequency, amplitude, gain, cutoff, damping, waveshape)
         gain = _finite(gain)
     resources = fit(segment_info(core, owner_address), original)
     if not resources['body_capacity_fits']:
@@ -143,7 +146,8 @@ def build_plan(core, owner_address, frequency=440, gain=0.5, amplitude=0.25,
                   stock_input_pair=inputs, stock_output_operand_candidates=stock['output_operand_candidates'],
                   specs=specs, fragment_sizes=list(map(len, fragments)), body_bytes=len(logical),
                   logical_sha256=hashlib.sha256(logical).hexdigest(),
-                  stored_sha256=hashlib.sha256(swap_words(logical)).hexdigest(),
+                  stored_bytes=(len(logical)+3)&~3, waveshape=waveshape,
+                  stored_sha256=hashlib.sha256(swap_words(logical+bytes(-len(logical) % 4))).hexdigest(),
                   address_changes=changes, non_address_bytes_verified=True,
                   initial_data=initial_data, required_initial_data=needed, coefficients=coefficients,
                   cpu_float32_data_sources=float_sources(initial_data),
@@ -165,10 +169,10 @@ def build_plan(core, owner_address, frequency=440, gain=0.5, amplitude=0.25,
 
 
 def render_check(core, owner_address, frames=2056, frequency=440, gain=0.5, amplitude=0.25,
-                 cutoff=None, damping=math.sqrt(2)):
+                 cutoff=None, damping=math.sqrt(2), waveshape=False):
     if type(frames) is not int or not 128 <= frames <= 1000000:
         raise ValueError('Expected 128..1000000 verification frames')
-    fragments, result = build_plan(core, owner_address, frequency, gain, amplitude, cutoff, damping)
+    fragments, result = build_plan(core, owner_address, frequency, gain, amplitude, cutoff, damping, waveshape)
     ring = [0.125+index/65536 for index in range(2048)]
     for cell, value in result['initial_data'].items():
         ring[cell] = value
@@ -192,7 +196,7 @@ def render_check(core, owner_address, frames=2056, frequency=440, gain=0.5, ampl
         baseline, _ = voice.render(frames, frequency, amplitude, gain)
     else:
         import bmc_filtered_voice as filtered
-        baseline, _ = filtered.render(frames, frequency, amplitude, gain, cutoff, damping)
+        baseline, _ = filtered.render(frames, frequency, amplitude, gain, cutoff, damping, waveshape)
     for frame, (observed, expected) in enumerate(zip(rows, baseline, strict=True)):
         if [value.hex() for value in observed] != [value.hex() for value in expected]:
             raise ValueError(f'Relocated voice differs from original output at frame {frame}')
@@ -204,10 +208,12 @@ def render_check(core, owner_address, frames=2056, frequency=440, gain=0.5, ampl
 
 def write_plan(output, fragments, result):
     logical = b''.join(fragments)
+    stored = swap_words(logical+bytes(-len(logical) % 4))
     if (len(logical) != result['body_bytes'] or hashlib.sha256(logical).hexdigest() != result['logical_sha256']
-            or hashlib.sha256(swap_words(logical)).hexdigest() != result['stored_sha256']):
+            or hashlib.sha256(stored).hexdigest() != result['stored_sha256']
+            or len(stored) != result['stored_bytes']):
         raise ValueError('Export bytes differ from the verified plan hashes')
-    payloads = {'body-logical.bin': logical, 'body-stored.bin': swap_words(logical),
+    payloads = {'body-logical.bin': logical, 'body-stored.bin': stored,
                 'manifest.json': (json.dumps(result, indent=2, allow_nan=False)+'\n').encode()}
     output = Path(output)
     output.mkdir(parents=True, exist_ok=False)
@@ -227,13 +233,14 @@ if __name__ == '__main__':
     parser.add_argument('--gain', type=float, default=0.5)
     parser.add_argument('--cutoff', type=float, help='Include the original stereo lowpass filter')
     parser.add_argument('--damping', type=float, default=math.sqrt(2))
+    parser.add_argument('--waveshape', action='store_true', help='Add cubic shaping before the filter')
     parser.add_argument('--frames', type=int, default=2056)
     args = parser.parse_args()
     try:
         if args.output.exists():
             raise FileExistsError('Refusing to replace an existing output directory')
         fragments, result = render_check(Core1(args.core1), args.owner, args.frames, args.frequency, args.gain,
-                                         cutoff=args.cutoff, damping=args.damping)
+                                         cutoff=args.cutoff, damping=args.damping, waveshape=args.waveshape)
         write_plan(args.output, fragments, result)
         print(json.dumps(result, indent=2, allow_nan=False))
     except (OSError, ValueError) as error:

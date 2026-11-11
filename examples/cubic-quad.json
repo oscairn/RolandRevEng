@@ -1,0 +1,5 @@
+{
+  "kind": "cubic_quad",
+  "sources": [14, 16, 15, 17],
+  "targets": [18, 24, 19, 26]
+}

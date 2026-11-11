@@ -1,8 +1,12 @@
-"""Bind four FDRV waveshaping windows to native stores; no isolated DSP admission."""
+"""Bind native FDRV cubic cutpoints and the exact cubic_quad packet profile."""
 import hashlib
 
 from bmc_dsp import literal, packets
 from line_shaping_study import NATIVE_SHA256, _finite
+
+
+def cubic_spec():
+    return dict(kind='cubic_quad', sources=[0xe, 0x10, 0xf, 0x11], targets=[0x12, 0x18, 0x13, 0x1a])
 
 
 def cubic_reference(value):
@@ -84,8 +88,24 @@ def report():
                              candidate_short_control=control, candidate_short_packet=packet,
                              native_add=start+24, source_transfer_field=dsp['source_fields'][index],
                              source_port_binding_verified=False))
+    for curve in bindings:
+        for item in (curve['source'], curve['target']):
+            if any(access['kind'] == 'write' and access['pc'] > item['pc']
+                   and any(fields[field]['address'] == item['address'] for field in access['fields'])
+                   for access in trace['accesses']):
+                raise ValueError('Cubic cutpoint is overwritten later in the callback')
+    input_copy = checked_access(native, fields, trace, 0x3059ec, 'write', 0x382, 0x11)
+    require_instructions(native, 0x3059ec, (('str', 'd0, [x11, w13, uxtw #3]'),))
+    preserved([native[pc] for pc in range(0x3059d0, 0x3059ec, 4)], 'd0')
+    short_fields = [dict(control=word, destination=(word >> 12) & 7, source=(word >> 6) & 7,
+                         operand_reference=word & 63, normalized_class=word & 0x8e00,
+                         required_family=1, universal_semantic_admission=False)
+                    for word in (0x0403, 0x4503, 0x2443, 0x6547, 0x2410, 0x6510,
+                                 0x1400, 0x5504, 0x1440, 0x5544, 0x1c42, 0x5d46)]
     return dict(native_sha256=NATIVE_SHA256, context=dsp, curves=bindings,
                 formula='x * (x*x + (3 - abs(3*x)))', native_probe_interval=[0x305a00, 0x305a24],
+                incoming_second_right_store=input_copy, short_control_fields=short_fields,
+                admitted_profile='cubic_quad', profile_logical_bytes=126,
                 native_execution_verified=False, bmc_execution_verified=False,
                 isolated_opcode_admission=False, complete_program_executable=False)
 
@@ -138,6 +158,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--execute-native', action='store_true')
     parser.add_argument('--core1', type=Path)
+    parser.add_argument('--native-window-frames', type=int,
+                        help='Compare the byte window against native callback input/output cutpoints')
     args = parser.parse_args()
     result = report()
     if args.execute_native:
@@ -146,4 +168,7 @@ if __name__ == '__main__':
     if args.core1:
         from core1 import Core1
         result['fantom_placements'] = fantom_report(Core1(args.core1))
+    if args.native_window_frames is not None:
+        from fdrv_filter_study import native_check
+        result['native_window'] = native_check(args.native_window_frames, (1, 2), True, compare_cubic=True)
     print(json.dumps(result, indent=2, allow_nan=False))

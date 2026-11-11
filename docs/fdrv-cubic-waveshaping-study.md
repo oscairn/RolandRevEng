@@ -12,11 +12,16 @@ FDRV is a different algorithm from FETDRIVE. No BMC hardware was accessed.
 actual DSP data operands. All five Fantom FDRV placements retain the packet
 contexts and relative resource relationships. The reference agrees bit for bit
 with an isolated native window on 1,034 inputs, including signed zero and the
-smallest positive and negative subnormals. No individual BMC control or complete
-FDRV program is admitted to execution by this cubic pass. The subsequent
-[auxiliary/add-MAC study](auxiliary-save-restore-and-add-mac.md) admits a separate
-exact context from the earlier state/filter sequence; the cubic producer window
-remains outside the strict interpreter.
+smallest positive and negative subnormals.
+
+**2026-11-11 update:** the exact 126-byte `cubic_quad` profile now executes in
+the strict emitter/interpreter. A ten-byte authored preload supplies the first
+left and incoming second-right samples; the following 116 bytes match stock
+FDRV `378..3ec`, including all five Fantom relocations. Independent four-input
+vectors and the isolated native curve match bit for bit. The full native callback
+also supplies input/output cutpoints for a conditional window comparison; these
+captured inputs do not constitute an independent whole-FDRV model. No general
+opcode, complete FDRV program or hardware precision policy is admitted.
 
 ## Four separate native input/output windows
 
@@ -67,18 +72,59 @@ The candidate short additions associate as follows:
 | `39c` / `5d46` | `305a9c` |
 | `3d0` / `5d46` | `305adc` |
 
-Thus packet `39c` does not simply correspond to the second native curve in
-listing order. The source/result field bindings constrain the whole window.
-They do not separately prove the values entering the short operation's ports.
-The miscellaneous `2e92/6f90` controls and preceding producers still matter.
-The numerical sum alone cannot establish their individual effects, issue order,
-or all live port state. In particular, the two-byte word `5d46` remains a bounded
-short-add candidate, not a general executable `I5 += I6` definition.
+Thus packet `39c` corresponds to the first right curve, while `3c6` corresponds
+to the second left curve. The new exact profile reconstructs their producers
+and coissued stores, using incoming ports throughout each packet. The initial
+right value is written to its own cell before that packet loads the first right
+input; treating the store as observing the new load would corrupt the fourth curve.
+The first-right curve finishes before its old port-5 value is stored concurrently
+with the next right producers. The final packet stores the second-right curve
+and reloads the first pair of shaped values into ports 2/6.
 
-The four earlier `5d46` contexts have coissued data stores and longer filter/state
-producer sequences. They are not treated as four additional cubic curves or
-silently folded into this reference. Their state/auxiliary-port relations and
-the corresponding PHONO sequences remain useful next comparisons.
+## Exact cubic profile and partial short fields
+
+The original JSON example is `examples/cubic-quad.json`. Its four sources and
+four targets are ordered `[left1,left2,right1,right2]`, all eight distinct integer
+data indices below `800`. It writes all four curves plus an unchanged copy of
+source right2. Final ports are `[left2,C(left2),C(left1),None,
+right2,C(right2),C(right1),None]`. Each source must be supplied in the finite
+checked `[-1,1]` domain. There are no coefficient reads or implicit zero seeds.
+
+| Short controls | Functional role in the exact profile |
+|---|---|
+| `2410 / 6510` | I2 = 3×A; I6 = 3×B, from pool literal zero |
+| `1400 / 5504` | I1 = A²; I5 = B² |
+| `1440 / 5544` | I1 = I1×A; I5 = I5×B |
+| `2e92 / 6f90` | I2/I6 = literal − magnitude of incoming I2/I6 |
+| `1c42 / 5d46` | I1 += I2; I5 += I6 |
+
+The first miscellaneous form uses literal pool word one, the second word zero;
+both are fixed `4300` (three) here. Magnitude follows the native `>= 0` selection,
+including negative zero, rather than replacing its operation order with a fused
+expression. The complete profile recognizer protects controls, literal references,
+headers, repeated resources and constants. General miscellaneous-header grammar
+remains opaque. A familiar word outside this context is still rejected.
+
+Ten admitted short multiplications share destination `(word >> 12) & 7`,
+source `(word >> 6) & 7` and six-bit operand reference `word & 63`.
+Their masked class `word & 8e00` is `0400`; the two sums normalize to `0c00`.
+This is a **partial field map**, not permission to execute arbitrary masked-class
+matches. Only ten whitelisted multiplies, the two exact miscellaneous forms and
+complete checked profiles execute. Operand references below eight select ports;
+`10` selects literal pool word zero in this window. Other references and all
+other families remain unadmitted. In the earlier filter, `6547` can now be
+represented as I5×I7, but I3/I7 carry equal values there: that context alone does
+not independently resolve coefficient-port choice.
+
+The conditional full-callback check sets a nonzero declared input gain (`.75`)
+to avoid a silent/default-zero cubic fixture. It captures the four source cells,
+executes the actual 126-byte profile, and compares all four output cells with
+the callback and scalar curve. The provenance audit rejects a later write to any
+captured source/target cell. Counts remain separate from the independently
+modeled first filter. Context-level `source_port_binding_verified` and
+`per_packet_port_state_verified` flags describe the native cutpoint trace alone;
+exact-profile packet execution supplies the additional functional interpretation,
+without physical port-state observations.
 
 ## Five Fantom placements
 
@@ -96,18 +142,20 @@ the data base plus `e/10/f/11`, and each target is base plus `12/18/13/1a`.
 
 These are recorded stock placements, not new allocations or proof that a
 particular effect is selected on a running instrument. Numeric equivalence and
-timing on the BMC remain unmeasured. This cubic reference adds no strict
-interpreter or emitter profile; no wrapper, transport or firmware patch is generated.
+timing on the BMC remain unmeasured. The exact cubic profile is available offline; no wrapper, transport or firmware
+patch is generated.
 
 ## Reproduce and review
 
 ```sh
 /Users/jacob/.pyenv/versions/3.13.7/bin/python tools/fdrv_cubic_study.py --core1 local/b0c1a.bin
-/Users/jacob/.pyenv/versions/3.13.7/bin/python tools/fdrv_cubic_study.py --execute-native
+/Users/jacob/.pyenv/versions/3.13.7/bin/python tools/fdrv_cubic_study.py --execute-native --native-window-frames 12000
+python3.13 tools/bmc_subset.py assemble examples/cubic-quad.json local/cubic-quad.bin --stored
+python3.13 tools/bmc_subset.py disassemble local/cubic-quad.bin --stored --length 126
 /Users/jacob/.pyenv/versions/3.13.7/bin/python -m unittest discover -s tests -p 'test_fdrv_cubic_study.py' -v
 ```
 
-Native execution extracts only `305a00..305a24`, nine verified register-only
+The standalone native curve probe extracts only `305a00..305a24`, nine verified register-only
 instructions, and appends a return. The resulting 40-byte function takes and
 returns one double; it has no memory, calls or external references. The existing
 executable-mapping helper handles permissions and instruction-cache invalidation.
@@ -119,3 +167,20 @@ and unknown firmware. Detailed vendor-derived output remains ignored under `loca
 Qwen's bounded FDRV review hit its 180.2-second deadline and returned no requested
 review artifacts. Its exploratory tool output was not accepted as evidence or code.
 The equations, aliases and execution checks above were derived and verified locally.
+
+The exact profile has 126 logical bytes, eleven packets and 128 stored bytes.
+Append two zero padding bytes before reversing storage words; pass `--length 126`
+when decoding. Never insert this storage padding between composed fragments.
+Additional tests check every packet state and old-value store, independent asymmetric
+inputs, signed zero, native cutpoints, all five stock bodies, mutated literals and
+controls, rejected domains/aliases, nonzero padding and output preservation.
+
+A new Qwen read-only attempt reached its 60.2-second limit without the requested
+review files. A reduced no-tool review returned in 6.3 seconds, but miscopied the
+right-channel inputs and made arithmetic errors. Its conclusions and exploratory
+scripts were rejected. The packet model, native checks and tests above were
+implemented and verified independently.
+
+At the extended 12,000-frame checkpoint, all 48,000 conditional cubic results
+match, with 47,985 distinct captured source values. The independent first-filter
+check matches another 96,000 values in the same fixture.

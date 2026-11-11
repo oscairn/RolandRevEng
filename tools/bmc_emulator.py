@@ -5,7 +5,7 @@ Only complete profiles accepted by bmc_subset may enter the packet interpreter.
 """
 import math
 
-from bmc_dsp import command_count, packets
+from bmc_dsp import command_count, literal, packets
 from bmc_subset import DEFAULT_INPUT_ADDRESSES, disassemble_fragment
 from line_shaping_study import _float32, quantize_native_reference
 
@@ -54,6 +54,10 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
     memory = _values(data, 'data', range(0x800))
     coefs = _values(coefficients, 'coefficients', range(0x1000))
     inputs = _values({} if io is None else io, 'io', io_addresses)
+    if spec['kind'] == 'cubic_quad':
+        for cell in spec['sources']:
+            if cell not in memory or not -1 <= memory[cell] <= 1:
+                raise ValueError('Cubic inputs must be provided in the checked [-1,1] domain')
     ports, trace, auxiliary_saved = [None] * 8, [], {}
 
     def load(address):
@@ -94,9 +98,22 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
                 else:
                     raise ValueError('Unsupported transfer port')
                 continue
-            if word in (0x0403, 0x4503):
-                destination = 0 if word == 0x0403 else 4
-                value = old_value(destination) * old_value(3)
+            if word in (0x0403, 0x4503, 0x2443, 0x6547, 0x2410, 0x6510,
+                        0x1400, 0x5504, 0x1440, 0x5544):
+                destination, source, operand = (word >> 12) & 7, (word >> 6) & 7, word & 63
+                if operand < 8:
+                    factor = old_value(operand)
+                elif operand == 0x10:
+                    factor = literal(pool[0].to_bytes(2, 'big'))
+                else:
+                    raise ValueError('Unsupported short-multiply operand')
+                value = old_value(source)*factor
+            elif word in (0x2e92, 0x6f90):
+                destination = 2 if word == 0x2e92 else 6
+                value = old_value(destination)
+                magnitude = value if value >= 0 else -value
+                constant = literal(pool[(word & 15)//2].to_bytes(2, 'big'))
+                value = constant-magnitude
             elif word in (0xaf60, 0xef60):
                 destination = 2 if word == 0xaf60 else 6
                 # The exact state-variable profile contains one balanced pair per port.
@@ -119,9 +136,6 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
                     value = _fma(s, old_value(3), -old_value(destination))+old_value(destination-1)
                 else:
                     raise ValueError('Unsupported state-variable long extension pair')
-            elif word in (0x2443, 0x6547):
-                destination = 2 if word == 0x2443 else 6
-                value = old_value(destination-1)*old_value(3)
             elif word in (0x08c2, 0x49c6):
                 destination = 0 if word == 0x08c2 else 4
                 value = _fma(old_value(destination), old_value(3), old_value(destination+2))

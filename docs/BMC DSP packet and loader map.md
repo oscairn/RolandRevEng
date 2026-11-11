@@ -14,7 +14,9 @@ and resource rules remain unresolved.
 The [original filtered voice](original-bmc-filtered-voice.md) now composes
 oscillation, gain and lowpass processing into 384 static bytes. Ten seed values
 and eleven coefficients suffice under the model, with all five Fantom layouts
-verified through wrap. Body load/entry/return addresses remain null; live graph
+verified through wrap. Optional cubic shaping extends it to 510 logical bytes,
+39 packets and data extent 150, retaining the same ten seeds/eleven coefficients.
+Body load/entry/return addresses remain null; live graph
 ownership, output routing and hardware timing/precision are still unverified.
 
 The [184-byte state-variable filter](fdrv-state-variable-filter.md) now executes
@@ -32,7 +34,8 @@ auxiliary-word execution, arbitrary opcodes and a complete BMC engine remain ope
 The [FDRV cubic study](fdrv-cubic-waveshaping-study.md) binds four waveshaping
 windows to source/result data records, executes an isolated native curve with
 bit-exact checks, and verifies five Fantom placements. This supports the numeric
-reference without claiming individual short-control port effects or a full engine.
+reference and an exact 126-byte four-curve executable profile. Partial short-field
+maps and conditional native cutpoint checks do not establish general opcodes or a full engine.
 
 The [label-target study](label-target-encoding-study.md) verifies CORE1's counted
 reference-record layout and explicit halfword target encoding, including five

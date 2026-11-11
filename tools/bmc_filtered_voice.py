@@ -22,6 +22,8 @@ FILTER_SPEC['sources'][0], FILTER_SPEC['sources'][3] = voice.TAIL_SPEC['scratch_
 FILTER_SPEC['sources'][6:] = [0x20, 0x30, 0x40, 0x50]
 FILTER_SPEC['coefficient_slots'] = [6, 7, 8, 9, 10]
 FILTER_SEEDS = sorted(FILTER_SPEC['sources'][index] for index in (1, 2, 4, 5))
+CUBIC_SPEC = dict(kind='cubic_quad', sources=[0x60, 0x90, 0x70, 0x91],
+                  targets=[0x92, 0x93, 0x94, 0x95])
 
 
 def design_lowpass(cutoff, damping=math.sqrt(2)):
@@ -45,15 +47,26 @@ def design_lowpass(cutoff, damping=math.sqrt(2)):
                 stability=check, hardware_calibrated=False)
 
 
-def programs():
-    return (*voice.programs(), assemble_fragment(FILTER_SPEC))
+def programs(waveshape=False):
+    if type(waveshape) is not bool:
+        raise ValueError('Expected a boolean waveshape option')
+    if not waveshape:
+        return (*voice.programs(), assemble_fragment(FILTER_SPEC))
+    spec = dict(FILTER_SPEC, sources=FILTER_SPEC['sources'].copy())
+    spec['sources'][0], spec['sources'][3] = CUBIC_SPEC['targets'][1::2]
+    return (*voice.programs(), assemble_fragment(CUBIC_SPEC), assemble_fragment(spec))
 
 
-def storage_program():
-    return swap_words(b''.join(programs()))
+def storage_program(waveshape=False):
+    logical = b''.join(programs(waveshape))
+    return swap_words(logical+bytes(-len(logical) % 4))
 
 
-def initialize(frequency, amplitude=.25, gain=.5, cutoff=1000, damping=math.sqrt(2)):
+def initialize(frequency, amplitude=.25, gain=.5, cutoff=1000, damping=math.sqrt(2), waveshape=False):
+    if type(waveshape) is not bool:
+        raise ValueError('Expected a boolean waveshape option')
+    if waveshape and not 0 <= _finite(amplitude) <= .5:
+        raise ValueError('Waveshaping requires amplitude in 0..0.5 to retain input headroom')
     gain = _finite(gain)
     if not 0 <= gain <= 1:
         raise ValueError('Expected gain in 0..1')
@@ -68,11 +81,11 @@ def initialize(frequency, amplitude=.25, gain=.5, cutoff=1000, damping=math.sqrt
     return ring, coefficients, seed
 
 
-def render(frames, frequency, amplitude=.25, gain=.5, cutoff=1000, damping=math.sqrt(2)):
+def render(frames, frequency, amplitude=.25, gain=.5, cutoff=1000, damping=math.sqrt(2), waveshape=False):
     if type(frames) is not int or not 128 <= frames <= 1000000:
         raise ValueError('Expected 128..1000000 frames')
-    ring, coefficients, seed = initialize(frequency, amplitude, gain, cutoff, damping)
-    fragments = programs()
+    ring, coefficients, seed = initialize(frequency, amplitude, gain, cutoff, damping, waveshape)
+    fragments = programs(waveshape)
     specs = [disassemble_fragment(fragment) for fragment in fragments]
     rows, origin = [], 0
     for _ in range(frames):
@@ -87,6 +100,7 @@ def render(frames, frequency, amplitude=.25, gain=.5, cutoff=1000, damping=math.
         origin = advance_native_origin(origin)
     logical = b''.join(fragments)
     return rows, dict(program_sha256=hashlib.sha256(logical).hexdigest(), program_bytes=len(logical),
+                      stored_bytes=(len(logical)+3)&~3, waveshape=waveshape,
                       total_packet_count=len(packets(logical)), **seed,
                       requested_gain=_finite(gain), source_gain=coefficients[3],
                       final_native_ring_origin=origin, origin_wraps=frames//2048,
@@ -104,13 +118,14 @@ if __name__ == '__main__':
     parser.add_argument('--gain', type=float, default=.5)
     parser.add_argument('--cutoff', type=float, default=1000)
     parser.add_argument('--damping', type=float, default=math.sqrt(2))
+    parser.add_argument('--waveshape', action='store_true', help='Shape the oscillator before the filter')
     parser.add_argument('--frames', type=int, default=12000)
     args = parser.parse_args()
     try:
         if args.output.exists():
             raise FileExistsError('Refusing to replace an existing output')
         rows, result = render(args.frames, args.frequency, gain=args.gain,
-                              cutoff=args.cutoff, damping=args.damping)
+                              cutoff=args.cutoff, damping=args.damping, waveshape=args.waveshape)
         payload = pcm16(rows)
         with args.output.open('xb') as stream, wave.open(stream, 'wb') as wav:
             wav.setnchannels(2)

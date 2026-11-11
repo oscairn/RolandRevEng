@@ -1,6 +1,6 @@
 # Original oscillator, gain and lowpass voice
 
-2026-11-11. `tools/bmc_filtered_voice.py` composes the original oscillator voice
+2026-11-11. `tools/bmc_filtered_voice.py` composes the original oscillator voice, an optional cubic waveshaper
 and the checked state-variable filter in one shared ring. All per-frame signal
 arithmetic executes through BMC packet bytes. The host initializes seeds and
 coefficients, supplies the ring view and advances the explicit native origin.
@@ -131,3 +131,54 @@ replaced its weak absolute stopband assertion with a relative response test,
 and checked that returned coefficients themselves are binary32 values. Shared
 resources, seed analysis, byte protection, relocation and render comparisons
 were independently implemented and verified locally. All 403 tests passed.
+
+## Optional cubic waveshaping before the filter
+
+`--waveshape` adds the [exact cubic quad](fdrv-cubic-waveshaping-study.md)
+between the gain/scratch and state-variable profiles. It produces a static
+**510-byte, 39-packet** body, stored as **512 bytes** after two final zeros.
+The four inputs are raw oscillator cells `60/70` and gained samples `90/91`,
+ordered `[60,90,70,91]`; four shaped results occupy `92/93/94/95` (hex).
+The filter consumes `93/95`, the gained then shaped pair. Raw-channel shaped
+results are retained as scratch because the exact quad profile includes them.
+Functional main A/B still carry the final filtered result.
+
+All five profiles initialize their consumed ports. Every per-sample multiply,
+magnitude, addition and filter update goes through the packet interpreter.
+The host performs no per-sample waveshaping. Initial seeds and coefficients
+remain ten and eleven; cubic inputs and outputs are already written before
+read. The named data set becomes 25 cells with extent **150**, exactly the
+smallest recorded enum-0 reservation. This leaves no spare numerical data
+extent in those owners and establishes no live allocation or issue budget.
+
+The authored composed fixture restricts amplitude to `0..0.5` for input
+headroom; gain remains `0..1`. Actual cubic reads are checked every frame
+against the proved finite `[-1,1]` domain. Other amplitude ranges retain the
+unshaped renderer's contract and are not silently clamped for waveshaping.
+The planner rejects `--waveshape` without `--cutoff` and accepts no implicit
+truth-value conversion for the API flag.
+
+```sh
+python3.13 tools/bmc_filtered_voice.py local/waveshaped.wav --waveshape --frames 12000
+python3.13 tools/fantom_voice_plan.py local/b0c1a.bin local/shaped-plan-dsp4 \
+  --cutoff 1000 --waveshape --frames 12000
+python3.13 -m unittest discover -s tests -p 'test_waveshaped_voice.py' -v
+```
+
+Independent relocation verifies **70 two-byte address fields**, protecting
+**370 other logical bytes**. Only exact cubic/filter recognizers admit the
+transfer walk through mixed packets. All fragments are joined before the
+single final storage padding/conversion; inserting two padding bytes after
+the cubic would shift and corrupt the following filter. Export manifests
+record both logical and stored lengths/hashes. The capacity check conservatively
+requires room for all 512 stored bytes; this is not a recovered loader ABI.
+
+The 12,000-frame original render matches a separately rendered oscillator
+voice followed by independent scalar cubic and filter references for all
+24,000 channel values, crossing five ring wraps. The default model body hash
+is `c75803f83d50e0d89ae35c9f24ab06b4065f0b008639cea7d7355acfea2d1b0a`; its peak is `0.3223646047275704`, 0.2305023653442409 `0.2305023653442409`. Five relocated canary-ring
+renders match another 120,000 channel values. These are software results,
+with the same hardware and entry/ownership gates as the unshaped body.
+
+The complete suite passes 415 tests at this checkpoint (57.989 seconds); the
+new shape/composition tests retain all default and hardware-boundary checks.

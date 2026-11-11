@@ -231,6 +231,33 @@ def assemble_state_variable_pair(spec):
     ])
 
 
+def assemble_cubic_quad(spec):
+    if (not isinstance(spec, dict) or spec.get('kind') != 'cubic_quad'
+            or set(spec) != {'kind', 'sources', 'targets'}):
+        raise ValueError('Expected cubic_quad with four sources and four targets')
+    for name in ('sources', 'targets'):
+        if (not isinstance(spec[name], list) or len(spec[name]) != 4
+                or any(type(value) is not int or not 0 <= value < 0x800 for value in spec[name])):
+            raise ValueError('Expected four data indices in 0..0x7ff')
+    if len(set(spec['sources']+spec['targets'])) != 8:
+        raise ValueError('The checked cubic profile requires eight distinct data indices')
+    left1, left2, right1, right2 = spec['sources']
+    out_left1, out_left2, out_right1, out_right2 = spec['targets']
+    return assemble([
+        [0x1e05, 0x0fe0, 0x4fe2, left1, right2],
+        [0x3407, 0x2410, 0xcfe2, 0x4fe4, 0x4300, right2, right1],
+        [0x2c06, 0x1400, 0x6510, 0x2e92, 0x4300, 0x4300],
+        [0x2c05, 0x1c42, 0x5504, 0x6f90, 0x4300],
+        [0x2e05, 0x1440, 0x5d46, 0x0fe0, left2],
+        [0x5f08, 0x2410, 0x5544, 0x9fe2, 0x4fe4, 0x4300, out_left1, right2],
+        [0x5c08, 0x1400, 0x6510, 0x2e92, 0xdfe4, 0x4300, 0x4300, out_right1],
+        [0x2c05, 0x1c42, 0x5504, 0x6f90, 0x4300],
+        [0x1503, 0x1440, 0x5d46],
+        [0x1804, 0x5544, 0x9fe0, out_left2],
+        [0x3e07, 0xdfe0, 0x2fe2, 0x6fe4, out_right2, out_left1, out_right1],
+    ])
+
+
 def assemble_fragment(spec):
     if not isinstance(spec, dict):
         raise ValueError('Expected a JSON object')
@@ -244,12 +271,23 @@ def assemble_fragment(spec):
         return assemble_register_add_mac_pair(spec)
     if spec.get('kind') == 'state_variable_pair':
         return assemble_state_variable_pair(spec)
+    if spec.get('kind') == 'cubic_quad':
+        return assemble_cubic_quad(spec)
     if spec.get('kind') == 'dry_wet_tail_with_scratch':
         return assemble_tail_with_scratch(spec)
     return assemble_tail(spec)
 
 
 def disassemble_fragment(stream):
+    if len(stream) == 126:
+        rows = [words for _, words in packets(stream)]
+        if len(rows) != 11 or [len(row) for row in rows] != [5, 7, 6, 5, 5, 8, 8, 5, 3, 4, 7]:
+            raise ValueError('Not an exact cubic_quad profile')
+        spec = dict(kind='cubic_quad', sources=[rows[0][3], rows[4][4], rows[1][6], rows[0][4]],
+                    targets=[rows[5][6], rows[9][3], rows[6][7], rows[10][4]])
+        if assemble_cubic_quad(spec) != stream:
+            raise ValueError('Unsupported cubic controls, literals, aliases or field references')
+        return spec
     if len(stream) == 184:
         rows = [words for _, words in packets(stream)]
         if len(rows) != 10 or [len(row) for row in rows] != [7, 7, 5, 9, 15, 7, 9, 5, 15, 13]:
@@ -306,7 +344,7 @@ def main():
     read = commands.add_parser('disassemble', help='Decode an exact template to its JSON assignment')
     read.add_argument('file', type=Path)
     read.add_argument('--stored', action='store_true', help='Read swapped LE32 storage words')
-    read.add_argument('--length', type=int, help='Logical byte length before storage padding (allpass4: 82)')
+    read.add_argument('--length', type=int, help='Logical byte length before storage padding (for example cubic_quad: 126)')
     args = parser.parse_args()
     try:
         if args.command == 'assemble':

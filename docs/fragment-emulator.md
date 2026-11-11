@@ -1,15 +1,25 @@
 # Offline functional fragment emulator
 
-2026-11-10. `tools/bmc_emulator.py` executes logical packet bytes for seven checked profiles. Stereo input takes 10 bytes, the dry/wet tail
+2026-11-10. `tools/bmc_emulator.py` executes logical packet bytes for eight checked profiles. Stereo input takes 10 bytes, the dry/wet tail
 has 60-byte and 80-byte forms, and the four-stage allpass takes 82 bytes. This is a packet-stepping functional model with memory and
 per-packet traces. It is not yet a complete Roland effect or a cycle/bit-accurate
 BMC emulator. No vendor plugin or instrument is executed.
+
+The [126-byte cubic quad](fdrv-cubic-waveshaping-study.md) executes four
+independent bounded curves through eleven packets. Its authored preload plus
+116-byte stock body has exact inverse recognition, independent native curve
+checks and conditional full-callback cutpoint comparison. Inputs must be finite
+and in `[-1,1]`; arbitrary short/miscellaneous forms remain rejected.
 
 The [original filtered voice](original-bmc-filtered-voice.md) now composes four
 existing profiles in one ring. All 24,000 channel values match a separately
 rendered oscillator voice plus independent scalar filter through five wraps,
 and all five relocated bodies match with nonseed canaries. This composition adds
 no new opcode admission or hardware precision claim.
+Its optional cubic stage now forms a 510-byte, 39-packet voice with the same
+ten seeds/eleven coefficients. Independent scalar shaping/filter checks and
+relocation canaries cover the composed body; storage padding is applied only
+at its end.
 
 The [84-byte add/MAC profile](auxiliary-save-restore-and-add-mac.md) adds two
 proved register sums, their following shared-factor MACs, pre-arithmetic
