@@ -36,6 +36,7 @@ Independent follow-up studies:
 - [Full TRANSIENT reference](docs/transient-full-reference.md): complete independent detector/envelope/output agreement with the pinned native callback, including branch and cache checks.
 - [Original BMC oscillator](docs/original-bmc-allpass-oscillator.md): a static 120-byte feedback core with all sample arithmetic executed by the packet interpreter.
 - [Stereo oscillator voice](docs/original-bmc-stereo-voice.md): a 200-byte body with packet-executed output gain and a checked static fit against five Fantom owners.
+- [Fantom voice resource plans](docs/fantom-voice-resource-plans.md): explicit data/coefficient/IO substitutions, protected non-address bytes, six-seed dependencies and identical output across all five layouts.
 - [Short-add candidates](docs/short-add-context-candidates.md): nine-class inventory, constructor/literal binding and retained source-port ambiguity.
 - [Typed state initialization](docs/state-initialization-and-float-writers.md): enum-0 native ring identity, Fantom float-write apertures, explicit readback rejection and checked source rounding.
 - [Gain controls](docs/alu-controls-study.md): native def/use comparison of selected gain chains.
@@ -167,16 +168,16 @@ The initial 19-note update was applied to the vault on 2026-11-10 through review
 The Roland research and related planning notes are organized in
 `/Users/jacob/Documents/ObsidianVault/Projects/Oscairn/Roland`. All 52 moved notes
 were verified byte for byte; their unique title links remain valid. Continued
-research now covers 64 verified notes in this folder. Future vault
+research now covers 65 verified notes in this folder. Future vault
 updates target this subdirectory. The move manifest is
 `local/obsidian-applied-roland-move-2026-11-10.json`; the latest update manifest
-is `local/obsidian-applied-voice-output-2026-11-10.json`. Current folder and manifest
+is `local/obsidian-applied-voice-relocation-2026-11-10.json`. Current folder and manifest
 are recorded in `local/obsidian-location.json`. Earlier manifests describe historical paths.
 
 The research notes include the functional fragment emulator, official cross-model
 comparisons, key/access studies and corrections to older recovery claims.
-The latest passes add a complete independent TRANSIENT reference, an original stereo
-voice body and typed state-initialization evidence, verifying the 64-note set against staged hashes.
+The latest passes add a complete independent TRANSIENT reference, explicit original-voice
+resource plans and typed state-initialization evidence, verifying the 65-note set against staged hashes.
 Firmware downloads remain local/ignored.
 Saved hashes were checked before each update; every note was verified byte for byte.
 Original backups, the initial validated patch and the applied hash manifests remain

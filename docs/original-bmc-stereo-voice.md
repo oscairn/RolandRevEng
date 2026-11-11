@@ -76,9 +76,11 @@ stock reservations, **not available allocations for a custom voice**. The
 checker emits no relocated program and marks ownership/execution unverified.
 Equal numeric indices in enum 0 and enum 6 remain different resources.
 
-The next offline placement step is to generate and verify explicit data,
-coefficient and IO substitutions for one selected owner while keeping its
-unproved entry/return wrapper visible. Actual replacement still needs the
+The [resource planner](fantom-voice-resource-plans.md) now generates and
+verifies explicit data/coefficient/IO substitutions for all five layouts.
+Each relocated body matches the original model through wrap with canaries
+outside its six seed cells. Its entry/return wrapper and load address remain
+unassigned. Actual replacement still needs the
 [typed state-write/readback gates](state-initialization-and-float-writers.md)
 and a verified control/transport path on the Fantom.
 

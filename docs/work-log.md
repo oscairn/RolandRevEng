@@ -1197,3 +1197,32 @@ remain beyond the extent in the four 150-element owners. These occupied stock
 owners are not custom allocations, wrappers are excluded, and no relocated or
 deployable engine is emitted. All 352 tests passed, with the final expanded
 native-immediate checks also run separately. Hardware gates remain open.
+
+## Original voice resource plans and six-seed dependency
+
+The new planner uses the pinned stock LINE context to obtain each known owner,
+DSP, reservations and IO assignments, then reassembles the original three
+voice profiles with explicit data/coefficients/input substitutions. A separate
+byte-level walk of only proved family-4 transfers verifies all thirty operand
+words and protects the remaining 140 bytes. The miscellaneous prefix packet's
+general layout stays rejected; no arithmetic/flow decoder was weakened.
+
+The model requires exactly six initial data values. The factor and scratch
+cells are written before read. Verification seeds those six cells in an
+otherwise nonzero, index-dependent canary ring. All five relocated bodies match
+all 120,000 original channel values across 12,000 frames per layout, with
+origin1760 after five wraps. Logical/stored original bodies and manifests are
+exported only under ignored local output, with typed CPU binary32 source rows
+and raw DSP encoding still unverified.
+
+The stock placement remains a stock578-byte LINE identity, separate from the
+custom200-byte body. Body load/entry/return addresses remain null, and no
+output-IO write, wrapper, live allocation or hardware success is claimed.
+Exports refuse existing directories and fail on byte/hash inconsistencies.
+
+Qwen's 240.2-second draft timed out with transfer-offset, coefficient-tag and
+default-IO errors. The typed remapping design was independently implemented;
+no unchecked draft was adopted. All 359 tests passed, followed by the seven
+planner tests after adding strict owner-address type rejection. Remaining work
+includes task entry/return, actual owner coordination, safe typed initialization,
+readback, routing and physical calibration, alongside the unresolved ISA work.

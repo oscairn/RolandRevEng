@@ -131,6 +131,12 @@ initialization while that owner is quiescent, observed address/origin behavior,
 a verified readback path, entry/return framing and output routing. The typed
 writer narrows the initialization problem; it does not make the engine load-ready.
 
+The [Fantom voice resource plans](fantom-voice-resource-plans.md) now bind six
+seed values and six coefficient sources to each recorded owner layout. A
+read-before-write analysis and nonseed canaries establish that the functional
+model needs only those six initial data cells. This supplies no live-write
+window, whole-bank-clear permission or hidden-hardware-state initialization.
+
 ## Reproduce and Qwen review
 
 ```sh

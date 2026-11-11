@@ -12,6 +12,12 @@ program or entry/return wrapper. No new arithmetic opcode is admitted by that
 composition. The [short-add inventory](short-add-context-candidates.md) keeps
 its newly bound operand field separate from unproved source/operation semantics.
 
+The [Fantom resource planner](fantom-voice-resource-plans.md) now emits original
+voice bodies with owner-specific data, coefficient and input substitutions.
+A separate transfer-field byte walk protects every other byte, and model
+comparison covers all five contexts. Entry/return framing, output-IO stores,
+load address and runtime allocation are absent from those bodies.
+
 ## Dry/wet functional contract
 
 With contextual stock MFX inputs `L/R` at `2016/2017`, data-array values `W(a/b)`

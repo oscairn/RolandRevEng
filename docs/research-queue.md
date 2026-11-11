@@ -550,7 +550,9 @@ now executes its sample arithmetic entirely through supported packet profiles.
 It has a reproducible coefficient/seed manifest and no per-sample host phase
 calculation. The [200-byte stereo voice](original-bmc-stereo-voice.md) now adds
 packet-executed gain and scratch output. Its resource extents fit five recorded
-stock owners. Next are explicit owned data/coefficient/IO substitutions,
+stock owners. [Explicit resource plans](fantom-voice-resource-plans.md) now
+substitute data/coefficient/IO fields for all five recorded layouts and match
+the original model with nonseed canaries. Next are actual owner coordination,
 initialization, envelope/routing integration and entry/return validation.
 Hardware precision/cadence and actual loader access remain required. The
 exact phaser input selection, TRANSIENT packet semantics and broader ISA gaps
@@ -571,3 +573,11 @@ PH100's zero literal are retained counterexamples. Four native immediate adds
 are checked, but exact port source/destination and side effects remain open.
 FDRV's branch-free stores offer a concrete next def/use target. Qwen's initial
 single-class/numeric rejection was independently corrected.
+
+The resource planner exports original logical/stored bodies and manifests only.
+It verifies all thirty transfer operands while protecting every other byte,
+and derives exactly six read-before-write data seeds. Across five 12,000-frame
+renders, all 120,000 channel values match the original body. This clears the
+offline resource-substitution step, with body load address and all entry/exit
+and hardware claims still unassigned. Qwen's timed-out draft was corrected
+through independent typed transfer-field checks rather than a grammar expansion.
