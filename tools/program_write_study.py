@@ -67,6 +67,20 @@ def completion_plan(state, wait, event_flags=0):
                 return_requires_new_completion_event=wait, completion_proven=False)
 
 
+def active_drain_plan(state, event_flags=0):
+    """Model the separate global drain, which does not start an unstarted queue."""
+    if type(state) is not int or state not in (0, 1, 2):
+        raise ValueError('Expected state 0/1/2')
+    event_flags = _u32(event_flags)
+    if state != 2:
+        return dict(starts_queue=False, waits=False, state_on_return=state,
+                    event_flags_on_return=event_flags, completion_proven=False)
+    return dict(starts_queue=False, waits=True, state_on_return=0,
+                event_flags_on_return=event_flags & ~4,
+                return_requires_new_completion_event=not bool(event_flags & 4),
+                completion_proven=False)
+
+
 def report(core):
     if hashlib.sha256(core.data).hexdigest() != IMAGE_SHA256:
         raise ValueError('Expected the pinned Fantom CORE1 payload')
@@ -105,18 +119,37 @@ def report(core):
         (0x0112f434, 'str', 'r1, [r0, #8]'), (0x0112f436, 'bx', 'lr'))
     for anchor in anchors:
         expect(core, *anchor)
+    for anchor in (
+            (0x0112f50a, 'ldrb', 'r1, [r0]'), (0x0112f50c, 'cmp', 'r1, #2'),
+            (0x0112f50e, 'ite', 'eq'), (0x0112f510, 'movs', 'r1, #4'),
+            (0x0112f512, 'bx', 'lr'), (0x0112f514, 'ldr', 'r2, [r0, #8]'),
+            (0x0112f516, 'tst', 'r2, r1'), (0x0112f518, 'beq', '#0x112f514'),
+            (0x0112f51a, 'ldr', 'r2, [r0, #8]'), (0x0112f51c, 'bic.w', 'r1, r2, r1'),
+            (0x0112f520, 'str', 'r1, [r0, #8]'), (0x0112f522, 'movs', 'r1, #0'),
+            (0x0112f524, 'strb', 'r1, [r0]'), (0x0112f526, 'bx', 'lr'),
+            (0x01132476, 'mov', 'r0, r1'), (0x01132478, 'bl', '#0x112f6a4'),
+            (0x01132482, 'ldrb', 'r2, [r1, r0]'), (0x0113248c, 'strb', 'r2, [r1, r0]'),
+            (0x01132492, 'add.w', 'r1, r0, #0xc'), (0x01132498, 'ldr', 'r3, [r0, #0x5c]'),
+            (0x011324a0, 'bx', 'r3'), (0x011324a2, 'b.w', '#0x112f508')):
+        expect(core, *anchor)
+    if (core.u32(0x6117647c+0x44), core.u32(0x6117647c+0x48)) != (0x01132473, 0x011324a3):
+        raise ValueError('Manager start/drain slots differ')
     if tuple(core.u32(0x0113a954+4*index) for index in range(7)) != APERTURES:
         raise ValueError('Program aperture table differs')
     if core.u32(0x0112f828) != 0x200847f0 or core.u32(0x0112f858) != 0x0112f42d:
         raise ValueError('DMA state/callback pointers differ')
     return dict(payload_sha256=IMAGE_SHA256, stack_writer=0x0112f582,
                 completion_helper=0x0112f6a4, callback=0x0112f42c,
+                active_drain_helper=0x0112f508, manager_start_slot=0x44, manager_drain_slot=0x48,
+                manager_start_has_pending_dramio_path=True, drain_uses_global_queue=True,
                 state_address=0x200847f0, event_offset=8, completion_mask=4,
                 start_then_later_wait_drains=False, callback_resets_state=False,
                 examples=[write_geometry(4, address, size) for address, size in
                           ((0x4020, 510), (0x4022, 4), (0x4022, 2))],
                 state_paths=[dict(initial_state=state, wait=wait, **completion_plan(state, wait))
                              for state in (0, 1, 2) for wait in (False, True)],
+                active_drain_paths=[dict(initial_state=state, **active_drain_plan(state))
+                                    for state in (0, 1, 2)],
                 hardware_execution_verified=False, execution_ready=False)
 
 

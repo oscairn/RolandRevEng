@@ -331,6 +331,38 @@ Qwen's no-tool review returned in 4.1 seconds but confused source read extent,
 source halves and the state 2 early return. Those claims were rejected against
 the instructions and independent replay; no worker code was used.
 
+### Separate active DMA drain and manager wrappers
+
+Follow-up on 2026-11-11: the missing active drain is implemented at **`0112f508`**.
+It checks the same global state byte for **2**, returns for states 0/1, polls
+event 4 without clearing it first, clears that bit and resets the state to 0.
+It does not start an unstarted queue. An already-set event satisfies the poll;
+source lifetime still depends on the stock event/ownership protocol.
+
+The manager address point `6117647c` supplies two distinct wrappers:
+
+| Slot | Body | Checked behavior |
+|---|---|---|
+| `44` | `01132472` | Takes this in r0 and wait in r1, forwards wait to `0112f6a4`, then handles a possible pending DRAM-IO update |
+| `48` | `011324a2` | Tailbranches to `0112f508`; the drain uses global state rather than a per-manager DMA queue |
+
+The extra slot 44 path reads a per-DSP pending byte from `20084810`, clears it
+if set, then dispatches manager slot 5c with descriptor+`c` and r2=1. It is not
+safe to pretend slot 44 is a render-only fence when that state is pending.
+The checker retains this side path rather than offering a blind live call.
+
+The all-program nonwaiting manager path skips `0112f6a4` entirely. Thus queuing
+without its final wait can leave state 1, with DMA not yet started. Calling the
+active drain then returns immediately. Correct offline state distinctions are:
+
+- **Queued state 1:** the start helper can initiate it, optionally waiting during that start.
+- **Started state 2:** the separate active drain can wait for its event and reset the state.
+- **Idle state 0:** both helpers return without initiating work.
+
+These are recovered firmware operations, not a tested upload sequence or a halt
+protocol. The active-drain model and actual vtable/body anchors now have regression
+coverage, including preexisting event bits and unstarted queues. No routine was run.
+
 ## Stock effect lifecycle and state boundaries
 
 The exact RTTI `15CFspMfxFETDRIVE` points to vtable group `0x6117a0fc`, whose

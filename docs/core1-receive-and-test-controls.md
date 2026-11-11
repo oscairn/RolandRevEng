@@ -99,6 +99,13 @@ engines in this build, but **mode 0 = stop and mode 2 = run are not established*
 Treating these values as a safe stop/start recipe would be premature. This bounded
 caller search also does not exclude compiler-inlined writes elsewhere.
 
+The [cross-model enable check](jupiter-crossmodel-c1-study.md#core1-enable-masks-and-mode-differences-2026-11-11)
+now ties this sequence to its real `CORE1_DSPEnable` log and preceding global-mask
+writer. Fantom uses mode 0 for DSP 1/3 while Jupiter-X uses mode 2 for those same
+indices. Low and high copies of the enable mask both correlate with the mode 2
+DSP set. These observations do not identify either mode as stopped/running or
+provide a safe halt operation.
+
 A function at `0x01101a1a` logs `DSPSync() Step 0/1/2/3`. It writes state 0 through
 `0x01126208` (byte `0x617f8001`), waits until `0x01126202` reads 1, clears register
 `0x4110003c`, writes state 2, then waits for state 3. Those are real polling and write
@@ -115,6 +122,8 @@ The `CBmcDspMgr` vtable address point is `0x6117647c`. Its recovered slots inclu
 | `18` | `01135099` → `01131c4e` with `r2=1` | Write every render-program segment and wait for DMA completion |
 | `1c` | `011350a9` → `01131cf4` with `r2=1` | Write DRAM-IO program list and wait |
 | `20` | `011350b5` → `01131c4e` with `r2=0` | Write render-program list without the final wait |
+| `44` | `01132473` → `0112f6a4` | Start queued DMA with r1 wait; an additional pending DRAM-IO path follows |
+| `48` | `011324a3` → `0112f508` | Drain only already-started global DMA; does not start state 1 |
 | `64` | `011327e7` | `WriteDspCoefFloat(const _CoefSym *, float)` |
 | `70` | `01132abf` | `ReadDspCoefFloat(const _CoefSym *)` |
 

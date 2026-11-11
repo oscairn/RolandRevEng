@@ -508,10 +508,11 @@ addresses with bit 0 clear. These are disassembly results, not a tested injectio
 |---|---|---|
 | `GetDspProgAdrs` | `0112f92a` | Returns the aperture below plus a byte address; checks DSP index and even address |
 | `StackWriteDspProg` | `0112f582` | `r0=dsp`, `r1=byte address`, `r2=byte count`, `r3=stored-word source`; even address/count; direct copy or queued DMA |
-| DMA completion helper | `0112f6a4` | Acts only from queued state1; optionally waits during that start; returns immediately from state2 |
+| DMA completion helper | `0112f6a4` | Acts only from queued state 1; optionally waits during that start; returns immediately from state 2 |
 | `WriteLiteralRaw` | `0112f528` | Writes a width/address command and a raw value via the DSP's literal port |
 | `WriteLiteralFloat` | `0112ff4e` | Same address/width command; writes float from `s0` to the hardware conversion port |
 | `WriteDspProgAllImpl` | `01131c4e` | Walks the CORE1 program-list records, calls `StackWriteDspProg` per segment, optionally completes DMA |
+| Active DMA drain | `0112f508` | Waits only from started state 2; exposed by manager slot 48, separate from the queued-start helper |
 | `SetExeMode` | `01130b6c` | Packs event, mode and start/address argument into a per-DSP control register |
 | `GetExeMode` | `01130be6` | Reads bits 25:24 of that register |
 
@@ -554,7 +555,9 @@ packet format; RAMCLR belongs here. An effect needing ERAM cannot ignore this pa
 
 Execution control packs `event << 28 | mode << 24 | argument`. The stock checks require
 mode < 3, event < 9, and an even 16-bit argument; DSP4/5 explicitly reject mode 2.
-What the enum values and events do must still be established. This is not sufficient
+The [two-image enable comparison](jupiter-crossmodel-c1-study.md#core1-enable-masks-and-mode-differences-2026-11-11)
+now checks the real call arguments and associated global masks: DSP 1/3 use mode 0
+in Fantom but mode 2 in Jupiter. What the enum values and events do remains open. This is not sufficient
 evidence for a safe stop/start sequence. Queued DMA tracks state 0/1/2 and completion
 bit 4 in bmc0 SRAM; arbitrary writes racing the stock manager can corrupt a running graph.
 

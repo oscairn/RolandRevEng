@@ -1493,3 +1493,42 @@ passed again. This helper assumes an otherwise empty shared DMA list, restricts
 nonwrapping/no-alias geometry, provides no live caller and performs no device IO.
 Next trace SetExeMode callers and packed stock event/mode/start values, keeping
 scheduler control separate from still-unproved render CALL/RETURN semantics.
+
+## Active DMA drain and two-model execution enable (2026-11-11)
+
+The separate active DMA drain at 0112f508 is now checked against instructions and
+manager slot 48 (011324a2 tailbranch). It waits only from global state 2, accepts
+an already-set completion bit, clears bit 4 and resets state 0. It does not start
+state 1. Manager slot 44 (01132472) forwards its r1 wait argument to the queued
+start helper, then may apply a per-DSP pending DRAM-IO update through slot 5c.
+This side path and the global queue scope are retained explicitly. The all-program
+nonwaiting upload skips the start helper entirely; a subsequent active drain
+cannot complete a merely queued transfer. No manager routine was actually called.
+
+The Jupiter comparison now reads the actual CORE1_DSPEnable suffix in both images,
+validates both veneer chains and tracks all four fresh MOV-defined arguments.
+Fantom calls DSP0/1/2/3/6 with modes 2/0/2/0/2; Jupiter uses mode 2 for all five.
+Every call has argument 0 and event 3. Global masks 45c5 and 4fcf are passed to a
+third exact shared code window: the 14-byte shadow-OR/MMIO writer. Its real shadow
+addresses differ, while the port is 41100004. The mask's low seven bits and bits
+14:8 both correlate with the mode-2 index set (45 versus 4f). This is a bounded
+cross-image observation, not an admitted complete register specification, halt
+operation or sample-execution proof. Argument zero cannot resolve entry units.
+
+The MOV tracker rejects unknown/stale sources, missing producers, unrecognized
+operations and a tail branch before the final call. An initially incorrect tail
+position in that guard was fixed, the corpus checks rerun and exact rejection
+messages added to the mutation regression. All 431 tests pass in 57.337 seconds;
+the strengthened focused checks also pass. The shared window is compared back
+to the original Jupiter member at 2f146, container 30146, with hash
+4af08510153d36b624d4d5afe6c050b8a25c3621ed714b842ba2b1e29afb7d02.
+
+Qwen's small supplied-contract boundary draft returned in 4.4 seconds. Seven
+vectors were consistent; the final DSP6/mode2/event3 expected word omitted the
+mode bits (30000000 instead of 32000000), which was corrected independently.
+No worker hardware interpretation was accepted. The firmware comparisons and
+active-drain implementation were completed locally. Existing Roland notes are
+updated; no executable wrapper, on-device upload, hardware halt or saved-return
+semantics is claimed. Next useful evidence remains an implemented event/mode
+consumer or actual continuation/PC observation, subject to the access/recovery
+requirements already documented.

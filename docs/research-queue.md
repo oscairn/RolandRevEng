@@ -13,6 +13,14 @@ Next recover another useful exact producer/control context or an owner-proven
 nonempty label/continuation path; retain bounded opcode admission and hardware gates.
 Entry, runtime allocation and hardware calibration remain separate requirements.
 
+Latest execution-path result (2026-11-11): the separate active DMA drain at 0112f508
+is now tied to manager slot 48; slot 44 starts queued DMA and can process pending
+DRAM-IO state. Queued state 1 and started state 2 require different operations.
+The actual Fantom/Jupiter CORE1_DSPEnable calls and global masks differ for DSP 1/3;
+no mode-to-halt semantics or custom entry/return rule follows. Next seek an
+implemented mode/event consumer or source of saved continuation; preserve these
+bounded negatives if hardware observation remains necessary.
+
 Latest loader result (2026-11-11): exact halfword source geometry, edge-before-bulk
 ordering and queued-only completion behavior are checked. A 510-byte body reads
 512 source bytes but writes 510. Starting without wait and later calling the same

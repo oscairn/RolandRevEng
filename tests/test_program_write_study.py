@@ -8,7 +8,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/'tools'))
 from bmc_dsp import swap_words
-from program_write_study import completion_plan, write_geometry
+from program_write_study import active_drain_plan, completion_plan, write_geometry
 
 
 def replay(plan, stored, address, count):
@@ -85,6 +85,22 @@ class GeometryTests(unittest.TestCase):
 
 
 class CompletionTests(unittest.TestCase):
+    def test_separate_drain_only_handles_started_dma_and_accepts_existing_event(self):
+        for state in (0, 1):
+            result = active_drain_plan(state, 0xa4)
+            self.assertFalse(result['starts_queue'])
+            self.assertFalse(result['waits'])
+            self.assertEqual(result['state_on_return'], state)
+        for flags in (0xa0, 0xa4):
+            result = active_drain_plan(2, flags)
+            self.assertTrue(result['waits'])
+            self.assertEqual(result['state_on_return'], 0)
+            self.assertEqual(result['event_flags_on_return'], 0xa0)
+            self.assertEqual(result['return_requires_new_completion_event'], not bool(flags & 4))
+            self.assertFalse(result['completion_proven'])
+        for args in ((True,), (3,), (2, -1)):
+            self.assertRaises(ValueError, active_drain_plan, *args)
+
     def test_nonwaiting_start_cannot_be_drained_by_calling_this_helper_again(self):
         start = completion_plan(1, False, 0xa4)
         self.assertTrue(start['starts_queue']); self.assertFalse(start['waits'])
@@ -120,6 +136,9 @@ class CorpusTests(unittest.TestCase):
         result = report(core)
         self.assertFalse(result['start_then_later_wait_drains'])
         self.assertFalse(result['callback_resets_state'])
+        self.assertEqual(result['active_drain_helper'], 0x112f508)
+        self.assertEqual(result['manager_start_slot'], 0x44)
+        self.assertEqual(result['manager_drain_slot'], 0x48)
         self.assertEqual(result['examples'][0]['actual_source_read_extent'], 512)
         self.assertFalse(result['execution_ready'])
         core.data += b'changed'

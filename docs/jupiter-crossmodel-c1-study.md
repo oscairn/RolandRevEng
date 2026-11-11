@@ -140,3 +140,51 @@ byte/range comparisons. Root independently reproduced the exact matches from raw
 Cross-model evidence narrows the address-field and shared-manager questions, but
 safe loading, task ownership, state initialization, render control-flow timing and
 hardware precision remain unverified. No new render opcode or executable wrapper was emitted.
+
+
+## CORE1 enable masks and mode differences (2026-11-11)
+
+The comparison now checks a third exact byte window: the 14-byte global-mask
+OR writer at Fantom `0112f4a6` and Jupiter `0112f126`. Jupiter's original member
+is idm1, offset `2f146` (container `30146`). Its PC-relative dependencies differ:
+Fantom stores a shadow at `200847fc`, Jupiter at `200850f4`; both OR the argument
+into that shadow and write the resulting value to MMIO `41100004`. Common code
+bytes do not establish that the two machines have interchangeable masks.
+
+The actual callers contain the format `%08d: CORE1_DSPEnable` and pass their
+constant mask through verified MOVW/MOVT/BX veneers to these writers. Five later
+calls go through separate verified veneers to the assertion-named SetExeMode.
+A bounded MOV/register tracker invalidates volatile arguments after every call,
+checks all four new arguments and permits a nonreturning branch only at the end.
+Unknown sources, omitted definitions, extra operations and early tail branches
+are rejected. It does not infer dataflow from equal numeric constants elsewhere.
+
+| Image | Enable routine | SetExeMode | Global OR mask | Modes for DSP 0,1,2,3,6 |
+|---|---|---|---|---|
+| Fantom-0 v1.08 | `610016b0` | `01130b6c` | `45c5` | 2,0,2,0,2 |
+| Jupiter-X v3.03 | `610029c8` | `011307ec` | `4fcf` | 2,2,2,2,2 |
+
+All ten calls supply argument 0 and event 3. Mask bits 6:0 and 14:8 independently
+equal the set of indices receiving mode 2: `45` versus `4f`. Bit 7 is set in both
+observed masks. The model checks this **two-image correlation**, not a complete
+register field specification. It does not establish the purpose of bit 7, the
+meaning of mode 0/2, or whether a particular DSP subsequently executes samples.
+A function named enable can configure several engines differently; its name
+alone cannot turn one enum value into a safe halt command.
+
+SetExeMode's Fantom body packs event<<28, mode<<24 and the unscaled even 16-bit
+argument, writes one register and returns. Its separate getter reads only mode
+bits 25:24. These interfaces expose no PC, return stack, issue fence or proof of
+execution completion. Argument 0 in every observed call cannot resolve argument
+units or establish where a custom fragment would begin.
+
+The [separate active DMA drain](kernel-audio-abi-study.md#separate-active-dma-drain-and-manager-wrappers)
+closes a different offline interface gap: manager slots 44/48 distinguish starting
+queued DMA from draining already-started DMA. DMA completion does not prove DSP
+halt, cache coherency, safe code replacement or the custom body's continuation.
+
+The checker reads the original Jupiter container, validates its identity/mapping,
+and compares the exact window back to its original member bytes. Added corpus
+tests cover both actual call tuples and reject stale/unproved register sources,
+missing producers and an early nonreturning branch. No Jupiter hardware is needed
+or accessed; this is a firmware comparison supporting the Fantom-07 investigation.
