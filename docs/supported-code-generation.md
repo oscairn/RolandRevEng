@@ -1,9 +1,19 @@
 # First supported code-generation subset
 
-2026-11-10. `tools/bmc_subset.py` turns a named dry/wet or four-stage allpass operation
+2026-11-10. `tools/bmc_subset.py` turns checked mix/filter and state-arithmetic operations
 and explicitly assigned indices into exact packet sequences independently matched
-against native FETDRIVE and LINEDRIVE expressions. This is a constrained semantic code emitter and
+against native FETDRIVE, LINEDRIVE and FDRV expressions. This is a constrained semantic code emitter and
 inverse decoder, not a general DSP assembler, scheduler or standalone engine.
+
+The [auxiliary/add-MAC study](auxiliary-save-restore-and-add-mac.md) adds an
+84-byte `register_add_mac_pair` profile. Its ten sources supply
+`[A,W1,S2,B,W5,S6,next_S2,next_S6,next_W1,next_W5]`, its two targets capture
+the incoming W1/W5, and its two coefficient slots supply a shared current factor
+and a following factor. It computes `A/B = fma(W1/W5 + S2/S6, Ccurrent, A/B)`
+under the documented native numeric policy. The original example is
+`examples/register-add-mac-pair.json`; all data indices are distinct. Its body
+matches the native-paired FDRV program and all five Fantom placements. No
+auxiliary operation or entry wrapper is included in this profile.
 
 The [original stereo oscillator voice](original-bmc-stereo-voice.md) composes
 three existing profiles into a static 200-byte body. Its resource-fit checker

@@ -13,7 +13,10 @@ actual DSP data operands. All five Fantom FDRV placements retain the packet
 contexts and relative resource relationships. The reference agrees bit for bit
 with an isolated native window on 1,034 inputs, including signed zero and the
 smallest positive and negative subnormals. No individual BMC control or complete
-FDRV program is admitted to execution.
+FDRV program is admitted to execution by this cubic pass. The subsequent
+[auxiliary/add-MAC study](auxiliary-save-restore-and-add-mac.md) admits a separate
+exact context from the earlier state/filter sequence; the cubic producer window
+remains outside the strict interpreter.
 
 ## Four separate native input/output windows
 
@@ -93,8 +96,8 @@ the data base plus `e/10/f/11`, and each target is base plus `12/18/13/1a`.
 
 These are recorded stock placements, not new allocations or proof that a
 particular effect is selected on a running instrument. Numeric equivalence and
-timing on the BMC remain unmeasured. The strict interpreter and emitter are
-unchanged; no wrapper, transport or firmware patch is generated.
+timing on the BMC remain unmeasured. This cubic reference adds no strict
+interpreter or emitter profile; no wrapper, transport or firmware patch is generated.
 
 ## Reproduce and review
 

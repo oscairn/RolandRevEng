@@ -174,6 +174,31 @@ def disassemble_allpass(stream):
     return spec
 
 
+def assemble_register_add_mac_pair(spec):
+    if (not isinstance(spec, dict) or spec.get('kind') != 'register_add_mac_pair'
+            or set(spec) != {'kind', 'sources', 'targets', 'coefficient_slots'}):
+        raise ValueError('Expected register_add_mac_pair with sources, targets and coefficient_slots')
+    for name, count, maximum in (('sources', 10, 0x800), ('targets', 2, 0x800),
+                                  ('coefficient_slots', 2, 0x1000)):
+        if (not isinstance(spec[name], list) or len(spec[name]) != count
+                or any(type(value) is not int or not 0 <= value < maximum for value in spec[name])):
+            raise ValueError(f'Expected {count} valid {name} indices')
+    if (len(set(spec['sources']+spec['targets'])) != 12
+            or len(set(spec['coefficient_slots'])) != 2):
+        raise ValueError('The checked add/MAC profile requires distinct resources')
+    a, w1, s2, b, w5, s6, next2, next6, next1, next5 = spec['sources']
+    first, second = spec['targets']
+    current, following = [0xc000 | value for value in spec['coefficient_slots']]
+    return assemble([
+        [0x3e07, 0x0fe0, 0x1fe2, 0x2fe4, a, w1, s2],
+        [0x3e07, 0x4fe0, 0x5fe2, 0x6fe4, b, w5, s6],
+        [0xb8cf, 0x1c42, 0x5d46, 0x9fe0, 0x3fe2, 0xdfe4, 0x7fe6, 0x2fe8, 0x6fea,
+         first, current, second, current, next2, next6],
+        [0x8f4d, 0x044b, 0x454f, 0x1fe4, 0x3fe6, 0x5fe8, 0x7fea,
+         0, 4, next1, following, next5, following],
+    ])
+
+
 def assemble_fragment(spec):
     if not isinstance(spec, dict):
         raise ValueError('Expected a JSON object')
@@ -183,12 +208,25 @@ def assemble_fragment(spec):
         return assemble_coefficient_shift4(spec)
     if spec.get('kind') == 'allpass4':
         return assemble_allpass(spec)
+    if spec.get('kind') == 'register_add_mac_pair':
+        return assemble_register_add_mac_pair(spec)
     if spec.get('kind') == 'dry_wet_tail_with_scratch':
         return assemble_tail_with_scratch(spec)
     return assemble_tail(spec)
 
 
 def disassemble_fragment(stream):
+    if len(stream) == 84:
+        rows = [words for _, words in packets(stream)]
+        if len(rows) != 4 or [len(row) for row in rows] != [7, 7, 15, 13]:
+            raise ValueError('Not an exact register_add_mac_pair profile')
+        first, second, third, fourth = rows
+        spec = dict(kind='register_add_mac_pair', sources=first[4:7]+second[4:7]+third[13:15]
+                    +[fourth[9], fourth[11]], targets=[third[9], third[11]],
+                    coefficient_slots=[third[10] & 0xfff, fourth[10] & 0xfff])
+        if assemble_register_add_mac_pair(spec) != stream:
+            raise ValueError('Unsupported add/MAC controls, extensions, duplicates or tags')
+        return spec
     if len(stream) == 38:
         rows = [words for _, words in packets(stream)]
         if len(rows) != 3 or [len(row) for row in rows] != [7, 8, 4]:

@@ -4,7 +4,10 @@
 candidate around `5d72`, but the same 16-bit word is also a long operation
 elsewhere. This pass binds the short operand to its actual constructor field,
 inventories independent contexts, and retains the missing arithmetic/port proof.
-No new opcode is admitted to the interpreter or assembler.
+This inventory alone admits no opcode. The later
+[auxiliary/add-MAC study](auxiliary-save-restore-and-add-mac.md) binds the first
+FDRV state/filter sums and admits one exact composite profile. It does not define
+these short words globally or admit the unresolved cubic producer sequences.
 
 The [FDRV cubic study](fdrv-cubic-waveshaping-study.md) now binds four complete
 waveshaping windows to their source/result stores and checks the native curve

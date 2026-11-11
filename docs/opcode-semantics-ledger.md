@@ -29,6 +29,7 @@ rounding, saturation, accumulator width or fused evaluation on silicon.
 | `454f / 0004` | B = B + I5×I7 | Stereo taps, first TS808 state term |
 | `048f / 0000` | A = A + I2×I7 | Stereo taps, second TS808 state term |
 | `458f / 0004` | B = B + I6×I7 | Stereo taps, second TS808 state term |
+| `1c42 / 5d46` short pair, then `044b/0000` + `454f/0004` long pair | In the exact FDRV context, sum I1+I2 and I5+I6, store incoming I1/I5, then accumulate the sums into A/B with a shared coefficient | [Auxiliary/add-MAC study](auxiliary-save-restore-and-add-mac.md), strict 84-byte profile; coefficient-port ambiguity retained |
 
 For the first gain row the slash separates two **short controls**. In long rows,
 it separates a base control from its extension. Headers and shared pool layout
@@ -102,6 +103,11 @@ DSP arithmetic opcode or a program-literal write.
 
 
 ## Executable offline subset
+
+The 84-byte `register_add_mac_pair` profile now admits the exact state-add/MAC
+context above. It supplies its own input data loads, preserves the shared-factor
+constraint and checks binary32/native-FMA behavior. It executes no auxiliary
+save/restore word, and does not admit the cubic producer window.
 
 The [FDRV cubic window](fdrv-cubic-waveshaping-study.md) now has four constructor-
 bound source/result relations and a directly executed native curve reference.

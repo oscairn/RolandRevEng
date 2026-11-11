@@ -40,6 +40,7 @@ Independent follow-up studies:
 - [Label target encoding](docs/label-target-encoding-study.md): firmware-proved halfword scaling, counted reference records and five parent numeric matches; call ownership and return state remain open.
 - [Short-add candidates](docs/short-add-context-candidates.md): nine-class inventory, constructor/literal binding and retained source-port ambiguity.
 - [FDRV cubic waveshaping](docs/fdrv-cubic-waveshaping-study.md): four source/result windows, bit-exact isolated native execution and five Fantom placements; individual port effects remain unresolved.
+- [Auxiliary saves and add/MAC execution](docs/auxiliary-save-restore-and-add-mac.md): native round trips, proved additive cutpoints and an original 84-byte profile with checked stores, loads and five Fantom body matches.
 - [Typed state initialization](docs/state-initialization-and-float-writers.md): enum-0 native ring identity, Fantom float-write apertures, explicit readback rejection and checked source rounding.
 - [Gain controls](docs/alu-controls-study.md): native def/use comparison of selected gain chains.
 - [Dry/wet MAC controls](docs/dry-wet-mac-study.md): symbolic mixing expressions for the established subset.

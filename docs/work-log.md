@@ -1275,3 +1275,33 @@ Qwen's bounded FDRV review timed out at180.2seconds without the requested review
 files. No exploratory result or code was accepted. The finished study was derived
 locally and checked by six focused tests. All374tests passed in31.504seconds.
 No hardware, firmware installation or BMC execution was performed.
+
+## Native auxiliary round trips and executable add/MAC profile
+
+FDRV's first native save/restore paths preserve their current inputs and rewind
+their cursors. The new checker pins both bank paths, pointer/cursor provenance,
+thirteen constructor cursor-zero stores and the first stereo additive cutpoints.
+The 118 candidate-word inventory retains two short 1f60 low-pattern collisions.
+The native three-slot model is not a claimed physical hardware depth or proof
+of arbitrary program balance. Invalid native cursors were not executed.
+
+The restored inputs are bound through the port 2/6 source records to native d5,
+then through the pre-add stores, additions and following main MAC/store results.
+The exact first context now supports an original 84-byte register_add_mac_pair
+profile. Its 56-byte arithmetic body matches the native-paired program and every
+one of the five Fantom placements. The remaining 28 bytes are original input-load
+setup. The constrained emitter, inverse decoder and interpreter preserve old
+stores, next-packet loads, shared coefficient constraints and native FMA/binary32
+policy. The arithmetic result matches 1,024 directly executed native channel cases.
+The 64-byte native circular fixture also matches 396 cases with distinct cache and
+surrounding canaries. The full FDRV program, auxiliary words, arbitrary variants
+and hardware scheduling/precision remain outside execution admission.
+
+Qwen returned a circular-helper/test draft in 24.1 seconds, with bare paths that
+wrote into the checkout root. Those original files were inspected and moved into
+ignored worker output. Review retained the circular copy/update logic, replaced
+overflow-prone numeric validation with the existing finite helper, and installed
+meaningful unit and native-execution checks. Native/firmware proof and emitter
+integration were independently derived locally. Stored example CLI roundtrip
+passes, and all 386 tests passed in 32.305 seconds after the final arithmetic-limit
+checks. No vendor binary, device operation or live allocation was added.

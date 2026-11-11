@@ -579,8 +579,10 @@ PH100's zero literal are retained counterexamples. Four native immediate adds
 are checked, but exact port source/destination and side effects remain open.
 The [FDRV cubic study](fdrv-cubic-waveshaping-study.md) now checks four independent
 source/result cutpoints, direct native arithmetic and all five Fantom placements.
-Next are the four earlier short-add state/filter sequences and their coissued
-store/auxiliary-port relations, with PHONO as a separate comparison. Qwen's initial
+The [auxiliary/add-MAC study](auxiliary-save-restore-and-add-mac.md) now closes
+the first stereo pair's source/store relation and admits an exact 84-byte profile.
+Next are the remaining state/filter producer arithmetic and PHONO, with actual
+owner/entry/return and hardware gates still required. Qwen's initial
 single-class/numeric rejection was independently corrected.
 
 The resource planner exports original logical/stored bodies and manifests only.

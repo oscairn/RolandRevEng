@@ -1,5 +1,10 @@
 # Stock-fragment validation of the offline emulator
 
+Follow-up: [auxiliary saves and add/MAC](auxiliary-save-restore-and-add-mac.md)
+documents another exact byte-executed profile, with native-paired and five Fantom
+body comparisons, all-port traces and 1,024 direct native arithmetic comparisons.
+The original dry/wet/allpass checks below retain their existing numeric policy.
+
 The corpus tests compare the emulator with independently recovered native
 equations for four actual stock fragments: the FETDRIVE and LINEDRIVE dry/wet
 tails, plus both LINEDRIVE four-stage allpass regions. The tests extract those

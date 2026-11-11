@@ -1,9 +1,16 @@
 # Offline functional fragment emulator
 
-2026-11-10. `tools/bmc_emulator.py` executes logical packet bytes for five checked profiles. Stereo input takes 10 bytes, the dry/wet tail
+2026-11-10. `tools/bmc_emulator.py` executes logical packet bytes for six checked profiles. Stereo input takes 10 bytes, the dry/wet tail
 has 60-byte and 80-byte forms, and the four-stage allpass takes 82 bytes. This is a packet-stepping functional model with memory and
 per-packet traces. It is not yet a complete Roland effect or a cycle/bit-accurate
 BMC emulator. No vendor plugin or instrument is executed.
+
+The [84-byte add/MAC profile](auxiliary-save-restore-and-add-mac.md) adds two
+proved register sums, their following shared-factor MACs, pre-arithmetic
+port-1/port-5 stores and next-packet loads. Its binary32 coefficient and
+binary64 FMA policy requires Python 3.13+. All 1,024 asymmetric channel results
+match isolated native arithmetic execution, separate from pure byte interpretation.
+The auxiliary save/restore candidates themselves remain outside the interpreter.
 
 The additional `coefficient_shift4` profile takes 38 logical bytes. Its
 numeric policy follows the checked VSOD native prefix, including binary32

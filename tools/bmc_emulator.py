@@ -39,9 +39,9 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
     if not isinstance(program, bytes):
         raise ValueError('Program must be logical bytes')
     spec = disassemble_fragment(program)
-    native_coefficient_prefix = spec['kind'] == 'coefficient_shift4'
+    native_coefficient_prefix = spec['kind'] in ('coefficient_shift4', 'register_add_mac_pair')
     if native_coefficient_prefix and not hasattr(math, 'fma'):
-        raise ValueError('The coefficient shift profile requires Python 3.13+ math.fma')
+        raise ValueError('This native-reference profile requires Python 3.13+ math.fma')
     io_addresses = spec.get('input_addresses', DEFAULT_INPUT_ADDRESSES)
     memory = _values(data, 'data', range(0x800))
     coefs = _values(coefficients, 'coefficients', range(0x1000))
@@ -79,7 +79,7 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
                 address = pool[index]
                 if port < 8:
                     next_ports[port] = load(address)
-                elif port in (8, 12, 15):
+                elif port in (8, 9, 12, 13, 15):
                     if not 0 <= address < 0x800:
                         raise ValueError('Only data stores below 0x800 are supported')
                     writes[address] = old_value(port - 8)
@@ -89,6 +89,16 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
             if word in (0x0403, 0x4503):
                 destination = 0 if word == 0x0403 else 4
                 value = old_value(destination) * old_value(3)
+            elif word in (0x1c42, 0x5d46):
+                destination = 1 if word == 0x1c42 else 5
+                value = old_value(destination) + old_value(destination+1)
+            elif word in (0x044b, 0x454f) and pool[:2] == [0, 4]:
+                destination = 0 if word == 0x044b else 4
+                # Both possible coefficient ports carry the same value in this exact profile.
+                try:
+                    value = math.fma(old_value(destination+1), old_value(3), old_value(destination))
+                except OverflowError as error:
+                    raise ValueError('Add/MAC result exceeds the finite reference domain') from error
             elif word == 0xfdd4:
                 destination = 7
                 # shortcut: native fixed32 policy until BMC conversion measurements are available.

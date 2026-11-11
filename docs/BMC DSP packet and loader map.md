@@ -11,6 +11,12 @@ locations, and a concrete CORE1 program-loading map. It does **not** yet support
 an arbitrary C/C++ synth to the render DSPs. Most arithmetic opcodes, scheduling, precision
 and resource rules remain unresolved.
 
+The [auxiliary/add-MAC study](auxiliary-save-restore-and-add-mac.md) maps native
+save/restore round trips and admits an original 84-byte byte-executed profile.
+Its stock arithmetic body matches all five Fantom placements and 1,024 asymmetric
+native arithmetic results agree bit for bit. This extends the offline subset;
+auxiliary-word execution, arbitrary opcodes and a complete BMC engine remain open.
+
 The [FDRV cubic study](fdrv-cubic-waveshaping-study.md) binds four waveshaping
 windows to source/result data records, executes an isolated native curve with
 bit-exact checks, and verifies five Fantom placements. This supports the numeric
