@@ -1,9 +1,17 @@
 # Offline functional fragment emulator
 
-2026-11-11. `tools/bmc_emulator.py` executes logical packet bytes for fourteen checked profiles. Stereo input takes 10 bytes, the dry/wet tail
+2026-11-11. `tools/bmc_emulator.py` executes logical packet bytes for fifteen checked profiles. Stereo input takes 10 bytes, the dry/wet tail
 has 60-byte and 80-byte forms, and the four-stage allpass takes 82 bytes. This is a packet-stepping functional model with memory and
 per-packet traces. It is not yet a complete Roland effect or a cycle/bit-accurate
 BMC emulator. No vendor plugin or instrument is executed.
+
+The [resampling/drive milestone](fdrv-cubic-waveshaping-study.md#connected-resampling-and-drive-milestone-2026-11-11)
+connects the filter bank through clipping and cubic outputs: 1,230 logical bytes,
+77 packets, with 456,000 comparisons per drive variant through five wraps. The
+122-byte `resample_drive_pair` supports the two recorded fixed drive literals,
+exactly representable tap constants and binary32 live gain. ZENOLOGY's native
+double differs slightly from its DSP literal; the interpreter's explicit native
+policy does not establish silicon precision. Whole-FDRV execution remains open.
 
 The [four-section filter bank](fdrv-state-variable-filter.md#four-section-filter-bank-milestone-2026-11-11)
 extends the input chain to 902 packet-executed bytes before resampling arithmetic.

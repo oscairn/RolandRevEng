@@ -1670,3 +1670,54 @@ This bounded milestone is complete. Save/push the verified checkpoint and sync
 the Roland Markdown notes, then pause broader work as requested. Resampling/drive
 and remaining full-FDRV integration, silicon precision/cadence, allocation,
 entry/return and safe live loading remain open. No instrument was accessed.
+
+## Completed connected resampling/drive milestone (2026-11-11)
+
+Recovered the 102-byte stock FDRV window at 2d6..33c, including raw-history
+writebacks, three-tap accumulation, mixed-history stores, fixed drive scaling,
+binary32 live C0 gain and a real coissued clip-history prefetch. The strict
+122-byte profile adds authored input/output transfers. Its short/long contexts
+reuse 1428/552b with different roles; long 0424/4527 accumulates the third term,
+and short 0426/4529 applies the fixed scale. All three tap coefficients must be
+exactly representable by the 24-bit encoder; no general opcode admission is added.
+
+The first Fantom comparison correctly failed: all five placements use duplicated
+100000 literals (0.0625), while ZENOLOGY uses 0656d2. Both exact variants are now
+supported and checked against their real bytes. ZENOLOGY's constructor double
+0x1.95b489f0954cbp-6 differs slightly from the decoded DSP literal; the interpreter
+uses that explicit native-reference constant, without claiming silicon precision.
+Right-channel literal loads reuse left-channel constructor records, with wire
+aliases retained rather than inventing independent records.
+
+The eight-fragment chain reaches clipping and cubic outputs from external samples
+and its own persistent packet ring: 1,230 logical/1,232 stored bytes, 77 packets.
+Synthetic bridge cells 60/61 and 62/63 have no on-device allocation proof. Native
+comparison runs the original complete callback in owned fixture memory but checks
+only 38 packet-covered data values per frame through the last cubic store. Later
+cutpoint writes fail provenance checks; native final output is not compared.
+
+Stock 1/0/0 tap defaults would hide history arithmetic. Declared nonzero fixture
+taps 0.5/0.25/-0.125, C0=8192 and each selected fixed scale match 456,000 data
+values over 12,000 frames/five wraps, ending at origin 1760. The two runs supply
+912,000 comparisons, with both varied nonsaturated values and clipped endpoints.
+Separate stock/nonzero/Fantom-scale cases cross wrap over 2,056 frames with
+cursors 1/2. These constructor substitutions are fixture inputs, not evidence of
+Roland parameter setters or physical Fantom execution.
+
+Qwen returned eight invalid-input suggestions in 4.0 seconds. Each is rejected,
+but its cross-channel suggestion instead breaks adjacency and aliases an output;
+an actual channel-alias case was added independently. A seventh source was needed
+for the traced prefetch after the worker received its six-source baseline.
+Pure tests cover the packet trace, pre-gain stores, delayed loads, both fixed
+scales, independent scalar FMA order, signed zeros and seeded random signals.
+Native mutations reject changed arithmetic, sub-quantum scale changes and later
+cutpoint overwrites. All 458 tests pass in 69.342 seconds.
+
+Default-tap logical hashes:
+ZENOLOGY 457a7ceca95660a4cba18eadb5de872f0603102f3436be7deb46cea5efaaaa26;
+Fantom 6a3aad1bfe9d00f180f8b07afd1b320df9bb3b861fd804ae96d439c9352601d1.
+Original JSON examples, reproduction commands and local evidence are saved.
+Pause broader research after the private commit and note sync. Full FDRV still
+has 23 downstream packets/416 stock bytes at 3ec..58c. Broader ISA/control-flow
+mapping, parameter behavior, numeric/timing calibration, entry/return, allocation
+and safe loading remain unresolved. No instrument was accessed.

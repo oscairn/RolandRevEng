@@ -13,7 +13,17 @@ Next recover another useful exact producer/control context or an owner-proven
 nonempty label/continuation path; retain bounded opcode admission and hardware gates.
 Entry, runtime allocation and hardware calibration remain separate requirements.
 
-The latest bounded milestone is complete (2026-11-11): all four stereo filter
+The latest bounded milestone is complete (2026-11-11): resampling/drive now
+connects the filter bank to clipping and cubic shaping in a 1,230-byte packet
+chain. Both native-reference drive variants match 456,000 data cutpoints each
+through five wraps; all five Fantom bodies retain their distinct 0.0625 scale.
+Save/sync this checkpoint and pause broader work. On resumption, begin the first
+post-cubic history mix at 3ec; full FDRV has 23 downstream packets/416 stock bytes
+remaining through 58c. These byte counts do not estimate effort or full-chip
+coverage. ISA/control-flow coverage, numeric/timing calibration and device
+loading/ownership remain separate requirements for a complete BMC map.
+
+The preceding bounded milestone is complete (2026-11-11): all four stereo filter
 sections and both recombinations now execute in a 902-byte input chain, ending
 before resampling arithmetic. A separate native prefix matches 336,000 values
 through five wraps. The terminal short packet form and synthetic bridge stores

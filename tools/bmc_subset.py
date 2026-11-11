@@ -308,6 +308,43 @@ def assemble_terminal_filter(spec):
     ])
 
 
+def assemble_resample_drive_pair(spec):
+    from bmc_dsp import encode_literal, literal
+    if (not isinstance(spec, dict) or spec.get('kind') != 'resample_drive_pair'
+            or set(spec) != {'kind','sources','output_addresses','coefficient_slots','tap_coefficients','drive_literal'}):
+        raise ValueError('Expected exact resample/drive resource and tap assignments')
+    if not isinstance(spec['drive_literal'],str) or spec['drive_literal'] not in ('0656d2','100000'):
+        raise ValueError('Expected a checked ZENOLOGY or Fantom drive literal')
+    for name,count,maximum in (('sources',7,0x800),('output_addresses',2,0x800),
+                               ('coefficient_slots',1,0x1000)):
+        if (not isinstance(spec[name],list) or len(spec[name]) != count
+                or any(type(v) is not int or not 0 <= v < maximum for v in spec[name])):
+            raise ValueError(f'Expected {count} valid {name} indices')
+    left,l1,l2,right,r1,r2,previous_left=spec['sources']
+    if ([l1,l2,r1,r2] != [left+1,left+2,right+1,right+2]
+            or len(set(spec['sources']+spec['output_addresses'])) != 9):
+        raise ValueError('Resample history/output resources violate checked adjacency or alias rules')
+    taps=spec['tap_coefficients']
+    if not isinstance(taps,list) or len(taps) != 3:
+        raise ValueError('Expected three exactly representable 24-bit tap coefficients')
+    encoded=[encode_literal(v,3) for v in taps]
+    if any(literal(data).hex() != float(v).hex() for data,v in zip(encoded,taps,strict=True)):
+        raise ValueError('Tap coefficients must be exactly representable as 24-bit literals')
+    pairs=[list(int.from_bytes((data+data)[i:i+2],'big') for i in range(0,6,2)) for data in encoded]
+    drive=bytes.fromhex(spec['drive_literal'])*2
+    drive_words=[int.from_bytes(drive[i:i+2],'big')for i in range(0,6,2)]
+    return assemble([
+        [0x1e05,0x0fe0,0x4fe2,left,right],
+        [0xb84e,0x1428,0x552b,0x0fe0,0x8fe2,0x4fe4,0xcfe6,l1,left,r1,right,*pairs[0]],
+        [0x470c,0x1428,0x552b,0x0fe4,0x4fe6,1,5,l2,r2,*pairs[1]],
+        [0x1008,0x0424,0x4527,1,5,*pairs[2]],
+        [0xb80c,0x0426,0x4529,0x8fe0,0xcfe2,0x3fe4,l1,r1,
+         0xc000|spec['coefficient_slots'][0],*drive_words],
+        [0x2e05,0x0403,0x4503,0x2fe0,previous_left],
+        [0x1e05,0x8fe0,0xcfe2,*spec['output_addresses']],
+    ])
+
+
 def assemble_cubic_quad(spec):
     if (not isinstance(spec, dict) or spec.get('kind') != 'cubic_quad'
             or set(spec) != {'kind', 'sources', 'targets'}):
@@ -408,6 +445,8 @@ def assemble_fragment(spec):
         return assemble_filter_recombine(spec)
     if spec.get('kind') == 'state_variable_terminal_pair_with_output':
         return assemble_terminal_filter(spec)
+    if spec.get('kind') == 'resample_drive_pair':
+        return assemble_resample_drive_pair(spec)
     if spec.get('kind') == 'cubic_quad':
         return assemble_cubic_quad(spec)
     if spec.get('kind') == 'clipped_half_pair':
@@ -420,6 +459,20 @@ def assemble_fragment(spec):
 
 
 def disassemble_fragment(stream):
+    if len(stream) == 122:
+        from bmc_dsp import literal
+        rows=packets(stream)
+        if [len(words) for _,words in rows] != [5,14,12,8,12,5,5]:
+            raise ValueError('Not an exact resample/drive profile')
+        a,b,c,d,e,f,g=[words for _,words in rows]
+        spec=dict(kind='resample_drive_pair',sources=[a[3],b[7],c[7],a[4],b[9],c[8],f[4]],
+                  output_addresses=g[3:5],coefficient_slots=[e[8]&0xfff],
+                  drive_literal=stream[rows[4][0]+18:rows[4][0]+21].hex(),
+                  tap_coefficients=[literal(stream[offset+field:offset+field+3])
+                                    for offset,field in ((rows[1][0],22),(rows[2][0],18),(rows[3][0],10))])
+        if assemble_resample_drive_pair(spec) != stream:
+            raise ValueError('Unsupported resample/drive controls, literals, duplicates or aliases')
+        return spec
     if len(stream) in (194, 226):
         base_length = len(stream)-10
         base = disassemble_fragment(stream[:base_length])

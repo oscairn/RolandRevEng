@@ -5,6 +5,14 @@ and explicitly assigned indices into exact packet sequences independently matche
 against native FETDRIVE, LINEDRIVE and FDRV expressions. This is a constrained semantic code emitter and
 inverse decoder, not a general DSP assembler, scheduler or standalone engine.
 
+The [resampling/drive milestone](fdrv-cubic-waveshaping-study.md#connected-resampling-and-drive-milestone-2026-11-11)
+adds `resample_drive_pair` (122 bytes) and separate Fantom/ZENOLOGY JSON examples.
+Seven sources include a real next-packet prefetch; output cells are distinct, tap
+constants must be exactly representable in 24 bits, and the two fixed drive literal
+forms remain explicit. The full input-to-cubic chain is 1,230 logical/1,232 stored
+bytes, with no captured native intermediates. Remaining downstream packets,
+hardware precision and loading are still excluded.
+
 The [four-section milestone](fdrv-state-variable-filter.md#four-section-filter-bank-milestone-2026-11-11)
 adds 226-byte `state_variable_recombine_pair_with_output` and 202-byte
 `state_variable_terminal_pair_with_output` profiles. They compose a 902-byte

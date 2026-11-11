@@ -1,5 +1,10 @@
 # FDRV cubic waveshaping, interpolation and clipping
 
+The [connected resampling/drive milestone](#connected-resampling-and-drive-milestone-2026-11-11)
+now supplies clipping and cubic inputs from an independent 1,230-byte packet
+chain, including the four earlier filter sections. Both recorded drive-literal
+variants match checked native-fixture cutpoints; full FDRV remains incomplete.
+
 2026-11-10. Static Python/Capstone analysis and explicitly isolated native arm64
 execution. Native ZENOLOGY SHA-256:
 `b8ba7f41e26bef91e2cc38e99452e7795cd132e9f2a59695a68a77f18b8a2c30`.
@@ -272,3 +277,122 @@ checks require the pinned local corpus and native probes require macOS ARM64.
 Qwen's 9.5-second test draft had correct asymmetric arithmetic, but omitted input
 values and assumed caller-dictionary mutation. Its code was rejected; actual
 API, signed-zero and native execution tests were implemented and run locally.
+
+## Connected resampling and drive milestone (2026-11-11)
+
+The input-to-shaping milestone is complete: an independent packet model now runs
+input → prefilter → four stereo filter sections and their recombinations →
+three-tap resampling/drive → half-sample clipping → four cubic curves. The eight
+fragments take **86/194/226/194/202/122/80/126 bytes**, or **1,230 logical bytes,
+1,232 stored bytes and 77 packets**. The model receives only initial ring canaries,
+external samples, declared coefficients/constants and its own packet writes.
+No captured native intermediate feeds this chain. Earlier conditional clip/cubic
+window tests remain separate evidence.
+
+The new `resample_drive_pair` is 122 bytes: ten authored input-load bytes, 102
+exact stock bytes at `2d6..33c`, and ten authored output-store bytes. Its seven
+sources are raw L, L-history 1/2, raw R, R-history 1/2 and the coissued previous-left
+clip prefetch. Six channel/history cells are distinct, each channel's three cells
+are consecutive, and the prefetch/output cells are distinct from them. Three
+stereo-shared tap constants must be exactly representable by the explicit 24-bit
+literal encoder; booleans, nonfinite values, inexact numbers and negative zero
+are rejected. Two fixed drive literal variants are admitted, with exact duplicate
+fields and all controls/extensions protected by inverse reassembly.
+
+For each channel, using incoming raw x and history cells h1/h2:
+
+```text
+z = fma(h2, c, fma(h1, b, x*a))
+driven = (z * fixed_drive_scale) * float32(live C0)
+```
+
+The raw x is stored at 0/3 before scaling. The mixed z is stored at 1/4 before
+drive; the final driven values go to authored bridge 62/63 for the existing clip
+profile. All data addresses here are hexadecimal. Under the fixture's origin
+increment of one, next frame's h1 reads the preceding raw x, while h2 reads the
+preceding mixed z. This is not a proof of physical sample cadence or a general
+FIR interpretation. Stock defaults a/b/c = 1/0/0 hide both history terms.
+
+| Packet context | Controls | Functional update in this exact profile |
+|---|---|---|
+| `b84e`, short | `1428 / 552b` | I1/I5 = incoming A/B × literal a; stores retain raw A/B |
+| `470c`, long, extensions `0001/0005` | `1428 / 552b` | I1/I5 = fma(incoming A/B, literal b, incoming I1/I5) |
+| `1008`, long, extensions `0001/0005` | `0424 / 4527` | A/B = fma(incoming A/B, literal c, incoming I1/I5) |
+| `b80c`, short | `0426 / 4529` | A/B × fixed scale; stores retain pre-drive z and load live C0 |
+| `2e05`, short | `0403 / 4503` | A/B × incoming C0; next-packet prefetch cannot affect the gain |
+
+The same base word can have different short/long roles according to its packet
+family. These observations do not admit any of these words globally. The actual
+native arithmetic, nine data access paths, live C0 load, constructor-literal
+records and output lifetimes are checked by `tools/fdrv_resample_study.py`.
+The right channel reuses left-channel constructor literal records; paired wire
+fields are explicit aliases, not independently established native records.
+
+### Fantom and ZENOLOGY differ at the fixed drive literal
+
+All five pinned Fantom FDRV placements contain duplicated **`100000`** literals
+at `32c/32f`, decoding exactly to **0.0625**. ZENOLOGY instead has duplicated
+**`0656d2`**, decoding to **0.024762272834777832**. Its constructor double is
+**`0x1.95b489f0954cbp-6`**, about **0.02476228209191759**. The difference is below
+one encoded-literal quantum, but is enough to break a bitwise native comparison.
+
+The interpreter therefore follows an explicit native-reference policy: `0656d2`
+uses the checked constructor double; `100000` uses exactly 0.0625. This is not
+evidence that BMC silicon uses the ZENOLOGY double or IEEE binary64 at all. The
+Fantom byte test selects its actual literal variant and matches the complete
+102-byte body in all five placements; substituting only addresses/slots was
+correctly rejected when the different scale was first encountered.
+
+### Independent native comparisons
+
+The owned native fixture executes the original complete callback, while comparing
+only packet-covered data cutpoints through the last cubic store at `305af0`.
+Later writes to those cutpoints are rejected. Native final audio output is not
+compared, and executing its callback does not make the packet model complete FDRV.
+For the nondegenerate fixture, constructor slots +48/+58/+68 receive exactly
+representable taps **0.5/0.25/-0.125**, live C0 is **8192**, and the fixed drive
+double is explicitly set to the selected variant. These are declared local fixture
+substitutions, not observed Roland parameter-setter behavior or hardware execution.
+
+Each 12,000-frame run matches **456,000 values** through five wraps, ending at
+origin 1760: 26 earlier filter-bank memory values plus 12 resampling/clip/cubic
+memory values per frame. The two drive variants therefore supply **912,000
+comparisons across two runs**. ZENOLOGY-scale clipping inputs include 47,909
+distinct values and 10 exact boundary results; the Fantom-scale run includes
+39,151 distinct values and 8,824 boundary results. Both nonsaturated curves and
+clipped endpoints are exercised. Three separate 2,056-frame cases cross wrap with
+cursors 1/2: stock taps, nonzero taps, and nonzero taps with the Fantom scale.
+
+All **458 tests pass** (69.342 seconds). Pure tests check asymmetric intermediate
+ports, stores before gain, next-packet coefficient timing, both scale policies,
+binary32 gain, signed zeros and seeded random references. Exact-template tests
+reject changed controls, literal duplicates/tags, partial bodies and bad resources.
+Native mutation tests reject arithmetic changes, even sub-quantum constructor
+scale changes, and later cutpoint overwrites. Qwen supplied eight invalid-input
+cases; each fails assembly, but its cross-channel suggestion also breaks adjacency
+and aliases an output. A true channel-alias case was added independently. The
+seventh prefetch source was added during tracing after Qwen received its baseline.
+
+```sh
+python3.13 tools/fdrv_resample_study.py --execute-native --frames 12000
+python3.13 -m unittest discover -s tests -p 'test_fdrv_resample.py' -v
+python3.13 tools/bmc_subset.py assemble examples/resample-drive-fantom.json local/resample.bin --stored
+```
+
+Original JSON assignments are `examples/resample-drive-zenology.json` and
+`examples/resample-drive-fantom.json`. Default-tap combined logical hashes:
+
+- ZENOLOGY scale: `457a7ceca95660a4cba18eadb5de872f0603102f3436be7deb46cea5efaaaa26`.
+- Fantom scale: `6a3aad1bfe9d00f180f8b07afd1b320df9bb3b861fd804ae96d439c9352601d1`.
+
+Concatenate logical fragments before padding/word reversal. The authored bridge
+cells 60/61 and 62/63 require separate allocation proof before on-device use.
+Packet execution needs no vendor artifacts; corpus/native checks need the pinned
+local inputs, and native execution requires macOS ARM64/Python 3.13+.
+
+Full FDRV still has **23 downstream packets, 416 stock bytes at `3ec..58c`**, to
+map and integrate. The first next window mixes shaped samples/history before
+later feedback/filter/output stages. State initialization, parameter-update
+behavior, hardware numeric/timing calibration, entry/return, allocation and safe
+loading remain separate work. Broader research pauses at this saved checkpoint;
+no instrument was accessed.

@@ -1,5 +1,10 @@
 # A byte-executed stereo state-variable filter
 
+The [connected resampling/drive stage](fdrv-cubic-waveshaping-study.md#connected-resampling-and-drive-milestone-2026-11-11)
+now carries this bank's outputs through clipping and cubic shaping in a 1,230-byte
+packet chain. Fantom and ZENOLOGY have distinct fixed drive literals; both are
+tested with an explicit native-reference precision policy.
+
 The [four-section filter-bank milestone](#four-section-filter-bank-milestone-2026-11-11)
 now forms a 902-byte packet-executed input/filter/recombination chain, checked
 against a native prefix ending before resampling arithmetic. Earlier 270-byte

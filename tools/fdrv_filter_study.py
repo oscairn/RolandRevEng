@@ -95,7 +95,9 @@ def report():
 
 def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds=None,
                   compare_cubic=False, compare_clip=False, compare_input_stage=False,
-                  compare_second_stage=False, compare_filterbank=False):
+                  compare_second_stage=False, compare_filterbank=False,
+                  compare_resample=False, resample_taps=(.5,.25,-.125),
+                  resample_drive_literal='0656d2'):
     import ctypes
     import struct
     import lib
@@ -105,6 +107,7 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
     from native_callback_fixture import RingFixture, executable_mapping
     from transfer_study import constructor_memory
 
+    compare_filterbank = compare_filterbank or compare_resample
     compare_second_stage = compare_second_stage or compare_filterbank
     if compare_second_stage and (compare_cubic or compare_clip):
         raise ValueError('The native prefix fixture stops before clipping and cubic stages')
@@ -135,6 +138,14 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
             raise ValueError('FDRV constructor data overlaps live pointers')
         image[offset] = value
     context = ctypes.create_string_buffer(bytes(image), len(image))
+    if compare_resample:
+        from fdrv_resample_study import report as resample_report,resample_spec,DRIVE_SCALES
+        from bmc_subset import assemble_fragment
+        resample_report()
+        assemble_fragment(resample_spec(taps=resample_taps,drive_literal=resample_drive_literal))
+        for offset,value in zip((0x48,0x58,0x68),resample_taps,strict=True):
+            struct.pack_into('<d',context,offset,value)
+        struct.pack_into('<d',context,0x28,DRIVE_SCALES[resample_drive_literal])
     values = [0.0]*20
     values[5] = 1.0
     values[10:15] = [-.4973, -.2531, .3737, .1279, -.0623]
@@ -149,6 +160,8 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
         values[15:20] = list(map(_float32,(-.3813,-.4171,.2937,.1739,-.0823)))
     if compare_cubic or compare_clip:
         values[0] = .75
+    if compare_resample:
+        values[0] = _float32(8192.)
     records = []
     for offset, slot in pointers.items():
         record = ctypes.create_string_buffer(0x48)
@@ -171,6 +184,7 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
     stage_count = 0
     second_count = 0
     filterbank_count = 0
+    resample_count,clipped_values = 0,0
     if compare_input_stage:
         from bmc_emulator import execute_fragment
         from bmc_subset import assemble_fragment
@@ -181,6 +195,9 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
         if compare_filterbank:
             from fdrv_filterbank_study import program_specs
             stage_specs = program_specs()
+        if compare_resample:
+            from fdrv_resample_study import program_specs as resample_specs
+            stage_specs = resample_specs(resample_taps,resample_drive_literal)
         stage_programs = [assemble_fragment(spec) for spec in stage_specs]
         model_ring = list(fixture.ring)
     if compare_emulator:
@@ -203,10 +220,10 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
         clipped_spec = clip_spec()
         clipped_program = assemble_fragment(clipped_spec)
     code = lib.Z[entry:checked['callback'][1]]
-    if compare_second_stage:
+    if compare_second_stage and not compare_resample:
         from fdrv_second_stage_study import prefix_code
         code = prefix_code()
-    if compare_filterbank:
+    if compare_filterbank and not compare_resample:
         from fdrv_filterbank_study import prefix_code as bank_prefix_code
         code = bank_prefix_code()
     with executable_mapping(code) as address:
@@ -266,10 +283,19 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                     if read(cell).hex() != model_ring[native_ring_index(cell,0,origin)].hex():
                         raise ValueError('Packet filter-bank state differs from native prefix')
                     filterbank_count += 1
-                for port,actual in ((0,out_left.value),(4,out_right.value)):
-                    if actual.hex() != stage['ports'][port].hex():
-                        raise ValueError('Packet filter-bank recombination differs from native prefix')
-                    filterbank_count += 1
+                if not compare_resample:
+                    for port,actual in ((0,out_left.value),(4,out_right.value)):
+                        if actual.hex() != stage['ports'][port].hex():
+                            raise ValueError('Packet filter-bank recombination differs from native prefix')
+                        filterbank_count += 1
+            if compare_resample:
+                for cell in (1,4,0x14,0x16,0xe,0x10,0xf,0x11,0x12,0x18,0x13,0x1a):
+                    if read(cell).hex() != model_ring[native_ring_index(cell,0,origin)].hex():
+                        raise ValueError(f'Packet resampling/shaping differs at frame {frame}, cell {cell:#x}')
+                    resample_count += 1
+                for cell in (0xe,0x10,0xf,0x11):
+                    cubic_input_values.add(read(cell).hex())
+                    clipped_values += abs(read(cell))==1
             for index, item in enumerate(model):
                 for cell, expected in ((0x1f+3*index, mixed[index]), (0x28+3*index, item['state_s']),
                                        (0x29+3*index, item['state_t']), (0x24+index, item['output'])):
@@ -304,13 +330,13 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
     actual_cursors = tuple(struct.unpack_from('<I', fixture.owner, offset)[0] for offset in (0x98, 0x118))
     if actual_cursors != tuple(cursors):
         raise ValueError('Native FDRV filter cursors did not roundtrip')
-    if compare_cubic and frames >= 128 and len(cubic_input_values) < 32:
+    if (compare_cubic or compare_resample) and frames >= 128 and len(cubic_input_values) < 32:
         raise ValueError('Native cubic comparison did not exercise varied input cutpoints')
     return dict(frames=frames, identical_native_values=count, final_origin=origin,
                 initial_cursors=list(cursors), final_cursors=list(actual_cursors),
                 explicit_state_seeds=state_seeds,
-                emulator_checked=compare_emulator, native_callback_executed=not compare_second_stage,
-                native_prefix_executed=compare_second_stage,
+                emulator_checked=compare_emulator, native_callback_executed=not compare_second_stage or compare_resample,
+                native_prefix_executed=compare_second_stage and not compare_resample,
                 conditional_cubic_values_checked=cubic_count,
                 conditional_clipped_values_checked=clip_count,
                 independent_packet_input_stage_values=stage_count,
@@ -318,8 +344,15 @@ def native_check(frames=128, cursors=(0, 0), compare_emulator=False, state_seeds
                 independent_packet_two_filter_values=(stage_count+second_count)
                     if compare_second_stage and not compare_filterbank else 0,
                 independent_packet_filterbank_values=(stage_count+second_count+filterbank_count)
-                    if compare_filterbank else 0,
-                native_prefix_end=0x3058a4 if compare_filterbank else 0x30553c if compare_second_stage else None,
+                    if compare_filterbank and not compare_resample else 0,
+                independent_packet_resample_chain_values=(stage_count+second_count+filterbank_count+resample_count)
+                    if compare_resample else 0,
+                resample_fixture_taps=list(resample_taps) if compare_resample else None,
+                resample_fixture_drive=values[0] if compare_resample else None,
+                resample_fixture_drive_literal=resample_drive_literal if compare_resample else None,
+                clipped_boundary_values=clipped_values,
+                native_prefix_end=None if compare_resample else 0x3058a4 if compare_filterbank
+                    else 0x30553c if compare_second_stage else None,
                 filterbank_fixture_coefficients=dict(C8=values[8],C9=values[9],C15_to_C19=values[15:20])
                     if compare_filterbank else None,
                 distinct_cubic_input_values=len(cubic_input_values),

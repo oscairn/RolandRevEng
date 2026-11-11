@@ -1,0 +1,25 @@
+{
+  "kind": "resample_drive_pair",
+  "sources": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    21
+  ],
+  "output_addresses": [
+    98,
+    99
+  ],
+  "coefficient_slots": [
+    0
+  ],
+  "tap_coefficients": [
+    1.0,
+    0.0,
+    0.0
+  ],
+  "drive_literal": "0656d2"
+}

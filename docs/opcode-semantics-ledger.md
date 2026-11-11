@@ -14,6 +14,14 @@ rounding, saturation, accumulator width or fused evaluation on silicon.
 
 ## Independently checked arithmetic contexts
 
+The [resampling/drive checkpoint](fdrv-cubic-waveshaping-study.md#connected-resampling-and-drive-milestone-2026-11-11)
+adds bounded short/long roles for `1428/552b`, long `0424/4527` with extensions
+`0001/0005`, and short literal gain `0426/4529`. Arithmetic and history stores
+are independently checked with nonzero tap weights. Fantom uses literal `100000`
+where ZENOLOGY uses `0656d2`; the native-reference precision distinction is explicit.
+These words execute only inside the exact 122-byte profile, extending the chain
+through cubic shaping; they are not a general ALU decoder.
+
 The [four-section FDRV checkpoint](fdrv-state-variable-filter.md#four-section-filter-bank-milestone-2026-11-11)
 adds exact terminal short-packet contexts for the existing recombination words
 and a store-extended profile. No new arithmetic word is admitted. The 902-byte
