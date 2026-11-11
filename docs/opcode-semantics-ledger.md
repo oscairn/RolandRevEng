@@ -115,6 +115,13 @@ relation remains unproved after a [bounded static inventory](line-prefix-global-
 The [JUPITER-X comparison](emulator-next-program-targets.md#jupiter-x-carries-an-asymmetric-instance-of-4822--1940)
 establishes unequal stored literals for the exact `4822 / 1940` form in a separate
 program. Its native setup locates the list. DSP values and port timing remain open.
+The [weighted-sum comparison](emulator-next-program-targets.md#weighted-sum-ports-across-trecho-bitcrush-and-the-reverbs)
+ties `4812 / 1500` to the next main-B store in TRECHO and `2424 / 0004` to an
+`A × literal + B` result in port 2 in BRHL. The `4822 / 1940` candidate keeps
+the same nonliteral bits as `4812 / 1500`. UPLIFT EXCITER's `3464 / 0002` ties
+port 1 and the previous accumulator to a port-3 result. LINE uses `3467 / 0004`,
+with B in the candidate addend position. The LINE packet sequence remains
+outside strict execution.
 The [conditional LINE render](fragment-emulator.md#conditional-line-reference-pipeline)
 is a host oracle plus supported fragments, with explicit fixture state and
 software timing. It does not skip unknown words to manufacture complete program

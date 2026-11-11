@@ -772,3 +772,21 @@ store ordering establish. Those observations alone do not show that a
 referenced literal contributes to the result or that the LINE auxiliary
 stores capture an incoming value. No generated code or semantic claim
 from the review was used.
+
+## Weighted-mix ports and a LINE prefix candidate
+
+TRECHO provides the independent `4812 / 1500` output store and confirms it uses
+the previous A/I1 pair when it co-issues input loads. BITCRUSH's unequal
+constructor coefficients fix the native weighted-sum term order. BINHALL
+independently ties unequal width-three literals to a port-5 result. BRHL traces
+`2424 / 0004` into the next `afe4` store. LINE's `4822 / 1940` shares the nonliteral
+bits of the TRECHO form and now has a falsifiable B-port hypothesis. UPLIFT
+EXCITER supplies a port-3 store and an independent I1 term for the neighboring
+`3464 / 0002` long operation. LINE's paired extensions `0004/0004` give a
+candidate shared B addend across both channels. Full LINE prefix state and
+silicon execution remain open.
+
+OMP/Qwen returned a bounded review. It correctly flagged the opaque BITCRUSH
+interval. Its generic call for a BITCRUSH trace was narrowed to a JUPITER-X
+observation of the exact target form with unequal literals. The symbolic
+comparisons were checked directly and no generated code was used.

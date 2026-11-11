@@ -298,3 +298,46 @@ python tools/line_mix_variation.py \
   --qspi local/crossmodel/mc101/RPG69_C1A_up.bin \
   --qspi local/crossmodel/sh-4d/DD013_C1A_up.bin > local/line-mix-variation.json
 ```
+
+## Weighted-sum ports across TRECHO, BITCRUSH and the reverbs
+
+`weighted_mix_study.py` checks the prepared ZENOLOGY image, reconstructs its
+constructor records, and compares independent ARM64 value and address-field
+provenance with exact DSP packet sequences. The comparison uses symbolic inputs
+and coefficients, so swapping two factors fails even when their defaults agree.
+
+| Effect and logical DSP packet | Checked native evidence | Port conclusion in this context |
+|---|---|---|
+| TRECHO `1d6`, `4812 / 1500` | `d018` writes `0.25 × (left input + left state)` to the record for `cfe6` | Arithmetic reads the entering A and I1 despite right-channel loads in the same packet. B holds the left sum at the next packet. |
+| TRECHO `1e8`, `5812 / 1500` | `d02c` writes `0.25 × (right input + right state)` to the record for the next `dfe0` | Port 5 holds the right sum. The co-issued main-B store captures the previous left sum. |
+| BITCRUSH `15c/1a8/1f4`, `4812 / 1500` | `241ba4/241c78/241d60` compute `first input × literal0 + second input × literal1`, each with distinct constructor records | The source cutpoints are the values matched to the earlier `8fe4` main-A store and `1fe2` port-1 load. Opaque packets between them and the sum still limit the DSP-side liveness proof. |
+| BINHALL `334`, `5824 / 49c0` | `1a3c00` saves the incoming value through the `cfe2` record. `1a3c10` computes `loaded input × literal0 + saved value × literal1`, then `1a3c1c` writes through the `dfe0` record. | Loaded port 0 and incoming B are distinguishable even though the two output records both have native index `32`. They belong to different memory paths. The result goes to port 5. |
+| BRHL `fc`, `2424 / 0004` | `2d9940` saves B via the `cfe2` record. `2d9960` writes `A × literal + B` via the next packet's `afe4` record. | Port 2 holds the MAC result. The incoming A matches the preceding `0fe2` load. |
+| UPLIFT EXCITER `1e8`, `3464 / 0002` | `8b67c` writes the previous accumulator plus the port-1 input times the constructor literal at `1f2`. | The result goes to the next `bfe0` store from port 3. The addend is the result of the preceding `2468 / 0002` operation in this context. |
+
+BITCRUSH's width-two literals are `(0.75, 0.25)`, `(0.5, 0.5)` and
+`(0.25, 0.75)`. BINHALL independently checks that order with unequal width-three
+literals and an explicit output. The shared nonliteral bits of `4812 / 1500`
+and `4822 / 1940` are `4800 / 1000`. The extension's low-six-bit reference is
+port 0 in both layouts and its high nibble remains `1`. This gives a specific
+LINE hypothesis: `4822 / 1940` computes `B = A × literal0 + I1 × literal1`.
+BRHL corroborates `I2 = A × literal + B` for LINE's next long operation.
+The `1008` header gives both `2424` and `3467` their own extension word.
+LINE uses `0004` for each. The UPLIFT EXCITER comparison supports a candidate
+`I3 = I1 × literal + B` for `3467 / 0004`, with B in the same addend position
+that points to I2 in UPLIFT EXCITER. `afe0/bfe2` at `2a` would then store I2
+and I3 while loading C2 into port 5. This reconstructs a candidate dataflow
+for the four opening packets from `004` to `038`. It leaves the LINE-specific
+relationship between the four literal fields and the complete port state open.
+
+For JUPITER-X's exact `4822 / 1940` instance, the hypothesis predicts that the
+next `cfe2` store receives the first input when the two ports differ and its
+literals are `(1, 0)`. A capture of that store and its two incoming port values
+would distinguish swapped operands, an alternate destination and capture of the
+next operation's result. No DSP trace or hardware arithmetic was measured.
+The strict emulator's admissions are unchanged.
+
+```sh
+python tools/weighted_mix_study.py > local/weighted-mix-study.json
+python -m unittest discover -s tests -p test_weighted_mix_study.py -v
+```
