@@ -965,3 +965,27 @@ current host view. Instrument loading and calibration remain pending.
 All 292 tests passed. The remaining offline work includes later OSC
 waveform folding, a complete native FETDRIVE fixture and independent
 contexts for the phase controls' other state effects.
+
+## Native OSC sine fold and stored waveform
+
+The sine window now binds seven owned literals, the native pi scale,
+the sign store, the unsigned polynomial store and the signed output store.
+The four Fantom placements retain the checked controls and relocated
+targets. The native polynomial is a factored degree-15 sine approximation.
+The reference preserves its constructor doubles and fused operation order.
+
+All 525 native probes agree bit for bit at four stored values per phase.
+The checked boundary behavior explains the earlier binary64 experiment's
+isolated peak sign changes. Reachability under BMC arithmetic remains open.
+Operand `e037` is a candidate for this context's pi input; a global constant
+bank assignment is not established. No strict DSP profile was added.
+
+Early tool-free Qwen drafts misread coefficients and fused arithmetic.
+They were rejected. Tool-enabled Qwen then executed exact rational algebra;
+its returned coefficient table was independently asserted locally. Worker
+code still receives review before adoption. Ring pointer/buffer setup is
+shared across the native LINE, phase and sine fixtures. Iterable phase
+inputs and mismatched sine packet contexts have regression coverage.
+
+All 297 tests passed. A scoped tool-enabled Qwen job is preparing the
+complete native FETDRIVE fixture in ignored scratch files.

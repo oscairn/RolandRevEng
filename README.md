@@ -29,6 +29,7 @@ from any of the five recorded Fantom placements. Its FMA oracle requires Python 
 
 Independent follow-up studies:
 
+- [OSC sine folding](docs/oscillator-sine-study.md): native polynomial, owned literals, four Fantom placements and bit-exact boundary execution.
 - [Gain controls](docs/alu-controls-study.md): native def/use comparison of selected gain chains.
 - [Dry/wet MAC controls](docs/dry-wet-mac-study.md): symbolic mixing expressions for the established subset.
 - [MAC, allpass and store timing](docs/mac-controls-and-issue-study.md): additional exact arithmetic forms and pre-arithmetic stores.
@@ -158,16 +159,16 @@ The initial 19-note update was applied to the vault on 2026-11-10 through review
 The Roland research and related planning notes are organized in
 `/Users/jacob/Documents/ObsidianVault/Projects/Oscairn/Roland`. All 52 moved notes
 were verified byte for byte; their unique title links remain valid. Continued
-research now covers 57 verified notes in this folder. Future vault
+research now covers 59 verified notes in this folder. Future vault
 updates target this subdirectory. The move manifest is
 `local/obsidian-applied-roland-move-2026-11-10.json`; the latest update manifest
-is `local/obsidian-applied-eleventh-2026-11-10.json`. Current folder and manifest
+is `local/obsidian-applied-osc-sine-2026-11-10.json`. Current folder and manifest
 are recorded in `local/obsidian-location.json`. Earlier manifests describe historical paths.
 
 The research notes include the functional fragment emulator, official cross-model
 comparisons, key/access studies and corrections to older recovery claims.
-The latest pass updated four Markdown notes and verified all 57 against the staged
-hashes. Firmware downloads remain local/ignored.
+The latest pass adds the OSC sine study and verifies the 59-note set against
+staged hashes. Firmware downloads remain local/ignored.
 Saved hashes were checked before each update; every note was verified byte for byte.
 Original backups, the initial validated patch and the applied hash manifests remain
 ignored/local. The patch records the initial original-to-updated change;

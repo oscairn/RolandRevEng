@@ -73,7 +73,7 @@ class ExecutionTests(unittest.TestCase):
                   (math.nextafter(2**31, 0), 0), (-math.nextafter(2**31, 0), 0)]
         cases += [(generator.uniform(-100, 100), generator.uniform(-3, 3)) for _ in range(256)]
         code = ('import json,sys; from oscillator_phase_study import native_probes; '
-                'print(json.dumps(native_probes(json.load(sys.stdin))))')
+                'print(json.dumps(native_probes(iter(json.load(sys.stdin)))))')
         env = dict(os.environ, PYTHONPATH=str(ROOT/'tools'), BMC_CORPUS_DIR=str(CORPUS))
         run = subprocess.run([sys.executable, '-c', code], env=env,
                              input=json.dumps(cases), capture_output=True, text=True, timeout=30)

@@ -11,7 +11,7 @@ import wave
 
 from line_shaping_study import NATIVE_SHA256
 from line_state_study import advance_native_origin
-from native_callback_fixture import executable_mapping
+from native_callback_fixture import RingFixture, executable_mapping
 from render_fragment_demo import SAMPLE_RATE, metrics, pcm16
 from render_line_reference import PARAMETERS, render_reference
 
@@ -69,15 +69,7 @@ def render_native(frames):
         records.append(record)
         struct.pack_into('<Q', context, field, ctypes.addressof(record))
 
-    ring = (ctypes.c_double * 2048)()
-    ring_context = ctypes.create_string_buffer(0x28)
-    owner = ctypes.create_string_buffer(0x20)
-    manager = ctypes.create_string_buffer(0x20)
-    wrapper = ctypes.create_string_buffer(0x30)
-    for buffer, offset, target in (
-            (ring_context, 0x18, ring), (owner, 0x10, ring_context),
-            (manager, 0x18, owner), (wrapper, 8, manager), (wrapper, 0x28, context)):
-        struct.pack_into('<Q', buffer, offset, ctypes.addressof(target))
+    fixture = RingFixture(context)
     left, right, output_left, output_right = [ctypes.c_double() for _ in range(4)]
     inputs = (ctypes.c_void_p * 2)(ctypes.addressof(left), ctypes.addressof(right))
     outputs = (ctypes.c_void_p * 2)(ctypes.addressof(output_left), ctypes.addressof(output_right))
@@ -96,8 +88,8 @@ def render_native(frames):
         for frame in range(frames):
             left.value = 0.1 * math.sin(2 * math.pi * 220 * frame / SAMPLE_RATE)
             right.value = 0.08 * math.sin(2 * math.pi * 330 * frame / SAMPLE_RATE)
-            struct.pack_into('<I', ring_context, 0x20, origin)
-            invoke(ctypes.addressof(wrapper), ctypes.addressof(inputs), ctypes.addressof(outputs))
+            struct.pack_into('<I', fixture.ring_context, 0x20, origin)
+            invoke(ctypes.addressof(fixture.wrapper), ctypes.addressof(inputs), ctypes.addressof(outputs))
             sample = output_left.value, output_right.value
             if not all(math.isfinite(value) for value in sample):
                 raise ValueError('Native LINE fixture produced a non-finite sample')

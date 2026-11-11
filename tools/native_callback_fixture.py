@@ -3,6 +3,24 @@ from contextlib import contextmanager
 import ctypes
 import mmap
 import platform
+import struct
+
+
+class RingFixture:
+    """Keep the recovered callback pointer graph and its data buffers alive."""
+
+    def __init__(self, context):
+        self.context = context
+        self.ring = (ctypes.c_double * 2048)()
+        self.ring_context = ctypes.create_string_buffer(0x28)
+        self.owner = ctypes.create_string_buffer(0x20)
+        self.manager = ctypes.create_string_buffer(0x20)
+        self.wrapper = ctypes.create_string_buffer(0x30)
+        for buffer, offset, target in (
+                (self.ring_context, 0x18, self.ring), (self.owner, 0x10, self.ring_context),
+                (self.manager, 0x18, self.owner), (self.wrapper, 8, self.manager),
+                (self.wrapper, 0x28, context)):
+            struct.pack_into('<Q', buffer, offset, ctypes.addressof(target))
 
 
 @contextmanager

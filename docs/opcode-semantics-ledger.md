@@ -145,3 +145,10 @@ The [conditional LINE render](fragment-emulator.md#conditional-line-reference-pi
 is a host oracle plus supported fragments, with explicit fixture state and
 software timing. It does not skip unknown words to manufacture complete program
 execution.
+
+The [OSC sine study](oscillator-sine-study.md) checks the native phase fold,
+seven polynomial literals and three waveform stores. Direct native execution
+agrees bit for bit at 525 phases, including narrow sign/fold boundary intervals.
+Four Fantom placements retain the context. The `e037` load is a fixed-input
+candidate for the native pi scale in this window. Exceptional state and a
+general constant-bank mapping remain open; no strict OSC profile is admitted.

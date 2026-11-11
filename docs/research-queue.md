@@ -493,3 +493,19 @@ can now distinguish an exact match, the recorded opening mute-bit
 difference and other differences. Prefix arithmetic and return
 continuation remain open on the DSP track.
 [Placement and readback comparison](kernel-audio-abi-study.md#offline-line-placement-and-readback-comparison)
+
+## Native arithmetic execution checkpoint
+
+The native LINE callback runs in an explicit isolated fixture and agrees
+with the conditional reference through ring wrap. MFX OSC now has a
+checked phase step, owned frequency write, sine factorization, seven owned
+polynomial literals and direct boundary execution. The
+[sine study](oscillator-sine-study.md) records the narrow native sign/fold
+intervals and four Fantom placements. These do not establish DSP precision
+or exceptional-state effects.
+
+Next offline work is a complete native FETDRIVE fixture, independent
+contexts for exceptional arithmetic and further OSC waveforms. The
+FETDRIVE fixture is assigned to tool-enabled OMP/Qwen in ignored scratch
+files. Review and local execution remain required before integration.
+Qwen's exact rational sine expansion has been checked independently.

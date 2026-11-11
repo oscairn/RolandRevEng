@@ -17,9 +17,9 @@ START, END = 0x29014, 0x290c0
 OSC_LIST = 0x61112114
 
 
-def advance_phase(phase, increment):
-    """Model the checked native interval within its bounded int32 domain."""
-    value = _finite(_finite(phase) + _finite(increment))
+def normalize_phase_sum(value):
+    """Normalize an already computed sum under the checked signed32 rule."""
+    value = _finite(value)
     if abs(value) >= 2**31:
         raise ValueError('Phase sum is outside the checked int32 domain')
     if -1 <= value < 1:
@@ -28,6 +28,11 @@ def advance_phase(phase, increment):
     if normalizer >= 2**31:
         normalizer -= 2**32
     return value + normalizer if value < 0 else value - normalizer
+
+
+def advance_phase(phase, increment):
+    """Model the checked native interval within its bounded int32 domain."""
+    return normalize_phase_sum(_finite(phase) + _finite(increment))
 
 
 def phase_context(program):
@@ -144,31 +149,24 @@ def report():
 def native_probes(cases):
     import ctypes
     import lib
-    from native_callback_fixture import executable_mapping
+    from native_callback_fixture import RingFixture, executable_mapping
 
+    cases = tuple(cases)
     checked = report()
     expected = [advance_phase(phase, increment) for phase, increment in cases]
     context = ctypes.create_string_buffer(0x200)
     struct.pack_into('<I', context, 0x1dc, checked['source']['address'])
     struct.pack_into('<I', context, 0x1d4, checked['target']['address'])
-    ring = (ctypes.c_double * 2048)()
-    ring_context = ctypes.create_string_buffer(0x28)
-    owner = ctypes.create_string_buffer(0x20)
-    manager = ctypes.create_string_buffer(0x20)
-    wrapper = ctypes.create_string_buffer(0x30)
-    for buffer, offset, target in (
-            (ring_context, 0x18, ring), (owner, 0x10, ring_context),
-            (manager, 0x18, owner), (wrapper, 8, manager), (wrapper, 0x28, context)):
-        struct.pack_into('<Q', buffer, offset, ctypes.addressof(target))
+    fixture = RingFixture(context)
     code = lib.Z[START:END] + bytes.fromhex('c0035fd6')
     results = []
     with executable_mapping(code) as address:
         invoke = ctypes.CFUNCTYPE(None, ctypes.c_void_p)(address)
         for (phase, increment), predicted in zip(cases, expected, strict=True):
-            ring[checked['source']['address']] = phase
+            fixture.ring[checked['source']['address']] = phase
             struct.pack_into('<d', context, 0xa8, increment)
-            invoke(ctypes.addressof(wrapper))
-            actual = ring[checked['target']['address']]
+            invoke(ctypes.addressof(fixture.wrapper))
+            actual = fixture.ring[checked['target']['address']]
             if actual != predicted:
                 raise ValueError(f'Native phase {actual} differs from model {predicted}')
             results.append(dict(phase=phase, increment=increment, stored=actual))
