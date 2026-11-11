@@ -342,3 +342,12 @@ as differences, including potential live parameter edits. The tool
 has no connection to the instrument. The first hardware evidence needed
 is a capture whose build, active effect, owner and DSP destination are
 independently identified. [Host peer evidence](core1-task-context-and-host-peer.md)
+
+Hardware validation is scoped to the Fantom-07. Use an independently identified
+stock LINE placement to establish the active owner and audio path. Compare the
+stock program bytes before interpreting sample or state observations. Once the
+execution and audio paths are verified, the existing original one-pole kernel
+is the first custom program candidate. JUPITER-X firmware contributes offline
+operand comparisons. Its store prediction is optional corroboration and does
+not gate the Fantom-07 work.
+[Original one-pole kernel](fragment-emulator.md#original-one-pole-kernel)

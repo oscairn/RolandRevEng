@@ -807,3 +807,20 @@ corresponding DSP windows, providing another encoding to compare.
 Qwen reviewed the argument and proposed an asymmetric capture. Its claim
 that the native mix treats the two inputs independently is contradicted by
 the native shared term at `2df898`. No generated code was used.
+
+## FETDRIVE through the first shaped store
+
+Native source-field binding and register preservation connect each FETDRIVE
+mixed-input reload to the first post-quantizer T store. The native clamp,
+distinct affine constants, square and post gain are checked end to end.
+The Fantom's five relocated copies have a drive scale of `1/256` and stored
+post gain `0.9187498092651367`. Desktop DSP literals use approximately
+`0.00154763` and `1`, respectively. The operand brackets still leave the
+two exceptional controls and their state effects unresolved.
+Native `SetAlg` independently writes `44100 / rate` to both post-gain fields.
+The Fantom's stored post gain agrees with a 48 kHz divisor within one literal step.
+
+Qwen reproduced the native order but overstated what the correspondence
+establishes about the DSP pipeline. The retained conclusions are from the
+checked byte and native dataflow evidence. The hardware plan now uses the
+Fantom-07 as the sole physical target.

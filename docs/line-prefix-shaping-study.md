@@ -192,6 +192,12 @@ conversion windows use shifts of 2 and 4. The checked VMCP inventory supplies no
 one-to-one relationship between its `9ed9` and either native conversion. These
 comparisons leave the role of the shared low bits and any special state open.
 
+The [FETDRIVE cutpoint study](operand-variants-and-macro-boundaries.md#fetdrive-mixed-input-through-the-first-shaped-store)
+now follows both mixed-input reloads through the native clamp and affine square
+to T. It reads the drive and post-gain literal values separately in all five
+Fantom placements. No intermediate readback establishes the two standalone
+operations' individual effects.
+
 ## Reproduce and Qwen review
 
 ```sh

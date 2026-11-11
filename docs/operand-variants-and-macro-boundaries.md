@@ -130,6 +130,68 @@ toward zero. Outside that range the 64-bit shift discards high bits; no unbounde
 `512*x` identity is valid. This is native sequence evidence, **not** a recovered
 DSP shift encoding or proof of the render DSP's accumulator width.
 
+### FETDRIVE mixed input through the first shaped store
+
+`fetdrive_quantizer_study.py` checks the complete native path to T on both
+channels. Native input reloads at `2f7e6c` and `2f7fd8` use the same constructor
+records as the earlier mixed-input stores, program fields `36/38`. The DSP
+reloads at `3e/d4` independently alias those destinations through their actual
+transfer operands. Native T stores at `2f7ee4/2f8018` bind exact DSP fields
+`6a/100` at the two `9fe0` packets. These are the first stores after each input
+reload in the selected DSP windows.
+
+The checked native value is
+
+```text
+g = native_scale * float64(float32(C1))
+q = signed_fixed32_shift9(mixed * g)
+a = fma(clamp(q, -1, +1), 0.33333, 0.33334)
+T = post_gain * (a * a)
+```
+
+The checker follows the scaled live coefficient and the constants across the
+two channels. The native callback uses the distinct binary64 bias and slope
+`0x3fd555714b9cb685` and `0x3fd555475a31a4be`. The DSP regions are `3e..6c` and
+`d4..102` (half-open). Both have the following packet sequence.
+
+| Offset from reload | Controls | Established context |
+|---|---|---|
+| `00` | `0fe0` | Reload the mixed input |
+| `06` | `1405` | Between the load and the standalone family-2 packets |
+| `0a/0e` | `9c59`, `9ed9` | Standalone family-2 pair preceding the first affine-literal packet |
+| `12` | `3452 / 0014` | Two width-two literals and a port-0 reference |
+| `1c/20` | `14c3`, `1460` | Short operations before T; `1460` references a width-three literal |
+| `28` | `9fe0` | Write T to the matched data record |
+
+The affine candidates have equal stored values (`0.333251953125`), so they
+cannot distinguish bias from slope by their numeric contents. The bracketed
+native equation does not isolate conversion, shift, clamp or special-state
+effects within `9c59/9ed9`. There is no independently anchored observable
+intermediate between those two DSP packets. The strict interpreter still
+rejects the window.
+
+All five Fantom FETDRIVE placements retain the same control sequence and have
+distinct input/output data addresses. Their stored values differ from the
+desktop constants at two points:
+
+| Field | Native constructor double | Desktop DSP literal | Fantom DSP literal, all five |
+|---|---:|---:|---:|
+| Drive scale `3a` | `0.0015476426307448495` | `0.0015476346015930176` | `0.00390625` |
+| Post gain `62/f8` | `1.0` shared | `1.0` | `0.9187498092651367` |
+
+Native `SetAlg` reads the signed rate divisor from `b78af0`, initially `44100`,
+computes `44100 / rate` at `32c994` and calls manager slot `c8` at `32c9a8` with
+the counted literal group `a50df8`. The group has exactly two width-three
+records, `62/f8`. The Fantom's stored post gain differs from `44100/48000` by
+less than one encoded step (`2^-20`). That is consistent with rate normalization.
+The separate `3a` drive scale difference remains unexplained. Live Fantom
+rate, active effect and any later writes require their own evidence.
+
+```sh
+python tools/fetdrive_quantizer_study.py --core1 local/b0c1a.bin > local/fetdrive-quantizer.json
+python -m unittest discover -s tests -p test_fetdrive_quantizer_study.py -v
+```
+
 ## Exceptional macros: a stronger negative result for TRANSIENT
 
 The existing UPLIFT_EXCITER cutpoints reproduce unchanged: two independent native
