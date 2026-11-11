@@ -1074,3 +1074,46 @@ by four live-pointer fields through `678`. Reviewed metadata is saved
 separately. A native TRANSIENT fixture can now target these concrete
 dependencies; it has not yet been executed. Code and the 309-test checkpoint
 are unchanged by this metadata-only follow-up.
+
+## Native TRANSIENT execution and conditional envelopes
+
+The complete callback runs with three rewritten math calls, explicit context,
+four binary32 coefficients and two owner caches. The source image, call set,
+branches, return and constructor bounds are checked before execution.
+Authored ABI snippets exercise the math bridge before vendor-code invocation.
+
+Qwen's bridge draft timed out with relocation-base/range and code/data errors.
+The corrected implementation rejects nonlocal or indirect branches and does
+not decode embedded host pointers as code. Its misplaced test draft was moved
+into ignored worker output. The source and tests were reviewed and run locally.
+
+The owner allocation now includes both caches through `118`; LINE/FETDRIVE
+and earlier native fixtures pass their regressions. A 12,000-frame run matches
+24,000 peak/log values and 60,000 envelope/gain/output values exactly. The
+upstream detector arguments still come from native execution. No complete
+TRANSIENT DSP interpretation or hardware calibration is claimed.
+
+The repeated OSC/TRANSIENT/FETDRIVE native scales supply an amplitude-convention
+candidate; physical full scale remains unverified. All 319 tests passed at
+this checkpoint, including math-bridge, native-execution and finite-kernel tests.
+
+## Original packet-driven allpass oscillator
+
+Qwen produced and tested an original oscillator from the supported coefficient
+prefix and allpass chain. Review retained its static packet/state loop,
+reused existing finite-number and PCM helpers, fixed output creation and
+exported the original 120 logical bytes under ignored local output. The
+manifest includes six seed slots, two live coefficient values and the byte
+format. No vendor binary or native call supplies this waveform.
+
+All per-frame signal arithmetic executes packet bytes. Only five sine values
+are computed at initialization. The explicit native ring convention supplies
+the one-frame feedback path. At requested 440 Hz, the quantized factor gives
+440.000197628852 Hz and a maximum 12,000-frame error of
+3.1290942059669646e-14. The worker's smaller error claim was replaced with
+local measurements. Tests cover external-input independence, two ring wraps,
+vendor-corpus-free operation and existing-output preservation.
+
+All 327 tests passed. This is a synthesis-core candidate, with hardware data
+encoding, owned resources, task wrapper, output routing and calibration
+still pending. The complete-program and general ISA goals remain open.

@@ -122,20 +122,125 @@ Fresh constructor extraction initializes bytes through object offset `65f`.
 The four live-coefficient pointer fields are `660/668/670/678`, slots
 `0/1/2/3`. An explicit context therefore needs at least `680` bytes.
 The primary DSP segment is 808 bytes. Initial native pointer loads follow
-the established wrapper/context/ring graph, but a complete fixture still
-needs to validate all accesses and select explicit coefficient/state values.
+the established wrapper/context/ring graph. These bounds informed the
+execution fixture below; metadata alone did not establish its memory setup.
 
 This callback cannot be copied using the call-free LINE/FETDRIVE procedure
 unchanged. Its three external `bl` instructions require deliberate host-math
 resolution. Internal relative branches must retain their destinations, and
-the callee-saved register/stack contract must remain intact. The next offline
-step is a checked fixture with known math-call targets and explicit memory,
-followed by numeric and state comparisons.
+the callee-saved register/stack contract must remain intact. The fixture below
+resolves these dependencies explicitly.
 
 Tool-enabled Qwen produced the initial metadata. Local review corrected its
 three internal jumps misclassified as unknown calls, its conditional-branch
 count, and FP loads included in a purported GPR list. Independent extraction
 asserted the callback bounds, complete decoding, import identities, branch
 targets and constructor layout. Raw and reviewed JSON remain ignored under
-`local/transient-metadata-worker/`. No TRANSIENT callback or DSP program
-was executed in this pass; this is execution-planning evidence.
+`local/transient-metadata-worker/`. This metadata-only pass did not execute
+the callback. The subsequent execution work is recorded below.
+
+## Native TRANSIENT fixture and conditional envelope reference
+
+`native_transient_reference.py` now executes the complete pinned callback
+in a separate macOS ARM64 process. The new `native_math_bridge.py` validates
+the entire instruction stream, checks the exact three original call targets,
+and rewrites their `bl` instructions to two local process-libm trampolines.
+Internal branches keep their destinations. Each trampoline uses caller-saved
+X16 and preserves the original call's return address. Its host pointer is
+literal data and is excluded from instruction decoding and report metadata.
+
+The relocation helper rejects unexpected calls, external/indirect branches,
+ADR/ADRP, PC-relative literal accesses, interrupts and early/unusual returns.
+It validates relocation rather than arbitrary machine-code safety; the
+fixture separately pins the source image and callback bounds. Authored ABI
+snippets test single `log`/`exp` calls and a two-call composition in isolated
+processes before any vendor callback execution. The helper checks signed BL
+range; tests cover nonzero source bases, shared trampolines and malformed streams.
+
+Memory is explicit: a `680`-byte coefficient/address context, four live
+coefficient records with binary32 slots `(1, 0.5, 0.25, 0.125)`, a cold
+2,048-double sample ring, and an owner buffer covering `120` bytes.
+TRANSIENT uses two additional three-double caches at owner+`a0` and
+owner+`100`, with cursors at `b8/118`. The common fixture allocation now
+covers both. Their cursors begin and end at zero under this experiment.
+Constructor defaults are retained. The host supplies zero wrapper base,
+one origin step per generated frame, and 48 kHz software input tones.
+
+The first native peak store at `1d6064` is the larger absolute channel input
+times the owned normalization default `0.02476228209191759`. The following
+log store at `1d609c` uses native `log`, replacing its zero-input result with
+the explicit constant `-22.18070977791825`, equal to `log(2^-32)`.
+The fixture checks both retained stores bit for bit on every frame.
+
+Two independently evaluated kernels then check the exponential envelopes
+and output gain. Let `a/b` be the new envelopes. Their arguments come from
+native cells `24/25` in hexadecimal; previous states are read before invocation
+from `27/29`. Current envelope stores use `26/28`. The native D0 argument
+to the first exp is unchanged after its saved store; the second uses D8,
+whose low 64 bits are also preserved by the libm ABI.
+
+```text
+delta = exp(argument) - previous
+next = fma(delta, above_rate if delta > -2^-32 else below_rate, previous)
+product = a * b
+gain = fma(a - product, C3, 1 + fma(1 - a, C1, product * C2))
+output = (input * gain) * C0
+```
+
+The finite reference preserves the native operation order. The four live
+values are read as binary32. For the supplied positive C1/C3, the selected
+constructor rates are
+
+| Envelope | Rate above the delta threshold | Rate at/below the threshold |
+|---|---:|---:|
+| First | `0.0028454592029794057` | `0.13258300293690084` |
+| Second | `0.02809113921598716` | `0.0028454592029794057` |
+
+The negative-epsilon threshold is strict, so small negative deltas can select
+the above-threshold rate. Separate tests distinguish the exact boundary and
+its neighboring binary64 value. The gain store is cell `10` in hexadecimal.
+The owner cache round trip supplies the current `a-product` term in this fixture.
+
+A 12,000-frame run matches 24,000 peak/log values and 60,000 envelope/gain/output
+values bit for bit. Peak stereo output is `0.14596584013287234`; RMS is
+`0.07554220759649252`. Subprocess tests cross sample-ring wrap at 2,056 frames,
+check fresh-render determinism and preserve existing output files.
+
+This is a conditional output reference: upstream detector arguments remain
+native-computed. The JSON keeps `full_output_reference_verified=false` and
+`upstream_arguments_from_native=true`. No BMC instructions run in this native
+fixture. Its hardware precision, parent cadence, warm state, sample-rate
+initialization and preset calibration remain unverified.
+
+```sh
+python tools/native_transient_reference.py local/native-transient-reference.wav \
+  --frames 12000 > local/native-transient-reference.json
+python -m unittest discover -s tests -p 'test_*transient*reference.py' -v
+python -m unittest discover -s tests -p test_native_math_bridge.py -v
+```
+
+Qwen's bridge draft had relocation-base, branch-range and code/data decoding
+errors and reached its time limit. The retained helper was corrected locally
+and verified with authored snippets before running the pinned callback. A
+misplaced worker test draft was preserved under ignored worker output.
+Unfinished bridge drafts and vendor bytes remain local; reviewed code is tracked.
+
+## Paired native amplitude-scale candidates
+
+TRANSIENT's peak normalization is the binary64 reciprocal of the OSC default
+gain `40.384`. FETDRIVE's drive-scale default is that normalization divided
+by sixteen. These numerical relationships and native uses are observed
+directly in the pinned artifact.
+
+| Native class | Native load | Object double field | Representative DSP field | Native default |
+|---|---|---|---|---|
+| OSC | `29820` | `98` | `2cc` | `40.384` |
+| TRANSIENT | `1d6040` | `28` | `12` | `0.02476228209191759` |
+| FETDRIVE | `2f7e58` | `58` | `3a` | `0.0015476426307448495` |
+
+The latter two have independently decoded owned width-three literals.
+OSC's containing mixed packet remains outside the ordinary layout decoder;
+its row describes a native constructor record and use, without new layout
+admission. These paired scales suggest a shared native amplitude convention.
+They do not establish a universal PCM full scale or the physical BMC data
+representation. Audio-boundary tracing and hardware calibration remain required.

@@ -13,7 +13,7 @@ class RingFixture:
         self.context = context
         self.ring = (ctypes.c_double * 2048)()
         self.ring_context = ctypes.create_string_buffer(0x28)
-        self.owner = ctypes.create_string_buffer(0x20)
+        self.owner = ctypes.create_string_buffer(0x120)  # TRANSIENT caches/cursors extend through +0x118.
         self.manager = ctypes.create_string_buffer(0x20)
         self.wrapper = ctypes.create_string_buffer(0x30)
         for buffer, offset, target in (

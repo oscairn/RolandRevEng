@@ -178,3 +178,14 @@ target is an integer in `0..0x7ff`. `input_addresses` selects a checked
 stereo pair. The 38 logical bytes take 40 stored bytes with zero padding.
 The [execution contract](fragment-emulator.md#stored-fixed-point-coefficient-prefix)
 records the native numeric policy and independent store bindings.
+
+## Original oscillator composition
+
+`bmc_allpass_oscillator.programs()` returns a 38-byte coefficient prefix and
+an 82-byte four-stage allpass chain. Their logical concatenation is the
+[original feedback oscillator candidate](original-bmc-allpass-oscillator.md).
+Its live coefficient and initial-state manifest is emitted by the demo
+renderer. No new instruction profile is admitted. The 38-byte prefix must
+not be padded independently inside the combined program; convert stored
+word order only after concatenating the complete 120 logical bytes.
+The fragment supplies neither a task reservation nor an entry/return wrapper.

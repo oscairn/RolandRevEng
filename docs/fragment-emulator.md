@@ -391,3 +391,23 @@ Its duplicated quantizer and filter/state equations were not adopted. Local
 native def/use checks supplied the corrected model, and actual execution
 established exact output agreement. The earlier Qwen native fixture was
 retained after review and remains the execution oracle.
+
+## Native TRANSIENT and conditional output
+
+The [TRANSIENT fixture](special-ops-and-exp-study.md#native-transient-fixture-and-conditional-envelope-reference)
+extends native execution to a callback with three real math imports. It checks
+peak/log stores, exp/smoothing stages and the final gain against independent
+finite kernels. Its upstream detector arguments remain native-computed.
+The 12,000-frame run matches 84,000 checkpoint values exactly. No additional
+DSP control is admitted by this native reference.
+
+## Original feedback oscillator
+
+The [original allpass oscillator](original-bmc-allpass-oscillator.md) composes
+the supported 38-byte coefficient prefix and 82-byte allpass chain into one
+static 120-byte fragment. All sample arithmetic goes through the packet
+interpreter. Five initialization sine evaluations seed its feedback state;
+the host performs no per-sample phase or waveform synthesis. It runs without
+vendor artifacts and retains the explicit native-ring cadence assumption.
+It still needs hardware data encoding, ownership, wrapper, timing and output
+routing before it can serve as an instrument engine.
