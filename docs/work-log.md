@@ -2112,3 +2112,49 @@ Remaining: concrete manager-query/task callers, actual sample-wait/IRQ ownership
 and cadence, physical BMC precision, history policy, entry/return and safe
 loading. The 18 opcode profiles and 1,692-byte/104-packet FDRV arithmetic chain
 are unchanged. No instrument was accessed or flashed.
+
+
+## Fantom mode-query binding and mute nesting (2026-11-11)
+
+Resolved the FDRV envelope-selection query through actual source binding, not a
+current-task assumption. Four 20-byte managers at 200a0d14 attach system+28 at
+manager+10. RTTI links that embedded object to CMyDSPSysMfx; virtual slot4 reads
+its per-slot mute nesting word. Original FDRV callers invert the Boolean, so
+count 0 enables envelopes and a positive count selects immediate updates.
+Constructor/mode paths are separately checked for FDRV, not its neighboring
+FETDRIVE class. The source installer, descriptor stride, getter and query are
+hash/instruction/RTTI checked.
+
+Added the smallest shared-oracle change: the previous fixed entry tuple becomes
+a class constant so the new bounded subclass can admit its four specific entries.
+Original getter/query/FDRV/piece/stability/software-math execution matches 20 query
+cases, 80 mute transitions and 40 original caller cases across four slots and both
+live pieces. Nested on/on/off/off defers boundary helpers until first acquisition
+and final release. An off at zero repeats boundary calls without decrementing
+negative. Gate/skip helpers and coefficient reads/writes are recorded; their
+hardware bodies, task dispatch and real IRQ preemption do not execute.
+
+Explicitly separated three completion domains: timer/sample byte 200845b4 and
+IRQ91; clear bit0 of 200847f8 and IRQ80; envelope bit1 of that word and its six DSP
+sources. Timer units remain uncalibrated. No task identity test, atomic exclusion,
+DSP halt or new safe live-call contract follows from the mode query.
+
+Qwen timed out at 120.2 seconds with only an in-progress report. Its final partial
+text incorrectly associated another constructor/vtable with the query. Parent
+RTTI/dataflow checks reject it; no worker conclusion was accepted. Raw listings,
+worker logs and reports stay ignored under local/fantom-context-*.
+
+Six focused tests pass in 6.166 seconds; all eight existing Fantom EqVg tests pass
+in 12.877 seconds after the shared whitelist change. Seventeen related timer,
+registered-task, clear, coefficient-envelope and effect-lifecycle checks pass in
+0.525 seconds: 31 relevant tests total. Corpus-free checks pass (four model tests,
+two corpus skips). The broader unchanged audio/arithmetic suite was not repeated.
+Syntax, diff and changed-document links are checked before commit. Markdown-only
+vault updates use hash guards, backups and atomic writes. Six changed notes were
+synced and all 75 current hashes verified. Detailed results are saved in ignored
+local/fantom-context-checkpoint.json. The attention chime again failed with
+AudioQueueStart (-66680).
+
+Remaining: actual setter dispatch/task callbacks and masks/exclusion; hardware
+completion cadence/precision; history, entry/return and safe engine loading. No
+opcode profile or FDRV audio arithmetic changes. No instrument accessed/flashed.

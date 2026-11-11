@@ -4,6 +4,10 @@ Independent Roland BMC interoperability research, starting with Fantom-0 v1.08 a
 the installed ZENOLOGY plugin. Remote: `https://github.com/jbschooley/RolandRevEng.git`.
 Private visibility was verified on 2026-11-10; keep it private as requested. This is not an official Roland project.
 
+The [Fantom envelope-mode study](docs/fantom-envelope-mode-study.md) traces FDRV's
+mode query to a per-slot mute nesting counter. Original caller execution selects
+envelopes at count zero and immediate writes while muted; this is not a task test.
+
 The [Fantom EqVg/control study](docs/fantom-eqvg-control-study.md) checks the original
 ARM32 generator, setters and selected manager paths in isolated CPU memory. It
 recovers four active filter types, fixed 48 kHz math, float32 rounding and the

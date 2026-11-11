@@ -1,5 +1,10 @@
 # Stock CORE1 task context and the remaining external peer
 
+The later [FDRV envelope-mode study](fantom-envelope-mode-study.md) resolves its
+manager query as per-slot mute nesting state, not task identity. The software-IRQ
+bindings below remain relevant; selecting envelope mode does not prove ownership
+of a wait or that its completion IRQ can preempt the calling context.
+
 Follow-up: [outbound transmit](core1-transmit-and-backpressure-study.md) maps TXDT
 task 2, its software/shared rings and the CORE1-local service-reply edge. The
 [clear-completion study](clear-completion-interrupt-study.md) identifies IRQ80.

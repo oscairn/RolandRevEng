@@ -1,5 +1,10 @@
 # Fantom EqVg math and control correspondence
 
+The subsequent [envelope-mode checkpoint](fantom-envelope-mode-study.md) resolves
+the query below: the source-bound MFX interface reads a per-slot mute nesting
+counter. Original FDRV callers select envelopes at count zero and immediate
+writes while muted. Task ownership remains a separate question.
+
 2026-11-11. The Fantom ARM32 generator, setter and selected manager paths now have
 an independent scalar reference checked by bounded Thumb execution. This closes
 the [desktop correspondence question](coefficient-manager-processing-study.md)
@@ -188,8 +193,8 @@ clear and unproved-ownership observations were independently checked. Its nearby
 bit2 waiter was not accepted as a bit0 sample-wait mapping; the supplied excerpts
 did not establish that mapping. Worker logs and listings remain ignored locally.
 
-Next trace the manager query implementation and task callers that select the
-live envelope branch, plus actual sample-wait/interrupt ownership. Physical
+The manager query is resolved by the later checkpoint above. Next trace actual
+setter task callers and sample-wait/interrupt ownership. Physical
 precision, completion cadence, history policy, entry/return and safe loading
 still require separate evidence. This is ARM control emulation, not full BMC
 instruction emulation or a working custom engine on the Fantom.

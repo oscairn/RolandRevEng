@@ -29,10 +29,17 @@ Its waited driver clears stale completion before arming, so the desktop canary
 does not transfer. Stock literal amount100 matches; negative amounts are modeled
 statically but excluded from CPU execution pending a Unicorn fixture/IT-path fix.
 
-Next trace the manager query and concrete task callers selecting live envelope
-mode, plus sample-wait/interrupt ownership and sync cadence. The shared busy byte
-is an assertion marker, not proved atomic exclusion. Hardware precision, history
-setup, entry/return and safe loading remain open.
+The [Fantom mode query](fantom-envelope-mode-study.md) is now traced through
+four source-bound managers to the MFX controller's per-slot mute nesting counter.
+Twenty query cases, 80 counter transitions and 40 original FDRV caller cases
+match: count zero enables envelopes, nonzero selects immediate writes. This query
+does not inspect task identity. Sample waits use a separate timer byte; bit0 of
+the shared completion word belongs to clear completion.
+
+Next trace actual setter dispatch/registered task callbacks and their masks or
+exclusion, plus sample-wait/interrupt ownership and sync cadence. The shared busy
+byte is an assertion marker, not proved atomic exclusion. Hardware precision,
+history setup, entry/return and safe loading remain open.
 
 The preceding bounded filter milestone is complete (2026-11-11): [EqVgCal](eqvg-filter-generation-study.md)
 now has native-checked formulas, Q clamping, consumer permutations and UI scaling.

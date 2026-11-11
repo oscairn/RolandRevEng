@@ -1,5 +1,11 @@
 # Live coefficient envelopes: selector, dispatch and completion
 
+The later [mode-query checkpoint](fantom-envelope-mode-study.md) traces the
+source-bound MFX interface to a per-slot mute nesting count. Its original FDRV
+caller enables envelopes only at count zero. This query is not current-task
+identity; actual task/IRQ exclusion still needs separate evidence. Timer/sample
+wait completion uses byte `200845b4`, separate from the clear/envelope flag word.
+
 The later [Fantom EqVg/control fixture](fantom-eqvg-control-study.md) executes the
 selected adapter, generic manager, driver, wait and original completion callback
 in private emulated memory. It verifies pre-arm clearing of bit1, preservation of

@@ -1,5 +1,10 @@
 # EqVg generation and interpolation policy
 
+The [Fantom mode-query checkpoint](fantom-envelope-mode-study.md) connects the
+original caller to its source-bound mute nesting count: count zero enables live
+envelopes, nonzero selects immediate writes. This resolves the dispatch choice
+for the checked MFX interface, with actual task/IRQ scheduling still unproved.
+
 The subsequent [Fantom ARM32 study](fantom-eqvg-control-study.md) checks original
 generator and setter execution. Fantom supports four active branches here,
 uses fixed 48 kHz and float32 storage, and has a different fallback and immediate

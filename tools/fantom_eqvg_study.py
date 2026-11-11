@@ -154,6 +154,7 @@ def report(core):
 
 class ThumbOracle:
     """Only fixed selected entries; code is data to Unicorn, with no host/device pointers."""
+    ENTRIES=(GENERATE,STABLE,LIVE,OUTPUT,MANAGER,DRIVER,WAIT,IRQ,INTERPOLATE)
     def __init__(self,core):
         self.core=core;self.checked=report(core)
         import unicorn as uc
@@ -235,7 +236,7 @@ class ThumbOracle:
             else:raise ValueError('Unexpected emulated callback slot')
 
     def _run(self,entry,*,registers=(),singles=(),doubles=(),stack=b'',mode=None,pending=False):
-        if entry not in (GENERATE,STABLE,LIVE,OUTPUT,MANAGER,DRIVER,WAIT,IRQ,INTERPOLATE):
+        if entry not in self.ENTRIES:
             raise ValueError('Unadmitted firmware entry')
         u=self.cpu;a=self.arm;self.mode=mode;self.polls=0;self.instructions=0;self.calls=[];self.writes=[]
         u.context_restore(self.base_context);self.failure=None
