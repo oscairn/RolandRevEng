@@ -513,3 +513,11 @@ required local correction from native instructions. Independent contexts
 for exceptional arithmetic, strict byte-execution admission and further
 OSC waveforms remain queued. Qwen's exact rational sine expansion has been
 checked independently.
+
+The next discriminating clamp comparison is now STPS `bedb` at packet `18a`
+and TVPS at `178`. Both have a following port-3 store, separate from the
+FETDRIVE reciprocal sequence. Their native tails perform explicit bipolar
+clamps. Complete provenance must account for the earlier phase branch, where
+the current prefix tracer stops. The six-artifact inventory found all 174
+`3086` hits in the same 58 repeated triples, with no independent result.
+[Inventory and phaser candidates](operand-variants-and-macro-boundaries.md#reciprocal-control-context-inventory)

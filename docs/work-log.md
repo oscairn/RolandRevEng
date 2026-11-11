@@ -1030,3 +1030,14 @@ checked quantizer. No new strict DSP profile or hardware execution is claimed.
 All 303 tests passed. A smaller Qwen inventory job is searching the existing
 six-artifact corpus for `3086/7086/bebe/bedb` contexts using the already
 checked framed control-slot scanner.
+
+The Qwen inventory completed. Local assertions verify 241,742 framed packets,
+174 family-1 `3086` hits, 58 `bebe` hits, 230 `bedb` hits and zero `7086` hits.
+All `3086` hits reproduce the same repeated triples. Qwen's final family
+summary was imprecise; the recorded JSON and local counts supply the table.
+
+Local class mapping identifies STPS and TVPS as simpler `bedb` candidates.
+Their following port-3 stores correspond to explicit native clamp tails.
+The prefix tracer stops earlier at phase branches, leaving full late-window
+record/input provenance as the next step. No opcode semantics were inferred
+from inventory adjacency alone. The 303-test code checkpoint is unchanged.

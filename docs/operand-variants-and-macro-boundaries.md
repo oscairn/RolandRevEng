@@ -1,5 +1,9 @@
 # Operand variants and exceptional-macro boundaries
 
+Follow-up: the [complete FETDRIVE reference](fragment-emulator.md#full-python-fetdrive-reference)
+agrees exactly with native output under an explicit fixture. The control inventory
+below identifies simpler phaser `bedb` contexts for the next isolated comparison.
+
 Follow-up: [oscillator layout candidates](oscillator-layout-candidates.md) explains
 all six owned oscillator literal references while retaining two arity ambiguities.
 The production decoder and emitter remain unchanged.
@@ -298,3 +302,62 @@ precision, special flags and a complete runnable engine remain unresolved.
 The actual transport conflict also still applies: normal BMC IPC uses **ttyGS0**,
 which the prepared shell updates can contend with. Those packages were not changed
 or used. Hardware probes, packaging and flashing remain unperformed.
+
+## Reciprocal-control context inventory
+
+A tool-enabled Qwen job used the existing framed control-slot scanner on
+241,742 packets from six artifacts. Local checks independently asserted the
+aggregate counts and all three adjacency forms for `3086`. No scanner or ISA
+code changed. The full local report is
+`local/reciprocal-context-worker/inventory.json`.
+
+| Artifact | `3086` family 1 | `bebe` family 2 | `bedb` family 2 | `bedb` unresolved header |
+|---|---:|---:|---:|---:|
+| ZENOLOGY | 12 | 4 | 8 | 8 |
+| Fantom BMC0 CORE1 | 30 | 10 | 20 | 14 |
+| Fantom BMC1 CORE1 | 0 | 0 | 0 | 2 |
+| JUPITER-X | 66 | 22 | 57 | 28 |
+| MC-101 | 0 | 0 | 9 | 2 |
+| SH-4d | 66 | 22 | 55 | 27 |
+| Total | 174 | 58 | 149 | 81 |
+
+There are no `7086` control-slot hits. All 174 `3086` occurrences belong
+to 58 triples. Each triple follows a standalone `bebe`, and its final
+`3086` precedes the FETDRIVE `7308 / bedb / 1fe0 / 2fe2 / 8fe4` packet.
+No isolated `3086` result or different adjacent control sequence was found.
+MC-101 has six unframed segments and SH-4d has one; their bytes are excluded
+from the framed negative result. Unresolved header families remain unclassified.
+
+The useful independent candidates are the phaser `bedb` contexts.
+
+| Native class | Descriptor | `bedb` packet | Co-issued port-2 store | Following port-3 store |
+|---|---|---|---|---|
+| `SIM_MFX_STPS` | `a46850` | `18a`, header `1b04` | Field `190`, cell `12`, native `149000` | Field `19a`, cell `13`, native `14901c` |
+| `SIM_MFX_TVPS` | `a4bb50` | `178`, header `3a06` | Field `180`, cell `12`, native `279128` | Field `194`, cell `13`, native `279144` |
+
+Both native tails store an independently computed value before clamping a
+separate register with `fmin(+1)`, comparison to `-1`, and conditional
+selection. STPS's clamp is `149004..14900c`; TVPS's is `27912c..279134`.
+This supports a port-3 clamp-result candidate for `bedb`, separate from the
+FETDRIVE division sequence. It still needs a complete input/record provenance
+proof. The generic native-access tracer stops at an earlier phase branch
+in both phasers, so its prefix result cannot establish these later bindings.
+The build-specific instruction observations and constructor fields are saved
+as candidates, without new interpreter admission.
+
+Reproduce the bounded inventory with the existing tools
+
+```sh
+PYTHONPATH=tools python - <<'PY'
+from functools import partial
+from pathlib import Path
+import json
+from line_mix_variation import study
+from quantizer_context_inventory import scan
+firmware = [Path('local')/name for name in ('b0c1a.bin', 'b1c1a.bin')]
+qspi = [Path('local/crossmodel')/name for name in (
+    'jupiter-x/MI077_C1A_up.bin', 'mc101/RPG69_C1A_up.bin', 'sh-4d/DD013_C1A_up.bin')]
+result = study(firmware, qspi, scan_segments=partial(scan, controls=(0x3086, 0x7086, 0xbebe, 0xbedb)))
+print(json.dumps(result, indent=2))
+PY
+```
