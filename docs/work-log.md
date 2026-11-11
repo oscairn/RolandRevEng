@@ -1006,3 +1006,27 @@ constructor filter defaults and software 48 kHz input are kept explicit.
 
 All 300 tests passed. A second Qwen job is deriving the full Python state
 reference for comparison against the now-executable native callback.
+
+## Complete native FETDRIVE arithmetic reference
+
+The full Python reference now reproduces the drive, variable allpass,
+DC-blocking filter, dry/wet mix and scratch round trip. It agrees bit for
+bit with native execution at all 24,000 final samples in 12,000 frames.
+Its WAV is byte-identical to the native fixture's WAV. Native invocation
+now enforces that full-output comparison alongside the first-store oracle.
+
+The new state checker follows all eight history pairs through constructor
+records and actual DSP operand fields. Every origin value satisfies the
+unit-delay relation under the explicit fixture step. Three counted groups
+bind the two filter-literal copies per coefficient to their native
+representatives and actual setup calls. Native double precision and DSP
+encoded literal precision remain separate policies.
+
+The second Qwen job timed out at 600 seconds with an unfinished model.
+Its extra quantizer and incorrect filter/state equations were rejected.
+The retained implementation follows the native instructions and existing
+checked quantizer. No new strict DSP profile or hardware execution is claimed.
+
+All 303 tests passed. A smaller Qwen inventory job is searching the existing
+six-artifact corpus for `3086/7086/bebe/bedb` contexts using the already
+checked framed control-slot scanner.

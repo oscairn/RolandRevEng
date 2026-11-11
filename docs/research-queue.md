@@ -505,9 +505,11 @@ intervals and four Fantom placements. These do not establish DSP precision
 or exceptional-state effects.
 
 The complete native FETDRIVE fixture has now passed review, local execution
-and per-frame comparison of both first shaped stores. Next is an independent
-full Python FETDRIVE state/reference model, assigned to tool-enabled OMP/Qwen
-in ignored scratch files. Review and local execution remain required before
-integration. Independent contexts for exceptional arithmetic and further
+and per-frame comparison of both first shaped stores. A full Python state
+reference also matches every output sample in 12,000 frames. Eight native
+history pairs and three paired coefficient groups are independently checked.
+Qwen's native fixture was retained; its later unfinished full-model draft
+required local correction from native instructions. Independent contexts
+for exceptional arithmetic, strict byte-execution admission and further
 OSC waveforms remain queued. Qwen's exact rational sine expansion has been
 checked independently.

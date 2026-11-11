@@ -41,6 +41,8 @@ class NativeFetdriveTests(unittest.TestCase):
             self.assertEqual(report['wrapper_base'], 0)
             self.assertEqual(report['final_origin'], 8)
             self.assertEqual(report['first_store_max_abs_error'], 0.0)
+            self.assertEqual(report['reference_max_abs_error'], 0.0)
+            self.assertEqual(report['reference_identical_frames'], 2056)
             self.assertEqual(report['coefficients']['drive_scale'], 0.0015476426307448495)
             with wave.open(str(output)) as wav:
                 self.assertEqual((wav.getnframes(), wav.getnchannels(), wav.getframerate()), (2056, 2, 48000))

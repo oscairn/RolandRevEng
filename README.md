@@ -31,6 +31,7 @@ Independent follow-up studies:
 
 - [OSC sine folding](docs/oscillator-sine-study.md): native polynomial, owned literals, four Fantom placements and bit-exact boundary execution.
 - [Native FETDRIVE fixture](docs/fragment-emulator.md#native-fetdrive-execution-fixture): complete native callback output and per-frame checks of the first shaped stores.
+- [Full FETDRIVE reference](docs/fragment-emulator.md#full-python-fetdrive-reference): exact native output agreement, eight checked history pairs and paired filter-literal ownership.
 - [Gain controls](docs/alu-controls-study.md): native def/use comparison of selected gain chains.
 - [Dry/wet MAC controls](docs/dry-wet-mac-study.md): symbolic mixing expressions for the established subset.
 - [MAC, allpass and store timing](docs/mac-controls-and-issue-study.md): additional exact arithmetic forms and pre-arithmetic stores.
@@ -163,12 +164,12 @@ were verified byte for byte; their unique title links remain valid. Continued
 research now covers 59 verified notes in this folder. Future vault
 updates target this subdirectory. The move manifest is
 `local/obsidian-applied-roland-move-2026-11-10.json`; the latest update manifest
-is `local/obsidian-applied-fet-native-2026-11-10.json`. Current folder and manifest
+is `local/obsidian-applied-fet-reference-2026-11-10.json`. Current folder and manifest
 are recorded in `local/obsidian-location.json`. Earlier manifests describe historical paths.
 
 The research notes include the functional fragment emulator, official cross-model
 comparisons, key/access studies and corrections to older recovery claims.
-The latest passes add the OSC sine study and native FETDRIVE fixture, verifying
+The latest passes add the OSC sine study and complete FETDRIVE reference, verifying
 the 59-note set against staged hashes. Firmware downloads remain local/ignored.
 Saved hashes were checked before each update; every note was verified byte for byte.
 Original backups, the initial validated patch and the applied hash manifests remain

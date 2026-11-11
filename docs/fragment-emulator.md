@@ -315,11 +315,79 @@ including ring wrap. The full native stereo output is finite, with peak
 `0.09773264180104757` and RMS `0.06125754092361567`. Three subprocess
 tests check wrap, fresh-render determinism and existing-output preservation.
 
-The WAV contains the complete native callback output. Only its first
-shaped stores have an independent arithmetic comparison in this fixture.
-Later filters still need their own model. Constructor filter coefficients
-are retained at their defaults while the test signals use 48 kHz; there
-is no sample-rate setup or preset calibration. DSP bytes, parent cadence,
-instrument routing and hardware precision are not executed or verified.
+The WAV contains the complete native callback output. The fixture now also
+compares every final sample with the full Python reference described below.
+Constructor filter coefficients are retained at their defaults while the
+test signals use 48 kHz; there is no sample-rate setup or preset calibration.
+DSP bytes, parent cadence, instrument routing and hardware precision are
+not executed or verified.
 Qwen wrote and ran the initial fixture. Local review added the existing
 constructor/cutpoint binding checks, then reran the tests and longer render.
+
+## Full Python FETDRIVE reference
+
+```sh
+python tools/fetdrive_state_study.py > local/fetdrive-state-study.json
+python tools/render_fetdrive_reference.py local/fetdrive-full-reference.wav \
+  --frames 12000 > local/fetdrive-full-reference.json
+```
+
+The Python model now covers the entire native callback's observable arithmetic
+and ring writes under the supplied fixture. It agrees bit for bit at all
+24,000 final output samples in a 12,000-frame native comparison. The native
+and Python WAV files are byte-identical. Native invocation also checks all
+24,000 first shaped stores independently. The test crosses ring wrap at
+2,056 frames and validates fresh-render determinism.
+
+For a shaped value `T`, the variable allpass factor is
+`k = clamp((2-T)/(T+2), -1, 1)`. With current mixed input `x`, the native
+allpass order is `y = previous_input + fma(-x, k, previous_output*k)`.
+The later filter computes `y*b + fma(previous_input, a, previous_output*c)`,
+using its separate history pair. The constructor doubles are
+`b = 0.9996439371675712`, `a = -0.9996439371675712` and
+`c = 0.9992878743351423`. The opposite numerator coefficients identify
+a DC-blocking stage. The model retains the native multiply, fused multiply-add
+and final add order.
+
+The state checker proves the native pointer path, exact constructor-record
+identity, DSP operand and double access for each history pair.
+
+| State | Left store / history cell | Right store / history cell |
+|---|---|---|
+| Allpass input | `7 / 8` | `b / c` |
+| Allpass output | `9 / a` | `d / e` |
+| DC-block input | `f / 10` | `13 / 14` |
+| DC-block output | `11 / 12` | `15 / 16` |
+
+Under the explicit origin step, the previous frame's store and current
+history read share the same physical ring index. All eight relationships
+are checked across all 2,048 possible origins. This establishes the delay
+for the fixture's cadence; the instrument's parent schedule remains open.
+The first shaped values use cells `3/4`, factors `5/6`, wet copies `17/18`
+and output scratch `19/1a` in hexadecimal.
+
+Counted literal groups explain why both channels use one native representative
+for each filter coefficient.
+
+| Coefficient | Native field | DSP fields | Group | Setup call |
+|---|---|---|---|---|
+| `b` | `8` | `b8 / 14e` | `a50d98` | `32c940` |
+| `a` | `18` | `c2 / 158` | `a50db8` | `32c95c` |
+| `c` | `28` | `c5 / 15b` | `a50dd8` | `32c980` |
+
+All six DSP fields are width three. The native loads, representative
+constructor values, counted group records and slot-`c8` call arguments
+are checked independently. Encoded DSP literals differ slightly from their
+native double defaults; this model evaluates the native defaults.
+
+The model uses the same explicit fixture parameters as native execution.
+It does not step unadmitted DSP words, establish `bedb`'s individual state
+effects or provide general opcode execution. It remains a numerical oracle
+for further DSP work. It requires the pinned corpus, Capstone and Python
+3.13+; rendering the Python reference does not execute vendor machine code.
+
+Qwen's full-model job reached its 600-second limit with an unfinished draft.
+Its duplicated quantizer and filter/state equations were not adopted. Local
+native def/use checks supplied the corrected model, and actual execution
+established exact output agreement. The earlier Qwen native fixture was
+retained after review and remains the execution oracle.

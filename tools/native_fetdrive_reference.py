@@ -104,6 +104,14 @@ def render_native(frames):
             error = max(error, *(abs(actual-model) for actual, model in zip(shaped, expected, strict=True)))
             rows.append(sample)
             origin = advance_native_origin(origin)
+    from render_fetdrive_reference import render_reference
+
+    reference, _ = render_reference(frames)
+    error_full = 0.0
+    for frame, (actual, expected) in enumerate(zip(rows, reference, strict=True)):
+        if any(a.hex() != b.hex() for a, b in zip(actual, expected, strict=True)):
+            raise ValueError(f'Native FETDRIVE full-output reference differs at frame {frame}')
+        error_full = max(error_full, *(abs(a-b) for a, b in zip(actual, expected, strict=True)))
     return rows, dict(model='pinned native ARM64 FETDRIVE callback with explicit memory fixture',
                       image_sha256=NATIVE_SHA256, callback=[start, end],
                       callback_sha256=hashlib.sha256(callback).hexdigest(),
@@ -112,6 +120,7 @@ def render_native(frames):
                       final_origin=origin, drive=COEFFICIENTS[1], post_gain=post_gain,
                       constructor_filters_uncalibrated=True, coefficients=coefficients,
                       shaped_stores=stores,
+                      reference_max_abs_error=error_full, reference_identical_frames=frames,
                       first_store_max_abs_error=error, **metrics(rows))
 
 
