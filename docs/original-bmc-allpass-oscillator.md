@@ -11,6 +11,11 @@ This is an offline synthesis-core candidate. Its native-ring convention,
 initial-state encoding, chip precision, task wrapper, scheduling and physical
 audio routing still require validation. It is not load-ready Fantom firmware.
 
+The [stereo voice body](original-bmc-stereo-voice.md) now appends the supported
+80-byte gain/scratch-output profile. It shares this core's exact initialization
+and ring state, while taking both audio channels from actual tail execution.
+The original mono samples and metadata remain unchanged.
+
 ## Static program and feedback
 
 The same two logical byte slices run on every frame.

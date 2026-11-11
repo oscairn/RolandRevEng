@@ -77,6 +77,12 @@ unchanged register/alias provenance is required instead of matching equal expres
 | DRAM-IO records, bulk clearing | Owners, addresses and completion paths are mapped; cadence, exact extent/count units and selective-reset safety remain open |
 | Arbitrary scheduling, numeric behavior | No hardware timing, hazard, precision or clipping calibration exists |
 
+The [short-add context inventory](short-add-context-candidates.md) adds fifteen
+family-1 candidates across nine classes. TRANSIENT's short `5d72` four-byte
+operand is bound to its native decay default, while long `5d72` and miscellaneous
+`5d50` remain distinct forms. Native additions in four other classes strengthen
+the hypothesis, but source-port and co-issued effects prevent isolated admission.
+
 ## Existing code generation
 
 [Supported generation](supported-code-generation.md) exposes fixed fragment profiles in `bmc_subset.py` for stereo input, dry/wet gain, the

@@ -5,6 +5,13 @@ and explicitly assigned indices into exact packet sequences independently matche
 against native FETDRIVE and LINEDRIVE expressions. This is a constrained semantic code emitter and
 inverse decoder, not a general DSP assembler, scheduler or standalone engine.
 
+The [original stereo oscillator voice](original-bmc-stereo-voice.md) composes
+three existing profiles into a static 200-byte body. Its resource-fit checker
+compares decoded requirements with five real Fantom owners; it emits no relocated
+program or entry/return wrapper. No new arithmetic opcode is admitted by that
+composition. The [short-add inventory](short-add-context-candidates.md) keeps
+its newly bound operand field separate from unproved source/operation semantics.
+
 ## Dry/wet functional contract
 
 With contextual stock MFX inputs `L/R` at `2016/2017`, data-array values `W(a/b)`

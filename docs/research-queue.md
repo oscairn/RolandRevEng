@@ -548,8 +548,10 @@ rates, native owner caches and explicit clock assumptions are documented in the
 An [original 120-byte feedback oscillator](original-bmc-allpass-oscillator.md)
 now executes its sample arithmetic entirely through supported packet profiles.
 It has a reproducible coefficient/seed manifest and no per-sample host phase
-calculation. The next custom-engine steps are owned placement/initialization,
-DSP-side output gain/envelope/routing composition and entry/return validation.
+calculation. The [200-byte stereo voice](original-bmc-stereo-voice.md) now adds
+packet-executed gain and scratch output. Its resource extents fit five recorded
+stock owners. Next are explicit owned data/coefficient/IO substitutions,
+initialization, envelope/routing integration and entry/return validation.
 Hardware precision/cadence and actual loader access remain required. The
 exact phaser input selection, TRANSIENT packet semantics and broader ISA gaps
 remain open alongside this original-core track.
@@ -561,3 +563,11 @@ the global IDM/EDM portal has no proved address join to this ring. The six-seed
 CPU-rounding experiment passes through ring wrap, but hardware conversion,
 owned initialization and readback remain open. Qwen's bounded portal analysis
 was reviewed; incorrect literal and call-search conclusions were rejected.
+
+The [short-add candidate study](short-add-context-candidates.md) inventories
+fifteen short contexts across nine classes and verifies TRANSIENT's constructor
+decay-default binding to its short operand. Same-word long/misc contexts and
+PH100's zero literal are retained counterexamples. Four native immediate adds
+are checked, but exact port source/destination and side effects remain open.
+FDRV's branch-free stores offer a concrete next def/use target. Qwen's initial
+single-class/numeric rejection was independently corrected.

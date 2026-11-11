@@ -1168,3 +1168,32 @@ no draft model code was accepted. The reviewed implementation was independently
 derived from the listing and verified against real callback execution.
 All 341 tests passed; the expanded native cache cases were also rerun afterward.
 Full DSP interpretation, physical precision/timing and hardware deployment stay open.
+
+## Short-add operand binding and original stereo voice body
+
+The masked-control inventory finds 15 short contexts in nine primary native
+programs, plus 23 long, one miscellaneous and nine unclassified contexts.
+TRANSIENT short5d72 selects the four-byte field104, whose constructor record
+and native load/add are now checked. Native and serialized values differ by
+less than one literal quantum; this is expected precision separation. Same-word
+long/misc forms and the nondiscriminating PH100 zero remain explicit. Four
+other immediate additions are checked without claiming source-port recovery.
+
+Qwen returned the initial study in 89.8 seconds, but narrowed the requested
+catalogue to TRANSIENT and misdecoded constants. Those conclusions were rejected.
+The correct inventory and field binding were independently reproduced locally.
+
+A second bounded Qwen draft returned the original stereo voice in 126.1 seconds.
+Review retained its three-block/shared-ring design, removed scratch import
+machinery and duplicate coefficient maps, validated shared initialization and
+checked old/new mono samples and metadata against the prior committed source.
+The 200-byte/18-packet body applies gain and obtains both output channels through
+the existing interpreter; only five initialization sine calls remain.
+
+The 12,000-frame .5-gain voice peaks at .12499999999623529, RMS .08838832781982624.
+Its derived footprint is 146 relative data positions and six coefficients; all
+five pinned stock descriptors fit the body numerically. Four data positions
+remain beyond the extent in the four 150-element owners. These occupied stock
+owners are not custom allocations, wrappers are excluded, and no relocated or
+deployable engine is emitted. All 352 tests passed, with the final expanded
+native-immediate checks also run separately. Hardware gates remain open.

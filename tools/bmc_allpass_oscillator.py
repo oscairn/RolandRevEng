@@ -55,14 +55,11 @@ def actual_omega(quantized):
     return (low + high) / 2.0
 
 
-def render(frames, frequency, amplitude=0.25):
-    """Run the two fragments per frame over the zero-initial native ring."""
-    if type(frames) is not int or not 128 <= frames <= 1_000_000:
-        raise ValueError('frames must be an int in 128..1000000')
+def initialize(frequency, amplitude=0.25):
+    """Prepare shared native-policy ring state for the oscillator and stereo voice."""
     amplitude = _finite(amplitude)
     if not 0.0 <= amplitude <= 1.0:
         raise ValueError('amplitude must satisfy 0 <= amplitude <= 1')
-    prefix, allpass = programs()
     factor, quantized = factor_for(frequency)
     omega = actual_omega(quantized)
     phase = -2.0 * math.atan(((1.0 + quantized) / (1.0 - quantized)) * math.tan(omega / 2.0))
@@ -74,6 +71,18 @@ def render(frames, frequency, amplitude=0.25):
     ring[0x61] = ring[0x71] = amplitude * math.sin(-omega)
     initial_data = {address: ring[address] for address in (0x21, 0x31, 0x41, 0x51, 0x61, 0x71)}
     coefficients = {0: 0.0, 1: factor / 16.0}
+    seed = dict(factor=factor, quantized_factor=quantized,
+                requested_frequency=frequency, actual_frequency=omega*SAMPLE_RATE/(2*math.pi),
+                initial_data=initial_data, coefficients=coefficients)
+    return ring, coefficients, seed
+
+
+def render(frames, frequency, amplitude=0.25):
+    """Run the two fragments per frame over the zero-initial native ring."""
+    if type(frames) is not int or not 128 <= frames <= 1_000_000:
+        raise ValueError('frames must be an int in 128..1000000')
+    prefix, allpass = programs()
+    ring, coefficients, seed = initialize(frequency, amplitude)
     samples, origin = [], 0
     for _ in range(frames):
         for program in (prefix, allpass):
@@ -85,14 +94,14 @@ def render(frames, frequency, amplitude=0.25):
         samples.append(result['ports'][0])
         origin = advance_native_origin(origin)
     return samples, dict(program_sha256=hashlib.sha256(prefix + allpass).hexdigest(),
-                         program_bytes=len(prefix) + len(allpass), factor=factor,
-                         quantized_factor=quantized, requested_frequency=frequency,
-                         actual_frequency=omega * SAMPLE_RATE / (2.0 * math.pi),
+                         program_bytes=len(prefix) + len(allpass), factor=seed['factor'],
+                         quantized_factor=seed['quantized_factor'], requested_frequency=seed['requested_frequency'],
+                         actual_frequency=seed['actual_frequency'],
                          final_native_ring_origin=origin,
                          origin_wraps=frames // RING_LENGTH,
                          program_format='logical big-endian BMC packet bytes',
                          software_sample_rate=SAMPLE_RATE, wrapper_base=0,
-                         initial_data=initial_data, coefficients=coefficients,
+                         initial_data=seed['initial_data'], coefficients=coefficients,
                          state_representation='native-policy binary64; hardware encoding unverified',
                          sine_evaluations_for_initialization=5,
                          hardware_execution_verified=False, full_engine_ready=False,
