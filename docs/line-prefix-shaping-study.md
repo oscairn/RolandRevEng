@@ -198,6 +198,64 @@ to T. It reads the drive and post-gain literal values separately in all five
 Fantom placements. No intermediate readback establishes the two standalone
 operations' individual effects.
 
+## VMCP and RING separate `9ed9` from fixed-point conversion
+
+The best current interpretation of `9ed9` is a bipolar limiter in the checked
+contexts. VMCP has an isolated `9ed9` at `4e`, after `1460`'s scale literal
+and before `1c64`'s bias literal. Native records tie the state read at
+`39da78` to field `3c`, the held-value store at `39da90` to field `44`, and
+the detector store at `39dac8` to field `6a`. The native interval is
+straight-line and computes the following:
+
+```text
+detector = clamp((held * state) * threshold_scale, -1, +1) + bias
+```
+
+Both literal operands are checked by constructor-field identity, including the
+bias `-0.010009765625` at `5e`. The native clamp is at `39daa4..39dab0`, with
+no integer conversion in this interval. The matching DSP stores are `9fe0`
+at `3e` and `62`. This places the clamp between two matched stores, with
+`9ed9` the sole family-2 control between them.
+
+RING provides a second store-bracketed case. Its `8fe2` store at `fa` matches
+native `277dcc`, and `9fe0` at `110` targets the cell written at `277e00`.
+The latter uses the constructor record associated with field `e4`; the DSP
+store field `11e` independently carries that same cell address (`7`). The
+native interval forms a new value with FMADD and clamps it to `[-1,+1]` at
+`277de0..277de8`. DSP `9ed9` co-issues with `0410` and a coefficient-slot-7
+load at `104`. The native coefficient load feeds a separate scaled term.
+This corroborates the limiter interpretation while leaving exceptional
+register selection and issue timing open.
+
+VMCP's native fixed-point conversions occur in later, distinct windows:
+
+| DSP context | Native boundary |
+|---|---|
+| `bc12` co-issued with `8fe0` at `e2` | Native `39dba8` stores the value before the shift-by-2 conversion at `39dbac`. Its rescaled result feeds both channel multiplies. |
+| `bcd4` at `108`, after loading coefficient slot 1 | Native `39dc08` reads the live float, and `39dc10` starts its shift-by-4 conversion. Its rescaled result multiplies both channels before stores at `39dc30/39dc44`, tied to fields `118/11a`. |
+
+These contexts support shift-2 and shift-4 hypotheses for `bc12` and `bcd4`
+without defining their individual state effects. In FETDRIVE, `9c59` precedes
+`9ed9`, and the native order is shift-by-nine followed by a clamp. The two new
+cases favor assigning the clamp to `9ed9` and make `9c59` the next conversion
+candidate. LINE's `ac99` still needs an independent binding. No strict DSP
+interpreter profile was added.
+
+The Fantom VMCP list at `6113d2b8` retains the checked sequence in all four
+placements. Literal `4a` is zero in the stored bytes. The desktop
+`SetThreshold(int)` and Fantom callback `610641da` both write that exact
+width-three field from a 128-entry table. The Fantom's manager dispatch is
+slot `64` at the receiver's vtable. Its table matches all desktop entries after
+exact conversion of the native doubles to float32. The endpoints are
+`0.630950927734375` and `0.010009765625`. This verifies a parameter-write path
+in the image. Active VMCP selection, threshold settings, hardware numeric
+behavior and actual execution timing remain unverified.
+
+```sh
+python tools/limit_control_study.py --core1 local/b0c1a.bin > local/limit-control-study.json
+python -m unittest discover -s tests -p test_limit_control_study.py -v
+```
+
 ## Reproduce and Qwen review
 
 ```sh

@@ -824,3 +824,18 @@ Qwen reproduced the native order but overstated what the correspondence
 establishes about the DSP pipeline. The retained conclusions are from the
 checked byte and native dataflow evidence. The hardware plan now uses the
 Fantom-07 as the sole physical target.
+
+## VMCP and RING limiter evidence
+
+VMCP's standalone `9ed9` is bracketed by native stores around a bipolar clamp
+with independent pre-scale and post-bias literals. RING independently brackets
+the same native clamp across a co-issued `9ed9` context. VMCP's later native
+shifts use distinct packets associated with `bc12` and `bcd4`. This narrows the
+FETDRIVE conversion candidate to the preceding `9c59` while preserving the
+strict interpreter boundary.
+
+The four Fantom VMCP placements retain the checked controls. The Thumb
+threshold setter writes the width-three field at `4a` and its 128-entry
+float table matches the native threshold values exactly. Qwen overassigned
+both scaling and clipping to the standalone control. The evidence binds
+the scale to a separate literal and leaves register and issue effects open.

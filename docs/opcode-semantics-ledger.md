@@ -122,6 +122,12 @@ the same nonliteral bits as `4812 / 1500`. UPLIFT EXCITER's `3464 / 0002` ties
 port 1 and the previous accumulator to a port-3 result. LINE uses `3467 / 0004`,
 with B in the candidate addend position. The LINE packet sequence remains
 outside strict execution.
+
+The [VMCP and RING comparisons](line-prefix-shaping-study.md#vmcp-and-ring-separate-9ed9-from-fixed-point-conversion)
+support a bipolar clamp for `9ed9` in two store-bracketed contexts. VMCP's
+shift-by-2 and shift-by-4 reference windows align separately with `bc12` and
+`bcd4`. The precise register and exceptional-state effects remain open.
+
 The [conditional LINE render](fragment-emulator.md#conditional-line-reference-pipeline)
 is a host oracle plus supported fragments, with explicit fixture state and
 software timing. It does not skip unknown words to manufacture complete program
