@@ -11,6 +11,11 @@ locations, and a concrete CORE1 program-loading map. It does **not** yet support
 an arbitrary C/C++ synth to the render DSPs. Most arithmetic opcodes, scheduling, precision
 and resource rules remain unresolved.
 
+The [FDRV cubic study](fdrv-cubic-waveshaping-study.md) binds four waveshaping
+windows to source/result data records, executes an isolated native curve with
+bit-exact checks, and verifies five Fantom placements. This supports the numeric
+reference without claiming individual short-control port effects or a full engine.
+
 The [label-target study](label-target-encoding-study.md) verifies CORE1's counted
 reference-record layout and explicit halfword target encoding, including five
 parent numeric matches. Actual incoming field ownership and DSP saved-return

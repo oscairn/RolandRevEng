@@ -6,6 +6,11 @@ elsewhere. This pass binds the short operand to its actual constructor field,
 inventories independent contexts, and retains the missing arithmetic/port proof.
 No new opcode is admitted to the interpreter or assembler.
 
+The [FDRV cubic study](fdrv-cubic-waveshaping-study.md) now binds four complete
+waveshaping windows to their source/result stores and checks the native curve
+directly on 1,034 inputs. It locates the two cubic `5d46` candidates among the
+six FDRV observations and retains their unresolved individual port effects.
+
 `tools/short_add_context_study.py` pins native SHA-256
 `b8ba7f41e26bef91e2cc38e99452e7795cd132e9f2a59695a68a77f18b8a2c30`.
 It examines the catalogued primary render program for each class; 18 entries
@@ -86,8 +91,9 @@ The checker also verifies actual native immediate definitions and adjacent
 
 These strengthen the additive hypothesis across different values and algorithms.
 They do not yet bind each native input value to a particular DSP arithmetic port.
-The FDRV callback is branch-free and has further candidate register additions;
-its input cutpoints and downstream stores are a useful next source-binding target.
+The FDRV callback is branch-free. Its four cubic input/result cutpoints are now
+bound in the follow-up above. The earlier four `5d46` state/filter sequences
+still need their auxiliary-port inputs and coissued-store relations resolved.
 
 ## Reproduce and reviewed Qwen result
 

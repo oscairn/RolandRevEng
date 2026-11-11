@@ -1252,3 +1252,26 @@ retained its helper checks, corrected the installed import path, added an actual
 firmware corpus check. All368tests passed in32.337seconds. Next evidence needed
 is owner-proven nonempty label references or an independent control-flow
 implementation; saved return state, issue order and physical deployment remain open.
+
+## Four FDRV cubic windows and five Fantom placements
+
+The next short-add pass binds four FDRV native input/result windows to actual
+constructor records and serialized data fields, retaining the earlier-store
+representative aliases rather than equating record offsets with read sites.
+Their arithmetic is x*(x*x+(3-abs(3*x))) with separate native operations. The
+constant register, input/result registers and intervening preservation are
+checked. The two cubic5d46 candidates are at39c/3d0 and correspond to the third
+and fourth native curves, rather than listing order across interleaved channels.
+
+An isolated40-byte native function matches all bits for1,034 boundary/random
+inputs, including signedzero and minimum subnormals. The same cubic contexts
+and resource relations are checked in all five Fantom FDRV programs under list
+610e5a94. These are whole-window source/result constraints, not complete port
+state or isolated short-opcode admission. The strict interpreter/emitter remain
+unchanged. The four earlier FDRV state/filter short-add contexts and the separate
+PHONO comparison remain next targets.
+
+Qwen's bounded FDRV review timed out at180.2seconds without the requested review
+files. No exploratory result or code was accepted. The finished study was derived
+locally and checked by six focused tests. All374tests passed in31.504seconds.
+No hardware, firmware installation or BMC execution was performed.

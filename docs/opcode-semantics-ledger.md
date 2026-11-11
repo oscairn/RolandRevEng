@@ -103,6 +103,12 @@ DSP arithmetic opcode or a program-literal write.
 
 ## Executable offline subset
 
+The [FDRV cubic window](fdrv-cubic-waveshaping-study.md) now has four constructor-
+bound source/result relations and a directly executed native curve reference.
+Two short `5d46` contexts sit in that window; four others sit in state/filter
+sequences. Whole-window agreement does not admit the individual short controls
+or the miscellaneous producers. All five Fantom placements retain the context.
+
 The [functional fragment interpreter](fragment-emulator.md) now executes only the
 same exact stereo input, dry/wet, scratch, allpass and VSOD coefficient-prefix contexts accepted by the inverse decoder. It steps
 packet bytes with old-port arithmetic/stores, next-packet loads and copied trace

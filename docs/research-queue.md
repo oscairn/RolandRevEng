@@ -577,7 +577,10 @@ fifteen short contexts across nine classes and verifies TRANSIENT's constructor
 decay-default binding to its short operand. Same-word long/misc contexts and
 PH100's zero literal are retained counterexamples. Four native immediate adds
 are checked, but exact port source/destination and side effects remain open.
-FDRV's branch-free stores offer a concrete next def/use target. Qwen's initial
+The [FDRV cubic study](fdrv-cubic-waveshaping-study.md) now checks four independent
+source/result cutpoints, direct native arithmetic and all five Fantom placements.
+Next are the four earlier short-add state/filter sequences and their coissued
+store/auxiliary-port relations, with PHONO as a separate comparison. Qwen's initial
 single-class/numeric rejection was independently corrected.
 
 The resource planner exports original logical/stored bodies and manifests only.
