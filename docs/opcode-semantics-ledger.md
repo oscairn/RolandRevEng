@@ -18,6 +18,12 @@ rounding, saturation, accumulator width or fused evaluation on silicon.
 
 ## Independently checked arithmetic contexts
 
+The [negative-bias follow-up](negative-short-add-study.md) verifies two native
+clip/magnitude/bias/floor/gain chains in each of three effects. It corrects the
+earlier inventory to retain both `-.25` add candidates, with 8,430 original-native
+cutpoint checks and 13 Fantom neighborhood matches. Source/port correspondence
+and miscellaneous effects remain unproved; no opcode or profile is admitted.
+
 The [Fantom ARM32 control checkpoint](fantom-eqvg-control-study.md) verifies
 selected original CPU math, setters and manager completion in private memory.
 Its four active types, fallback, float32 rounding and pre-arm flag clearing differ

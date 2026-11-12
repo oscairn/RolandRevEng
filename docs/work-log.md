@@ -2611,3 +2611,50 @@ flow, missing peer/physical ownership, precision/history, interrupt timing,
 entry/return and safe loading remain unresolved. No instrument was accessed or
 flashed. The marker preload is authored offline state, not proof of a free cell
 or a hardware allocator/voice-planner integration.
+
+## Paired negative-bias chains and nonunique opcode candidates (2026-11-11)
+
+Corrected the short-add inventory: GASSPH, GASSDLY and GAMPSIM each contain two
+native additions of the same -.25 constant, rather than one uniquely matched
+add. The original first-add addresses remain candidates alongside14a680,
+2fa200 and324fe8. Both native chains are now checked independently through
+clip, magnitude, bias, zero floor and1.75-minus-floor gain. Every reused constant
+and intermediate is checked across the original compiler interleaving. Native
+temporaries are not treated as DSP port numbers.
+
+Added negative_short_add_study.py, focused tests and the corresponding study.
+All8,430 original ARM64 dependency-slice cutpoints match the scalar reference:
+281 inputs, six chains and five endpoints. Inputs cover signed zeros, subnormals,
+quarter/clip boundary neighbors, maximum finite values and256 deterministic
+random values. These are register-only slices, not whole callbacks or a DSP
+packet interpreter extension. Upstream producers, full multiplication/mixes,
+memory effects and silicon behavior stay outside this probe.
+
+The pinned Fantom scan covers377 render segments /36,793 packets. Thirteen
+neighborhoods match the three desktop contexts after explicit resource-word
+substitution: four GASSPH, four GASSDLY and five GAMPSIM. Four more uses under
+header5e09 remain unresolved and receive no short-operand or semantic admission.
+Earlier1c90/0d90 contexts also contain-.25; their header families and literal
+consumption remain unproved. Constant equality alone cannot select the add that
+implements5d52. The executable subset remains19 exact profiles.
+
+Qwen's supplied-evidence review returned in25.5 seconds. It conflated compiler
+temporaries with DSP ports, incorrectly required temporary results to be stored
+to memory, and misquoted an immediate instruction. Its opcode conclusions were
+discarded. Native checks, paired candidates and Fantom matches were independently
+implemented and verified; no worker code was accepted.
+
+All23 focused negative-bias/inventory/header/OSC tests pass in16.204 seconds,
+including the original OSC native/ring regressions. Four pure tests pass without
+the corpus, with four skips. Tests reject changed controls, malformed/unknown
+contexts, changed image identity, changed arithmetic and clobbered constants.
+The header corpus retains its previously documented named-width exception;
+no generic layout change is made. Markdown links, Python syntax and whitespace
+are checked. Unrelated full audio and ARM host/control suites were not repeated.
+Vault synchronization uses Markdown-only expected hashes, backups and atomic
+writes. The attention chime still fails with AudioQueueStart(-66680).
+
+Next establish the earlier5a/b1 layouts and ded4/maximum producer effects,
+accounting for coissued operations and both channels before binding short5d52.
+No instrument was accessed or flashed. Physical arithmetic/timing, general ISA,
+whole-engine execution, entry/return and safe loading remain open.

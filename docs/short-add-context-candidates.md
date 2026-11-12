@@ -91,18 +91,24 @@ to -6.90625. These are separate from the small four-byte decay increment.
 
 ## Additional native addition candidates
 
-The checker also verifies actual native immediate definitions and adjacent
-`FADD` instructions with the corresponding short literal values:
+The checker also verifies actual native immediate definitions and `FADD`
+instructions with the corresponding short literal values. The
+[negative-bias follow-up](negative-short-add-study.md) corrects an important
+ambiguity: each negative-literal context has two uses of the same immediate.
+The first use listed in the original inventory was not a unique opcode binding.
 
-| Class | DSP packet | Native constant / add | Value |
-|---|---|---|---:|
-| OSC | `27a` | `2974c / 29750` | .203125 |
-| GASSPH | `25c` | `14a62c / 14a630` | -.25 |
-| GAMPSIM | `2a4` | `324f84 / 324f88` | -.25 |
-| GASSDLY | `240` | `2fa1b0 / 2fa1b4` | -.25 |
+| Class | DSP packet | Native constant definition | Native add candidates | Value |
+|---|---|---|---|---:|
+| OSC | `27a` | `2974c` | `29750` | .203125 |
+| GASSPH | `25c` | `14a62c` | `14a630`, `14a680` | -.25 |
+| GAMPSIM | `2a4` | `324f84` | `324f88`, `324fe8` | -.25 |
+| GASSDLY | `240` | `2fa1b0` | `2fa1b4`, `2fa200` | -.25 |
 
 These strengthen the additive hypothesis across different values and algorithms.
-They do not yet bind each native input value to a particular DSP arithmetic port.
+This inventory does not bind each native input value to a particular DSP
+arithmetic port. The OSC follow-up supplies its separate exact-profile proof;
+the negative-bias study verifies both native chains and 13 Fantom neighborhoods
+without assigning either add uniquely to `5d52`.
 The FDRV callback is branch-free. Its four cubic input/result cutpoints are now
 bound in the follow-up above. The earlier four `5d46` state/filter sequences
 still need their auxiliary-port inputs and coissued-store relations resolved.

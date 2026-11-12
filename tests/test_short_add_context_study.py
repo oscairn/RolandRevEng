@@ -52,6 +52,8 @@ class CorpusTests(unittest.TestCase):
         self.assertLess(abs(binding['stored_value']-binding['full_native_default']), 2**-32)
         self.assertEqual(binding['native_clamp_limit'].hex(), '-0x1.ba18a998fffa0p+2')
         self.assertEqual(len(result['native_addition_candidates']), 4)
+        self.assertEqual([row['native_add_candidates'] for row in result['native_addition_candidates']],
+                         [[0x29750], [0x14a630, 0x14a680], [0x324f88, 0x324fe8], [0x2fa1b4, 0x2fa200]])
         self.assertTrue(all(not row['source_port_binding_verified']
                             for row in result['native_addition_candidates']))
         self.assertFalse(result['isolated_short_add_verified'])

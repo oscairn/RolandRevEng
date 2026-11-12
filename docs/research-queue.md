@@ -4,7 +4,7 @@ Queued 2026-11-10 at Jacob's request. Starting research checkpoint: `80b740b`.
 The practical target is a small custom engine running on the BMC render DSPs, with
 the i.MX8M handling UI/control. Current emitters produce verified fragments only.
 
-The [mapping-status inventory](bmc-mapping-status.md) distinguishes the 18 exact
+The [mapping-status inventory](bmc-mapping-status.md) distinguishes the 19 exact
 DSP profiles and complete FDRV arithmetic reference from structural parsing,
 ARM control evidence and unverified hardware. No whole-chip percentage is known.
 
@@ -101,9 +101,18 @@ bias/fold and old-marker store match 8,460 native cutpoints across desktop/four
 Fantom placements and three ring origins. The subset now has 19 exact sequence
 profiles; word-only or universal operation admission does not follow.
 
-Next seek an independent negative-literal short-add/source-port context, such as
-GASSPH's packet25c, or another self-contained OSC arithmetic window. The queued
-SysEx emitter, route0a consumers and missing peer remain separate host leads.
+The [negative-bias checkpoint](negative-short-add-study.md) now verifies both
+native clip/magnitude/bias/floor/gain chains in GASSPH, GASSDLY and GAMPSIM. All
+8,430 cutpoints pass. The earlier inventory listed only the first of two matching
+native adds per context; it now retains both. Thirteen Fantom neighborhoods match
+after explicit resource substitution; four uses under header5e09 stay unresolved.
+No new DSP execution profile is admitted.
+
+Next establish the earlier5a/b1 operation families and ded4/maximum producer
+effects, accounting for both channel chains before binding short5d52 to an add.
+Matching constants alone cannot select between them. Another self-contained OSC
+window remains an independent lead. The queued SysEx emitter, route0a consumers
+and missing peer remain separate host leads.
 Silicon precision/history, interrupt timing, entry/return and safe loading remain
 unresolved.
 

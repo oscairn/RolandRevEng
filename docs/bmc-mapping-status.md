@@ -44,6 +44,7 @@ they do not increase the 19 DSP execution profiles.
 - [Supported code generation](supported-code-generation.md) and [semantics ledger](opcode-semantics-ledger.md): exact admitted forms and limits.
 - [Fragment emulator](fragment-emulator.md): functional execution boundary.
 - [OSC bias/add and fold](osc-bias-wrap-study.md): exact 52-byte profile, 42 stock bytes, four Fantom body matches and 8,460 private-native cutpoint checks; no universal word decoding or silicon calibration.
+- [Negative literal add ambiguity](negative-short-add-study.md): six native bias chains, 8,430 cutpoint checks and 13 Fantom neighborhood matches; two matching native adds per context prevent unique `5d52` admission, and four further Fantom uses retain unresolved headers.
 - [Complete FDRV arithmetic](fdrv-cubic-waveshaping-study.md#complete-arithmetic-and-output-milestone-2026-11-11): comparison scope and preserved state.
 - [Authored filtered/shaped voice](original-bmc-filtered-voice.md): reusable components and explicit hardware gates.
 - [Fantom resource plans](fantom-voice-resource-plans.md): meaning of five placements.

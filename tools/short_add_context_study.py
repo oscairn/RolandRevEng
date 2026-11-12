@@ -72,11 +72,11 @@ def report():
     short = [row for row in found if row['family'] == 1]
     counts = Counter(str(row['family']) for row in found)
     additions = []
-    for cls, offset, pc, destination, constant in (
-            ('SIM_MFX_OSC', 0x27a, 0x2974c, 'd0', 'd2'),
-            ('SIM_MFX_GASSPH', 0x25c, 0x14a62c, 'd6', 'd16'),
-            ('SIM_MFX_GAMPSIM', 0x2a4, 0x324f84, 'd17', 'd18'),
-            ('SIM_MFX_GASSDLY', 0x240, 0x2fa1b0, 'd6', 'd7')):
+    for cls, offset, pc, destination, constant, repeated in (
+            ('SIM_MFX_OSC', 0x27a, 0x2974c, 'd0', 'd2', None),
+            ('SIM_MFX_GASSPH', 0x25c, 0x14a62c, 'd6', 'd16', (0x14a680, 'd6, d6, d16')),
+            ('SIM_MFX_GAMPSIM', 0x2a4, 0x324f84, 'd17', 'd18', (0x324fe8, 'd16, d17, d18')),
+            ('SIM_MFX_GASSDLY', 0x240, 0x2fa1b0, 'd6', 'd7', (0x2fa200, 'd7, d16, d7'))):
         row, = (row for row in short if row['cls'] == cls and row['offset'] == offset)
         _, instructions, _, _, _ = native_context(cls)
         immediate = decode_constant([instructions[pc]])
@@ -84,8 +84,14 @@ def report():
         if immediate['register'] != constant or value != row['operand']['value']:
             raise ValueError('Candidate immediate differs from native addition constant')
         require_instructions(instructions, pc+4, (('fadd', f'{destination}, {destination}, {constant}'),))
-        additions.append(dict(cls=cls, packet=offset, native_constant=pc, native_add=pc+4,
-                              value=value, source_port_binding_verified=False))
+        native_adds = [pc+4]
+        if repeated:
+            add_pc, operands = repeated
+            require_instructions(instructions, add_pc, (('fadd', operands),))
+            native_adds.append(add_pc)
+        additions.append(dict(cls=cls, packet=offset, native_constant=pc,
+                              native_add_candidates=native_adds, value=value,
+                              source_port_binding_verified=False))
     return dict(native_sha256=NATIVE_SHA256, rows=found, skipped_without_render=skipped,
                 family_counts=dict(counts), short_candidates=len(short),
                 short_classes=len({row['cls'] for row in short}),
