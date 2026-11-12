@@ -1,0 +1,5 @@
+{
+  "kind": "osc_bias_wrap",
+  "sources": [9, 10, 2047],
+  "targets": [2, 3, 8]
+}

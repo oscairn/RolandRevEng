@@ -95,13 +95,17 @@ records merge numerically in first-arrival order and reset for reuse. The queued
 emitter has a source-traced kind2 SysEx route to08; it remains intercepted, as do
 route0a consumers. Host-to-CORE1 conversion and physical slot mapping remain open.
 
-Next prioritize the [OSC short-add candidate](short-add-context-candidates.md):
-packet27a, short5d50 and native2974c/29750. Bind its input/output ports and coissued
-effects before any admission; the same word in JDMLT's miscellaneous family is a
-counterexample to word-only decoding. The queued emitter and route0a registrations
-remain separate host leads. No new DSP opcode coverage follows from these ARM
-passes. Hardware precision/history, interrupt ownership/cadence, entry/return and
-safe loading remain unresolved.
+The [OSC bias/wrap checkpoint](osc-bias-wrap-study.md) adds a strict 52-byte
+profile: authored preload plus 42 stock bytes. Its hoisted quarter, P5 multiply/FMA/
+bias/fold and old-marker store match 8,460 native cutpoints across desktop/four
+Fantom placements and three ring origins. The subset now has 19 exact sequence
+profiles; word-only or universal operation admission does not follow.
+
+Next seek an independent negative-literal short-add/source-port context, such as
+GASSPH's packet25c, or another self-contained OSC arithmetic window. The queued
+SysEx emitter, route0a consumers and missing peer remain separate host leads.
+Silicon precision/history, interrupt timing, entry/return and safe loading remain
+unresolved.
 
 The preceding bounded filter milestone is complete (2026-11-11): [EqVgCal](eqvg-filter-generation-study.md)
 now has native-checked formulas, Q clamping, consumer permutations and UI scaling.

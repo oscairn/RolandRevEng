@@ -526,6 +526,27 @@ def assemble_stereo_prefilter(spec):
     ])
 
 
+def assemble_osc_bias_wrap(spec):
+    if (not isinstance(spec,dict) or set(spec)!={'kind','sources','targets'}
+            or spec['kind']!='osc_bias_wrap'):
+        raise ValueError('Expected osc_bias_wrap with three sources and three targets')
+    for name in ('sources','targets'):
+        if (not isinstance(spec[name],list) or len(spec[name])!=3
+                or any(type(v)is not int or not 0<=v<0x800 for v in spec[name])):
+            raise ValueError('Expected three data addresses per resource list')
+    if len(set(spec['sources']+spec['targets']))!=6:
+        raise ValueError('OSC bias/wrap resources must not alias')
+    first,second,marker=spec['sources'];save,out0,out1=spec['targets']
+    return assemble([
+        [0x1e05,0x4fe0,0x2fe2,first,marker],
+        [0x3407,0x5510,0xafe2,0x4fe4,0x4300,save,second],
+        [0x0804,0x5512,0x0005,0x2400],
+        [0x0903,0x5d50,0x2340],
+        [0x0a02,0xdee5],
+        [0x1e05,0xdfe0,0xdfe2,out0,out1],
+    ])
+
+
 def assemble_fragment(spec):
     if not isinstance(spec, dict):
         raise ValueError('Expected a JSON object')
@@ -559,12 +580,23 @@ def assemble_fragment(spec):
         return assemble_clipped_half_pair(spec)
     if spec.get('kind') == 'stereo_prefilter':
         return assemble_stereo_prefilter(spec)
+    if spec.get('kind') == 'osc_bias_wrap':
+        return assemble_osc_bias_wrap(spec)
     if spec.get('kind') == 'dry_wet_tail_with_scratch':
         return assemble_tail_with_scratch(spec)
     return assemble_tail(spec)
 
 
 def disassemble_fragment(stream):
+    if len(stream)==52:
+        rows=[words for _,words in packets(stream)]
+        if [len(row)for row in rows]!=[5,7,4,3,2,5]:
+            raise ValueError('Not an exact OSC bias/wrap profile')
+        spec=dict(kind='osc_bias_wrap',sources=[rows[0][3],rows[1][6],rows[0][4]],
+                  targets=[rows[1][5],rows[5][3],rows[5][4]])
+        if assemble_osc_bias_wrap(spec)!=stream:
+            raise ValueError('Unsupported OSC bias/wrap controls, literals or resources')
+        return spec
     if len(stream)==188:
         from bmc_dsp import literal
         rows=packets(stream)

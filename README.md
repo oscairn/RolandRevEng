@@ -10,7 +10,7 @@ This project is not affiliated with or endorsed by Roland.
 This is experimental offline research. It does not yet provide a loadable custom
 engine, complete BMC emulator, general assembler, hardware driver or flasher.
 
-- A strict packet interpreter and constrained emitter support **18 exact sequence
+- A strict packet interpreter and constrained emitter support **19 exact sequence
   profiles**, with original oscillator/filter voice examples.
 - The complete FDRV arithmetic reference matches the pinned native callback's
   audio and persistent state in the documented tests. This is a software

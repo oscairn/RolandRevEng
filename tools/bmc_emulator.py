@@ -1,6 +1,6 @@
 """Functional float reference for exact BMC fragments, not silicon precision.
 
-No device IO, scheduling, history advancement, clipping or unknown operations.
+No device IO, scheduling, history advancement or unknown operations.
 Only complete profiles accepted by bmc_subset may enter the packet interpreter.
 """
 import math
@@ -66,7 +66,7 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
                                                 'state_variable_recombine_pair_with_output',
                                                 'state_variable_terminal_pair_with_output', 'resample_drive_pair',
                                                 'post_cubic_mix_pair','cascaded_history_pair','fdrv_output_pair')
-    if (native_coefficient_prefix or spec['kind'] == 'clipped_half_pair') and not hasattr(math, 'fma'):
+    if (native_coefficient_prefix or spec['kind'] in ('clipped_half_pair','osc_bias_wrap')) and not hasattr(math, 'fma'):
         raise ValueError('This native-reference profile requires Python 3.13+ math.fma')
     io_addresses = spec.get('input_addresses', DEFAULT_INPUT_ADDRESSES)
     memory = _values(data, 'data', range(0x800))
@@ -171,7 +171,7 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
                 # Native constructor double differs from the encoded DSP literal.
                 value=old_value(destination)*DRIVE_SCALES[spec['drive_literal']]
             elif word in (0x0403, 0x4503, 0x2443, 0x6547, 0x2410, 0x6510,
-                        0x1400, 0x5504, 0x1440, 0x5544, 0x2403, 0x6503,0x2483,0x6583,0x1443,0x5543):
+                        0x1400, 0x5504, 0x1440, 0x5544, 0x2403, 0x6503,0x2483,0x6583,0x1443,0x5543,0x5510):
                 destination, source, operand = (word >> 12) & 7, (word >> 6) & 7, word & 63
                 if operand < 8:
                     factor = old_value(operand)
@@ -180,6 +180,16 @@ def execute_fragment(program: bytes, data: dict[int, float], coefficients: dict[
                 else:
                     raise ValueError('Unsupported short-multiply operand')
                 value = old_value(source)*factor
+            elif word == 0x5512 and pool == [0x0005,0x2400]:
+                destination=5
+                value=_fma(old_value(4),.25,old_value(5))
+            elif word == 0x5d50:
+                destination=5
+                value=old_value(5)+literal(pool[0].to_bytes(2,'big'))
+            elif word == 0xdee5:
+                from oscillator_phase_study import normalize_phase_sum
+                destination=5
+                value=normalize_phase_sum(old_value(5))
             elif word in (0x2e92, 0x6f90):
                 destination = 2 if word == 0x2e92 else 6
                 value = old_value(destination)

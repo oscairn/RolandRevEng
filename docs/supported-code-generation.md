@@ -1,6 +1,8 @@
 # First supported code-generation subset
 
-The [mapping-status inventory](bmc-mapping-status.md) summarizes the current 18
+The [OSC bias/wrap profile](osc-bias-wrap-study.md) adds `osc_bias_wrap` (52 bytes, six packets): three distinct sources and targets, fixed multiply/FMA/bias/fold order, and an explicit old-marker store. Example: `examples/osc-bias-wrap.json`. It adds no hardware wrapper or voice-planner allocation.
+
+The [mapping-status inventory](bmc-mapping-status.md) summarizes the current 19
 exact profiles. Recent ARM parameter/control checks add no instruction profile
 or safe hardware-entry guarantee.
 

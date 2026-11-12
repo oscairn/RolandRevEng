@@ -1,6 +1,8 @@
 # Offline functional fragment emulator
 
-The [mapping-status inventory](bmc-mapping-status.md) separates the 18 executable
+The [OSC bias/wrap checkpoint](osc-bias-wrap-study.md) adds a 52-byte exact profile with four native cutpoints, coissued old-marker storage and signed32 fold quirks. The subset now has 19 exact profiles; arbitrary operations and silicon numerics remain outside admission.
+
+The [mapping-status inventory](bmc-mapping-status.md) separates the 19 executable
 profiles, composed FDRV arithmetic and authored voices from a full BMC emulator.
 Recent parameter-dispatch checks execute ARM control code, not new DSP opcodes.
 

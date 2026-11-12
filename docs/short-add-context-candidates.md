@@ -1,5 +1,7 @@
 # Short-add candidates: field bindings and remaining source ambiguity
 
+Follow-up: [OSC bias/add and fold](osc-bias-wrap-study.md) now binds the hoisted quarter, preceding P5 producer, isolated add cutpoint and folded stores. One exact 52-byte profile is admitted; the inventory and other short-add candidates below retain their original limits.
+
 2026-11-10. The complete TRANSIENT reference exposes a useful constant-add
 candidate around `5d72`, but the same 16-bit word is also a long operation
 elsewhere. This pass binds the short operand to its actual constructor field,

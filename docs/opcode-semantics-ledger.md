@@ -1,8 +1,8 @@
 # DSP control semantics ledger
 
 The [mapping-status inventory](bmc-mapping-status.md) consolidates coverage.
-Recent ARM parameter/control studies do not expand the 18 exact DSP profiles
-or establish general opcode semantics.
+The [OSC bias/wrap study](osc-bias-wrap-study.md) brings the executable subset to 19
+exact profiles. ARM parameter/control studies add no general opcode semantics.
 
 2026-11-10. This index consolidates the **bounded semantic proofs** scattered
 across the studies. It is not a general instruction-set specification. The unit
@@ -105,6 +105,7 @@ the whole effect and silicon semantics remain unresolved.
 | `458f / 0004` | B = B + I6×I7 | Stereo taps, second TS808 state term |
 | `1c42 / 5d46` short pair, then `044b/0000` + `454f/0004` long pair | In the exact FDRV context, sum I1+I2 and I5+I6, store incoming I1/I5, then accumulate the sums into A/B with a shared coefficient | [Auxiliary/add-MAC study](auxiliary-save-restore-and-add-mac.md), strict 84-byte profile; coefficient-port ambiguity retained |
 | FDRV `66..f8` filter context | Two coupled state updates, a weighted output, and balanced port-2/port-6 saves/restores | [State-variable filter](fdrv-state-variable-filter.md), strict 184-byte profile; no word-only decoding or physical stack-depth claim |
+| OSC `5510`, `5512/0005`, short `5d50` and misc `dee5` | In the exact sequence: scaled P4, FMA with the next P4, literal bias and native signed32 fold in P5; old P2 store and paired P5 outputs | [OSC bias/fold](osc-bias-wrap-study.md), strict 52-byte profile with authored preload; no universal word or silicon timing admission |
 
 | FDRV `378..3ec` cubic context plus authored preload | Four `x×(x²+3−abs(3x))` curves, with old-value stores and final reloads | [Cubic study](fdrv-cubic-waveshaping-study.md), strict 126-byte profile; six new short multiplies and two exact literal-minus-magnitude forms, no universal masked-class admission |
 
@@ -170,8 +171,9 @@ candidate controls. This is host-manager encoding evidence, not admission of
 The [short-add context inventory](short-add-context-candidates.md) adds fifteen
 family-1 candidates across nine classes. TRANSIENT's short `5d72` four-byte
 operand is bound to its native decay default, while long `5d72` and miscellaneous
-`5d50` remain distinct forms. Native additions in four other classes strengthen
-the hypothesis, but source-port and co-issued effects prevent isolated admission.
+`5d50` remain distinct forms. The [OSC follow-up](osc-bias-wrap-study.md) now binds its hoisted quarter, P5
+producer/add/fold and stores in one exact 52-byte profile. Other candidates retain
+their source-port/coissued gaps; no isolated word or universal class is admitted.
 
 ## Existing code generation
 

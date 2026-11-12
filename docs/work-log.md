@@ -2565,3 +2565,49 @@ and route0a consumers remain host leads. Missing peer/physical slot mapping,
 silicon precision/history, interrupt timing, entry/return and safe loading remain
 open. No DSP execution profile is added;18 exact profiles remain. No instrument
 was accessed or flashed.
+
+## OSC short literal add, FMA producer and signed32 fold (2026-11-11)
+
+Added strict osc_bias_wrap assembly/disassembly and packet interpretation: 52
+logical/stored bytes, six packets, comprising an authored preload and 42 stock
+bytes at OSC264..28e. This raises the executable subset from18 to19 exact sequence
+profiles. All four Fantom OSC body placements match the desktop context after
+explicit resource substitution. This does not add a whole oscillator or general
+5d4x/misc decoder, and the existing FDRV chain remains1,692 bytes.
+
+Native source tracing resolves a hoisted quarter literal: d0 is defined as.25 at
+29590 and preserved through the FMA at29748. The bounded path computes3*first,
+FMA(second,.25,scaled), adds.203125, then performs the native signed32 fold and
+stores P5 twice. A distinct old P2 marker store and coissued P4 load are checked.
+Constructor records bind every native read/store to its program field. Short5d50
+in this header remains distinct from JDMLT's miscellaneous-family use.
+
+All8,460 native cutpoint checks pass:141 inputs, five layouts (desktop and four
+Fantom), three ring origins and four endpoints. Every native call additionally
+checks all2,048 ring cells for unintended writes. The packet interpreter matches
+the intermediate values, marker and outputs. Native code is source-pinned and
+branch-free; injected register-copy bridges and original pointer/literal setup are
+checked. The fixture runs in private executable memory, without device access.
+
+Qwen returned boundary-input generation in4.8 seconds. Its construction and exact
+recomputation filter were reviewed and retained, with deterministic sorted output.
+Thirteen exactly reconstructed boundary inputs supplement128 asymmetric random
+triples. The reference preserves negative odd-integer endpoints and signed32
+normalizer-overflow quirks; non-finite, overflow and out-of-domain inputs reject.
+This is an explicit binary64/native-FMA policy, not silicon numeric calibration.
+
+All42 focused OSC/subset/interpreter/corpus/phase/short-add tests pass in14.653
+seconds. Three pure tests pass without corpus, with three skips. The original JSON
+example emits52 stored bytes and decodes to the identical spec. Fixed-field
+mutations, aliases, numeric boundaries, source identity, syntax, Markdown links
+and whitespace are checked. Broader DSP/audio and unrelated ARM host/control
+suites were not repeated. Vault sync uses expected hashes, Markdown-only writes,
+backups and atomic replacement. The attention chime fails with AudioQueueStart
+(-66680).
+
+Next seek an independent negative-literal short-add/source-port context or another
+self-contained OSC window. General opcode semantics, complete oscillator/state
+flow, missing peer/physical ownership, precision/history, interrupt timing,
+entry/return and safe loading remain unresolved. No instrument was accessed or
+flashed. The marker preload is authored offline state, not proof of a free cell
+or a hardware allocator/voice-planner integration.

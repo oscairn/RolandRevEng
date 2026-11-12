@@ -14,7 +14,7 @@ coverage, would produce a misleading percentage.
 | Area | What is mapped/documented | What remains |
 |---|---|---|
 | Packet/container structure | Deterministic parsing, control/payload split, sized literals/extensions; the original three-image corpus has 61,334 packets | Other contexts do not gain execution semantics from successful parsing |
-| Executable DSP subset | 18 exact sequence profiles, with constrained operands/resources and strict rejection of unsupported forms | General ALU/operand/extension decoding, branches/calls/returns, broader engines |
+| Executable DSP subset | 19 exact sequence profiles, with constrained operands/resources and strict rejection of unsupported forms | General ALU/operand/extension decoding, branches/calls/returns, broader engines |
 | FDRV arithmetic | 11 fragments, 1,692 composed bytes, 104 packets; native-policy stereo audio/ring/cache checks through wrap | Stock end/IO controls, silicon arithmetic/timing and a loadable wrapper |
 | Authored voices | Oscillator, stereo gain, filter and cubic shaping; shaped filtered voice 510 logical bytes, 39 packets | Hardware scheduling, voice allocation, physical state/routing and launch |
 | Placement/resource plans | Five Fantom placements and explicit owner/data/coefficient substitutions | General runtime allocator and safe whole-graph integration |
@@ -23,7 +23,7 @@ coverage, would produce a misleading percentage.
 | Host/boot access | Readable CORE1 receive/transmit routes, comparison firmware, bounded key/provider searches | Readable installed CORE0/host peer, any required key, verified external protocol |
 | Physical BMC behavior | No silicon execution/calibration in this research | Precision, saturation/rounding, pipeline latency, timing, aliases and real interrupt delivery |
 
-The 18 profiles are exact **instruction sequences**, not 18 universally decoded
+The 19 profiles are exact **instruction sequences**, not 19 universally decoded
 opcodes. Their arithmetic includes checked mix/MAC, allpass feedback,
 state-variable/history filters, clipping, cubic shaping and selected coefficient
 transfers. Context matters: identical control words can compute different results
@@ -36,13 +36,14 @@ references; that does not make their BMC packet programs fully emulated.
 The five Fantom layouts are relocations/owner placements of checked material.
 They are not five complete BMC maps or five independently emulated synth engines.
 The recent coefficient/mute/parameter checkpoints deepen ARM control coverage;
-they do not increase the 18 DSP execution profiles.
+they do not increase the 19 DSP execution profiles.
 
 ## Evidence to start from
 
 - [Packet/loader map](BMC%20DSP%20packet%20and%20loader%20map.md): structural corpus and build-specific interfaces.
 - [Supported code generation](supported-code-generation.md) and [semantics ledger](opcode-semantics-ledger.md): exact admitted forms and limits.
 - [Fragment emulator](fragment-emulator.md): functional execution boundary.
+- [OSC bias/add and fold](osc-bias-wrap-study.md): exact 52-byte profile, 42 stock bytes, four Fantom body matches and 8,460 private-native cutpoint checks; no universal word decoding or silicon calibration.
 - [Complete FDRV arithmetic](fdrv-cubic-waveshaping-study.md#complete-arithmetic-and-output-milestone-2026-11-11): comparison scope and preserved state.
 - [Authored filtered/shaped voice](original-bmc-filtered-voice.md): reusable components and explicit hardware gates.
 - [Fantom resource plans](fantom-voice-resource-plans.md): meaning of five placements.
