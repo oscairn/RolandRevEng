@@ -1,5 +1,10 @@
 # BMC DSP packet and loader map
 
+The [Fantom raw-parameter study](fantom-parameter-buffer-study.md) now connects
+original signed-16 snapshot copying/change bytes through the existing FDRV
+dispatch comparison. This is ARM control evidence; upstream registered callers,
+silicon execution and safe loading remain unproved, with no new DSP profile.
+
 See [current mapping status](bmc-mapping-status.md) for consolidated coverage and
 remaining gates. Later checkpoints complete the offline FDRV arithmetic chain
 and selected ARM parameter/control paths; the DSP subset remains 18 exact profiles.

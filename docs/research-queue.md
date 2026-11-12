@@ -46,8 +46,15 @@ body, logical live1 fields 2/3, mute query and coefficient math. Ninety-six case
 and 360 writes match. Checked NVIC helpers use unconditional CPSID/CPSIE rather
 than preserving an incoming PRIMASK; this is not an exclusion protocol.
 
-Next recover the actual parameter-interface buffer/flag producer and its route
-from a concrete registered task callback, preserving masks and object lifetimes.
+The [raw-buffer checkpoint](fantom-parameter-buffer-study.md) now resolves the
+embedded capacity-32 FDRV interface: signed-16 snapshot pointer plus element count,
+prefix copy and byte-per-field changes. Twenty-four original-buffer cases cover
+three capacities; 96 connected raw dispatches match 360 writes without value/flag
+callbacks. Short updates retain tail flags, reset retains values, and oversize
+updates return unchanged. This is not the external transport or a safe live-call ABI.
+
+Next recover the upstream source/count producer and its route from a concrete
+registered task callback, preserving masks and object lifetimes.
 Sample-wait/interrupt ownership and cadence remain open. These control passes add
 no DSP opcode coverage; new independently supported instruction contexts remain
 a separate useful offline direction. Hardware precision, history setup,

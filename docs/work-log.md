@@ -2211,3 +2211,47 @@ Next: actual parameter-interface producer and raw flags/buffers, then a source-
 proved registered callback path with masks and object lifetime. Broader DSP
 semantics and hardware entry/return, precision/timing, history and safe loading
 remain separate work. No instrument was accessed or flashed.
+
+## Fantom raw snapshot ABI and original change detection (2026-11-11)
+
+Resolved the intermediate parameter-buffer boundary that the previous dispatch
+fixture supplied through callbacks. FDRV's factory branch statically binds a
+CEfctPrmBufferTemplate<32> at wrapper+8 and stores that embedded interface at
+wrapper+4. The original update consumes a signed-16 source array plus an element
+count, copies the prefix and computes one changed byte per field. RTTI/vtables,
+factory constants and source instructions are pinned to the existing CORE1 hash.
+
+The 20/24/32-capacity routines share the checked behavior: reset sets count zero
+and all flags without initializing values; first positive copy marks its prefix;
+subsequent copies compare retained values; short updates preserve tail flags;
+zero stores count zero, and oversize is a no-op. Original getters read signed
+values/bytes without count/index guards. Negative counts and aliasing are excluded
+from the safe fixture, rather than claimed rejected by the firmware.
+
+Twenty-four original buffer cases match the independent model and object canaries.
+Zero/oversize use null sources. Valid source buffers are preserved by the update,
+then overwritten before original getters check the retained copies. The connected
+fixture executes reset/baseline copy, original outer update, real value/change
+getters, FDRV/mute query and coefficient generation: 96 cases match 360 writes.
+Coefficient I/O and companion slope effects remain controlled as before. No
+factory allocation, algorithm replacement, registered task or real MMIO executes.
+
+Qwen returned a no-tool source review in 37.8 seconds. Narrow first-copy/zero/
+oversize observations were independently verified; two-flag-array and reversed-
+storage claims were rejected by address algebra and asymmetric CPU checks.
+No worker code was accepted. Source listings and worker text remain ignored/local.
+
+Six focused tests pass; all 27 related buffer/dispatch/mute/EqVg/task checks pass
+in 14.402 seconds. The strengthened source-overwrite check is verified separately
+by the direct CPU selfcheck. Four model tests pass without corpus (two skips).
+Changed links, syntax and diff checks accompany the checkpoint. The unchanged
+broader audio/arithmetic suite was not repeated. Markdown-only vault syncing uses
+hash guards, local backups and atomic writes; its manifest is retained locally.
+Five notes were updated and all 78 current hashes verified. The attention chime
+again failed with AudioQueueStart (-66680).
+
+Next trace the source/count producer and registered callback route, retaining
+lifetime and priority/mask evidence. No DSP opcode profile is added; the 18 exact
+profiles and 1,692-byte FDRV arithmetic reference remain the current DSP boundary.
+Physical precision/timing, history policy, entry/return and safe loading remain
+unverified. No instrument was accessed or flashed.

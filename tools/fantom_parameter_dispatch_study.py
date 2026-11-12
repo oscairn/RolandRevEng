@@ -91,6 +91,12 @@ class DispatchOracle(ModeOracle):
                 u.reg_write(a.UC_ARM_REG_PC,u.reg_read(a.UC_ARM_REG_LR));return
         super()._code(u,address,size,_)
 
+    def _parameter_interface(self,wrapper,table,args):
+        self.cpu.mem_write(self.interface,struct.pack('<I',table))
+        for slot,stub in ((4,0x300),(8,0x304),(12,0x308)):
+            self.cpu.mem_write(table+slot,struct.pack('<I',RETURN+stub+1))
+        return args
+
     def parameter(self,values,changed,counter=0,index=0):
         events=inputs(values,changed,counter,index)
         self.values=values.copy();self.changed=set(changed);self.state(counter,index)
@@ -106,9 +112,7 @@ class DispatchOracle(ModeOracle):
         self.symbols={self.core.u32(0x610e5c38+4*i):i for i in range(5)}
         u.mem_write(wrapper,struct.pack('<II',PARAM_VTABLE,self.interface))
         u.mem_write(wrapper+0x74,struct.pack('<I',self.effect))
-        u.mem_write(self.interface,struct.pack('<I',parameter_table))
-        for slot,stub in ((4,0x300),(8,0x304),(12,0x308)):
-            u.mem_write(parameter_table+slot,struct.pack('<I',RETURN+stub+1))
+        tags=self._parameter_interface(wrapper,parameter_table,tags)
         u.mem_write(outer,bytes(0x20));u.mem_write(outer,struct.pack('<I',OUTER_VTABLE))
         u.mem_write(outer+8,struct.pack('<I',wrapper));u.mem_write(outer+0x18,struct.pack('<I',42))
         self._run(UPDATE,registers=(outer,42,*tags),mode='fdrv')

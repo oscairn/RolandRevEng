@@ -7,6 +7,12 @@ mode/cutoff. This extends [mode selection](fantom-envelope-mode-study.md);
 it does not connect an incoming hardware message or registered IRQ task all the
 way to this callback. No BMC opcode profile is added.
 
+The follow-up [raw-buffer study](fantom-parameter-buffer-study.md) replaces this
+study's value/changed callbacks with original signed-16 snapshot copying and
+byte-flag getters, retaining the 96-case/360-write comparison. The producer and
+registered-task route remain open. Callback limitations below describe this
+original fixture, which remains a separate regression.
+
 ## Source chain and independent checks
 
 `tools/fantom_parameter_dispatch_study.py` pins the same stripped CORE1 SHA-256
@@ -115,7 +121,8 @@ checks accept the source CPSID/CPSIE observations; the registration-byte-as-lock
 claim, one polling-PC attribution and unconditional WFI/deadlock claims are
 rejected or narrowed. Raw listings and worker logs remain ignored locally.
 
-Next recover the actual parameter interface/buffer producer and its route from a
-concrete registered callback, preserving masks and object lifetimes. This remains
+Next recover the upstream source/count producer and its route from a concrete
+registered callback, preserving masks and object lifetimes. The buffer follow-up
+resolves the intervening snapshot copy and changed-byte ABI. This remains
 separate from broader DSP instruction coverage, silicon precision/timing,
 history initialization, entry/return and safe custom-engine loading.
