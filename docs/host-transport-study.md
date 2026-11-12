@@ -1,5 +1,7 @@
 # Linux application transport: BMC IPC uses ttyGS0
 
+Follow-up: [original host block replay](fantom-host-block-study.md) checks kind-7 metadata/data placement, copying and padding in an isolated CPU. The original static-only investigation follows.
+
 2026-11-10. Read-only static analysis of the existing local ARM64 `mi078` application
 and `qctest` diagnostic executable. No target code was executed, device opened,
 message sent, boot script changed or update applied.

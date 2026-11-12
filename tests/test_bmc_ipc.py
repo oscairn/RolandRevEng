@@ -37,6 +37,22 @@ class IpcTests(unittest.TestCase):
             with self.subTest(data=data.hex()), self.assertRaises(ValueError):
                 list(frames(data))
 
+    def test_kind7_metadata_is_separate_from_variable_data(self):
+        metadata = bytes.fromhex('34125678')
+        for size in range(6):
+            data = bytes(range(size))
+            if size <= 3:
+                wire = bytes.fromhex('0e60ef84') + metadata + data + b'\x5a'*(3-size) + bytes((4+size,))
+            else:
+                wire = bytes.fromhex('0f60ef845a5a5a5a') + metadata + struct.pack('<I',size) + data
+            row, = frames(wire)
+            self.assertEqual(row['block'],dict(u16=0x1234,byte2=0x56,byte3=0x78,data=data.hex()))
+            self.assertEqual(row['variable'],size>3)
+            self.assertEqual(row['payload'],(data if size>3 else metadata+data).hex())
+        for size in range(4):
+            with self.assertRaisesRegex(ValueError,'kind-7 metadata'):
+                list(frames(bytes.fromhex('0e60ef84') + bytes(7) + bytes((size,))))
+
 
 if __name__ == '__main__':
     unittest.main()

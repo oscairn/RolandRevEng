@@ -2392,3 +2392,39 @@ across the missing CORE0 peer. Live IRQ delivery, preemption, concurrent queue
 ownership, silicon precision/history and safe loading remain unverified. No new
 DSP profile is added: 18 exact profiles and 1,692-byte FDRV arithmetic remain.
 No instrument was accessed or flashed.
+
+## Original Linux block constructor and serializer (2026-11-11)
+
+Added a source-pinned AArch64 replay of mi078 kind-7 construction and serialization,
+plus separate metadata/data fields in the existing offline capture decoder.
+All 108 authored cases match an independent byte-layout model and the capture
+reader: 12 payload sizes through 0x660, three scalar patterns and three canaries.
+The original constructor copies input storage; overwriting it before serialization
+preserves output. Inline block data is limited to three bytes because four metadata
+bytes share the seven-byte payload. Larger records serialize native bytes0–7,
+metadata at+16, length and copied data; the native pointer is omitted.
+
+Canary tests show inline unused bytes and variable prefix bytes4–7 retain seeded
+memory. They are opaque, not presumed zero; no live memory-disclosure claim follows.
+An aligned direct B/BL scan pins 37 constructor sites. Source tracing identifies
+the generic descriptor-derived byte-range helpers and their subsequent separate
+kind8 packed notification. Neither the paired notification nor queue ownership was
+executed, and no host-to-CORE1 selector84 transformation is established.
+
+Qwen's no-tool review returned in 16.6 seconds. Its copying observation was
+corroborated; incorrect inline limit, field placement, stack/register and wire-size
+claims were rejected. No worker code was accepted. Source code, allocation/copy
+ELF imports and actual private-CPU output independently establish the reported
+layout. Allocator, memcpy, reference-count helper and output sink are intercepted;
+no stock process, physical device or network transport runs in the fixture.
+
+All 13 related host/IPC/SysEx tests pass in 27.088 seconds. Without corpus, six pass
+and two skip. Syntax, changed-document links and diff whitespace are checked.
+The unchanged broader DSP/audio and previous ARM control suites were not repeated.
+Vault notes use Markdown-only expected-hash guards, backups and atomic writes.
+The attention chime continues to fail with AudioQueueStart (-66680).
+
+Next trace a particular host parameter family through its descriptor/getter and
+paired notification, then correlate readable comparison-peer code or saved traffic.
+CORE0 translation, physical scheduling, silicon precision/history, entry/return and
+safe loading remain open. No DSP profile is added; 18 exact profiles remain.

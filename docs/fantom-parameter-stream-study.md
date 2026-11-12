@@ -1,5 +1,7 @@
 # Fantom assignment words to original parameter editing
 
+Follow-up: [host block construction](fantom-host-block-study.md) now has 108 original constructor/serializer replay cases. Its outer structured metadata is distinct from this internal CORE1 format; the missing peer is still unproved.
+
 2026-11-11. The recovered control path now begins before the stream writer:
 original assignment-word copying, ring enqueue/dequeue, ASGN handler/callback,
 `CUMDWRxPRMEdit` reassembly and selector84 dispatch feed the

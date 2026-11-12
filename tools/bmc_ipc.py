@@ -34,6 +34,13 @@ def frames(data):
                    byte1=prefix[1], destination=prefix[2], selector=prefix[3])
         if kind == 3 and len(payload) == 4:
             row['word_le'] = int.from_bytes(payload, 'little')
+        if kind == 7:
+            metadata = prefix[8:12] if variable else payload[:4]
+            if len(metadata) != 4:
+                raise ValueError(f'Truncated kind-7 metadata at {offset:#x}')
+            row['block'] = dict(u16=int.from_bytes(metadata[:2], 'little'),
+                                byte2=metadata[2], byte3=metadata[3],
+                                data=(payload if variable else payload[4:]).hex())
         yield row
         offset = end
 

@@ -1,5 +1,7 @@
 # Host routes, CORE1 SysEx and the remaining bridge
 
+The bounded [host block replay](fantom-host-block-study.md) now executes the original kind-7 constructor/serializer across 108 cases and exposes metadata in saved captures. Padding retains seeded memory. Host-to-CORE1 translation remains unresolved.
+
 Follow-up: [service initialization and reply frames](core1-service-startup-mmio.md)
 closes the startup-table activation edge below for both supplied builds. It also
 refines the exact count/remainder and saved-register bounds; the external bridge

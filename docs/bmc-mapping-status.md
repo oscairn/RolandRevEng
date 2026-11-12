@@ -50,6 +50,7 @@ they do not increase the 18 DSP execution profiles.
 - [Stock FDRV producer and EFCT callback](fantom-parameter-producer-study.md): factory ID85, 22-field snapshot, descriptor defaults and registered source path; no live scheduling claim.
 - [Stream-store writes and finalization](fantom-parameter-store-study.md): scalar/block low16-bit writes, generic/typed IDs, dirty ranges and original local notification; external transport remains open.
 - [Assignment words and PRMEdit reception](fantom-parameter-stream-study.md): original queue copying/wrap, ASGN, reassembly and selector84 block dispatch; missing host/CORE0 peer remains a separate boundary.
+- [Host block construction and serialization](fantom-host-block-study.md): 108 isolated original-code cases, metadata/data capture decoding and padding checks; the external-to-CORE1 translation remains unproved.
 - [Task contexts](core1-task-context-and-host-peer.md), [host bridge](host-core1-bridge-followup.md) and [CORE0/key limits](core0-ciphertext-and-key-location.md): access and ownership gaps.
 
 ## What separates this from the two intended outcomes

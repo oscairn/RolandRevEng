@@ -72,8 +72,14 @@ and selector84 into the writer/EFCT path. 576 cases match 2,160 writes through
 1,584 incoming words, including ring wrap. This caller passes serialization false;
 the separate scalar/UI adapter flag is not assigned that behavior by assumption.
 
-Next bind CORE1 stream records to readable host block constructors/serialization
-across the missing CORE0 peer, preserving masks and object lifetimes.
+The [host block checkpoint](fantom-host-block-study.md) now verifies original
+kind-7 construction/serialization in 108 cases and decodes separate metadata/data
+in saved frames. It identifies 37 direct constructor sites and the generic paired
+block/range-notification source, without connecting them to CORE1 selector84.
+
+Next trace one host parameter family through its descriptors, getter and paired
+notification; seek readable comparison-peer code or saved traffic for the missing
+CORE0 translation, preserving masks and object lifetimes.
 Sample-wait/interrupt ownership and cadence remain open. These control passes add
 no DSP opcode coverage; new independently supported instruction contexts remain
 a separate useful offline direction. Hardware precision, history setup,
