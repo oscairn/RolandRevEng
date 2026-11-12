@@ -1,5 +1,7 @@
 # Fantom Linux block construction and serialization
 
+Follow-up: [registered host MFX family callbacks](fantom-host-family-study.md) now bind 74 corresponding host/CORE1 descriptor tuples and execute getters, routing and paired block/range notifications. The queue and missing-peer boundaries remain explicit.
+
 2026-11-11. The readable Linux application now has a bounded, executable check of
 its kind-7 block constructor and serializer. **108 authored cases match the
 independent byte layout**, including copied input lifetime and the inline/variable

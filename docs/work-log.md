@@ -2428,3 +2428,48 @@ Next trace a particular host parameter family through its descriptor/getter and
 paired notification, then correlate readable comparison-peer code or saved traffic.
 CORE0 translation, physical scheduling, silicon precision/history, entry/return and
 safe loading remain open. No DSP profile is added; 18 exact profiles remain.
+
+## Registered host MFX families and paired range messages (2026-11-11)
+
+Compared 48 generic MFX and 26 algorithm85/FDRV typed descriptor tuples between
+mi078 and CORE1. Defaults, bounds, byte offsets and native widths match with a
+2,071-ID shift in these ranges; other host encoding flags and a universal ID
+conversion are not claimed. Host family6's fixed getter and family7 contexts0/1
+select three contiguous 84-byte stores. Their CORE1 slot assignments remain open.
+
+The private CPU fixture executes the original global binding constructor,
+registered callbacks, parameter scope/getters, typed-to-generic conversion,
+block/range constructors, message retaining wrapper, routing, temporary destruction
+and serialization. All 432 matrix cases match: 216 no-send cases and 216 ordered
+block/range pairs, totaling 432 messages and 8,928 block data bytes. Three separate
+status-header force-full cases pass. Full generic updates cover 80 bytes, not the
+entire 84-byte allocation stride. The block retains a 16-bit index; its kind8
+notification retains 14 bits. Generic/typed IDs can send identical bytes with
+different range notification payloads.
+
+The first replay caught a reversed CSEL interpretation in the independent model:
+byte3 bit0 forces the full range, and bit1 enables sending. A focused synthetic
+register trace resolved it, followed by all four flag combinations. No firmware
+or emulator instruction defect was inferred. Qwen returned a no-tool draft in
+14.3 seconds; its nibble layout was corroborated, but family/index header packing
+and boolean validation were wrong. No draft code was accepted.
+
+Output queue storage, pthread mutex effects, allocation/copy/reference helpers
+and free remain controlled. Native message/payload snapshots are captured at the
+queue boundary and later restored for original serialization after the original
+temporaries expire. Allocation/release counts, poisoned free storage, store
+invariance, mutex nesting restoration, message order and payloads are checked.
+The upstream host scalar writer, live Linux worker and missing CORE0 peer do not
+execute; no physical device or interrupt is involved.
+
+All 17 related family/block/IPC/SysEx tests pass in 31.069 seconds. Two model tests
+pass without corpus, with two skips. Syntax, changed-document links and whitespace
+are checked. The unchanged DSP/audio and earlier CORE1 control suites were not
+repeated. Vault sync uses Markdown-only expected-hash checks, backups and atomic
+writes. The attention chime continues to fail with AudioQueueStart (-66680).
+
+Next execute the host scalar-write transaction and trace a readable comparison
+peer's handling of this precise paired format. Host-to-CORE1 conversion, physical
+store/slot identity, silicon precision/history, scheduling, entry/return and safe
+loading remain unresolved. No DSP execution profile is added; 18 exact profiles
+remain. No instrument was accessed or flashed.

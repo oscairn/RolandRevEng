@@ -1,5 +1,7 @@
 # Fantom assignment words to original parameter editing
 
+The [host family study](fantom-host-family-study.md) matches 48 generic and 26 typed descriptor tuples, with different host IDs, and replays paired host messages. It does not establish their translation into this internal stream or assign host stores to CORE1 slots.
+
 Follow-up: [host block construction](fantom-host-block-study.md) now has 108 original constructor/serializer replay cases. Its outer structured metadata is distinct from this internal CORE1 format; the missing peer is still unproved.
 
 2026-11-11. The recovered control path now begins before the stream writer:

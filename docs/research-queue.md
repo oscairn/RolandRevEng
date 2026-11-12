@@ -77,9 +77,13 @@ kind-7 construction/serialization in 108 cases and decodes separate metadata/dat
 in saved frames. It identifies 37 direct constructor sites and the generic paired
 block/range-notification source, without connecting them to CORE1 selector84.
 
-Next trace one host parameter family through its descriptors, getter and paired
-notification; seek readable comparison-peer code or saved traffic for the missing
-CORE0 translation, preserving masks and object lifetimes.
+The [host MFX family checkpoint](fantom-host-family-study.md) now compares all 48
+generic and 26 FDRV typed descriptor tuples with CORE1, finding a 2,071-ID shift in
+these ranges. Registered callbacks, actual getters and paired block/range messages
+match 432 cases; physical slot assignment and the missing peer remain unresolved.
+
+Next execute an original host scalar-write transaction into these callbacks and
+seek readable comparison-peer handling of the specific block/notification pair.
 Sample-wait/interrupt ownership and cadence remain open. These control passes add
 no DSP opcode coverage; new independently supported instruction contexts remain
 a separate useful offline direction. Hardware precision, history setup,
