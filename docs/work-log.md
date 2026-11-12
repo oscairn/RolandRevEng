@@ -2473,3 +2473,49 @@ peer's handling of this precise paired format. Host-to-CORE1 conversion, physica
 store/slot identity, silicon precision/history, scheduling, entry/return and safe
 loading remain unresolved. No DSP execution profile is added; 18 exact profiles
 remain. No instrument was accessed or flashed.
+
+## Original host scalar-edit wrappers and clamped writes (2026-11-11)
+
+Executed original family6/7 wrappers 00478d60/00478dd8 through transaction
+construction, descriptor-clamped scalar writing, dirty-ID tracking, destruction,
+registered MFX callbacks, routing and original serialization. The wrappers set the
+block-send bit themselves. All 648 cases match 2,268 captured messages: 1,296 BMC
+output messages, 648 local route0a notifications and 324 optional local route4
+notifications. Seventy-two unchanged stores still receive one original halfword
+write and their notifications. Guards check the exact requested cell/value and
+all bytes of the three selected stores afterward.
+
+The host clamps signed32 input to descriptor bounds before storing. For value65537,
+generic mode/cutoff IDs3504/3505 store20000, typed mode4917 stores2 and typed
+cutoff4918 stores16000. This differs from CORE1's recovered low16 stream write.
+The transaction initially notifies local route0a with supplied IDs, then its family
+callback sends kind7/8 and records converted generic IDs. When byte04db0438 is
+seeded nonzero, destruction emits another kind1 to local route4 with those
+converted IDs. No live flag value/owner or external transmission follows.
+
+Original parameter-scope nesting restores the counter after two intercepted lock
+calls and one unlock. The local receiver list, route4 consumer and BMC output queue
+are captured at their entries; no consumer, actual mutex effect, process thread,
+physical device or peer bridge executes. Native message snapshots are restored for
+original serialization after original temporaries expire. Multi-write transactions,
+read-only parameters and type changes remain outside this fixture.
+
+Qwen returned a small clamp-model draft in 6.5 seconds. Its exact integer/signed32
+checks and boundary choices were reviewed and adopted; independent tests and
+original-code comparisons verify them. The first negative-write guard incorrectly
+compared Unicorn's full STRH source operand with a halfword. Comparing the low16
+stored bits, while checking final memory independently, fixed that fixture error.
+No firmware or instruction-emulation defect was inferred.
+
+All 21 related write/family/block/IPC/SysEx tests pass in 108.297 seconds. Two new
+model tests pass without corpus, with two skips. Syntax, changed-document links
+and diff whitespace are checked. The unchanged DSP/audio and previous CORE1
+control suites were not repeated. Markdown-only vault updates use expected hashes,
+backups and atomic writes. The attention chime fails with AudioQueueStart (-66680).
+
+Next bind local receiver/queue registration and drain behavior, and seek readable
+peer evidence for the distinct host block/range formats. New independently
+supported DSP encoding contexts remain useful offline work. Physical slot mapping,
+silicon precision/history, interrupt timing, entry/return and safe loading remain
+open. No DSP execution profile is added; 18 exact profiles remain. No instrument
+was accessed or flashed.

@@ -82,8 +82,15 @@ generic and 26 FDRV typed descriptor tuples with CORE1, finding a 2,071-ID shift
 these ranges. Registered callbacks, actual getters and paired block/range messages
 match 432 cases; physical slot assignment and the missing peer remain unresolved.
 
-Next execute an original host scalar-write transaction into these callbacks and
-seek readable comparison-peer handling of the specific block/notification pair.
+The [host scalar-edit checkpoint](fantom-host-write-study.md) now runs original
+wrappers, descriptor-clamped writes, destruction and routed notifications in 648
+cases, producing 2,268 messages. Identical values still write/notify; an optional
+local route4 notification uses converted generic IDs. Receiver/queue consumers and
+the missing peer remain outside the replay.
+
+Next bind the local receiver/queue registrations and drain behavior, then seek
+readable comparison-peer handling of the precise block/range formats. Independently
+supported new DSP encoding contexts remain a separate useful offline direction.
 Sample-wait/interrupt ownership and cadence remain open. These control passes add
 no DSP opcode coverage; new independently supported instruction contexts remain
 a separate useful offline direction. Hardware precision, history setup,

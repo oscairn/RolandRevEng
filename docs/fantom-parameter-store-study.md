@@ -1,5 +1,7 @@
 # Fantom stream writes, dirty IDs and local finalization
 
+The separate [host scalar-write study](fantom-host-write-study.md) verifies descriptor clamping before serialization. This differs from the low16-bit CORE1 writer below; the missing peer is not bridged by assuming the same scalar behavior.
+
 Follow-up: the [assignment-stream study](fantom-parameter-stream-study.md)
 now executes the original assignment queue, ASGN callback, PRMEdit reassembler
 and selector84 dispatcher before this writer. The incoming case hardcodes

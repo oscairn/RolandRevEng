@@ -1,5 +1,7 @@
 # Fantom Linux block construction and serialization
 
+The [scalar-edit follow-up](fantom-host-write-study.md) now begins at original family6/7 edit wrappers and reaches these serialized messages; local receiver and BMC queue consumers remain outside the replay.
+
 Follow-up: [registered host MFX family callbacks](fantom-host-family-study.md) now bind 74 corresponding host/CORE1 descriptor tuples and execute getters, routing and paired block/range notifications. The queue and missing-peer boundaries remain explicit.
 
 2026-11-11. The readable Linux application now has a bounded, executable check of

@@ -1,5 +1,7 @@
 # Fantom host MFX families and paired range notifications
 
+Follow-up: [original host scalar edits](fantom-host-write-study.md) now execute two edit wrappers through the writer, destructor and these callbacks. The 648 cases distinguish descriptor clamping, identical-value notifications and an optional local route4 notification.
+
 2026-11-11. Host families 6 and 7 now have source-bound store getters and registered
 callback replays. **432 matrix cases produce 216 block/range pairs and 8,928 block
 data bytes**, with another three force-full cases checked separately. All 48
