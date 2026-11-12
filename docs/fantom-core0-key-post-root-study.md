@@ -88,3 +88,31 @@ length 24. Derive its key with the documented word packing and validate actual
 Fantom plaintext/integrity before claiming compatibility. The two published
 MC-101 ROM hashes conflict, as recorded in the earlier key-location study.
 No patched BMC image was built or installed in this pass.
+
+## Live UART follow-up after persistent SSH installation
+
+The live driver maps tty index 3 (`/dev/ttymxc3`, Linux UART4) to i.MX MMIO
+`30a60000`, IRQ34. fuser reported no owner on UART0, UART2 or UART4; mi078 was
+running. The live UART4 device-tree node is enabled. The retained matching board
+source assigns RXD/TXD only, with no RTS/CTS declaration. These are Linux-side
+facts, not identification of the BMC-side UART register block or boot straps.
+
+A five-second passive UART4 capture used the stock helper's speed, 1000000 baud,
+8N1, no hardware/software flow control and no echo. The descriptor was opened
+read-only with NOCTTY/NONBLOCK. No data writes, break or monitor commands were
+issued. Original termios settings were restored and checked before closing.
+The driver counters were tx=0/rx=0 both before and after, and zero bytes arrived.
+Ignored evidence: `local/fantom-live-recovery/{passive_uart4.py,uart4-passive-capture.json}`.
+
+The line is therefore idle during the observed normal operation; this does not
+prove that it lacks an unprompted or boot-only monitor. The verified stock use is
+the update-status protocol described above. The MC-101 ROM report's UART ISP
+read commands require hardware-selected mode 10, not ordinary QSPI boot. No
+Fantom entry sequence or BMC-side UART identity has been established, so those
+opcodes were not sent to the running synth.
+
+The UART could be a return channel for a future dumper once its BMC register/clock
+mapping is proven. It is not yet a demonstrated stock ROM-read route. A bounded
+CORE1 dump package still requires the model-specific hook, DMA/scratch ownership,
+request/output transport and recovery validation listed above. Persistent SSH is
+now verified after reboot, removing the repeated Linux bootstrap requirement.
