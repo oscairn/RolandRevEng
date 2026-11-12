@@ -1,0 +1,24 @@
+remove_popup() {
+    GO=$1
+    BACKUP=$2
+    if [ ! -f "$GO" ] || [ -L "$GO" ]; then return 0; fi
+    HASH=$(sha256sum "$GO")
+    if [ "${HASH%% *}" != '@POPUP_SHA@' ]; then return 0; fi
+    TEMP=$(mktemp "$GO.oscairn.XXXXXX") || return 1
+    if ! cp -p "$GO" "$TEMP"; then rm -f "$TEMP"; return 1; fi
+    if ! awk '
+      $0 == "    (" { inside=1; blocks++; next }
+      inside { if ($0 == "    ) &") inside=0; next }
+      { print }
+      END { if (inside || blocks != 1) exit 1 }
+    ' "$GO" > "$TEMP"; then rm -f "$TEMP"; return 1; fi
+    HASH=$(sha256sum "$TEMP")
+    if [ "${HASH%% *}" != '@CLEAN_GO_SHA@' ] || ! /bin/sh -n "$TEMP"; then
+        rm -f "$TEMP"; return 1
+    fi
+    if [ ! -e "$BACKUP" ] && [ ! -L "$BACKUP" ]; then
+        if ! cp -p "$GO" "$BACKUP"; then rm -f "$TEMP"; return 1; fi
+    fi
+    mv -f "$TEMP" "$GO"
+    printf 'Removed known OSCAIRN shell popup for the next boot\n'
+}

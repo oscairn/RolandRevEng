@@ -87,6 +87,8 @@ class InstallerTests(unittest.TestCase):
         self.assertFalse((out / 'FANTOM_SSH_AUTHORIZED_KEYS').exists())
         self.assertFalse((out / 'FNTM0_UPA.BIN').exists())
         self.assertFalse((out / '_DATA_FNTM0').exists())
+        self.assertIn('musl 1.2.6', (out / 'LICENSE.dropbear.txt').read_text())
+        self.assertIn('GCC RUNTIME LIBRARY EXCEPTION', (out / 'LICENSE.dropbear.txt').read_text())
         home = self.root / 'gpg'
         home.mkdir(mode=0o700)
         result = subprocess.run([
@@ -97,6 +99,47 @@ class InstallerTests(unittest.TestCase):
         for line in (out / 'SHA256SUMS').read_text().splitlines():
             digest, name = line.split()
             self.assertEqual(digest, hashlib.sha256((out / name).read_bytes()).hexdigest())
+
+
+class PopupTests(unittest.TestCase):
+    BEFORE = '#!/bin/sh\nprintf before\n    (\n        printf popup\n    ) &\nprintf synth\n'
+    AFTER = '#!/bin/sh\nprintf before\nprintf synth\n'
+
+    def exercise(self, content, expected=None):
+        temp = tempfile.TemporaryDirectory()
+        self.addCleanup(temp.cleanup)
+        root = Path(temp.name)
+        go, backup = root / 'go.sh', root / 'backup.sh'
+        go.write_text(content)
+        go.chmod(0o755)
+        script = (package.ASSETS / 'remove_popup.sh.in').read_text()
+        script = script.replace('@POPUP_SHA@', hashlib.sha256(self.BEFORE.encode()).hexdigest())
+        script = script.replace('@CLEAN_GO_SHA@', expected or hashlib.sha256(self.AFTER.encode()).hexdigest())
+        cleanup = root / 'cleanup.sh'
+        cleanup.write_text(script + '\nremove_popup "$1" "$2"\n')
+        result = subprocess.run(['/bin/sh', str(cleanup), str(go), str(backup)],
+                                capture_output=True, text=True)
+        return go, backup, result
+
+    def test_known_popup_removed_with_backup_and_permissions(self):
+        go, backup, result = self.exercise(self.BEFORE)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(go.read_text(), self.AFTER)
+        self.assertEqual(backup.read_text(), self.BEFORE)
+        self.assertEqual(go.stat().st_mode & 0o777, 0o755)
+
+    def test_unknown_startup_is_untouched(self):
+        go, backup, result = self.exercise('#!/bin/sh\nprintf custom\n')
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(go.read_text(), '#!/bin/sh\nprintf custom\n')
+        self.assertFalse(backup.exists())
+
+    def test_failed_output_integrity_preserves_original(self):
+        go, backup, result = self.exercise(self.BEFORE, '0' * 64)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(go.read_text(), self.BEFORE)
+        self.assertFalse(backup.exists())
+        self.assertEqual(sorted(p.name for p in go.parent.iterdir()), ['cleanup.sh', 'go.sh'])
 
 
 if __name__ == '__main__':

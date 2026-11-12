@@ -2,15 +2,25 @@
 
 2026-11-12. Persistent key-only root SSH is installed on Jacob's Fantom-07 and
 **verified after reboot**, including reuse of its pinned host key. This replaces
-the temporary /run-only server. The new package's USB recovery installation has
-not yet been exercised on hardware; its default recovery path passed an isolated
-filesystem test, and the exact encrypted installer passed live GnuPG 1.4.7
-decryption and installation through its --live mode.
+the temporary /run-only server. Installation through the actual USB MEMORY/board1
+recovery screen is now verified: the saved recovery log contains INSTALL OK and
+root SSH returned after normal boot. The isolated recovery filesystem test and
+live GnuPG 1.4.7 decryption/installation checks also passed.
+
+Download the [key-free installer ZIP](../packages/fantom-07-persistent-ssh-update.zip).
+User instructions are in the package's [README.txt](../tools/fantom_ssh/README.txt).
+The keyboard must already run Roland system version **1.08**. After board1 End,
+power off, remove the drive and reboot normally; **do not insert the drive into
+EXT DEVICE for board2**. This package does not perform a full firmware upgrade.
+The revised package also removes the exact earlier Oscairn popup startup block;
+that cleanup was tested separately on the live keyboard. After the subsequent
+USB installation and normal boot, the cleaned script hash was retained and no
+popup-shell process was present.
 
 ## Distribution layout
 
-The generated package is outside the repository at
-`../fantom-07-persistent-ssh-update/` (also zipped alongside it):
+The audited distribution is `packages/fantom-07-persistent-ssh-update.zip`.
+The local extracted working copy is `../fantom-07-persistent-ssh-update/`:
 
 * `update_fntm0`: encrypted original SSH installer code, containing no user key.
 * `dropbearmulti`: separate hardware-tested ARM64 static Dropbear binary.
@@ -26,7 +36,9 @@ mi078 SHA256 before writing.
 
 This is an SSH-only installer: remove old `_DATA_FNTM0` and `FNTM0_UPA.BIN` from
 the USB root. It does not include or update BMC firmware, the application, factory
-content, go.sh or partitions. Follow its included README: this custom installer
+content or partitions. It removes the popup only when go.sh matches the pinned
+earlier Oscairn probe, preserving a backup as `.oscairn-ssh/go.sh.with-popup`;
+stock or unfamiliar startup scripts are unchanged. Follow its included README: this custom installer
 finishes after board1, with no board2 payload. The stock wrapper can display End
 even after a child-script error; require the installer’s explicit
 `OSCAIRN SSH INSTALL OK` message. Installation interruption can leave partial files.
@@ -75,16 +87,32 @@ included in the package or command-line arguments. The builder pins the binary
 that was hardware-tested (see the earlier SSH handoff for source/binary hashes)
 and uses RFC4880 AES256/MDC encryption compatible with the installed GPG 1.4.7.
 
-Seven automated tests passed: missing/private/malformed/oversized keys, binary
-integrity, shell syntax and package encryption round-trip/key exclusion. An
+Ten automated tests passed: missing/private/malformed/oversized keys, binary
+integrity, shell syntax, package encryption round-trip/key exclusion and guarded
+popup cleanup, backup and preservation on integrity failure. An
 ARM64 Alpine container with no networking tested the exact decrypted installer
 against a disposable mounted target containing the real application. Installation,
 permissions, repeat installation, host-key preservation and unchanged stock
 sentinels passed. Detailed fixture remains ignored at
 `local/fantom-ssh/recovery-fixture/`.
 
+The revised fixture at `local/fantom-ssh/recovery-fixture-v2/` also verified the
+real probe script's cleanup, unchanged application/content, backup preservation
+and repeat installation. Live cleanup changed go.sh from SHA256
+`36b4fc75965f736f5254db6f1dc53706e0a0395cbbfac9021c4a20c3caa1bd45`
+to `a9ad448d6b24a326cb8520ce0a4e486d290fd8f435a814f1b3f19a7c8c63bfe4`,
+retained the original backup and left the SSH service active.
+
 Live testing: root login and a PTY worked before reboot. After reboot, the same
 pinned host key authenticated, systemd reported the USB service active, and the
 temporary /run bootstrap directory was absent. No new bootstrap command was sent
 after reboot. Physical USB hot-unplug/replug and stock-update removal/rollback
-have not been tested. Unrelated BMC research remains deferred for this priority.
+have not been separately tested. The user reconnected USB Ethernet after normal
+startup following the physical installation, and automatic SSH access worked.
+Unrelated BMC research remains deferred for this priority.
+
+Physical package installation evidence: `id` returned UID/GID 0, `tty` was
+`/dev/pts/0`, `oscairn-ssh@eth1.service` was active, go.sh retained SHA256
+`a9ad448d6b24a326cb8520ce0a4e486d290fd8f435a814f1b3f19a7c8c63bfe4`,
+and `/home/root/update_sd*.log` contained the explicit installer success marker.
+No process matching the earlier `OSCAIRN shell probe` command was present.

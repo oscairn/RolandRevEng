@@ -9,6 +9,7 @@ __pycache__/
 *.BIN
 *.pkl
 *.zip
+!/packages/fantom-07-persistent-ssh-update.zip
 *.tar
 *.tar.gz
 *.rom

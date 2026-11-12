@@ -64,6 +64,8 @@ cat > "$STAGE/rules" <<'OSCAIRN_RULES'
 OSCAIRN_RULES
 chmod 644 "$STAGE/rules"
 mv -f "$STAGE/rules" "$ROOT/etc/udev/rules.d/90-oscairn-ssh.rules"
+@POPUP_CLEANUP@
+remove_popup "$ROOT/home/root/go.sh" "$STATE/go.sh.with-popup"
 sync
 if [ "${2:-}" = --live ]; then
     systemctl daemon-reload

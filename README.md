@@ -14,6 +14,9 @@ general assembler, BMC hardware driver or BMC firmware flasher.
 - Fantom-07 Linux root and persistent, key-only SSH over USB Ethernet are verified,
   including automatic access after reboot. The [SSH-only installer](docs/fantom-persistent-ssh-update.md)
   accepts a reader-supplied public key and leaves BMC firmware unchanged.
+  [Download the package](packages/fantom-07-persistent-ssh-update.zip) and follow
+  the [instructions](tools/fantom_ssh/README.txt): **install Roland 1.08 first**;
+  after board1 End, reboot normally and **do not move the drive to EXT DEVICE**.
 
 - A strict packet interpreter and constrained emitter support **19 exact sequence
   profiles**, with original oscillator/filter voice examples.

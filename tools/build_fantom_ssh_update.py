@@ -10,15 +10,20 @@ import tempfile
 ASSETS = Path(__file__).with_name('fantom_ssh')
 APP_SHA = '90515931ab039e926fea9cd1b237e341d4097002dcb119674eed7df00f3d9bb7'
 DROPBEAR_SHA = '3b026dc09825a16ce2fab96d41f30429b538924081a2aa72de2ac5bbff0573c8'
+POPUP_SHA = '36b4fc75965f736f5254db6f1dc53706e0a0395cbbfac9021c4a20c3caa1bd45'
+CLEAN_GO_SHA = 'a9ad448d6b24a326cb8520ce0a4e486d290fd8f435a814f1b3f19a7c8c63bfe4'
 
 
 def render_installer(binary):
     digest = hashlib.sha256(binary).hexdigest()
     if digest != DROPBEAR_SHA:
         raise ValueError('Use the hardware-tested static ARM64 Dropbear binary')
+    cleanup = (ASSETS / 'remove_popup.sh.in').read_text()
+    cleanup = cleanup.replace('@POPUP_SHA@', POPUP_SHA).replace('@CLEAN_GO_SHA@', CLEAN_GO_SHA)
     script = (ASSETS / 'install.sh.in').read_text()
     for marker, text in {
         'DROPBEAR_SHA': digest, 'APP_SHA': APP_SHA,
+        'POPUP_CLEANUP': cleanup.rstrip(),
         'START': (ASSETS / 'start.sh').read_text().rstrip(),
         'SERVICE': (ASSETS / 'oscairn-ssh@.service').read_text().rstrip(),
         'RULES': (ASSETS / '90-oscairn-ssh.rules').read_text().rstrip(),
@@ -35,6 +40,7 @@ def build(binary_path, passphrase_path, source, output):
         raise ValueError('Expected one passphrase line in external file')
     licenses = [source / n for n in ('LICENSE', 'libtomcrypt/LICENSE', 'libtommath/LICENSE')]
     notices = '\n\n'.join(p.read_text() for p in licenses)
+    notices += '\n\n' + (ASSETS / 'LICENSE.runtime.txt').read_text()
     output.mkdir(parents=True, exist_ok=False)
     with tempfile.TemporaryDirectory(prefix='fantom-ssh-gpg-') as temp:
         home = Path(temp)
