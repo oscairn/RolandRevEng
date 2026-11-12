@@ -4,6 +4,10 @@ Queued 2026-11-10 at Jacob's request. Starting research checkpoint: `80b740b`.
 The practical target is a small custom engine running on the BMC render DSPs, with
 the i.MX8M handling UI/control. Current emitters produce verified fragments only.
 
+For a fresh agent, start with the [handoff checkpoint](agent-handoff.md): verified
+state, ordered next work, local commands and an explicitly unproved mixed-header
+lead. Do not infer opcode admission from that lead.
+
 The [mapping-status inventory](bmc-mapping-status.md) distinguishes the 19 exact
 DSP profiles and complete FDRV arithmetic reference from structural parsing,
 ARM control evidence and unverified hardware. No whole-chip percentage is known.

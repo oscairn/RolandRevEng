@@ -2658,3 +2658,21 @@ Next establish the earlier5a/b1 layouts and ded4/maximum producer effects,
 accounting for coissued operations and both channels before binding short5d52.
 No instrument was accessed or flashed. Physical arithmetic/timing, general ISA,
 whole-engine execution, entry/return and safe loading remain open.
+
+## Low-token handoff checkpoint (2026-11-11)
+
+Jacob requested the next priorities and a good stopping point for another agent.
+Added agent-handoff.md with the verified179ebee research state, ordered ISA and
+transport/loading work, reproducible commands, artifact identities and note-sync
+constraints. No implementation or decoder change was made in this pass.
+
+A scratch four-operation rank rule matches the six existing anchors and predicts
+4b=0124,5a=1122,5c=1124,62=1224. It remains a fitted hypothesis, not a proof or
+general header grammar. The handoff records an independently rejected direct
+literal binding: GASSDLY native object+b8 represents field22b, not23c, despite
+matching defaults. Shared representative ownership remains unproved. Both the
+lead and the failed check are preserved in ignored local/mixed-bias-layout.
+
+This documentation-only checkpoint checks Markdown links and whitespace. Native
+tests were not rerun; the prior23-test and8,430-cutpoint results remain explicitly
+attributed to179ebee. The full goal remains incomplete.
