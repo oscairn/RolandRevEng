@@ -4,6 +4,11 @@
 or another route into the Fantom. No key bytes were recovered by this comparison.
 No encrypted image was decrypted and no target memory or device was accessed.
 
+2026-11-12 follow-up: [live-root key search](fantom-core0-key-post-root-study.md)
+examines the newly recovered Linux recovery image, UART update-status helper and
+installed tickgen module. Linux updater decryption is now verified separately;
+the BMC CORE0 key remains unrecovered.
+
 ## A concrete reported location, with a product boundary
 
 The pinned [MC-101 decryptor](https://github.com/edco/mc-101-re/blob/b6607ade1417e90afd7a0eab51aa371b21d2b3d4/tools/decrypt_c0a.py)

@@ -138,7 +138,10 @@ Other unresolved conditions:
   scan of all C/header members found only its definition and declaration, no
   registration caller. The default callback is inert; an out-of-tree/installed
   module could register another. This is an additional unresolved isolation
-  condition, not evidence of actual cross-port BMC processing.
+  condition, not evidence of actual cross-port BMC processing. The subsequent
+  [post-root study](fantom-core0-key-post-root-study.md) identified the installed
+  tickgen module as the registration caller and traced its stateful IPC/clock
+  parser; the earlier absence applies only to the retained GPL C/header scan.
 * Successful stock rollback, the executing UID and resolution of Program Version
   Error are still unverified.
 
