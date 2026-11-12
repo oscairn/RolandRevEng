@@ -1,0 +1,90 @@
+# Persistent SSH-only Fantom-0 installer
+
+2026-11-12. Persistent key-only root SSH is installed on Jacob's Fantom-07 and
+**verified after reboot**, including reuse of its pinned host key. This replaces
+the temporary /run-only server. The new package's USB recovery installation has
+not yet been exercised on hardware; its default recovery path passed an isolated
+filesystem test, and the exact encrypted installer passed live GnuPG 1.4.7
+decryption and installation through its --live mode.
+
+## Distribution layout
+
+The generated package is outside the repository at
+`../fantom-07-persistent-ssh-update/` (also zipped alongside it):
+
+* `update_fntm0`: encrypted original SSH installer code, containing no user key.
+* `dropbearmulti`: separate hardware-tested ARM64 static Dropbear binary.
+* README, SHA256SUMS and Oscairn/Dropbear/library license notices.
+
+**No public or private authentication key is included.** The reader generates
+an Ed25519 key on their computer and adds only its .pub file to the USB root as
+`FANTOM_SSH_AUTHORIZED_KEYS`. Missing, private, malformed or oversized key files
+are rejected before Linux target files are changed. Multiple plain Ed25519 keys
+are supported; authorized_keys options, certificates and other algorithms are not.
+The installer verifies the external binary's SHA256 and the installed v1.08
+mi078 SHA256 before writing.
+
+This is an SSH-only installer: remove old `_DATA_FNTM0` and `FNTM0_UPA.BIN` from
+the USB root. It does not include or update BMC firmware, the application, factory
+content, go.sh or partitions. Follow its included README: this custom installer
+finishes after board1, with no board2 payload. The stock wrapper can display End
+even after a child-script error; require the installer’s explicit
+`OSCAIRN SSH INSTALL OK` message. Installation interruption can leave partial files.
+
+## Installed files and startup
+
+* `/home/root/bin/oscairn-dropbearmulti`
+* `/home/root/bin/oscairn-ssh-start.sh`
+* `/home/root/.oscairn-ssh/{authorized_keys,host_ed25519}`
+* `/etc/systemd/system/oscairn-ssh@.service`
+* `/etc/udev/rules.d/90-oscairn-ssh.rules`
+
+The host key is generated on-device during installation and preserved on
+reinstalls. State directory mode is 700; key files are 600, owned by root.
+Reinstalling replaces the authorized public-key list. udev requests a service
+instance for USB network devices; systemd binds its lifetime to that device.
+Dropbear runs in the foreground under systemd, bound to that interface on port
+2222, with passwords and forwarding disabled. DHCP remains managed by existing
+ConnMan/systemd-networkd. No ttyGS or GPIO configuration is touched.
+
+For Jacob's existing key, from the repository directory:
+
+```sh
+ssh -p 2222 -i local/fantom-ssh/client_ed25519 \
+  -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+  -o UserKnownHostsFile=local/fantom-ssh/persistent_known_hosts root@192.168.0.100
+```
+
+This is USB Ethernet/LAN SSH, not USB TO COMPUTER serial access. The adapter
+used in hardware testing is the RTL8153 on eth1. Interface/IP names are not
+hardcoded in the service.
+
+## Build and checks
+
+```sh
+python3 tools/build_fantom_ssh_update.py \
+  --dropbear local/fantom-ssh/dropbearmulti \
+  --passphrase-file local/fantom-ssh/update-passphrase.txt \
+  --dropbear-source local/fantom-ssh/dropbear-2026.94 \
+  --output ../fantom-07-persistent-ssh-update
+python3 -m unittest discover -s tests -p test_fantom_ssh_update.py -v
+```
+
+Use a new output directory. The passphrase file stays ignored/local; it is never
+included in the package or command-line arguments. The builder pins the binary
+that was hardware-tested (see the earlier SSH handoff for source/binary hashes)
+and uses RFC4880 AES256/MDC encryption compatible with the installed GPG 1.4.7.
+
+Seven automated tests passed: missing/private/malformed/oversized keys, binary
+integrity, shell syntax and package encryption round-trip/key exclusion. An
+ARM64 Alpine container with no networking tested the exact decrypted installer
+against a disposable mounted target containing the real application. Installation,
+permissions, repeat installation, host-key preservation and unchanged stock
+sentinels passed. Detailed fixture remains ignored at
+`local/fantom-ssh/recovery-fixture/`.
+
+Live testing: root login and a PTY worked before reboot. After reboot, the same
+pinned host key authenticated, systemd reported the USB service active, and the
+temporary /run bootstrap directory was absent. No new bootstrap command was sent
+after reboot. Physical USB hot-unplug/replug and stock-update removal/rollback
+have not been tested. Unrelated BMC research remains deferred for this priority.

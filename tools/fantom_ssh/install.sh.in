@@ -1,0 +1,76 @@
+#!/bin/sh
+set -eu
+umask 077
+fail() { printf 'OSCAIRN SSH INSTALL FAILED: %s\n' "$*" >&2; exit 1; }
+SOURCE=${1:?USB directory required}
+KEYS="$SOURCE/FANTOM_SSH_AUTHORIZED_KEYS"
+test -f "$KEYS" || fail 'Missing FANTOM_SSH_AUTHORIZED_KEYS (public key file)'
+test "$(wc -c < "$KEYS")" -le 16384 || fail 'Public key file exceeds 16 KiB'
+# Accept plain Ed25519 public keys; reject private keys and authorized_keys options.
+awk '
+  /^[[:space:]]*#/ || /^[[:space:]]*$/ { next }
+  { if ($1 != "ssh-ed25519" || length($2) != 68 ||
+        substr($2,1,25) != "AAAAC3NzaC1lZDI1NTE5AAAAI" ||
+        $2 ~ /[^A-Za-z0-9+\/]/) bad=1; count++ }
+  END { exit (bad || count == 0) }
+' "$KEYS" || fail 'Expected plain ssh-ed25519 PUBLIC keys, generated with ssh-keygen'
+test -f "$SOURCE/dropbearmulti" || fail 'Missing dropbearmulti'
+ACTUAL=$(sha256sum "$SOURCE/dropbearmulti")
+test "${ACTUAL%% *}" = '@DROPBEAR_SHA@' || fail 'Dropbear SHA256 mismatch'
+test "$(id -u)" = 0 || fail 'Root required'
+ROOT=/run/media/mmcblk2p2
+case "${2:-}" in
+  '') grep -qs " $ROOT " /proc/mounts || fail 'Expected Fantom root partition is not mounted';;
+  --live) ROOT=;;
+  *) fail 'Unknown argument';;
+esac
+test -f "$ROOT/home/root/mi078" || fail 'Fantom mi078 application not found'
+ACTUAL=$(sha256sum "$ROOT/home/root/mi078")
+test "${ACTUAL%% *}" = '@APP_SHA@' || fail 'Requires the verified Fantom-0 v1.08 application'
+STATE="$ROOT/home/root/.oscairn-ssh"
+for DIR in "$STATE" "$ROOT/home/root/bin" "$ROOT/etc/systemd/system" "$ROOT/etc/udev/rules.d"; do
+    test ! -L "$DIR" || fail "Refusing symlink directory: $DIR"
+done
+mkdir -p "$STATE" "$ROOT/home/root/bin" "$ROOT/etc/systemd/system" "$ROOT/etc/udev/rules.d"
+chown 0:0 "$STATE"
+chmod 700 "$STATE"
+STAGE=$(mktemp -d "$STATE/.install.XXXXXX")
+trap 'rm -rf "$STAGE"' EXIT
+cp "$SOURCE/dropbearmulti" "$STAGE/dropbearmulti"
+chmod 755 "$STAGE/dropbearmulti"
+cp "$KEYS" "$STAGE/authorized_keys"
+chmod 600 "$STAGE/authorized_keys"
+test ! -L "$STATE/host_ed25519" || fail 'Refusing symlink host key'
+if [ ! -s "$STATE/host_ed25519" ]; then
+    "$STAGE/dropbearmulti" dropbearkey -t ed25519 -f "$STAGE/host_ed25519"
+    chmod 600 "$STAGE/host_ed25519"
+    mv "$STAGE/host_ed25519" "$STATE/host_ed25519"
+fi
+chmod 600 "$STATE/host_ed25519"
+mv -f "$STAGE/dropbearmulti" "$ROOT/home/root/bin/oscairn-dropbearmulti"
+mv -f "$STAGE/authorized_keys" "$STATE/authorized_keys"
+cat > "$STAGE/start" <<'OSCAIRN_START'
+@START@
+OSCAIRN_START
+chmod 755 "$STAGE/start"
+mv -f "$STAGE/start" "$ROOT/home/root/bin/oscairn-ssh-start.sh"
+cat > "$STAGE/service" <<'OSCAIRN_SERVICE'
+@SERVICE@
+OSCAIRN_SERVICE
+chmod 644 "$STAGE/service"
+mv -f "$STAGE/service" "$ROOT/etc/systemd/system/oscairn-ssh@.service"
+cat > "$STAGE/rules" <<'OSCAIRN_RULES'
+@RULES@
+OSCAIRN_RULES
+chmod 644 "$STAGE/rules"
+mv -f "$STAGE/rules" "$ROOT/etc/udev/rules.d/90-oscairn-ssh.rules"
+sync
+if [ "${2:-}" = --live ]; then
+    systemctl daemon-reload
+    udevadm control --reload
+    for NET in /sys/class/net/*; do
+        DEVICE=$(readlink -f "$NET/device") || continue
+        case "$DEVICE" in */usb*/*) systemctl restart "oscairn-ssh@${NET##*/}.service";; esac
+    done
+fi
+printf 'OSCAIRN SSH INSTALL OK: key-only SSH on USB networking, port 2222\n'

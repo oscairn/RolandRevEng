@@ -1,0 +1,11 @@
+[Unit]
+Description=Oscairn SSH on USB network interface %I
+BindsTo=sys-subsystem-net-devices-%i.device
+After=sys-subsystem-net-devices-%i.device
+ConditionPathExists=/home/root/.oscairn-ssh/authorized_keys
+
+[Service]
+Type=simple
+ExecStart=/home/root/bin/oscairn-ssh-start.sh %I
+Restart=on-failure
+RestartSec=5

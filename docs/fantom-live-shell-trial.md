@@ -1,5 +1,9 @@
 # Fantom-07 live shell trial
 
+Latest deployment result: [persistent SSH](fantom-persistent-ssh-update.md) is
+installed and verified after reboot. The temporary shell/session details below
+are historical evidence.
+
 2026-11-12. Hardware observations now supersede the earlier statement that no
 prepared package had been tried. The former offline audit remains relevant to
 its unverified USB-console and recovery assumptions.

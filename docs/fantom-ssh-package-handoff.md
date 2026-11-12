@@ -1,5 +1,9 @@
 # Fantom-07: verified SSH and update-package handoff
 
+Superseded for deployment by the [persistent SSH installer](fantom-persistent-ssh-update.md):
+the service is now installed and verified after reboot. The /run-only server and
+host key below describe the original temporary test.
+
 2026-11-12. **SSH works on the actual keyboard**, including public-key root login,
 remote commands and a PTY (`/dev/pts/1`). No flash was performed for this test.
 

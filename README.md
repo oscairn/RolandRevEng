@@ -7,8 +7,13 @@ This project is not affiliated with or endorsed by Roland.
 
 ## Current status
 
-This is experimental offline research. It does not yet provide a loadable custom
-engine, complete BMC emulator, general assembler, hardware driver or flasher.
+This combines experimental offline BMC research with live Fantom Linux-access
+work. It does not yet provide a loadable custom engine, complete BMC emulator,
+general assembler, BMC hardware driver or BMC firmware flasher.
+
+- Fantom-07 Linux root and persistent, key-only SSH over USB Ethernet are verified,
+  including automatic access after reboot. The [SSH-only installer](docs/fantom-persistent-ssh-update.md)
+  accepts a reader-supplied public key and leaves BMC firmware unchanged.
 
 - A strict packet interpreter and constrained emitter support **19 exact sequence
   profiles**, with original oscillator/filter voice examples.
