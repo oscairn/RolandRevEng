@@ -2255,3 +2255,54 @@ lifetime and priority/mask evidence. No DSP opcode profile is added; the 18 exac
 profiles and 1,692-byte FDRV arithmetic reference remain the current DSP boundary.
 Physical precision/timing, history policy, entry/return and safe loading remain
 unverified. No instrument was accessed or flashed.
+
+## EFCT registered source route and stock FDRV snapshot producer (2026-11-11)
+
+Connected a concrete source path beyond the previous synthetic snapshot input.
+Normal application setup calls 01126cec; it registers task 8 named EFCT, callback
+01126a6d, priority argument 28 / byte e0. The map selects IRQ139 and vector0110026c
+points to handler0110225c, which reads callback slot20084978. The callback consumes
+pending/transition words20083e7c/80 and reaches producer610835d0 through a veneer
+and adapter. It is distinct from ASGN/task5 and the nearby DEMO/task6.
+
+Factory TBH entry algorithm 85 selects the checked FDRV construction branch.
+Its typed store has an 84-byte part stride and descriptor range 2840..2865; the
+producer supplies 22 values, IDs2844..2865, into the capacity 32 buffer. Logical
+fields 2/3 are source IDs 2846/2847, halfwords at offsets14/16. The original reader
+chooses signedness from the minimum and substitutes default values on range
+failure. Cutoff 19000 becomes 3740; mode 3 becomes 2. This is not edge clamping or
+an inference of physical panel labels. Earlier 32-field/direct-setter fixtures
+remain distinct from this stock producer.
+
+Original notifier01126d2e processes a local 21/84 part notification, sets the
+pending bit and requests task 8. The bounded fixture runs that notifier, IRQ
+handler body, callback, producer, original descriptor lookup/read, buffer and
+FDRV/mute/coefficient math. All 288 selected route cases match 1,080 writes;
+four further cases verify descriptor fallback. Dirty consumption and handler
+invocation/activity state match. Only live1 fields 2/3 change; the type stays 85
+and owner state selects the steady path, excluding replacement/RAMCLR.
+
+Task signaling, NVIC helpers and post-apply hardware routing are recorded;
+command-ring input is controlled empty. Actual exceptions, OS startup, preemption,
+physical NVIC/peripherals, factory allocation/lifetime and external host commands
+are not executed. The source calls enable-task5 before module apply: disabling
+ASGN around acquisition does not establish exclusion during parameter application.
+
+Qwen returned a no-tool review in 23.1 seconds. Scratch/source/count observations
+were independently checked; its replacement-target identity, enable/apply order
+and task5-consumer inference were rejected by source and event-order checks.
+No worker code was accepted. Listings and detailed reports remain ignored/local.
+
+All 32 related producer/buffer/dispatch/mute/EqVg/task regressions pass in 51.878 seconds.
+All five final focused checks also pass in 19.507 seconds; three
+model tests pass without corpus, with two skips. Syntax, diff and changed-note
+links are checked. The unchanged broader DSP/audio suite was not repeated.
+Markdown-only vault updates retain expected-hash guards, backups and atomic writes.
+Six notes were updated and all 79 current note hashes verified.
+The attention chime continues to fail with AudioQueueStart (-66680).
+
+Next recover upstream typed-store writes and their notification/host boundary.
+Runtime masks/exclusion, completion cadence, hardware precision/history,
+entry/return and safe loading remain separate requirements. No new DSP execution
+profile is added; the 18 profiles and 1,692-byte arithmetic chain are unchanged.
+No instrument was accessed or flashed.

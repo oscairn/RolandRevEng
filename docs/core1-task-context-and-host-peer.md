@@ -1,5 +1,10 @@
 # Stock CORE1 task context and the remaining external peer
 
+The [EFCT producer study](fantom-parameter-producer-study.md) adds a separate
+source-proved route: task8/IRQ139 → descriptor-backed 22-value FDRV snapshot →
+buffer/setter. Its bounded handler-body checks do not observe live IRQ arrival
+or preemption. The RXDT/ASGN transport bindings below remain distinct.
+
 The [parameter-dispatch audit](fantom-parameter-dispatch-study.md) checks the
 original FDRV parameter callback and confirms the task IRQ-mask helpers use
 unconditional CPSID/CPSIE. It does not establish an ASGN-to-setter call edge or

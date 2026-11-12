@@ -53,8 +53,15 @@ three capacities; 96 connected raw dispatches match 360 writes without value/fla
 callbacks. Short updates retain tail flags, reset retains values, and oversize
 updates return unchanged. This is not the external transport or a safe live-call ABI.
 
-Next recover the upstream source/count producer and its route from a concrete
-registered task callback, preserving masks and object lifetimes.
+The [stock producer/EFCT checkpoint](fantom-parameter-producer-study.md) now
+connects task8/IRQ139 through the original descriptor reader to a 22-value FDRV
+snapshot and live1 setter. Factory ID85 and descriptor fallback are source-bound;
+288 selected route cases match 1,080 writes. ASGN is re-enabled before apply.
+The notification, handler body and callback execute in private CPU memory with
+hardware effects controlled; real preemption/ownership is still unverified.
+
+Next recover upstream parameter-store writes and their notification/host boundary,
+preserving masks and object lifetimes.
 Sample-wait/interrupt ownership and cadence remain open. These control passes add
 no DSP opcode coverage; new independently supported instruction contexts remain
 a separate useful offline direction. Hardware precision, history setup,

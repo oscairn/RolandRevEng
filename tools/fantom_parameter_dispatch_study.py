@@ -60,6 +60,7 @@ def report(core):
 
 class DispatchOracle(ModeOracle):
     ENTRIES=(*ModeOracle.ENTRIES,UPDATE)
+    ALGORITHM=42
 
     def __init__(self,core):
         checked_source=report(core)
@@ -97,6 +98,9 @@ class DispatchOracle(ModeOracle):
             self.cpu.mem_write(table+slot,struct.pack('<I',RETURN+stub+1))
         return args
 
+    def _dispatch_parameter(self,outer,args):
+        self._run(UPDATE,registers=(outer,self.ALGORITHM,*args),mode='fdrv')
+
     def parameter(self,values,changed,counter=0,index=0):
         events=inputs(values,changed,counter,index)
         self.values=values.copy();self.changed=set(changed);self.state(counter,index)
@@ -114,8 +118,8 @@ class DispatchOracle(ModeOracle):
         u.mem_write(wrapper+0x74,struct.pack('<I',self.effect))
         tags=self._parameter_interface(wrapper,parameter_table,tags)
         u.mem_write(outer,bytes(0x20));u.mem_write(outer,struct.pack('<I',OUTER_VTABLE))
-        u.mem_write(outer+8,struct.pack('<I',wrapper));u.mem_write(outer+0x18,struct.pack('<I',42))
-        self._run(UPDATE,registers=(outer,42,*tags),mode='fdrv')
+        u.mem_write(outer+8,struct.pack('<I',wrapper));u.mem_write(outer+0x18,struct.pack('<I',self.ALGORITHM))
+        self._dispatch_parameter(outer,tags)
         wanted=[dict(filter=1,type=e['type'],cutoff=_float32(e['cutoff']),gain=0.,q=_float32(e['q']))for e in events]
         expected=[]
         for e in events:

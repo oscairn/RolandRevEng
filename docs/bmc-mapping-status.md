@@ -18,7 +18,7 @@ coverage, would produce a misleading percentage.
 | FDRV arithmetic | 11 fragments, 1,692 composed bytes, 104 packets; native-policy stereo audio/ring/cache checks through wrap | Stock end/IO controls, silicon arithmetic/timing and a loadable wrapper |
 | Authored voices | Oscillator, stereo gain, filter and cubic shaping; shaped filtered voice 510 logical bytes, 39 packets | Hardware scheduling, voice allocation, physical state/routing and launch |
 | Placement/resource plans | Five Fantom placements and explicit owner/data/coefficient substitutions | General runtime allocator and safe whole-graph integration |
-| Parameter control | Coefficient producers, live/literal groups, envelope/mute state, signed-16 snapshot copying/change bytes, selected original ARM32 execution | Full logical-field coverage, upstream snapshot producer, panel/MIDI routing, actual task/IRQ exclusion |
+| Parameter control | Coefficient producers, envelope/mute state, snapshot/change bytes, stock FDRV descriptor reads and source-proved EFCT callback route | Full field effects, upstream parameter-store writes, external panel/MIDI routing, real task/IRQ exclusion |
 | Memory/loading interfaces | Build-pinned render/DRAM-IO loaders, descriptors/reservations, DMA ordering, completion/IRQ paths and label encoding | Validated external entry, safe replacement/halt/return contract and recovery |
 | Host/boot access | Readable CORE1 receive/transmit routes, comparison firmware, bounded key/provider searches | Readable installed CORE0/host peer, any required key, verified external protocol |
 | Physical BMC behavior | No silicon execution/calibration in this research | Precision, saturation/rounding, pipeline latency, timing, aliases and real interrupt delivery |
@@ -47,6 +47,7 @@ they do not increase the 18 DSP execution profiles.
 - [Authored filtered/shaped voice](original-bmc-filtered-voice.md): reusable components and explicit hardware gates.
 - [Fantom resource plans](fantom-voice-resource-plans.md): meaning of five placements.
 - [Fantom ARM32 math/control](fantom-eqvg-control-study.md), [mute nesting](fantom-envelope-mode-study.md), [parameter dispatch](fantom-parameter-dispatch-study.md) and [raw parameter buffers](fantom-parameter-buffer-study.md): CPU evidence distinct from DSP ISA coverage.
+- [Stock FDRV producer and EFCT callback](fantom-parameter-producer-study.md): factory ID85, 22-field snapshot, descriptor defaults and registered source path; no live scheduling claim.
 - [Task contexts](core1-task-context-and-host-peer.md), [host bridge](host-core1-bridge-followup.md) and [CORE0/key limits](core0-ciphertext-and-key-location.md): access and ownership gaps.
 
 ## What separates this from the two intended outcomes

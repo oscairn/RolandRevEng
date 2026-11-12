@@ -13,6 +13,11 @@ byte-flag getters, retaining the 96-case/360-write comparison. The producer and
 registered-task route remain open. Callback limitations below describe this
 original fixture, which remains a separate regression.
 
+The subsequent [EFCT producer study](fantom-parameter-producer-study.md) also
+binds the stock 22-value producer and registered task8 source route. Its original
+handler-body checks still exclude actual IRQ arrival, preemption and the external
+host protocol; this earlier logical-callback fixture remains narrower.
+
 ## Source chain and independent checks
 
 `tools/fantom_parameter_dispatch_study.py` pins the same stripped CORE1 SHA-256

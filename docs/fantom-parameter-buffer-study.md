@@ -1,5 +1,10 @@
 # Fantom raw parameter snapshots and changed bytes
 
+Follow-up: the [stock producer/EFCT study](fantom-parameter-producer-study.md)
+binds FDRV to factory ID85 and a 22-element stock snapshot, then source-connects
+the registered task8 callback to this buffer and its setter. Actual IRQ arrival,
+preemption, external transport and parameter-store writes remain unverified.
+
 2026-11-11. The FDRV parameter interface consumes a pointer to signed 16-bit
 values and an element count. It copies values into an embedded buffer and
 computes byte-per-field change flags; the second argument is not a flag-word
@@ -118,6 +123,7 @@ python3.13 tools/fantom_parameter_buffer_study.py local/b0c1a.bin --execute-thum
 python3.13 -m unittest discover -s tests -p test_fantom_parameter_buffer.py -v
 ```
 
-Next trace the caller that supplies this source/count and binds the module to
-a concrete registered callback. Preserve object lifetime, priority/mask state
-and the distinction between this local snapshot ABI and the external transport.
+The producer follow-up now supplies the source/count caller and registered
+callback binding. Next trace the parameter-store write/notification producer,
+preserving object lifetime, priority/mask state and the distinction between the
+local snapshot ABI and external transport.
