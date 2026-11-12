@@ -88,13 +88,20 @@ cases, producing 2,268 messages. Identical values still write/notify; an optiona
 local route4 notification uses converted generic IDs. Receiver/queue consumers and
 the missing peer remain outside the replay.
 
-Next bind the local receiver/queue registrations and drain behavior, then seek
-readable comparison-peer handling of the precise block/range formats. Independently
-supported new DSP encoding contexts remain a separate useful offline direction.
-Sample-wait/interrupt ownership and cadence remain open. These control passes add
-no DSP opcode coverage; new independently supported instruction contexts remain
-a separate useful offline direction. Hardware precision, history setup,
-entry/return and safe loading remain open.
+The [stock receiver checkpoint](fantom-host-receiver-study.md) now executes the
+registry initializer, actual family6/7 providers, route4 coalescer, wake helper and
+drain: 777 cases consume 2,178 notifications and produce 1,488 emitter calls. Dirty
+records merge numerically in first-arrival order and reset for reuse. The queued
+emitter has a source-traced kind2 SysEx route to08; it remains intercepted, as do
+route0a consumers. Host-to-CORE1 conversion and physical slot mapping remain open.
+
+Next prioritize the [OSC short-add candidate](short-add-context-candidates.md):
+packet27a, short5d50 and native2974c/29750. Bind its input/output ports and coissued
+effects before any admission; the same word in JDMLT's miscellaneous family is a
+counterexample to word-only decoding. The queued emitter and route0a registrations
+remain separate host leads. No new DSP opcode coverage follows from these ARM
+passes. Hardware precision/history, interrupt ownership/cadence, entry/return and
+safe loading remain unresolved.
 
 The preceding bounded filter milestone is complete (2026-11-11): [EqVgCal](eqvg-filter-generation-study.md)
 now has native-checked formulas, Q clamping, consumer permutations and UI scaling.

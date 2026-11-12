@@ -53,6 +53,7 @@ they do not increase the 18 DSP execution profiles.
 - [Host block construction and serialization](fantom-host-block-study.md): 108 isolated original-code cases, metadata/data capture decoding and padding checks; the external-to-CORE1 translation remains unproved.
 - [Host MFX families and paired notifications](fantom-host-family-study.md): 74 corresponding descriptor tuples, 432 callback cases and original getters/routes; peer translation and physical slot assignment remain open.
 - [Host scalar edits](fantom-host-write-study.md): 648 original wrapper/write/destructor cases, descriptor clamps and local/BMC-output notification order; receiver consumers and missing-peer translation remain open.
+- [Host local range receiver](fantom-host-receiver-study.md): original registry/providers, 777 coalescing/drain cases and source-traced queued SysEx route; emitter bytes, receiver consumers and missing peer remain open.
 - [Task contexts](core1-task-context-and-host-peer.md), [host bridge](host-core1-bridge-followup.md) and [CORE0/key limits](core0-ciphertext-and-key-location.md): access and ownership gaps.
 
 ## What separates this from the two intended outcomes

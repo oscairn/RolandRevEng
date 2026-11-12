@@ -1,5 +1,7 @@
 # Host routes, CORE1 SysEx and the remaining bridge
 
+The [local range-receiver study](fantom-host-receiver-study.md) now executes stock provider registration, coalescing and drain for families6/7. Its queued emitter statically constructs kind2 SysEx routed to08, distinct from immediate kind7/8 blocks; the external peer remains unproved.
+
 The [host family follow-up](fantom-host-family-study.md) now executes registered family6/7 callbacks, original store getters and paired block/range routing. The descriptor match narrows the parameter domains without proving the missing peer.
 
 The bounded [host block replay](fantom-host-block-study.md) now executes the original kind-7 constructor/serializer across 108 cases and exposes metadata in saved captures. Padding retains seeded memory. Host-to-CORE1 translation remains unresolved.

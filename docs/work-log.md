@@ -2519,3 +2519,49 @@ supported DSP encoding contexts remain useful offline work. Physical slot mappin
 silicon precision/history, interrupt timing, entry/return and safe loading remain
 open. No DSP execution profile is added; 18 exact profiles remain. No instrument
 was accessed or flashed.
+
+## Original local range registry, coalescing and drain (2026-11-11)
+
+Bound the host route4 receiver to its actual ELF static initializer and provider
+registry. Initializer00438240 appears in init_array and installs the allocated
+registry at0424bb20 after original constructor00c05580. Native execution performs
+78 allocations, including77 provider objects. Family6 uses RTTI
+CIDMinMaxBlock<1,1>; family7 uses CIDMinMaxBlock<1,2>. Their actual lookup/inverse
+methods execute, rather than an authored provider table. The selected three records
+have24-byte stride and min/max/family plus next/previous links.
+
+All777 cases consume2,178 original packed/routed kind1 notifications and produce
+1,488 coalesced emitter-entry calls. Repeated records merge numeric bounds and retain
+first-arrival order; all min/max/link state resets for reuse. Every case includes a
+second empty drain that emits nothing. The matrix spans length0–3 sequences from
+six notifications, three stack canaries, interleaved contexts and bounded index/
+context aliases. Source getter aliasing is observed, not a valid caller-domain or
+physical BMC mapping claim. Original wake code sets its pending flag and requests
+one condition signal per incoming message; drain delay requests are intercepted.
+
+The SysEx emitter remains intercepted. Source tracing shows its Cff range/address
+encoders, F0/41 header construction, kind2 wrapper and route08 output edge. This is
+distinct from immediate kind7/8 block output and is not a proved CORE1 stream
+translation. Route0a consumers, complete emitted bytes and live endpoint meanings
+remain open. The worker's infinite loop and actual condition/mutex/sem behavior do
+not run; setup, allocation, cleanup registration and OS effects are controlled.
+
+The complete provider constructor exceeded the small-fragment instruction cap;
+a separate bounded allowance and private FP/SIMD enablement permit its original
+initialization stores. No firmware or arithmetic-emulation defect was inferred.
+Qwen returned a model draft in4.6 seconds. Its FIFO/range-union algorithm was
+retained, with redundant set/linear-search state replaced by an ordered dict;
+independent tests and original-code results verify it.
+
+All17 related receiver/block/IPC/SysEx tests pass in46.883 seconds. Two pure tests
+pass without corpus, with two skips. Syntax, changed-document links and whitespace
+are checked. Unchanged DSP/audio, host scalar/family and CORE1 control suites were
+not repeated. Vault synchronization uses Markdown-only expected-hash guards,
+backups and atomic writes. The attention chime fails with AudioQueueStart (-66680).
+
+Next prioritize independent port/coissue proof for OSC's packet27a short5d50
+candidate, preserving the known miscellaneous-family counterexample. Queued SysEx
+and route0a consumers remain host leads. Missing peer/physical slot mapping,
+silicon precision/history, interrupt timing, entry/return and safe loading remain
+open. No DSP execution profile is added;18 exact profiles remain. No instrument
+was accessed or flashed.

@@ -1,5 +1,7 @@
 # Fantom original host scalar edits and routed notifications
 
+Follow-up: the [stock local registry/coalescer/drain](fantom-host-receiver-study.md) now executes independently for route4. It verifies range merging and FIFO cleanup; the queued SysEx emitter and route0a consumers remain separate boundaries.
+
 2026-11-11. Two original host edit wrappers now execute through transaction
 construction, descriptor-bound scalar writes, destruction, registered MFX
 callbacks and routed messages. **648 cases match 2,268 captured messages**.

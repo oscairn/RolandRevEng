@@ -1,5 +1,7 @@
 # Fantom host MFX families and paired range notifications
 
+The [local receiver follow-up](fantom-host-receiver-study.md) binds the actual family6/7 dirty-record providers and verifies queued min/max coalescing, first-arrival order and record reuse. Its emitter is intercepted.
+
 Follow-up: [original host scalar edits](fantom-host-write-study.md) now execute two edit wrappers through the writer, destructor and these callbacks. The 648 cases distinguish descriptor clamping, identical-value notifications and an optional local route4 notification.
 
 2026-11-11. Host families 6 and 7 now have source-bound store getters and registered
