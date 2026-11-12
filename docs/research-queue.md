@@ -66,8 +66,14 @@ generic scalar/block writes and original finalization before the EFCT path.
 FDRV IDs; writes retain low16 bits, identical writes still notify, and reserved
 notification bits6..12 retain stack contents. External serialization is excluded.
 
-Next identify the incoming stream-selection/write caller and its host boundary,
-preserving masks and object lifetimes.
+The [assignment-stream checkpoint](fantom-parameter-stream-study.md) now runs
+word copying, the real assignment ring, ASGN handler/callback, PRMEdit reassembly
+and selector84 into the writer/EFCT path. 576 cases match 2,160 writes through
+1,584 incoming words, including ring wrap. This caller passes serialization false;
+the separate scalar/UI adapter flag is not assigned that behavior by assumption.
+
+Next bind CORE1 stream records to readable host block constructors/serialization
+across the missing CORE0 peer, preserving masks and object lifetimes.
 Sample-wait/interrupt ownership and cadence remain open. These control passes add
 no DSP opcode coverage; new independently supported instruction contexts remain
 a separate useful offline direction. Hardware precision, history setup,

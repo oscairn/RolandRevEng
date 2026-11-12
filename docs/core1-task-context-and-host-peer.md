@@ -1,5 +1,10 @@
 # Stock CORE1 task context and the remaining external peer
 
+The [assignment-stream study](fantom-parameter-stream-study.md) now executes
+ASGN's original queue/receiver path into MFX block writes and the checked EFCT
+setter path. Word-copy and ring-wrap checks are separate from real IRQ arrival,
+preemption, external framing and concurrent queue ownership.
+
 The [EFCT producer study](fantom-parameter-producer-study.md) adds a separate
 source-proved route: task8/IRQ139 → descriptor-backed 22-value FDRV snapshot →
 buffer/setter. Its bounded handler-body checks do not observe live IRQ arrival

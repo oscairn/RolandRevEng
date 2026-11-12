@@ -2357,3 +2357,38 @@ flag 20081980; its runtime value/owner remain unproved. Host/CORE0 framing and t
 physical entry/return, precision/history/timing and safe loading gaps remain.
 No DSP profile was added: 18 exact profiles and 1,692-byte FDRV arithmetic remain
 unchanged. No instrument was accessed or flashed.
+
+## Assignment queue and original parameter-edit reception (2026-11-11)
+
+Extended the control replay upstream through original assignment-word copying,
+ring enqueue/dequeue, the registered ASGN handler/callback, CUMDWRxPRMEdit
+reassembly and selector84 block dispatch. The same stock stream writer/finalizer
+then reaches the checked EFCT/FDRV path. All 576 selected cases match 2,160
+coefficient writes, consuming 1,584 words and producing 864 local notifications.
+Empty-ring cursors 0 and 2047 exercise wrapping; overwriting input storage before
+consumption verifies that the forwarder copies the word. All three terminal
+tags and an all-ones cutoff/default case are checked.
+
+The incoming selector explicitly finalizes with serialization false, including
+with a nonzero global-flag canary. Separate scalar adapters bind to RTTI
+CEZSNDTonePrmSFSub; their higher UI caller and flag runtime meaning remain open.
+The receiver's stream object expires with its stack frame, so dirty ranges are
+captured at finalizer entry. The RXDT forward edge is source-checked only.
+
+Qwen supplied a no-tool encoder draft in 46.0 seconds. Review retained its
+chunk/tag algorithm, tightened part validation and removed unnecessary branches
+and commentary; independent tests replaced its incomplete tests. The first CPU
+run exposed a fixture Thumb-resume bug at an intercepted NVIC store, which was
+fixed before the successful checks. This was not a firmware defect.
+
+All five focused tests pass in 61.560 seconds; all 42 related regressions pass
+in 118.925 seconds. Without corpus, three tests pass and two skip. Syntax, diff
+and changed-document links are checked. The unchanged broader DSP/audio suite
+was not repeated. Vault synchronization uses Markdown-only expected-hash guards,
+backups and atomic writes. The attention chime fails with AudioQueueStart (-66680).
+
+Next bind the internal records to readable host block construction/serialization
+across the missing CORE0 peer. Live IRQ delivery, preemption, concurrent queue
+ownership, silicon precision/history and safe loading remain unverified. No new
+DSP profile is added: 18 exact profiles and 1,692-byte FDRV arithmetic remain.
+No instrument was accessed or flashed.

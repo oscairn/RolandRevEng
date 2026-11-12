@@ -68,19 +68,20 @@ def report(core):
 
 class StoreOracle(ProducerOracle):
     ENTRIES=(*ProducerOracle.ENTRIES,CONSTRUCT,SCALAR,BLOCK,FINALIZE)
+    WRITE_MODES=('store',)
 
     def __init__(self,core):
         source=report(core);super().__init__(core);self.checked.update(source)
 
     def _write(self,u,access,address,size,value,_):
-        if self.mode=='store'and PARAM_BASE<=address<PARAM_BASE+3*PARAM_STRIDE:
+        if self.mode in self.WRITE_MODES and PARAM_BASE<=address<PARAM_BASE+3*PARAM_STRIDE:
             if not all(byte in self.allowed_bytes for byte in range(address,address+size)):
                 raise ValueError('Original writer touched an unrequested parameter byte')
             self.writes.append((self.pc,address,size,value));return
         super()._write(u,access,address,size,value,_)
 
     def _code(self,u,address,size,_):
-        if self.mode=='store':
+        if self.mode in self.WRITE_MODES:
             if address==NOTIFY:
                 self.messages.append(bytes(u.mem_read(u.reg_read(self.arm.UC_ARM_REG_R0),4)))
             elif address==0x011020c0:
@@ -126,6 +127,7 @@ class StoreOracle(ProducerOracle):
         if word&0x1fc0!=0x5a5a&0x1fc0:raise ValueError('Reserved notification bits no longer retain prior stack contents')
         if struct.unpack('<hh',u.mem_read(OBJECT+0x10,4))!=dirty:
             raise ValueError('Finalizer unexpectedly reset the dirty range')
+        self.dirty_range=dirty
 
     def write_controls(self,previous,changes,counter=0,index=1,enabled=True,form='scalar'):
         checked_slot(index);checked(counter,index)
@@ -136,7 +138,7 @@ class StoreOracle(ProducerOracle):
         for field,value in prepared:values[field]=value
         self.previous=previous;self.changes=prepared;self.scalar_sources=list(changes);self.form=form
         result=self.producer(previous,values,counter,index,enabled)
-        result.update(notification_count=len(self.messages),written_range=struct.unpack('<hh',self.cpu.mem_read(OBJECT+0x10,4)))
+        result.update(notification_count=len(self.messages),written_range=self.dirty_range)
         return result
 
 

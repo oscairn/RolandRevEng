@@ -1,5 +1,10 @@
 # Fantom stream writes, dirty IDs and local finalization
 
+Follow-up: the [assignment-stream study](fantom-parameter-stream-study.md)
+now executes the original assignment queue, ASGN callback, PRMEdit reassembler
+and selector84 dispatcher before this writer. The incoming case hardcodes
+serialization false; the separate scalar/UI adapter flag remains unproved.
+
 2026-11-11. Original scalar/block stream writers and their finalizer now run
 before the [EFCT/FDRV producer](fantom-parameter-producer-study.md). The fixture
 no longer supplies the final store bytes or constructs its own EFCT notification:
@@ -142,5 +147,6 @@ completion cadence, BMC precision/history, entry/return and safe loading.
 Concrete next leads are block/finalizer veneers `01134574/0113457e` and the
 scalar/finalizer adapters `61080abc/61080ac4`. The latter add4 to their receiver;
 the finalizer adapter loads its second argument as a signed byte from `20081980`.
-Its owner, incoming caller and that serialization flag's runtime value still
-need source binding. These edges do not establish an external command.
+The follow-up binds the scalar adapters to RTTI `CEZSNDTonePrmSFSub` and identifies
+the incoming selector84 block caller. The higher scalar/UI caller and that
+serialization flag's runtime value remain open. No external command follows.
