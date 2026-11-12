@@ -60,7 +60,13 @@ snapshot and live1 setter. Factory ID85 and descriptor fallback are source-bound
 The notification, handler body and callback execute in private CPU memory with
 hardware effects controlled; real preemption/ownership is still unverified.
 
-Next recover upstream parameter-store writes and their notification/host boundary,
+The [stream-store checkpoint](fantom-parameter-store-study.md) now executes
+generic scalar/block writes and original finalization before the EFCT path.
+576 cases match 2,160 writes and 864 notifications. Dirty IDs differ from typed
+FDRV IDs; writes retain low16 bits, identical writes still notify, and reserved
+notification bits6..12 retain stack contents. External serialization is excluded.
+
+Next identify the incoming stream-selection/write caller and its host boundary,
 preserving masks and object lifetimes.
 Sample-wait/interrupt ownership and cadence remain open. These control passes add
 no DSP opcode coverage; new independently supported instruction contexts remain

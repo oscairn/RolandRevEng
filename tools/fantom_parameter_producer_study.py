@@ -109,11 +109,8 @@ class ProducerOracle(BufferOracle):
         store=bytearray(PARAM_STRIDE);store[0]=TYPE;store[1]=int(self.enabled)
         for raw,row in zip(self.raw_input,self.descriptors,strict=True):
             struct.pack_into('<H',store,row[3],raw&0xffff)
-        u.mem_write(PARAM_BASE+PARAM_STRIDE*(self.slot-1),bytes(store))
-        u.mem_write(NOTIFICATION,struct.pack('<BBH',0x21,0x84,self.slot-1))
-        self.notifications=[]
-        self._run(NOTIFY,registers=(NOTIFICATION,),mode='notify')
-        if self.notifications!=['signal8']or self._word(DIRTY+8)!=1<<(self.slot-1):
+        self._write_store_and_notify(PARAM_BASE+PARAM_STRIDE*(self.slot-1),bytes(store))
+        if not self.notifications or self._word(DIRTY+8)!=1<<(self.slot-1):
             raise ValueError('Original notification did not mark and signal the selected producer')
         self.events=[];self.queue_polls=0
         self._run(HANDLER,mode='fdrv')
@@ -121,6 +118,13 @@ class ProducerOracle(BufferOracle):
         if ([e[0]for e in self.events]!=wanted or self._word(INVOCATIONS)!=1
                 or self._word(ACTIVITY)!=0 or self._word(DIRTY+8)!=0 or self._word(DIRTY+12)!=0):
             raise ValueError('EFCT callback/producer event order or dirty-flag consumption differs')
+
+    def _write_store_and_notify(self,address,store):
+        self.cpu.mem_write(address,store)
+        self.cpu.mem_write(NOTIFICATION,struct.pack('<BBH',0x21,0x84,self.slot-1))
+        self.notifications=[]
+        self._run(NOTIFY,registers=(NOTIFICATION,),mode='notify')
+        if self.notifications!=['signal8']:raise ValueError('Unexpected original notification signal count')
 
     def _code(self,u,address,size,_):
         if self.mode=='notify'and address==0x011020c0:

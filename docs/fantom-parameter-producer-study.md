@@ -1,5 +1,10 @@
 # Fantom EFCT callback and stock FDRV parameter producer
 
+Follow-up: the [stream-store study](fantom-parameter-store-study.md) now runs
+original generic-ID writes and their finalizer before this producer, replacing
+the constructed notification. It distinguishes generic write IDs from FDRV's
+typed read IDs and checks truncation, dirty ranges and reserved stack bits.
+
 2026-11-11. A concrete registered **EFCT** callback now connects an internal
 change notification to FDRV's descriptor reader, 22-value snapshot, original
 buffer change detection and coefficient setter. This extends the

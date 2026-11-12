@@ -2306,3 +2306,54 @@ Runtime masks/exclusion, completion cadence, hardware precision/history,
 entry/return and safe loading remain separate requirements. No new DSP execution
 profile is added; the 18 profiles and 1,692-byte arithmetic chain are unchanged.
 No instrument was accessed or flashed.
+
+## Generic stream writes and original EFCT finalization (2026-11-11)
+
+Replaced the producer fixture's prepared final store and constructed notification
+with original CMUSE_PrmStmSF construction, scalar/block writes and finalization.
+Generic live1 stream IDs 599/59a share store offsets 14/16 with FDRV typed
+IDs b1e/b1f (2846/2847 decimal). Generic fields 597..5b6 are halfwords; block
+prefixes are IDs relative to stream base 587, not raw store byte offsets.
+
+The scalar base receives r0 object, r1 value, r2 ID. It stores low 16 bits without
+range validation or equality checking, and expands dirty minimum/maximum using
+the ID. The reader's later algorithm-specific validation remains distinct:
+65537 writes mode 1; 65539 writes raw mode 3 then reads default 2; cutoff 66536
+writes 1000; cutoff 65535 reads default 3740. Both writer forms match that pipeline.
+
+The original finalizer emits 21/84 even for an empty write transaction. A single
+dirty ID also emits 21/9f with that generic ID. Two repeated identical scalar
+writes produce two notifications but zero coefficient writes. Finalization does
+not reset dirty markers. Bits 6..12 of the part word retain prior stack contents;
+a 5a stack canary disproves the assumed-zero interpretation. Type-header writes
+request a separate transition path and are excluded, as is optional external
+serialization selected by the finalizer's second argument.
+
+All 576 selected scalar/block write-to-setter cases match 2,160 coefficient writes
+and 864 local notifications. Eight boundary cases verify wrapping/defaults. Store
+write guards permit only the requested parameter bytes; full part storage and
+dirty ranges match the independent model. Original local notifications reach the
+existing handler/EFCT/FDRV path. Hardware/OS/exception effects remain controlled
+as in the preceding checkpoint; real IRQ arrival, preemption, object lifetime,
+external commands and safe loading are not established.
+
+Qwen returned a no-tool review in 19.6 seconds. Truncation/no-value-validation
+observations were independently confirmed. Dirty-ID/value conflation, null-store
+versus descriptor interpretation, reserved-zero assumption, argument numbering
+and merged neighboring function claims were rejected. No worker code was accepted.
+Listings and detailed reports stay ignored/local.
+
+All 37 related store/producer/buffer/dispatch/mute/EqVg/task tests pass in 61.201
+seconds. Three new pure tests pass without corpus, with two skips. Syntax, diff
+and changed-document links are checked; the unchanged broader DSP/audio suite
+was not repeated. Markdown-only vault updates use hash guards, backups and atomic
+writes. The attention chime continues to fail with AudioQueueStart (-66680).
+
+This checkpoint updated four vault notes and verified all 80 current note hashes.
+
+Next trace block/finalizer veneers 01134574/0113457e and scalar/finalizer adapters
+61080abc/61080ac4 to an incoming stream owner/caller. The latter reads serialization
+flag 20081980; its runtime value/owner remain unproved. Host/CORE0 framing and the
+physical entry/return, precision/history/timing and safe loading gaps remain.
+No DSP profile was added: 18 exact profiles and 1,692-byte FDRV arithmetic remain
+unchanged. No instrument was accessed or flashed.
