@@ -463,3 +463,80 @@
   (static, extends this run's anchors), or take the still-open DSP5
   ctor-table item (bind 0x460..0x465 to the kernel study's DSP5 list
   operands).
+
+## Run 11 - 2026-11-13
+
+- **Item chosen:** lane A1 (load route), the first of the owner's
+  feasibility-ordered gaps: bind which stock code actually drives the
+  bmc0 CORE1 program-load route, whether any code reads program or
+  coefficient state back, and the exclusion flag's scope. Taken over an
+  unfinished, uncommitted pass found in this worktree (untracked note/tool/
+  test files, no log entry): this run verified every claim in that pass
+  against the pinned image, fixed four wrong addresses/attributions and a
+  duplicated anchor, added a whole-image negative check, and committed.
+  Static only, pinned `b0c1a.bin`, no keys/encryption/device access.
+- **Files added:** `docs/core1-load-route-callers-study.md`,
+  `tools/core1_load_route_study.py`,
+  `tests/test_core1_load_route_study.py`; tool JSON report sample in ignored
+  `local/core1-load-route-report.json` (main-checkout local).
+- **Verified** (tool exits 0, `ok: true`, 74/74 byte-exact anchors, SHA-256
+  `6d954...263154`; every address below re-checked by disassembly or census
+  this run): the boot verify routine `0x610010d0` is the image's only
+  end-to-end load-route user: reads state word `0x200800d8`, walks per-DSP
+  list slots (bound `cmp r4,#6; bls` at `0x6100111c`), resolves every
+  destination through `GetDspProgAdrs 0x112f92a` — zero direct BL callers;
+  its only image reference is veneer cell `0x61076a82` whose sole direct BL
+  caller is `0x61001194` — uploads through manager vtable byte 0x18
+  (`0x1135099` wrapper, `movs r2,#1` at `0x1135098`, quads byte-pinned at
+  `0x61176490..f0`), then readback-compares every written byte (halfword
+  edges from `0x610011ae`, word bulk `0x61001200..210`) against the stored
+  list, logging `"DSP%c VerifyProg() = "` (`0x610014f4`) + ` NG(%d)` through
+  the log helper `0x61015b76` (its `0x20091280` literal load pinned at
+  `0x61015caa`). Phase 2 repeats for DRAM-IO: object table `0x61085ddc`/
+  `0x61085de4`, veneer `0x61076a8c` → `GetDramIOProgAdrs 0x112fb75`
+  (DSP<6, 8-byte-aligned check verified in the body), vtable byte 0x1c at
+  `0x61001156`, `"DSP%c VerifyDrProg() = "` at `0x61001518`. The five
+  `SetExeMode 0x1130b6d` call sites `0x610016d8/e4/f0/fc/70c` all go through
+  veneer `0x61076aaa` (its only callers) — the boot routine is the stock
+  image's only execution-mode programmer. `GetExeMode 0x1130be6` is dead
+  (no BL, veneer or word reference anywhere). Strict virtual-call census:
+  13/9/6 sites through upload bytes 0x18/0x1c/0x20; outside the boot routine
+  they belong to a bounded set of 12 functions (table in the note; two
+  attributions corrected this run: `0x610836f8` sits inside `0x610835d0`,
+  `0x1129a04` inside `0x112999e`). Coefficient readback is event-driven:
+  the only virtual callers of vtable bytes 0x70/0x74 are the register-event
+  handlers `0x01131710`/`0x01131740` (regs `0x41100370/374`, ack-by-zeroing,
+  results to stats block `0x200a16b8`+0x70/74), reached only through ITCM
+  pointer-table words `0x01100194` (index 5), `0x01100244`, `0x01100248`.
+  Exclusion flag `0x2008480c`: all ten image-wide literal-pool occurrences
+  lie inside the manager writer region `0x1131dbc..0x113517c` (whole-image
+  byte scan), load pinned at `0x1131c96`, released at `0x1132ab2/b6`.
+  Corrections made to the inherited pass: (1) `StackFillDspProgNop`'s caller
+  `0x11324c2` sits inside the vtable byte-0x44 wrapper `0x01132473`, not
+  "slot 0x44 helper region"; (2) two enclosing-function attributions above;
+  (3) ERAM addresses normalized from a stray `0x0610…` prefix form to
+  `0x610…` in note, tool and tests; (4) a duplicated anchor
+  (`0x61001194`, listed both as boot-walk and veneer-caller anchor) removed,
+  count 75 → 74 everywhere.
+- **Tests:** with corpus: 10 passed (735.5 s,
+  `BMC_CORPUS_DIR=<main>/local python -m unittest discover -s tests -p
+  test_core1_load_route_study.py -v`); after the dedup edit the suite was
+  re-run (result in the run summary). Without the corpus: 3 model tests
+  pass, 7 pinned-image tests skip cleanly (0.0 s). Tool re-run after the
+  edit: exit 0, `ok true`, 74 anchors, no problems.
+- **Remains unknown:** what triggers the boot verify routine and when it
+  runs (no direct BL callers of `0x610010d0`; entry built at runtime or in
+  an unrecovered table, like bmc1's ASGN task in run 7); the semantics of
+  the unnamed ITCM walkers (`0x011021fc`, `0x011027b4`, `0x0110e400`) and
+  the effect-lifecycle upload callers (`0x61013aa0`, `0x6101ef2e`,
+  `0x6103050c`, `0x61034954`, `0x61034c52`, `0x610835d0`); whether the
+  verify compare loop's NG path ever fires (needs the unit); the
+  `0x41100370/374` event registers' meaning and the pointer-table
+  consumer; bmc1 mirrors none of this census.
+- **Best next item for run 12:** A1 continuation — trace the boot verify
+  routine's entry (who builds `0x610010d0` into a dispatch table) to bind
+  when the load route runs, or decode the DRAM-IO verify phase's aperture
+  tables (`0x0113a970`/`0x0113a988`) to bound what a resident loader's own
+  verify could reuse. Both are static. Alternative: A5 (wave memory and
+  interpolation) is the least mapped and most important for the first
+  sample-playback target, but is a bigger bite.
