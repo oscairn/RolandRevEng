@@ -111,3 +111,51 @@ context — bind `1c90`/`0d90`/`ded4`/`9450`/`d550`/`d554` effects to native
 cutpoints through both channel chains (native execution fixtures), or, if that
 exceeds one run, a native window over a `4b`/`5c` miscellaneous slot as an
 alternative discriminator.
+
+## Run 6 — 2026-11-13: GASSDLY 6209 6fe4 trap resolved to a proved shared ownership group
+
+Item chosen: the instruction-semantics trap the handoff and run 4 left standing —
+GASSDLY's `6209` packet (`6fe4 9450 ded4 8fe2`), whose `6fe4` low-six reference
+selects relative field `23c` while the native constructor representative for the
+1.414 value names relative `22b`. The handoff required proving the
+shared-representative/ownership-update group before any binding; this run proved
+it with the count-1/count-N descriptor machinery run 2 built.
+
+Files:
+
+* `tools/gassdly_62_trap.py` (new): pins the constructor pair (object+`b0`/`b8`
+  = relative `22b`, double `1.414`), proves no constructor pair names `23c`,
+  maps the `6fe4` and `75e5` low-six references to fields `23c`/`22b`, and
+  recovers the unique count-2 group `9dfa50` (`424b/22b`, `425c/23c`) written by
+  the single slot-`c8` call at `cbf98` inside `CFspMfxGASSDLY::SetDLY`.
+* `tests/test_gassdly_62_trap.py` (new): 7 tests — synthetic fail-closed checks
+  for the mov/movk immediate rebuild and low-six reference rejection, plus
+  corpus-pinned representative, trap, ownership and stored-bytes facts.
+* `docs/gassdly-62-trap-study.md` (new): the study note.
+
+Verified this run (commands and outputs in the transcript):
+
+* Tool exits 0: `PYTHONPATH=local/fantom-python:tools BMC_CORPUS_DIR="$PWD/local"
+  python tools/gassdly_62_trap.py local/zen_arm64` — representative
+  `(22b, 1.414)`, no second `23c` pair among 123, `6fe4` -> field `23c`
+  (1.4139995574951172), `75e5` (packet `5a09`) -> field `22b`, stored bytes equal
+  (`369fbe`), group `9dfa50` written at `cbf98` inside `cbe54..cc0d4` with
+  selection constants 0.1 / 1.4140000343322754 / 1.0.
+* `python -m unittest discover -s tests -p test_gassdly_62_trap.py`: 7 tests, OK.
+* Neighboring suites unchanged: `test_line_prefix_single_writer.py` 9 OK,
+  `test_short_add_context_study.py` 3 OK, `test_line_prefix_study.py` 4 OK,
+  `test_prefix_group_inventory.py` 3 OK, `test_header_family_crosscheck.py` 7 OK,
+  `test_emulator_target_study.py` 3 OK.
+
+Established: the `22b`/`23c` pair of program `4020` in GASSDLY is declared and
+written together by one checked grouped-write operation, always with one common
+value; the native read side binds the 1.414 double to field `22b` only. The
+handoff's precondition for a `6fe4`-consumes-`23c` binding is therefore satisfied
+for this pair. Unknown: actual DSP execution of `6fe4`, the fitted `62` family
+roles of `9450`/`ded4`/`8fe2`, runtime-built/raw writers, other builds. No opcode,
+family or interpreter admission.
+
+Best next item: with the ownership precondition met, the `5a`/`62` family proof
+can proceed — either prove the `ded4`/`9450`/`8fe2` roles of the `6209` packet
+statically against both channel chains, or attempt the native cutpoint binding of
+the GASSDLY/GASSPH/GAMPSIM `5d52` chains through the now-proved grouped fields.
