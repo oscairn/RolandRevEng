@@ -222,3 +222,68 @@ proof; the smallest remaining step is native — bind the GASSDLY/GASSPH/GAMPSIM
 through the now twice-corroborated field reading, using the existing
 `native_callback_fixture` style; if that exceeds one run, cross-check the
 `0x60`/`0x71` RVSDLY fields or a `4b`/`5c` miscellaneous slot instead.
+
+## Run 8 — 2026-11-13: RVSDLY 60/71 second pair corroborates the reference reading; run 7 aside corrected
+
+Item chosen: the instruction-semantics fallback run 7 left as next — cross-check
+the unexamined RVSDLY neighbor fields `0x60`/`0x71`, which hold the same doubles
+as `0x22b`/`0x23c`, against the same four-part proof shape (constructor pair,
+exact stored bytes, count-1 SetAlg ownership, unique strict-decoder control).
+The native `5d52` cutpoint binding remains the preferred next item and was left
+in place because it needs native-execution fixtures beyond one run.
+
+Files:
+
+* `tools/rvsdly_60_71_pair_crosscheck.py` (new): pins the double-copy field sets
+  `{0x60,0x22b}`/`{0x71,0x23c}`, both constructor pairs, the count-1 width-3
+  SetAlg groups `0xa438c0`/`0xa438a0` with their sole code references, the
+  skipped-oversized-window ADRP sweep, the SetAlg call arguments, the exactly-one
+  strict-decoder control per field, and the GASSDLY contrast (other values, no
+  constructor pair, no strict control). Zero decoder changes.
+* `tests/test_rvsdly_60_71_pair_crosscheck.py` (new): 10 tests — synthetic
+  fail-closed checks on the real packet-0x56/0x64 byte shapes, exact-value
+  stored-window matching, and corpus-pinned report, ownership, contrast,
+  run-7-unchanged and fail-closed constructor facts.
+* `docs/rvsdly-60-71-pair-crosscheck-study.md` (new): the study note.
+* `docs/rvsdly-22b-23c-crosscheck-study.md`: corrected run 7's untested aside —
+  `0x60`/`0x71` ARE selected by strict-decoder controls of their own; the
+  by-offsets-not-values discrimination point is unchanged.
+
+Verified this run (commands and outputs in the transcript):
+
+* Tool exits 0: `PYTHONPATH=local/fantom-python:tools BMC_CORPUS_DIR="$PWD/local"
+  python tools/rvsdly_60_71_pair_crosscheck.py local/zen_arm64` — stored
+  `0x60=2ff000`/`0x71=aff800`, double-copy sets exactly `{0x60,0x22b}`/
+  `{0x71,0x23c}`, constructor pairs object `0x1b0`/`0x1a0` with doubles
+  `0.99609375`/`-0.998046875` (44 pairs total), groups `0xa438c0`/`0xa438a0`
+  count 1 with sole references at SetAlg ADDs `0x2c268c`/`0x2c2670`, calls
+  `0x2c2694` (`d0, d10`) and `0x2c2678` (`d0, d9`), exactly one strict control
+  each (packet `0x56` `0x34e2` -> `0x60`; packet `0x64` `0xc24` -> `0x71`),
+  GASSDLY `0x60`=`3fe28f`/`0x71`=`080c64` with no constructor pair and no
+  strict control.
+* Fail-closed negatives (one-bit image mutations, hash re-patched so identity
+  does not pre-empt): stored triple bytes (`0x820e38+0x60/+0x71`), control
+  literal byte (packet `0x64`), group record bytes (`0x821808`, `0x8217fc`,
+  width byte included) and a SetAlg ADD immediate (`0x2c268c+3`) each raise
+  `ValueError`. The program byte space is word-reversed (`lib.be`), so naive
+  file-offset mutations were first off by three bytes and did not fire; corrected.
+* `python -m unittest discover -s tests -p test_rvsdly_60_71_pair_crosscheck.py`:
+  10 tests, OK (with `BMC_CORPUS_DIR` at the prepared corpus).
+* Neighboring suites unchanged: `test_rvsdly_22b_23c_crosscheck.py` 7 OK,
+  `test_gassdly_62_trap.py` 7 OK, `test_header_family_crosscheck.py` 7 OK,
+  `test_line_prefix_single_writer.py` 9 OK, `test_header_study.py` 9 OK.
+
+Established: the reference reading now holds for two independently owned,
+differently-valued field pairs in RVSDLY through both strict syntax forms, with
+exact constructor/stored/strict-control agreement in each, plus a cross-program
+contrast showing the pairing is program-local. Run 7's "neither field selected"
+aside is corrected with evidence. Unknown: DSP execution, why the program keeps
+two copies, other writer groups for `0x60`/`0x71` (widths 2/4, functions bounded
+but unnamed), arithmetic roles of `0x34e2`/`0xc24`, other builds. No opcode,
+family or interpreter admission.
+
+Best next item: unchanged from run 7 — the native `5d52` cutpoint binding
+(GASSDLY/GASSPH/GAMPSIM chains or the `6209` packet's `9450/ded4/8fe2` roles)
+through `native_callback_fixture`; it has now survived two structural
+cross-checks. If one run is still too small, the next static fallback is naming
+the writers of the other `0x60`/`0x71`/`0x22b`/`0x23c` declaring groups.

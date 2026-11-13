@@ -61,10 +61,12 @@ Established (every claim re-checked by the tool and pinned in
     (low-six `0x25` -> offset 5, width 3) selects absolute field `0x22b`, value
     `0.99609375`.
 * `0.99609375` also occurs at field `0x60` (same bytes `2ff000`), and
-  `-0.998046875` at field `0x71`; neither of those fields is selected by any
-  strict-decoder control, and field `0x60` is covered by other groups
+  `-0.998046875` at field `0x71`; field `0x60` is covered by other groups
   (`a52a08`, `a578e0`), so the discrimination rests on exact field offsets and
-  constructor pairs, not on values alone.
+  constructor pairs, not on values alone. (Correction, run 8: this note
+  originally added that neither field is selected by any strict-decoder
+  control; [run 8](rvsdly-60-71-pair-crosscheck-study.md) shows each is selected
+  by exactly one such control of its own.)
 
 ## What this establishes for the lane
 
