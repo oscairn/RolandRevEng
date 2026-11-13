@@ -1,11 +1,20 @@
 # CORE0 key search after live Linux root access
 
+**Later result: [B6 material recovered and both Fantom CORE0 payloads decrypted
+with matching CRCs](fantom-core0-key-recovery.md).** The earlier negative search
+and UART observations below are retained as history.
+
 2026-11-12. **No BMC CORE0 key recovered in this pass.** The Linux updater
 passphrase is independently verified in
 [the Linux updater study](fantom-linux-updater-decryption.md); it does not decrypt
 the BMC App1_Main container. This pass used live read-only inventory and offline
 analysis. No BMC command, GPIO change, raw bus/memory probe or firmware write
 was performed.
+
+Later same-day follow-up: the [CORE1 marker flash trial](fantom-core1-flash-trial.md)
+proved custom bmc0 CORE1 execution and a USB MIDI request/reply path on Jacob's
+Fantom-07. It did not read ROM or recover a key. The inventory/UART observations
+below describe the earlier read-only pass.
 
 ## Newly available artifacts
 

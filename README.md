@@ -18,6 +18,11 @@ general assembler, BMC hardware driver or BMC firmware flasher.
   the [instructions](tools/fantom_ssh/README.txt): **install Roland 1.08 first**;
   after board1 End, reboot normally and **do not move the drive to EXT DEVICE**.
 
+- Custom CORE1 ARM diagnostics now execute on the Fantom-07 with USB MIDI replies.
+  Bounded DMA reads recovered ROM table material that decrypts **both CORE0 images**
+  with matching plaintext CRCs. See [hardware results and reproduction](docs/fantom-core0-key-recovery.md).
+  Recovered material and decrypted vendor binaries remain local and are not distributed.
+
 - A strict packet interpreter and constrained emitter support **19 exact sequence
   profiles**, with original oscillator/filter voice examples.
 - The complete FDRV arithmetic reference matches the pinned native callback's

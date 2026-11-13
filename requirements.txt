@@ -3,3 +3,5 @@ capstone==5.0.7
 pyelftools==0.33
 # Optional selected-entry Fantom Thumb execution; no firmware startup or device access.
 unicorn==2.1.4
+# CORE0 offline decryption and CRC validation.
+pycryptodomex==3.23.0

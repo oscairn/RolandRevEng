@@ -1,0 +1,23 @@
+#!/bin/sh
+set -eu
+fail() { printf '\nOSCAIRN BMC CHECK FAILED: %s\nDO NOT MOVE THE DRIVE TO EXT DEVICE.\n' "$*" >&2; exit 1; }
+SOURCE=${1:?USB directory required}
+ROOT=/run/media/mmcblk2p2
+grep -qs " $ROOT " /proc/mounts || fail 'Fantom root partition is not mounted'
+test -f "$SOURCE/FNTM0_UPA.BIN" || fail 'Missing FNTM0_UPA.BIN'
+ACTUAL=$(sha256sum "$SOURCE/FNTM0_UPA.BIN") || fail 'Cannot read BMC payload'
+test "${ACTUAL%% *}" = '@UPA_SHA@' || fail 'BMC payload SHA256 mismatch'
+test ! -e "$SOURCE/_DATA_FNTM0" || fail 'Remove the old _DATA_FNTM0 from this drive'
+ACTUAL=$(sha256sum "$ROOT/home/root/mi078") || fail 'Cannot read Fantom application'
+test "${ACTUAL%% *}" = '@APP_SHA@' || fail 'Requires the verified Fantom-0 v1.08 application'
+test -x "$ROOT/home/root/bin/oscairn-dropbearmulti" || fail 'Persistent SSH binary is missing'
+ACTUAL=$(sha256sum "$ROOT/home/root/bin/oscairn-dropbearmulti") || fail 'Cannot read SSH binary'
+test "${ACTUAL%% *}" = '@DROPBEAR_SHA@' || fail 'Persistent SSH binary SHA256 mismatch'
+for FILE in home/root/.oscairn-ssh/authorized_keys home/root/.oscairn-ssh/host_ed25519 \
+    home/root/bin/oscairn-ssh-start.sh etc/systemd/system/oscairn-ssh@.service \
+    etc/udev/rules.d/90-oscairn-ssh.rules; do
+    test -s "$ROOT/$FILE" || fail "Persistent SSH file missing: $FILE"
+done
+printf '\nOSCAIRN BMC CHECK OK: @LABEL@\n'
+printf 'Linux, SSH keys and startup files were not changed.\n'
+printf 'After board1 End, move the drive to EXT DEVICE without powering off.\n\n'
