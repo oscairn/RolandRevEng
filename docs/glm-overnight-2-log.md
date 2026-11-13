@@ -540,3 +540,75 @@
   verify could reuse. Both are static. Alternative: A5 (wave memory and
   interpolation) is the least mapped and most important for the first
   sample-playback target, but is a bigger bite.
+
+## Run 12 — 2026-11-13
+
+- **Item chosen:** lane A1 continuation, the item run 11 queued first: trace
+  the boot verify routine's entry (who reaches `0x610010d0`) to bind when the
+  load route runs. Took it because run 11 proved the verify routine is the
+  image's only end-to-end load-route user but found no direct caller, so the
+  "when does it run" question was the last open A1 edge this chain could
+  close statically. Static only, pinned `b0c1a.bin`, no keys/encryption/
+  device access.
+- **Files added:** `docs/core1-boot-entry-chain-study.md`,
+  `tools/core1_boot_entry_study.py`,
+  `tests/test_core1_boot_entry_study.py`.
+- **Verified** (84/84 byte-exact anchors, tool exits 0, `ok: true`, SHA-256
+  `6d954…263154`; full JSON output and the key disassembly are pasted into
+  the note per the owner's evidence rule): the chain has no dispatch table —
+  reset vector `0x1100004` = `0x01100e55` → reset entry zeroes registers,
+  configures SCB AIRCR (`0xe000ed0c`, `0xf8ff` mask) at `0x01100e2a..e40`,
+  calls `__rt_entry 0x1100ee9` (CPACR `0xe000ed88` |= 0xf00000) and
+  `0x1102ceb`, `bx`es into ERAM `0x61000001`, and the reset wrapper
+  `0x01100e2a..e48` (reached from `0x011004de`, SP literal `0x1148000` at
+  `0x011004e8`) then `bl 0x1102986` — the boot task, which has exactly ONE
+  caller image-wide (`0x01100e42`; no veneer, no word refs). The boot task
+  divides `0x200800d8` by 1000 (ms uptime), configures/enables SysTick
+  (`0xe000e00f`; LOAD `cmp.w r1,#0x1000000`; prio `0xf8`; CTRL 7), logs
+  `CORE1 Version/Build` via `0x1134380`/`0x20091280`, arms NVIC IRQ4
+  (`strb.w r0,[r1,#0x400]`, r0=0x10, r1=0xe000e006, at `0x01102a2a`), calls
+  IO init `0x1101a1a`, then calls the verify routine at `0x01102a3a` through
+  veneer cell `0x0113439e` (`movw ip,#0x10d1; movt ip,#0x6100; bx ip` →
+  `0x610010d1`) — that BL is the veneer cell's only caller, so the boot task
+  is provably the verify routine's only driver. After verify: calls
+  `0x61001443` (veneer `0x11343a8` → `push {r4,lr}` at `0x61001442`, no
+  other callers), then `wfi`-gates 20 ticks on the counter (`adds
+  r0,#0x14`) and later 19 ticks (`adds r0,#0x13`). Resolution of run 11's
+  open question: `0x200800d8` is the SysTick tick counter — the handler at
+  vector `0x110003c` (Thumb `0x0110292d`, body `0x0110292c`) increments it
+  and runs timer poll `0x110284c` + clock gate `0x110336a`; the SysTick
+  exception vector `0x1100058` (Thumb `0x01102945`) is a distinct idle
+  worker (`0x111f246`, ICSR write). The router-reached path (run 5's byte-1
+  `0xFE` at `0x0111ea7c` → `bl 0x1102970`, the scheduler wrapper's only
+  caller) also re-enters the SAME boot task (wrapper tail
+  `bl 0x1102986`/`b.w 0x110efba` at `0x01102976..82`), so `0xFE` re-runs the
+  full load/verify/mode-arming sequence; those are the boot task's only two
+  entry paths. Note addresses cross-checked per the owner's rule: all 74
+  cited addresses are byte-pinned in this run's 84 anchors, run 11's
+  committed anchors, pinned literal words (SP `0x1148000`, the four NVIC/
+  SCB literals) or recorded string bytes (`CORE1 Version…`, `%08d: CORE I/O
+  Init`); none needed correcting — no earlier-note corrections this run.
+- **Tests:** with corpus: 8 passed (5.1 s, `BMC_CORPUS_DIR=<main>/local
+  …/.venv/bin/python -m unittest discover -s tests -p
+  test_core1_boot_entry_study.py -v`); without corpus 3 pass, 5 skip cleanly
+  (pinned-image guard). Tool run: exit 0, `ok: true`, 84 anchors, no
+  problems. Sibling suites re-run before commit: run-11
+  `test_core1_load_route_study.py` 10 passed (678.5 s), `test_core1_b1_route_study.py`
+  13 passed, `test_core1_ef_319_consumers_study.py` 8 passed,
+  `test_bmc_ipc.py` 4 passed.
+- **Remains unknown:** what peripheral raises NVIC interrupt 4 (armed at
+  `0x01102a2a`; handler table entry not traced to a device); the bodies of
+  the scheduler wrapper's callees (`0x61070295` is `bx lr` at its pinned
+  entry; `0x110bdc4`, `0x110c686`, `0x110efba`, `0x61001442`) — call
+  structure verified, semantics inferred; whether a `0xFE` command's second
+  full boot-task pass is safe in practice (timers/ISR state assumptions
+  unverified); the producer side of the `0xFE` command (still the missing
+  peer edge); bmc1 mirrors none of this chain.
+- **Best next item for run 13:** decode the DRAM-IO verify phase's aperture
+  tables (`0x0113a970`/`0x0113a988`, run 11) to bound what a resident
+  loader's own verify could reuse, or take A2 (program reservations): the
+  boot walk's per-DSP bound `cmp r4,#6` gives 7 list slots per DSP —
+  cross-check against the stock lists the boot task uploads to say which
+  slots are occupied in the stock image. Both are static. Alternative: A5
+  (wave memory and interpolation) remains the least mapped and most
+  important for the first sample-playback target, but is a bigger bite.
