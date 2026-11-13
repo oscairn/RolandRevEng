@@ -123,3 +123,50 @@
   0xEF on the BMC side (run 1's still-open pointer), or, if the peer evidence
   is too thin, trace the 0x7de/0x7e/0x7f 0x840-gate caller families to identify
   the meter surfaces and bind bytes 92..95/108..111 to named UI fields.
+
+## Run 4 — 2026-11-13
+
+- **Item chosen:** host-to-CORE1 bridge lane. Run 3's log pointed at the 0xEF
+  responder; took the host half of that question because it reuses this
+  series' proved scanner machinery against the pinned `mi078` and the saved
+  strace captures, and closes with a verifiable negative (no host receive
+  path tests a frame source of 0xEF) rather than depending on the missing
+  ttyGS0 peer. Static only; no keys, encryption or device access.
+- **Files added:** `docs/host-ef-settings-study.md`,
+  `tools/host_ef_study.py`, `tests/test_host_ef_study.py`. Full census JSON
+  in ignored `local/host-ef-report.json` (main-checkout local; this worktree
+  has no corpus).
+- **Verified:** all 391 direct `00be4270` route calls carry the route
+  immediate in w0; 46 go to 0xEF across 25 functions. Exactly two
+  functions construct both the kind-7 parameter block and its kind-8
+  companion (`0xc01ec0`, `0xc02010`); `0xc170a0` sends a kind-9 selector-0x0E
+  service envelope to 0xEF. Capture cross-check: slider trace = 388 kind-7
+  selector-0x0E blocks + 388 kind-8 companions to 0xEF (byte-exact,
+  companion pairing holds with unrelated frames interleaved between the two
+  writes in 10 cases); Local Switch trace = 37 selector-1/parameter-cf pairs;
+  every written frame has byte 1 = 0x00. The `cmp #0xe1/#0xe2/#0xef`
+  census (8/6/8 sites) classifies every site; the only received-source-byte
+  checks are the three 0xE1 reply handlers (`0xbe9fdc`, `0xc0f610`,
+  `0xc0fe58`, all `ldrb w0,[sp,#0x29]`) and the version client's 0xE1/0xE2
+  destination checks; **no site anywhere compares against 0xEF**, and no
+  capture ever read a frame sourced 0xEF or 0xE2. So a 0xEF reply would
+  match no recovered host receiver — settings traffic is fire-and-forget at
+  the application layer (inferred from the negative).
+- **Tests:** `BMC_CORPUS_DIR=<main>/local python -m unittest discover -s
+  tests -p test_host_ef_study.py -v` → 8 passed (67.3 s); without the corpus
+  7 skip cleanly, 1 pure parser test still runs. Existing
+  `test_bmc_ipc.py` (4), `test_host_byte1_study.py` (4, 38.0 s) and
+  `test_host_status9*.py` (11, 60.8 s) all still pass.
+- **Remains unknown:** which BMC/CORE service answers 0xEF on the wire (the
+  peer side; unchanged missing edge); what the BMC does with kind-7 blocks
+  selector 0x0E/0x01 (parameter 0x07 in block 0x0E still unbound); whether a
+  0xEF-sourced reply would be silently dropped or hit an unrecovered input
+ -worker path; meaning of kind-8 companion payload bytes 2..5; the two
+  senders' UI surfaces (the functions exist, the menu items behind them are
+  not bound).
+- **Best next item for run 5:** the BMC-side half: search bmc0 CORE1
+  (`b0c1a.bin`) for consumers of 0xEF-addressed work (the first router's
+  non-zero byte-1 routes and the service startup MMIO note are the entry
+  points), or, if the peer evidence stays thin, take the kernel-ABI item
+  run 3 flagged: locate which context owns the `2016..2019` routing writes
+  against `fantom-audio-link-measurements.md` (section 3, not section 2).
