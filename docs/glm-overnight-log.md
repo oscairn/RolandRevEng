@@ -305,10 +305,10 @@ Files:
   the three cross-model QSPI containers via the existing `analyze.core_lists()`/
   `qspi_c1.read_c1()` framing; four known control shapes, unknown shapes fatal;
   GASS-type per-packet invariants (gain 1.75, bias -0.25, resource offsets 4/6).
-* `tests/test_five_e09_inventory.py` (new): 8 tests — synthetic fail-closed
+* `tests/test_five_e09_inventory.py` (new): 9 tests — synthetic fail-closed
   shape/framing/literal checks plus corpus-pinned totals, per-image counts,
   b0c1a stride `0x5f0`, dsp6 diagnostic payload/offset floor and byte-exact
-  GASS anchor payload.
+  GASS anchor payload (count corrected from 8 by the run 12 review).
 * `docs/five-e09-inventory-study.md` (new): the study note, with a run-10
   verification transcript pasted verbatim (owner direction of 2026-11-13).
 
@@ -345,10 +345,12 @@ Verified this run (commands and outputs in the transcript):
 * Fail-closed mutation check: single-bit flips at the stored gain/bias literal
   bytes (`0x817988+0x290/0x291/0x297`) each raise
   `ValueError: 0x288: gain/bias literal ... is not ...`.
-* `python -m unittest discover -s tests -p test_five_e09_inventory.py`: 8
-  tests, OK (with `BMC_CORPUS_DIR` at the prepared corpus). Neighboring suites
-  unchanged: `test_header_family_crosscheck.py` 7 OK, `test_header_study.py`
-  9 OK.
+* `python -m unittest discover -s tests -p test_five_e09_inventory.py`: 9
+  tests, OK (with `BMC_CORPUS_DIR` at the prepared corpus; count corrected
+  from the originally recorded 8 by the run 12 review — the committed file
+  had 9 `test_` methods from the start, and run 11's log already recorded
+  "test_five_e09_inventory.py 9 OK"). Neighboring suites unchanged:
+  `test_header_family_crosscheck.py` 7 OK, `test_header_study.py` 9 OK.
 
 Established: complete `5e09` coverage across six images (117 packets, four
 shapes, no unknown combination); the GASS-type invariants per packet and image;
@@ -443,3 +445,75 @@ through `native_callback_fixture`, now with this run's positional evidence in
 hand; if native execution exceeds one run again, the next static fallback is
 profiling the `b9b3`-class controls' co-occurrence contexts to bound what the
 fitted miscellaneous slot can be doing.
+## Run 12 — 2026-11-13: review pass; three most recent notes re-verified, run 10 log test count corrected
+
+Item chosen: item C, the every-fourth-run review pass. The three most recent
+study notes on this branch are `docs/four-b-five-c-slot-crosscheck-study.md`
+(run 11), `docs/five-e09-inventory-study.md` (run 10) and
+`docs/rvsdly-60-71-pair-crosscheck-study.md` (run 8). Every stated command in
+each note was re-run in this worktree with the pinned interpreter
+`/Users/jacob/Projects/Open Synth Platform/bmc-research/.venv/bin/python`, and
+every address/offset in each note was re-checked against the tools' fresh JSON
+and the tests' anchors. No note's analytical content changed; one earlier log
+entry's test count was corrected.
+
+Verified this run (all commands and outputs in the transcript):
+
+* Run 11 tool re-run:
+  `BMC_CORPUS_DIR="$PWD/local" PYTHONPATH=local/fantom-python:tools python
+  tools/four_b_five_c_crosscheck.py` — exit 0; the fresh JSON's `totals`
+  match the note's pasted block field for field (38,441 fitted / 27,138
+  decoded / 11,303 unsupported / 276 `5a` / 306 `62` / 28 slot-0-trap /
+  2,257 `4b5c` = 1,520 + 737 / calibration 43,939 with 7,579 window, all
+  class `0c`), and the per-image `4b`/`5c` counts 152, 316, 61, 801, 117,
+  810 match the note's prose. `python -c` field-by-field comparison against
+  `local/four-b-five-c-run11.json`: 0 differing fields.
+* Run 10 tool re-run: `python tools/five_e09_inventory.py` — exit 0; fresh
+  JSON identical to `local/five-e09-inventory.json` (0 differing fields):
+  totals 117 `5e09` / 2,535 framed / 135 unframeable / shapes 28/56/28/5 /
+  26 distinct GASS pairs; per-image shapes match the note's table (zen 8 =
+  2/4/2/0, b0c1a 17 = 4/8/4/1, b1c1a 1 = 0/0/0/1, MI077 45 = 11/22/11/1,
+  RPG69 1, DD013 45); the five dsp6 diagnostic offsets `0x1964/0x1776/0x16e0/
+  0x1324/0x1788` re-read from the fresh JSON equal the note's record.
+* Run 8 tool re-run:
+  `python tools/rvsdly_60_71_pair_crosscheck.py local/zen_arm64` — exit 0;
+  every address in the note matches the fresh JSON: stored
+  `0x60=2ff000`/`0x71=aff800`, double-copy sets `{0x60,0x22b}`/`{0x71,0x23c}`,
+  constructor pairs object `0x1b0`/`0x1a0` with doubles `0.99609375`/
+  `-0.998046875` at `+0x1b8`/`+0x1a8`, groups `0xa438c0`/`0xa438a0` count 1
+  with records `0x4080`/`0x4091`, SetAlg ADDs `0x2c268c`/`0x2c2670`, calls
+  `0x2c2694` (`d0, d10`)/`0x2c2678` (`d0, d9`), peer groups `0xa43860`/
+  `0xa43840` at calls `0x2c2640`/`0x2c2620`, strict controls packet `0x56`
+  header `0x2e07` `0x34e2` and packet `0x64` header `0x1408` `0xc24`, and
+  the GASSDLY contrast `3fe28f`/`080c64`. `header_study.families(0x2e07)` =
+  `(1,1,4)` and `families(0x1408)` = `(0,4)` re-confirmed directly.
+* All six image hashes re-hashed with `shasum -a 256`; all equal the run 11
+  note's pinned values (zen `b8ba7…c30`, b0c1a `6d954…3154`, b1c1a
+  `c8d150…68bd`, MI077 `9368e…567b`, RPG69 `6de1e…2a21`, DD013
+  `57466…cadf`).
+* Suites re-run (`BMC_CORPUS_DIR="$PWD/local"
+  PYTHONPATH=local/fantom-python:tools:tests python -m unittest discover -s
+  tests -p <name>`): `test_four_b_five_c_crosscheck.py` 13 tests OK,
+  `test_five_e09_inventory.py` 9 tests OK, `test_rvsdly_60_71_pair_crosscheck.py`
+  10 tests OK, `test_rvsdly_22b_23c_crosscheck.py` 7 tests OK,
+  `test_gassdly_62_trap.py` 7 tests OK, `test_header_family_crosscheck.py`
+  7 tests OK, `test_header_study.py` 9 tests OK.
+* One correction made: run 10's log entry said its new suite had "8 tests";
+  the committed `tests/test_five_e09_inventory.py` has contained 9 `test_`
+  methods since commit `496cb5c`, and this run's fresh execution ran 9. Run
+  11's log entry already recorded "test_five_e09_inventory.py 9 OK", so the
+  8 was a transcription slip in run 10's log text only; both log lines now say
+  9. No study note needed a change: no address, offset, count or hash in the
+  three notes failed re-verification.
+
+Remaining unknown: unchanged — nothing in this pass produces new semantic
+evidence; the review's job was to confirm that existing evidence still
+reproduces from the committed tools and pinned corpus. The one process note
+from the run: the RVSDLY suites fail with import errors when `tests` is
+omitted from `PYTHONPATH`; the notes' reproduce blocks already include it.
+
+Best next item: unchanged from runs 8/10/11 — the native `5d52` cutpoint
+binding (GASSDLY/GASSPH/GAMPSIM chains or the `6209` packet's `9450/ded4/8fe2`
+roles) through `native_callback_fixture`; if native execution exceeds one run,
+the next static fallback is profiling the `b9b3`-class controls' co-occurrence
+contexts to bound what the fitted miscellaneous slot can be doing.
