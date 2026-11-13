@@ -9,7 +9,7 @@ remote commands and a PTY (`/dev/pts/1`). No flash was performed for this test.
 
 ## Working hardware/runtime
 
-* Fantom: `192.168.0.100`; Mac: `192.168.0.200`.
+* Fantom: `<keyboard-ip>`; Mac: `<computer-ip>` (same LAN, DHCP).
 * USB MEMORY → hub → RTL8153 Ethernet adapter (`0bda:8153`) and USB keyboard.
 * USB Ethernet is eth1, driver r8152; DHCP worked automatically. Both connmand
   and systemd-networkd are running. Do not launch a competing DHCP client.
@@ -59,7 +59,7 @@ From the project directory on the Mac:
 ```sh
 ssh -p 2222 -i bmc-research/local/fantom-ssh/client_ed25519 \
   -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
-  -o UserKnownHostsFile=bmc-research/local/fantom-ssh/known_hosts root@192.168.0.100
+  -o UserKnownHostsFile=bmc-research/local/fantom-ssh/known_hosts root@<keyboard-ip>
 ```
 
 ## Next agent: create the update package

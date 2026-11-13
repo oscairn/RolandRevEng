@@ -1,11 +1,20 @@
 # Persistent SSH-only Fantom-0 installer
 
-2026-11-12. Persistent key-only root SSH is installed on Jacob's Fantom-07 and
+2026-11-12. Persistent key-only root SSH was installed on a test FANTOM-07 and
 **verified after reboot**, including reuse of its pinned host key. This replaces
 the temporary /run-only server. Installation through the actual USB MEMORY/board1
 recovery screen is now verified: the saved recovery log contains INSTALL OK and
 root SSH returned after normal boot. The isolated recovery filesystem test and
 live GnuPG 1.4.7 decryption/installation checks also passed.
+
+**Risk.** Use this at your own risk. It modifies the instrument's system, and it
+was tested on one FANTOM-07 only; the FANTOM-06 and FANTOM-08 are untested. No
+removal procedure is documented yet.
+
+**Requirements.** System version 1.08, a USB flash drive, and a USB Ethernet
+adapter. The only adapter verified is the Realtek RTL8153; other adapters are
+untested. Generate an Ed25519 key on your computer; the README covers key
+generation, drive preparation, installation, connecting and reinstalling.
 
 Download the [key-free installer ZIP](../packages/fantom-07-persistent-ssh-update.zip).
 User instructions are in the package's [README.txt](../tools/fantom_ssh/README.txt).
@@ -59,13 +68,22 @@ Dropbear runs in the foreground under systemd, bound to that interface on port
 2222, with passwords and forwarding disabled. DHCP remains managed by existing
 ConnMan/systemd-networkd. No ttyGS or GPIO configuration is touched.
 
-For Jacob's existing key, from the repository directory:
+To connect, with your private key and the keyboard's address (see your router's
+DHCP leases):
 
 ```sh
-ssh -p 2222 -i local/fantom-ssh/client_ed25519 \
+ssh -p 2222 -i ~/.ssh/id_ed25519 \
   -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
-  -o UserKnownHostsFile=local/fantom-ssh/persistent_known_hosts root@192.168.0.100
+  -o UserKnownHostsFile=<known-hosts-file> root@<keyboard-ip>
 ```
+
+`<known-hosts-file>` holds the keyboard's pinned host key. Verify the fingerprint
+on the first connection as described in the README before pinning it.
+
+## Removal
+
+No removal procedure is documented yet. Stock-update removal/rollback has not
+been tested.
 
 This is USB Ethernet/LAN SSH, not USB TO COMPUTER serial access. The adapter
 used in hardware testing is the RTL8153 on eth1. Interface/IP names are not
@@ -107,7 +125,7 @@ Live testing: root login and a PTY worked before reboot. After reboot, the same
 pinned host key authenticated, systemd reported the USB service active, and the
 temporary /run bootstrap directory was absent. No new bootstrap command was sent
 after reboot. Physical USB hot-unplug/replug and stock-update removal/rollback
-have not been separately tested. The user reconnected USB Ethernet after normal
+have not been separately tested. The tester reconnected USB Ethernet after normal
 startup following the physical installation, and automatic SSH access worked.
 Unrelated BMC research remains deferred for this priority.
 
