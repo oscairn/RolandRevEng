@@ -612,3 +612,81 @@
   slots are occupied in the stock image. Both are static. Alternative: A5
   (wave memory and interpolation) remains the least mapped and most
   important for the first sample-playback target, but is a bigger bite.
+
+## Run 13 — 2026-11-13
+
+- **Item chosen:** lane A1 continuation, the item run 12 queued first:
+  decode the DRAM-IO verify phase's aperture tables (`0x0113a970`/
+  `0x0113a988`) to bound what a resident loader's own verify could reuse.
+  Static only, pinned `b0c1a.bin`, no keys/encryption/device access.
+- **Files added:** `docs/core1-dramio-apertures-study.md`,
+  `tools/core1_dramio_apertures_study.py`,
+  `tests/test_core1_dramio_apertures_study.py`; full tool JSON in ignored
+  `local/dramio-apertures-report.json` (worktree local/). The tool/test
+  files were found as an untracked leftover from a previous unfinished
+  pass in this worktree; this run verified every claim in them against
+  the pinned image, fixed four bugs (below) and committed.
+- **Verified** (tool exits 0, `ok: true`, 26/26 byte-exact anchors, SHA-256
+  `6d954…263154`; real JSON and key disassembly pasted into the note): the
+  two "tables" are one contiguous 24-word array at `0x0113a970` with the
+  closed form `0x41440000 + b*0x40000 + d*0x100000` (bank b 0..3, DSP d
+  0..5), all 24 words checked. `GetDramIOProgAdrs 0x0112fb75` requires
+  dsp<6 and 8-byte alignment and selects the array's two halves with r2.
+  Bank consumers (whole-image literal-pool census with pool-value check):
+  upload/read paths use banks 0/1 (`StackWriteDramIOProg`, `ReadDramIOProg`,
+  `StackFillDramIOProgNop`, `GetDramIOProgAdrs`); banks 3/2 are consumed
+  only by `SetDramIOMuteCounter`/`GetDramIOMuteCounter` (counter at
+  `4+(counter>>3)*8`, bits 19..0). Four 7-word per-DSP literal port tables
+  follow (`0x4110{2..9}310/318/300/200` plus raw `0x4110{2..9}400`,
+  sixth entry = MDSP). Boot verify phase 2 dispatch: TBB `0x61001128`
+  sends DSP0→`0x61085dcc` (tag 0x10001), DSP2→`0x61085ddc` (tag 0x10201),
+  MDSP (r4=6)→SRAM pointer `0x20084bb4`, DSP1/3/4/5 to the shared skip
+  `0x61001158`; upload via manager vtable byte 0x1c; each object is
+  (tag:u32, count:u8@+2, list:u32@+4) with exactly one 16-byte record
+  `[word0, len, len, first_source_word]`, and both stock DRAM-IO payloads
+  are 16-byte stubs `ffff 7f80 0000 0000` ×2 (`0x807fffff`/`0x00000000`
+  pairs) — the stock image boots no real DRAM-IO program. Phase-2
+  readback compares against bank 0 (`movs r2,#0` at `0x610012a6`). Phase-1
+  TBB `0x610010e2` decoded to targets {0:0x610010ee, 2:0x610010f2,
+  6:0x610010f6, else 0x6100111a}, matching the three program-list objects
+  `0x61085dc4`/`0x61085dd4`/`0x61085de4` (lengths 0x13e4/0xce6/0xc956,
+  i.e. run 11's program lists) — both TBB decodes cross-checked by
+  Unicorn single-step, which exposed the static decoder's missing ×2
+  halfword scale and unaligned `insn+4` table base.
+  `CopyDramIOProgPage 0x0112fdc0` contract pinned: dsp<6, offset/span
+  1 KiB-granular, span ≤ 0x3000, per-page command pair through the
+  `0x113aa08` port table with bit 16 set, per-page busy-wait on
+  `[port[2]+8]` bit 31; sibling `SetDramIOProgPage 0x0112fe9e` writes
+  `value|0x80000000` into the `0x113aa24` table at `(offset>>10)*4` —
+  the reusable port-protocol shape for a loader's own DRAM-IO transfers.
+- **Fixes to the inherited uncommitted pass:** (1) the static TBB decoder
+  used `(insn+4)&~3` and byte-scale; TBB here needs the unaligned `insn+4`
+  base and ×2 halfword scale (Unicorn-verified); (2) `pc_relative_loads`
+  compared literal-pool slot ADDRESSES against targets instead of the slot
+  VALUES, so the user census came back empty; also its ERAM region bound
+  mixed file offsets with address space (struct.error overread); (3)
+  results are now keyed by table NAME (the old dict comprehension expected
+  names but the function keyed by values, silently emptying every list);
+  (4) `object_records` read `field_0xc`/`source` past the 16-byte record
+  into the next record; records are 4×u32.
+- **Tests:** with corpus: 9 passed (0.2 s, `BMC_CORPUS_DIR=<main>/local
+  …/.venv/bin/python -m unittest discover -s tests -p
+  test_core1_dramio_apertures_study.py -v`); without corpus 3 pass, the
+  pinned-image class skips cleanly. Tool re-run with `--json` (Unicorn
+  on): exit 0, unicorn tables equal static decode. Siblings re-run:
+  `test_core1_load_route_study.py` 10 passed (227.0 s),
+  `test_core1_boot_entry_study.py` 8 passed (3.3 s), `test_bmc_ipc.py`
+  4 passed.
+- **Remains unknown:** what physical DRAM-IO region each `0x41440000`-
+  based aperture maps to and how the DMA consumes `GetDramIOProgAdrs`
+  results; what the stub words `0x807fffff`/`0x00000000` mean to the
+  hardware; the `0x4110..400` raw region's semantics (users pinned at
+  `0x112ff82`/`0x1130032`, bodies not analyzed); whether any runtime
+  path ever writes a non-stub DRAM-IO program; bmc1 mirrors none of this.
+- **Best next item for run 14:** A2 (program reservations) — this run
+  pinned the occupied stock phase-1 objects (one program each on DSP0/
+  DSP2/MDSP); the next step is a census of all seven per-DSP list-slot
+  objects to say which slots are free in the stock image, bounding where a
+  foreign program can load without disturbing stock state. Static.
+  Alternative: A5 (wave memory and interpolation), least mapped and most
+  important for the first sample-playback target, but a bigger bite.
