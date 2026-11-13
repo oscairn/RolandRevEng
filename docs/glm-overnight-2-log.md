@@ -360,3 +360,50 @@
   `ff70/ff71` mute state — or, if that stalls, reconstruct the DSP5 routing
   ctor tables (`0x34c0f8`) to bind `0x460..0x465` to the kernel study's DSP5
   list operands. Both are static, native-side, and reuse this run's tool.
+
+## Run 9 - 2026-11-13
+
+- **Item chosen:** kernel/audio ABI lane, the item run 8's log queued as
+  next: trace the writers of the gate floats (structure+0x678/+0x628) to name
+  the stock mute/enable controls that gate the routing dispatch (the
+  ctor-table alternative touches the 428-byte DSP5 ctor ladder run 3 flagged
+  as stalled).
+- **Files added:** `docs/routing-gate-writers-study.md`,
+  `tools/routing_gate_writers_study.py`,
+  `tests/test_routing_gate_writers_study.py`.
+- **Verified** (pinned image `zen_arm64`, SHA-256 `b8ba7f41...b8a2c30`, same
+  as run 8): both gate floats are written exactly once, at construction time,
+  by the per-core initializers as value slots of 0x50-stride tail records
+  (32-bit record key 8 bytes below the 64-bit value). DSP4 initializer
+  0x42e14: enable +0x628=1.0 at 0x432b8 with key 0x0000, bypass +0x678=0.0
+  at 0x43304 with key 0x07c4. DSP5 initializer 0x34d690: +0x628=1.0 at
+  0x34db9c with key 0x4fce, +0x678=0.0 at 0x34dbd8 with key 0x4d02. After
+  construction the run 8 dispatch gate reads 1.0/0.0 (effects enabled, no
+  bypass). The manager write path is byte-checked end to end:
+  `CSimDspMgr::WriteDspCoefFloat` 0xfba10 -> `CSimDSP4Routing` vtable slot 4
+  = 0x41334 (0xce-entry 16-byte record scan over `[x0+0x38]`, returns
+  entry+8) and slot 5 = 0x41380 (0x1ba-entry 8-byte key scan over
+  `[x0+0x38]+0xce0`); both helpers resolve coefficient keys into the same
+  record storage the initializer wrote, so the coefficient transfer path can
+  rewrite the gate records at runtime. DSP5 control analog: VSubProc 0x34c244
+  loads the manager through global 0x9c8480 and reads both gate records
+  through it per pass (0x34c2b8), with no hard-coded [x0+0x678] bypass branch
+  in its prologue. The tool pins 102 byte-exact anchors (run 8 chain plus
+  initializer tails and helper bodies) and decodes every `str` in both
+  initializer bodies (capstone), asserting the single-writer property.
+- **Tests:** with corpus: 5 passed (0.27 s, `BMC_CORPUS_DIR=<main>/local
+  python -m unittest discover -s tests -p test_routing_gate_writers_study.py
+  -v`); without corpus 2 pass, 3 skip cleanly. Tool run exits 0 with
+  `"ok": true`. Siblings: run 8 routing suite 9 passed, `test_core1_*.py` 57
+  (1 skipped), `test_bmc_ipc.py` 4, transfer study 6 (1 skipped).
+- **Remains unknown:** whether the stock application ever flips bypass
+  (+0x678) nonzero through WriteDspCoefFloat at runtime (needs a caller
+  census of 0xfba10 or runtime capture); the full key space of the
+  0x50-stride tail records (only the two gate keys per core decoded); the
+  loader of global 0x9c8480 (image-rest 0, filled at load); the DSP5 VSubProc
+  asymmetry is inferred from the prologue only, not the full body.
+- **Best next item for run 10:** census callers of
+  `CSimDspMgr::WriteDspCoefFloat` 0xfba10 and classify which record keys they
+  write (purely static; answers whether the application can flip the bypass
+  gate at runtime), or the still-open DSP5 ctor-table item (reconstruct the
+  0x34c0f8 tables to bind 0x460/0x465).
