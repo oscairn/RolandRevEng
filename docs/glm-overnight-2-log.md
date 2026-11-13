@@ -309,3 +309,54 @@
   not section 2), or, if that stalls, cross-check the parser's producer
   requirements against `core1-transmit-and-backpressure-study.md` to bound
   what a resident loader must format into the second ring.
+
+## Run 8 — 2026-11-13
+
+- **Item chosen:** kernel/audio ABI lane, the section-3 item runs 3/5/6/7
+  flagged four times and no run had taken: locate which context owns the
+  `2016..2019` routing writes against `fantom-audio-link-measurements.md`.
+  Took it because the native image gives a concrete, fully static handle —
+  the exported `CSimDSP4Routing::VSubProc` — and the queue explicitly
+  forbids labelling `2016..2019` physical TDM channels without evidence, so
+  naming the writer and its call condition closes a named gap. No keys,
+  encryption or device access.
+- **Files added:** `docs/routing-2016-owner-study.md`,
+  `tools/routing_2016_owner_study.py`,
+  `tests/test_routing_2016_owner_study.py`.
+- **Verified (65/65 byte-exact anchors in pinned `zen_arm64`, SHA-256
+  `b8ba7…c30`, via `tools/routing_2016_owner_study.py`):** the owner chain is
+  `CEfctPrm::EfctLoadFixedAlg` (`0x165fd8`) → `CSimDSP4_Core::Init`
+  (`0x16bc68`) → routing ctor `0x41288` with `(CFspDspMgr*, SGlobalObj*)` →
+  stored at core+0x230 (`0x16bcc4 str x20, [x19, #0x230]`); per pass
+  `VProcSync` dispatches through it and `VSubProc` (`0x413d0`) writes the
+  four routing slots (absolute 0x16..0x19 = program operands `2016..2019`
+  under the FZ tag-2 base 0x16) **unconditionally** (`0x41c54..0x41ca8`),
+  while the effect's virtual call is gated on two floats in the 0x1b40
+  structure: `[x8+0x678] == 0` forces bypass (`0x41c14/0x41c18/0x41c30`),
+  else `[x8+0x628] != 0` enables (`0x41c20/0x41c28`), dispatch at `0x41cac
+  tbz` → vtable byte 0x20 = **slot 4** (`0x41ccc`), confirmed by
+  `SIM_MFX_FZ::VSubProc 0x3e480c` sitting at `0xa76210` = slot 4 of the
+  vtable starting `0xa761f0` (typeinfo chain names `9CMDSPTask`). The bypass
+  path still writes slots and zeroes ten 32-byte effect-state blocks
+  (`0x41d2c..0x41d90`). `CSimDSP5Routing::VSubProc` (`0x34c244`) mirrors the
+  shape with absolute slots 0x460..0x465 and zeroed fallback outputs.
+  Nothing in this chain references a TDM/SAI slot number — the writes are
+  core-internal routing storage, corroborating the queue's warning.
+- **Tests:** with corpus: 9 passed (0.05 s, `BMC_CORPUS_DIR=<main>/local
+  python -m unittest discover -s tests -p test_routing_2016_owner_study.py
+  -v`); without corpus 5 pass, 4 skip cleanly (pinned-image guard).
+  Siblings still pass: `test_core1_*.py` 57 (1 skipped), `test_bmc_ipc.py`
+  4, `test_transfer_study.py` 6 (1 skipped).
+- **Remains unknown:** which BMC/DSP/TDM slot each native routing instance
+  maps to on the instrument (native study cannot bound it; the kernel study's
+  five recorded effect placements stay the Fantom-side evidence); which
+  coefficient symbols feed the gate floats at structure+0x678/+0x628 (writers
+  untraced); whether DSP5's 0x460..0x465 matches the kernel study's per-
+  instance DSP5 tag-2 bases (DSP5 ctor tables not reconstructed); the role of
+  the six `SIM_MFX_COMP::Init` instances at `EfctLoadFixedAlg`'s tail.
+- **Best next item for run 9:** trace the writers of the gate floats
+  (structure+0x678/+0x628) to name the stock mute/enable controls that gate
+  the routing dispatch — they are the natural counterpart of CORE1's
+  `ff70/ff71` mute state — or, if that stalls, reconstruct the DSP5 routing
+  ctor tables (`0x34c0f8`) to bind `0x460..0x465` to the kernel study's DSP5
+  list operands. Both are static, native-side, and reuse this run's tool.
