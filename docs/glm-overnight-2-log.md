@@ -266,3 +266,46 @@
   or, if the native side is too thin offline, cross-check the parser's producer
   requirements against `core1-transmit-and-backpressure-study.md` to bound what
   a resident loader would have to format into the second ring.
+
+## Run 7 — 2026-11-13
+
+- **Item chosen:** host-to-CORE1 bridge lane, the question runs 5/6 left
+  explicitly untouched: whether bmc1 (`b1c1a.bin`) mirrors the recovered
+  receive route. This closes the last open peer-mirroring edge of the
+  route work and bounds the measurements' 0xE1/0xE2 addressing question with
+  the same verified machinery; static only, no keys/encryption/device access.
+- **Files added:** `docs/core1-b1-route-study.md`,
+  `tools/core1_b1_route_study.py`, `tests/test_core1_b1_route_study.py`.
+- **Verified (75/75 exact byte anchors in pinned bmc1, SHA-256 `c8d150…268bd`):**
+  bmc1 mirrors the route's structure at every recovered decision with different
+  addresses and sets — ASGN-analog task `0x0110a9e2` (nibble switch 0/3/7/0xb,
+  else parser `0x0110f70c`; nibble 0 reads byte 1 at `0x0110aa54`, compares only
+  0x07, else CUMDWRx `0x0110b7da`); CUMDWRx extracts `(word>>8)&0xff` and
+  consumes nine commands — bmc1 adds 0x53 to bmc0's eight; remote-state helper
+  `0x0112a1ce` (byte-0 high nibble 2 gate, shared tail `movs r0,#8`) consumes
+  byte 1 in {0x80..0x88 TBB (`efeecfbf9ded14aedf`), 0x89, 0x8a, 0x8e, 0x8f,
+  0x9f} — different from bmc0's {0x80..0x85, 0x8e, 0x8f, 0xbc..0xbe}; parser
+  consumes 0xEF exactly like bmc0's: payload bit 15 gate, singleton getter
+  `0x01110cfc` → `0x61402164`, flag byte +8, cleanup `0x11118a4`, 16-entry
+  pointer walk at `0x20084d28` (bmc1 stride 0x2ac). Nothing on the recovered
+  bmc1 chain tests byte 1 against 0xE1/0xE2 — the addressing question stays
+  open on both images. Paired census (same committed scanner): 0xEF 16→47,
+  0xE1 4→14, 0xE2 1506→6121. Also: run 6's prose stride 0x148 was wrong —
+  bmc0's own instruction bytes compute 496 (0x1f0); committed anchors
+  unaffected.
+- **Tests:** with corpus: 13 passed (0.65 s, `BMC_CORPUS_DIR=<main>/local
+  python -m unittest discover -s tests -p test_core1_b1_route_study.py -v`);
+  without corpus 5 pass, 8 skip cleanly. Siblings: `test_core1_ef*.py` 17
+  passed; `test_core1_*.py` 57 (1 skipped); `test_bmc_ipc.py` 4.
+- **Remains unknown:** the bmc1 first-router (RXDT) analog and the ASGN task's
+  entry path (no direct BL, word-ref or MOVW/MOVT/BX reference to `0x0110a9e2`
+  anywhere in the image — entry is built at runtime or in an unrecovered
+  table); whether a 0xE2-addressed frame would ever reach this route; the
+  parser's producer on bmc1; the ERAM cmp#0xef/#0xe1 classifier contexts
+  (stride-0x440 families at 0x610e722c/0x611cf8e4, not disassembled).
+- **Best next item for run 8:** the section-3 item runs 3/5/6 flagged three
+  times, still untouched: locate which context owns the `2016..2019` routing
+  writes against `fantom-audio-link-measurements.md` (kernel/audio ABI lane,
+  not section 2), or, if that stalls, cross-check the parser's producer
+  requirements against `core1-transmit-and-backpressure-study.md` to bound
+  what a resident loader must format into the second ring.
