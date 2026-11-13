@@ -170,3 +170,45 @@
   points), or, if the peer evidence stays thin, take the kernel-ABI item
   run 3 flagged: locate which context owns the `2016..2019` routing writes
   against `fantom-audio-link-measurements.md` (section 3, not section 2).
+## Run 5 — 2026-11-13
+
+- **Item chosen:** host-to-CORE1 bridge lane. Run 4's log pointed at the BMC-side
+  half of the 0xEF question; took it because it reuses this series' verified
+  router evidence directly against the pinned `b0c1a.bin` and closes with a
+  checkable negative (nothing on the recovered CORE1 receive route tests byte 1
+  against 0xEF). Static only; no keys, encryption or device access.
+- **Files added:** `docs/core1-ef-route-study.md`, `tools/core1_ef_route_study.py`,
+  `tests/test_core1_ef_route_study.py`.
+- **Verified:** 32/32 instruction anchors byte-exact in the pinned payload
+  (SHA-256 `6d954…263154`). First router `0x0111ea24`: only route 0 (TBB table at
+  `0x111ea54`, 16 bytes pinned) reads byte 1 (`ldrb.w r0,[sp,#1]` at `0x0111ea64`)
+  and compares only 0x07/0xc0/0xc1/0xfe; every other byte 1, 0xEF included, falls
+  through to second-ring enqueue (`0x0111ea80 bl #0x110a5a6`). ASGN router
+  `0x0110a65c` compares byte 1 only against 0x07, else calls CUMDWRx
+  `0x0110bacc`, which dispatches only commands 0x51/0x52/0x54/0x58/0x70/0x74/
+  0x75/0x7b (ubfx bits 15:8 at `0x0110bace`) and returns bare (`0x0110bb04`) for
+  everything else, 0xEF included. Image-wide census of 16-bit-aligned
+  `cmp #imm8` candidates (32-bit-instruction interiors excluded): 0xEF=16, 0xE1=4,
+  0xE2=1506; no 0xEF candidate lies inside the recovered router/CUMDWRx ranges
+  (`0x0111ea24..0x0111ed25`, `0x0110a65c..0x0110a760`, `0x0110bacc..0x0110bb10`).
+  The two ITCM 0xEF compares belong to other dispatchers: `0x0110045e` (debug
+  service reply chain, reached from `0x0112c8b8`; 0xEF → `0x0112d6de`, a 3-bit
+  hex-digit repack of an 8-byte value) and `0x0110ddb0` (byte-stream parser at
+  `0x0110d980`; 0xEF → `0x0110e1f2`; no BL/veneer/aligned-word reference to
+  `0x0110d981` found, entry reachability unresolved).
+- **Tests:** with corpus: 9 passed (0.7 s, `BMC_CORPUS_DIR=<main>/local python -m
+  unittest discover -s tests -p test_core1_ef_route_study.py -v`); without corpus
+  4 pass, 5 skip cleanly. Existing `test_bmc_ipc.py` (4) and the `test_core1_*`
+  family (36, 9 skipped) still pass.
+- **Remains unknown:** which service actually answers 0xEF on the wire — the
+  recovered route would ignore a 0xEF ring word, so the answerer (if any) sits
+  behind the missing ttyGS0 peer, the unrecovered parser `0x0110d980`, CORE0
+  (encrypted, out of scope), or nowhere; what the route-0 fallthrough helper
+  `0x0112d2e` checks deeper; whether bmc1 mirrors the route; which UI surfaces
+  the run-4 senders belong to.
+- **Best next item for run 6:** trace the route-0 fallthrough helper `0x0112d2e`
+  and the parser `0x0110d980` ingress to bound where a 0xEF-byte-1 word could
+  still be consumed, or, if that stays thin, take the section-3 item run 3
+  flagged: locate which context owns the `2016..2019` routing writes against
+  `fantom-audio-link-measurements.md`. Do not take instruction-semantics items
+  (another series works section 2).
