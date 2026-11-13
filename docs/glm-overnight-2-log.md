@@ -407,3 +407,59 @@
   write (purely static; answers whether the application can flip the bypass
   gate at runtime), or the still-open DSP5 ctor-table item (reconstruct the
   0x34c0f8 tables to bind 0x460/0x465).
+
+## Run 10 - 2026-11-13
+
+- **Item chosen:** kernel/audio ABI lane, the item run 9's log queued first:
+  census callers of `CSimDspMgr::WriteDspCoefFloat` 0xfba10 to answer whether
+  the application can flip the bypass gate (+0x678) at runtime. Took it
+  because it completes run 9's write-path story with a checkable caller
+  census; static only, pinned `zen_arm64`, no keys/encryption/device access.
+- **Files added:** `docs/routing-gate-callers-study.md`,
+  `tools/routing_gate_callers_study.py`,
+  `tests/test_routing_gate_callers_study.py`. Corrected two prose errors in
+  run 9's `docs/routing-gate-writers-study.md`: (1) the routing vtable byte
+  offsets are 0x10 (0x41334, slot 2) and 0x18 (0x41380, slot 3), not "slot
+  4"/"slot 5" — the quad anchors were right, the slot names wrong; (2) the
+  DSP5 routing vtable pointer is 0xa52e98 (ctor 0x34c0b8..0x34c0c0 computes
+  0xa52000+0xe98), not 0xa520e98. Both corrections are marked in that note.
+- **Verified (76/76 byte-exact anchors in pinned zen_arm64, SHA-256
+  b8ba7...c30, real tool JSON pasted into the study note):** 0xfba10 has NO
+  direct BL callers anywhere in the image (0 hits for 0xfba10/0xfba11; only
+  reference is an aligned pointer quad at 0x9e54d0 in the consecutive
+  manager-function-pointer table from 0x9e53f8; no adrp+add computes either
+  address). It is reached virtually: manager vtable byte 0xc8. Strict
+  virtual-call scan (LDR xS,[xR] from a pointer load within 4 instrs; LDR
+  xT,[xS,#0xc8]; BLR xT) finds 162 sites, of which exactly 5 load the manager
+  global 0x9c8480 nearby — 0x354388/0x3543a0/0x3543b8/0x3543d0/0x3543e8, all
+  inside one parameter-apply function at 0x354184 (prologue 0x3541a4 adrp
+  x8,#0x9c8000; ldr x8,[x8,#0x480]; ldr x8,[x8]; per-pair ldp x0,x8,[x19];
+  ldr x1,[x8,#0x10]; ldr d0,[sp,#8]; ldr x8,[x0]; ldr x8,[x8,#0xc8]; blr x8,
+  symbol-field offsets 0x10/0x18/0x20/0x28). Write ABI re-pinned end to end:
+  0xfba10(x0=manager, x1=symbol, d0=value) checks byte symbol+0x18, loads
+  routing=[manager+0x28], calls vtable byte 0x10 = 0x41334 (0xce x 16-byte
+  key scan over [routing+0x38]; wanted key u32[[symbol+0x10]+4; returns
+  record+8), stores d8,[x0]; sibling 0x41380 (0x1ba x 8-byte over
+  [routing+0x38]+0xce0) is vtable byte 0x18; DSP5 pair 0x34c1a8 (0xa9
+  entries)/0x34c1f4 (0x4bb, +0xa90) at its vtable bytes 0x10/0x18, vtable
+  0xa52e98 byte 0x20 = 0x34c244. Call-site keys come from symbol
+  descriptors, not immediates, so the four gate keys 0x0000/0x07c4/0x4fce/
+  0x4d02 are runtime-writable through this path; the bypass gate is not
+  frozen at construction.
+- **Tests:** with corpus: 8 passed (36.6 s, `BMC_CORPUS_DIR=<main>/local
+  python -m unittest discover -s tests -p test_routing_gate_callers_study.py
+  -v`); without corpus 3 pass, 5 skip cleanly. Tool exits 0 with
+  `"ok": true`. Combined routing suites (`test_routing_*.py`) and the sibling
+  families re-run before commit (output in the run summary).
+- **Remains unknown:** whether the stock parameter stream ever carries the
+  bypass keys 0x07c4/0x4d02 (call shape proven, runtime values not — needs
+  the unit or capture); the role of the manager function-pointer table at
+  0x9e53f8 beyond holding 0xfba10 at 0x9e54d0 (no adrp+add references
+  found); whether any of the other 157 strict slot-0xc8 sites also reach
+  0xfba10 (only the five loading the manager global are attributed); the
+  symbol-descriptor key space u32[[symbol+0x10]+4 at runtime.
+- **Best next item for run 11:** trace the parameter-apply function
+  0x354184's callers to name the stock entry that drives coefficient writes
+  (static, extends this run's anchors), or take the still-open DSP5
+  ctor-table item (bind 0x460..0x465 to the kernel study's DSP5 list
+  operands).

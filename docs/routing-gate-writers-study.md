@@ -64,18 +64,22 @@ initializers (key at +0, value at +8), matching the transfer-spaces study's
 
 ### The manager's coefficient path reaches the same floats (verified, no trace)
 
-Run 8's owner probe is byte-checked again: vtable slot 4 = 0x41334, reached
-from `CSimDspMgr::WriteDspCoefFloat` 0xfba10 through `CSimDSP4Routing`'s
-vtable (0x9cfd68 region: slot 1 = 0x412fc at +0x8, slot 4 at +0x20, slot 5 =
-0x41380 at +0x28 — anchors 0x9cfd70/0x9cfd88/0x9cfd90). Both helper slots are
-verified record lookups: slot 5 (0x41380) loads the routing object's
-record-table base `[x0+0x38]+0xce0` and linearly scans 0x1ba 8-byte key
-entries for the requested key, returning a pointer into the table; slot 4
-(0x41334) scans 0xce 16-byte entries over `[x0+0x38]` and returns entry+8.
-These are the manager-side views of the same 0x50-stride records the
-initializer wrote. This closes the loop run 8 opened: `WriteDspCoefFloat`
-resolves a coefficient key through one of these helpers and writes the value
-slot the VSubProc gate reads.
+Run 8's owner probe is byte-checked again: vtable byte 0x10 = 0x41334 (slot 2
+by 8-byte index), reached from `CSimDspMgr::WriteDspCoefFloat` 0xfba10 through
+`CSimDSP4Routing`'s vtable (0x9cfd78 region: byte 0x8 = 0x412fc, byte 0x10 =
+0x41334, byte 0x18 = 0x41380, byte 0x20 = 0x413d0 — anchors 0x9cfd70/0x9cfd88/
+0x9cfd90). Both helper slots are verified record lookups: byte 0x18 (0x41380)
+loads the routing object's record-table base `[x0+0x38]+0xce0` and linearly
+scans 0x1ba 8-byte key entries for the requested key, returning a pointer into
+the table; byte 0x10 (0x41334) scans 0xce 16-byte entries over `[x0+0x38]` and
+returns entry+8. These are the manager-side views of the same 0x50-stride
+records the initializer wrote. This closes the loop run 8 opened:
+`WriteDspCoefFloat` resolves a coefficient key through one of these helpers and
+writes the value slot the VSubProc gate reads. (Correction 2026-11-13, run 10:
+this section originally called 0x41334 "slot 4" and 0x41380 "slot 5"; the quad
+anchors were right but the slot names were wrong — byte 0x10 is slot 2 and
+byte 0x18 slot 3 by 8-byte index. The caller census is in
+[routing-gate-callers-study.md](routing-gate-callers-study.md).)
 
 ### DSP5 control analog (verified instructions, inferred semantics)
 
@@ -87,7 +91,10 @@ through the manager per pass: 0x34c2b8 `ldr x10,[x9,#0x3300]; ldr s0,
 DSP4's hard-coded dispatch gate, DSP5's VSubProc takes no [x0+0x678] != 0
 branch in its head — the skip decision lives in its caller or in the effect
 objects. That asymmetry is **inferred** from the disassembled prologue only;
-the full DSP5 pass body was not walked this run.
+the full DSP5 pass body was not walked this run. (Correction 2026-11-13,
+run 10: this section's prose gave the DSP5 routing vtable pointer as
+0xa520e98; the ctor bytes at 0x34c0b8..0x34c0c0 compute 0xa52000+0xe98 =
+0xa52e98. The anchors were right, the arithmetic in the prose was wrong.)
 
 ### DSP5 initializer scale (verified)
 
