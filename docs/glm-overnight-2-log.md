@@ -43,3 +43,39 @@
   context owns `2016..2019` routing writes against the measured audio-link
   note. Do not take instruction-semantics items (another series works section
   2).
+
+## Run 2 — 2026-11-13
+
+- **Item chosen:** host-to-CORE1 bridge lane. Run 1's log pointed at locating
+  where the measured 0xE1 traffic is answered; the concrete open item taken is
+  the unexplained long kind-9 status frames from 0xE1 (112-byte payload,
+  sub-type 9, listed as unknown in `bmc-addressing-and-loader-open-questions.md`
+  and absent from the kind-9 service table in
+  `host-core1-bridge-followup.md`). This is a static host-side consumer
+  cross-check against the saved captures; no keys, encryption or device access.
+- **Files added:** `docs/host-status9-study.md`, `tools/host_status9_study.py`,
+  `tests/test_host_status9_study.py`.
+- **Verified:** all 741 kind-9 frames across the four saved app-stopped
+  `.bin` captures are (byte 1, destination, selector) = (0xE1, 0x60, 9) with a
+  112-byte payload (181/180/220/160). Statically, the pinned mi078 input worker
+  `00be1a50` dispatches kind 9 on byte 3; selector 9 at `0xbe1b18..34` stores
+  the payload through `0x6c3070` into a gated two-slot 112-byte ring at
+  `0x40a9760`/`0x40a97d0` with a toggle cursor at `0x40a975c` (gate byte
+  `0x40a9758`; 11 enable/15 disable direct callers). The consumer checks
+  neither source byte 1 nor payload length on this path. All 18 instruction
+  anchors checked exactly by `tools/host_status9_study.py`.
+- **Tests:** with corpus: 5 passed (38.7 s, `python -m unittest discover -s
+  tests -p test_host_status9_study.py -v`); without corpus: 5 skipped cleanly.
+  Existing `test_bmc_ipc.py` still passes (4).
+- **Remains unknown:** meaning of any of the 112 payload bytes (captures bound
+  the varying offsets: 4, 6, 64..70, 92..94, 108..111 under key activity);
+  which reader consumes which field (27 references to the gate base not traced);
+  the ring object `0x40a9858`'s RTTI; the second gate byte `0x40a9840`'s writer;
+  and the BMC-side producer of these frames (measured: they flow with nothing
+  sent, app stopped — the producer is beyond the link).
+- **Best next item for run 3:** the queue's section-1 continuation: identify
+  which service answers frames routed to 0xEF on the BMC side (settings/
+  parameter blocks), per run 1's pointer, or decode the selector-9 payload
+  fields by tracing the gated reader families' callers against the capture
+  offsets above. If either stalls, the section-3 item: which context owns
+  `2016..2019` routing writes against `fantom-audio-link-measurements.md`.
