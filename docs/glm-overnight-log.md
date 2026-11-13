@@ -159,3 +159,66 @@ Best next item: with the ownership precondition met, the `5a`/`62` family proof
 can proceed — either prove the `ded4`/`9450`/`8fe2` roles of the `6209` packet
 statically against both channel chains, or attempt the native cutpoint binding of
 the GASSDLY/GASSPH/GAMPSIM `5d52` chains through the now-proved grouped fields.
+
+## Run 7 — 2026-11-13: RVSDLY cross-check removes the grouped-equality objection
+
+Item chosen: the instruction-semantics cross-check run 6 left open — test the
+GASSDLY `0x22b`/`0x23c` grouped-ownership and strict-reference reading against a
+second independent program. `SIM_MFX_RVSDLY` is the natural discriminator
+because run 6's own sibling table shows its two fields owned by separate
+count-1 groups, so the grouped-equality shortcut that carried the GASSDLY proof
+is unavailable and each field must stand on its own constructor and reference
+evidence. Static analysis only; no native execution fixture was needed.
+
+Files:
+
+* `tools/rvsdly_22b_23c_crosscheck.py` (new): pins the RVSDLY segment bases,
+  stored field triples, exactly-one constructor pair per field (object `0x150`
+  -> relative `0x22b`, 0.99609375; object `0x140` -> relative `0x23c`,
+  -0.998046875), the count>=1 descriptor inventory, the two count-1 RVSDLY
+  groups and their sole references inside `CFspMfxRVSDLY::SetAlg()`, the exact
+  six-call slot-c8 sequence with descriptor/argument registers, and the
+  strict-decoder (`header_study.layout`) packet-reference sets for both fields.
+* `tests/test_rvsdly_22b_23c_crosscheck.py` (new): 7 tests — synthetic
+  fail-closed checks (exact-start literal matching, one-bit mutation,
+  unsupported-layout skip, truncated descriptor) plus corpus-pinned report,
+  group-record and exact-decode facts.
+* `docs/rvsdly-22b-23c-crosscheck-study.md` (new): the study note.
+
+Verified this run (commands and outputs in the transcript):
+
+* Tool exits 0: `PYTHONPATH=local/fantom-python:tools BMC_CORPUS_DIR="$PWD/local"
+  python tools/rvsdly_22b_23c_crosscheck.py local/zen_arm64` — stored bytes
+  `0x22b=2ff000` (0.99609375), `0x23c=aff800` (-0.998046875), each exactly its
+  own constructor double; groups `a43860`/`a43840` count 1 with single records
+  `424b/22b/3` and `425c/23c/3`, sole references `0x2c2638`/`0x2c2618` inside
+  `SetAlg 0x2c2508..0x2c2740`; `9dfa50` still the only count>=2 group.
+* `SetAlg` has exactly six slot-c8 calls (descriptors `0xa430840..0xa4308e0`,
+  arguments `d9, d10, d8, d9, d10, #1.0`); the first two write the two fields
+  with `d0=-d8` and `d0=d8*d10+d11`, so the fields differ by construction.
+* Exactly one strict-decoder control selects each field across the whole
+  program: packet `0x22e` header `0x2b09` families `[0,4,4]` long-op literal
+  `0xca6/5fe2` -> `0x23c` = -0.998046875; packet `0x21e` header `0x2e08`
+  families `[1,1,4]` short control `0x34e5` -> `0x22b` = 0.99609375.
+* Negative controls: mutating one stored triple byte or one descriptor record
+  byte makes the tool exit 2.
+* `python -m unittest discover -s tests -p test_rvsdly_22b_23c_crosscheck.py`:
+  7 tests, OK. Neighboring suites unchanged: `test_gassdly_62_trap.py`,
+  `test_line_prefix_single_writer.py`, `test_header_family_crosscheck.py`,
+  `test_header_study.py`, `test_short_add_context_study.py` each OK.
+
+Established: the GASSDLY grouped-write reading is not an artifact of grouped
+equality — in a second program the same relative fields are independently owned,
+written with different computed values, and each is selected by exactly one
+strict-decodable control whose literal equals that field's own constructor
+default. Unknown: DSP execution of these controls (static evidence only), other
+writers/builds, the arithmetic roles of `0xca6`/`0x5fe2`/`0x34e5`, the fitted
+`62` family roles (run 4 unchanged), and the unexamined neighbor fields
+`0x60`/`0x71`. No opcode, family or interpreter admission.
+
+Best next item: run 6+7 remove both structural objections to the `62` family
+proof; the smallest remaining step is native — bind the GASSDLY/GASSPH/GAMPSIM
+`5d52` chains (or the `6209` packet's `9450/ded4/8fe2` roles) to native cutpoints
+through the now twice-corroborated field reading, using the existing
+`native_callback_fixture` style; if that exceeds one run, cross-check the
+`0x60`/`0x71` RVSDLY fields or a `4b`/`5c` miscellaneous slot instead.
