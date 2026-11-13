@@ -79,3 +79,47 @@
   fields by tracing the gated reader families' callers against the capture
   offsets above. If either stalls, the section-3 item: which context owns
   `2016..2019` routing writes against `fantom-audio-link-measurements.md`.
+
+## Run 3 — 2026-11-13
+
+- **Item chosen:** host-to-CORE1 bridge lane. Run 2's log offered decoding the
+  selector-9 payload via its gated readers or locating the 0xEF responder; took
+  the reader trace because it extends this series' already-verified selector-9
+  ring evidence directly against the pinned `mi078` and saved captures (static
+  only, no keys/encryption/device access).
+- **Files added:** `docs/host-status9-readers-study.md`,
+  `tools/host_status9_readers_study.py`,
+  `tests/test_host_status9_readers_study.py`.
+- **Verified:** the selector-9 ring's readers are a 26-selector jump-table
+  dispatcher at `0xb983c0` (table `0x1308c98`, stubs `0xb98430..698`, bound
+  `cmp w19, #0x19`); all 26 stub tail branches resolved: selectors 1-3 to pair
+  readers `0x6c27f8/0x6c2900/0x6c2988`, 4-7 to `0x6c2a30`, 8-15 to `0x6c2b60`,
+  16-17 to `0x6c2d50`, 18-23 to `0x6c2e10`, 24-25 to `0x6c2fb0`, 0 to a
+  distinct return path. Each family is gated on `0x40a9758` (direct) or
+  `0x40a9758+0xe8=0x40a9840`; the second gate byte's writers are `0x6c2a10`
+  (enable) and `0x6c2a20` (disable) with exactly 15/19 direct callers
+  (`0x7de324/0x7dd9bc` and eleven more 0x7e/0x7f sites touch only the 0x840
+  gate). Every family decodes level = clamp(6*((h>>5 & 31) - 27) +
+  table[(h>>5)&31], -60, 0) from the float32[32] table at `0x1214f78`
+  (monotonic ramp, ladder -56.31..-0.85 for k=17..26, clamped outside); pair
+  readers add `(h1&31)` and halve with rounding, and the zero-level fallback is
+  `(h1&31-60)/2`. Capture cross-check: all varying bytes 68,70,92,94,108,109,
+  110,111 are inside the readers' reach and decode from -60 (idle captures) to
+  -43.97..-7.0 (keys capture); varying bytes 64/66 have no recovered reader
+  case.
+- **Tests:** `BMC_CORPUS_DIR=<main>/local python -m unittest discover -s tests
+  -p test_host_status9_readers_study.py -v` → 6 passed (26.2 s); existing
+  `test_host_status9_study.py` → 5 passed (39.4 s); `test_bmc_ipc.py` → 4
+  passed. Without the corpus the new tests skip cleanly (pinned-image
+  guard).
+- **Remains unknown:** meaning of bytes 4, 6 and 64, 66 (64/66 unreached by any
+  recovered reader; 4/6 sit in pair word s=1 whose arithmetic is verified but
+  whose UI binding is not); the ring object `0x40a9858`'s RTTI name (runtime
+  vtable pointer at `0x40a9de0` is `.bss`; the `.rodata` vtable `0x1308d40`
+  holding `0xb983c0` at slot 0 and typeinfo `0x5adb88` was recovered but its
+  name string not resolved); which UI surfaces the 0x7de/0x7e/0x7f 0x840-gate
+  callers belong to; the BMC-side producer of the frames.
+- **Best next item for run 4:** locate which service answers frames routed to
+  0xEF on the BMC side (run 1's still-open pointer), or, if the peer evidence
+  is too thin, trace the 0x7de/0x7e/0x7f 0x840-gate caller families to identify
+  the meter surfaces and bind bytes 92..95/108..111 to named UI fields.
