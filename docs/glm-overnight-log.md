@@ -57,3 +57,57 @@ mixed-packet operation families around `5d52` (`1c90`/`0d90`, `ded4`, `9450`,
 execution fixtures beyond an overnight run, extend the fragment emulator's
 verified coverage by one more LINEDRIVE/FETDRIVE packet context with the same
 fail-closed test style used here.
+
+## Run 4 — 2026-11-13: fitted four-operation header rule cross-checked, no counterexample
+
+Item chosen: the instruction-semantics lane item left as next by run 2 and the
+agent handoff — corpus-wide validation of the explicitly hypothesis-only fitted
+rule for four-operation header families (rank
+`combinations_with_replacement(range(5), 4)` under
+`sum(kind<2)<=2 or (sum==3 and last==2)`, indexed by `(header>>8)-0x40`, 57
+entries). The handoff fitted it to six anchors with predictions `4b=0124`,
+`5a=1122`, `5c=1124`, `62=1224` and forbade expanding `header_study.families()`
+from the fit alone; this run tested the fit against the corpora without admitting
+anything.
+
+Files:
+
+* `tools/header_family_crosscheck.py` (new): rebuilds the ranking from the
+  constraint, asserts size 57 and the six anchor families, then scans
+  render-list segments of any number of `--core1`/`--qspi` images with the
+  existing `analyze.core_lists()` framing, comparing every count-4 packet against
+  the rule (code range, strict-decode families, must-fail-closed for
+  miscellaneous predictions). Zero decoder changes.
+* `tests/test_header_family_crosscheck.py` (new): 7 tests — ranking/anchor
+  agreement pinned against `header_study.families`, only-anchors-strictly-decode
+  partition, synthetic strict-decode and out-of-range counterexample detection,
+  and corpus-pinned zero-counterexample plus exact packet/code counts.
+* `docs/header-family-crosscheck-study.md` (new): the study note.
+
+Verified this run (commands and outputs in the transcript):
+
+* The tool exits 0 with zero counterexamples over six images
+  (zen_arm64, b0c1a.bin, b1c1a.bin, JUPITER-X MI077, MC-101 RPG69, SH-4d DD013):
+  38,441 count-4 packets, every code inside `40..78`, all strict decodes are the
+  six anchors (zen 1,703; b0 3,697; b1 631; JUPITER-X 11,285; MC-101 837;
+  SH-4d 8,985), zero non-anchor strict decodes, zero rejected decodes.
+* GASSDLY's `6209` (`6fe4 9450 ded4 8fe2`, segment offset `022e`) and `6207` fail
+  closed as the fitted `62=(1,2,2,4)` miscellaneous prediction requires; the
+  `6fe4` trap stays unresolved, unchanged.
+* `python -m unittest discover -s tests -p test_header_family_crosscheck.py`:
+  7 tests, OK (with `BMC_CORPUS_DIR` at the prepared corpus).
+* `python -m unittest discover -s tests -p test_header_study.py`: 9 tests,
+  OK (1 skipped without context) — decoder unchanged.
+* Full `python -m unittest discover -s tests` with the corpus: no failures.
+
+Established: the fit is consistent with all six prepared images; no non-anchor
+count-4 code strictly decodes anywhere, so no discriminating evidence for the
+predicted tuples exists. Unknown: the actual operand syntax of the 45 observed
+non-anchor codes; whether the ranking constraint has a causal basis; other builds.
+No opcode or interpreter admission.
+
+Best next item: the smallest independent proof is still the earlier-`5a`/`62`
+context — bind `1c90`/`0d90`/`ded4`/`9450`/`d550`/`d554` effects to native
+cutpoints through both channel chains (native execution fixtures), or, if that
+exceeds one run, a native window over a `4b`/`5c` miscellaneous slot as an
+alternative discriminator.
