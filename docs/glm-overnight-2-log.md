@@ -212,3 +212,57 @@
   flagged: locate which context owns the `2016..2019` routing writes against
   `fantom-audio-link-measurements.md`. Do not take instruction-semantics items
   (another series works section 2).
+
+## Run 6 — 2026-11-13
+
+- **Item chosen:** host-to-CORE1 bridge lane, the continuation run 5 queued
+  first: trace the route-0 fallthrough helper and the byte-stream parser's
+  ingress to bound where a byte-1 = 0xEF ring word could still be consumed on
+  bmc0 CORE1. Reuses run 5's verified router anchors directly against the
+  pinned `b0c1a.bin`; static only, no keys/encryption/device access.
+- **Files added:** `docs/core1-ef-319-consumers-study.md`,
+  `tools/core1_ef_319_consumers_study.py`,
+  `tests/test_core1_ef_319_consumers_study.py`; run tool JSON sample in ignored
+  `local/core1-ef319-report.json`. Corrected two addresses in run 5's note
+  `docs/core1-ef-route-study.md` (fallthrough helper is `0x01126d2e`, not
+  `0x0112d2e`; the parser is entered at `0x0110d962`, not `0x0110d980`).
+- **Verified (all exact byte matches in the pinned payload, SHA-256
+  `6d954…263154`, 105/105 anchors):** the route-0 fallthrough helper
+  `0x01126d2e` tests byte-0 high nibble == 2, then consumes byte 1 in
+  {0x80..0x85 (TBB at 0x1126d52, table bytes `03f05b5d2a1c`), 0x8e, 0x8f,
+  0xbc, 0xbd, 0xbe} and ignores everything else including 0xEF (shared tail
+  `0x01126e1a; movs r0,#8; b 0x11020c0`). The parser's ingress is recovered:
+  the ASGN router's byte-0-high-nibble switch (0/3/7/0xb special) calls it at
+  **`0x0110a6ba bl #0x110d962`** — run 5's xref search missed it by probing
+  `0x0110d980/0x0110d981`. Parser `0x0110d962` dispatches on word low nibble
+  (TBB at 0x0110d972, 15 entries, nibble 15 rejects); its shared bodies
+  re-dispatch on byte 1 through binary-search chains that consume
+  0x76/0x77/0x7c/0x80/0x88/0x8c/0x8d/0x99/0xa5/0xa6..0xad/0xb3..0xb7/
+  0xbc..0xbe/**0xee**/**0xef** and reject the rest (`0x0110ddb6 b.w #0x110e2b6`).
+  The **0xEF body `0x0110e1f2`** requires payload bit 15 (bytes 2..3 &
+  0x8000), then the singleton getter `0x110e9f0` (returns `0x614020c8`),
+  tests flag byte +0xa (zero, else a cleanup call `0x110f522` runs first),
+  then walks a 16-entry table at `0x20084d88` (stride 0x148) calling each
+  entry's vtable slots +0x10 and +0x20(+0x20, twice) and `0x1104e34` per
+  entry. 0xEE is a distinct single-shot command, not an alias. So a 0xEF
+  byte-1 ring word IS consumed on the recovered route, gated on payload bit 15
+  and the flag byte — the first recovered place on bmc0 CORE1 where 0xEF does
+  work. The remaining 0xEF consumers are exactly: this parser body (consumes),
+  the helper (ignores), CUMDWRx (ignores, run 5).
+- **Tests:** with corpus: 8 passed (0.03 s, `BMC_CORPUS_DIR=<main>/local
+  python -m unittest discover -s tests -p test_core1_ef_319_consumers_study.py
+  -v`); without corpus 3 pass, 5 skip cleanly. Sibling suites still pass:
+  `test_core1_*.py` 44 (1 skipped), `test_bmc_ipc.py` 4.
+- **Remains unknown:** whether the wire settings frames (host→0xEF, run 4) are
+  the same stream this parser consumes — the parser reads two/three-byte
+  records (low nibble + byte-1 command + 16-bit payload), not 12-byte short
+  frames, so a repackaging peer would be required and that peer is still the
+  missing ttyGS0 edge; what the 16 walked vtable callees do (call structure
+  verified, body semantics inferred); the `0x110f522` cleanup body; whether
+  bmc1 (`b1c1a.bin`) mirrors the route (untouched); the parser's producer side.
+- **Best next item for run 7:** the section-3 item runs 3/5 flagged twice:
+  locate which context owns the `2016..2019` routing writes against
+  `fantom-audio-link-measurements.md` (kernel/audio ABI lane, not section 2),
+  or, if the native side is too thin offline, cross-check the parser's producer
+  requirements against `core1-transmit-and-backpressure-study.md` to bound what
+  a resident loader would have to format into the second ring.

@@ -35,7 +35,8 @@ First router `0x0111ea24` (RXDT): word bits 7:4 select one of 16 TBB routes
 - `0x0111ea68 cmp r0, #7` / `0x0111ea72 cmp r0, #0xc0` / `0x0111ea76 cmp r0,
   #0xc1` / `0x0111ea7a cmp r0, #0xfe` — four special byte-1 values.
 - Everything else (including 0xEF) falls through to `0x0111ea80 bl #0x110a5a6`
-  (second-ring enqueue + ASGN signal) plus a call to `0x0112d2e`.
+  (second-ring enqueue + ASGN signal) plus a call to `0x01126d2e` (run 5 wrote
+  `0x0112d2e`; corrected in run 6 — the encoded `bl` targets `0x01126d2e`).
 - Route 1 (high nibble 1, SysEx assembly) forwards the whole word to both
   receiver objects without checking byte 1; route 7 enqueues like route 0's
   default; other routes handle kind zero without touching byte 1.
@@ -85,8 +86,8 @@ reached from the reply-state machine at `0x0112c8b8` (caller `0x0112ca0a`; the
 0xEF branch at `0x01100460` targets `0x0112d6de`, a 3-bit hex-digit repack of an
 8-byte value into `r0+0x24`, the same builder family as the debug reply helpers
 `0x0112c6a4`/`0x0112d4ca` — **verified anchors, inferred role**) — and
-`0x0110ddb0`, inside a byte-stream command parser entered at `0x0110d980` whose
-0xEF branch (`0x0110ddb2 → 0x0110e1f2`) tests a flag bit and calls `0x110e9f0`
+`0x0110ddb0`, inside a byte-stream command parser entered at `0x0110d962`
+whose 0xEF branch (`0x0110ddb2 → 0x0110e1f2`) tests a flag bit and calls `0x110e9f0`
 (the same receive-helper called at the first router's entry) — **verified
 anchors, reachability of this parser's entry from the recovered route not
 established** (no direct BL/veneer/aligned-word reference to `0x0110d981` was
@@ -118,18 +119,21 @@ that CUMDWRx handles only the eight commands 0x51/0x52/0x54/0x58/0x70/0x74/
 0x75/0x7b and returns for everything else; the bounded census numbers above.
 
 Inferred: the `0x0110045e` chain serves the debug/service reply path; the
-`0x0110d980` parser is a command dispatcher whose ingress is outside the
-recovered route (entry reachability unresolved).
+parser entered at `0x0110d962` is a command dispatcher whose ingress run 6
+later recovered as the ASGN router's second call `0x0110a6ba` (see
+[core1-ef-319-consumers-study](core1-ef-319-consumers-study.md)).
 
 Not established: which service actually answers 0xEF on the wire. The
 recovered route would *ignore* a 0xEF-byte-1 ring word, so either the answerer
 lives behind an ingress this study has not recovered (the ttyGS0 peer remains
 missing — [host-core1-bridge-followup](host-core1-bridge-followup.md) section
-4), behind the unrecovered parser `0x0110d980`, in CORE0 (encrypted, out of
-scope for this series), or nothing answers and the settings traffic is
+4), behind the parser entered at `0x0110d962` (run 5 called it `0x0110d980`
+and could not reach it; run 6 recovered the ingress), in CORE0 (encrypted, out
+of scope for this series), or nothing answers and the settings traffic is
 fire-and-forget end to end. Also unknown: whether the second byte-1 dispatch
-(`0x0112d2e`, called from route 0's fallthrough) checks byte 1 deeper (not
-traced this run); whether bmc1 (`b1c1a.bin`) mirrors this route (untouched).
+(`0x01126d2e`, called from route 0's fallthrough) checks byte 1 deeper (run 6
+traced it: it does, and never against 0xEF); whether bmc1 (`b1c1a.bin`)
+mirrors this route (untouched).
 
 ## Reproduce
 
