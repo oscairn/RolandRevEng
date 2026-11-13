@@ -366,3 +366,80 @@ attempt the native `5d52` cutpoint binding (GASSDLY/GASSPH/GAMPSIM chains, or
 the `6209` packet's `9450/ded4/8fe2` roles) through the existing
 `native_callback_fixture` style, or, if that still exceeds one run, the bounded
 4b/5c miscellaneous-slot cross-check named in the review follow-ups.
+
+## Run 11 — 2026-11-13: fitted 4b/5c slot ordering survives the corpus-wide transfer-marker cross-check
+
+Item chosen: the review-follow-up bounded 4b/5c miscellaneous-slot cross-check
+(the static fallback runs 4, 8 and 10 left standing; the preferred native
+`5d52` cutpoint binding needs native-execution fixtures, which this run's
+static-analysis-only rules exclude). Run 4 proved only that `4b`/`5c` fail
+closed; this run added the corpus-decidable positional check: a full census of
+all 38,441 fitted count-4 packets in six images plus a `fe0..fee`-window
+transfer-marker invariant calibrated on the admitted anchor syntax and the
+count-1 classes `08..0c`. Taken from the review follow-up B list and run 10's
+"best next item"; no earlier item was repeated.
+
+Files:
+
+* `tools/four_b_five_c_crosscheck.py` (new): reuses
+  `header_family_crosscheck.ranked_choices()` and the existing
+  `analyze.core_lists()` framing; records per-slot control vocabularies and
+  window statistics for all fitted count-4 packets and count-1 classes
+  `08..0c`; raises on any window control outside a transfer-predicted slot
+  (except the pinned `62`/`6fe4` slot-0 trap), on `4b`/`5c` window sets other
+  than `[]`/`[3]`, on any `5a` window control, and on count-1 `08..0b` window
+  use. Zero decoder changes.
+* `tests/test_four_b_five_c_crosscheck.py` (new): 13 tests — synthetic
+  fail-closed invariant checks (window into anchor long/short slot, extra window
+  control, `5a` window control, `4b` window in slot 2, count-1 calibration
+  change, truncated-packet framing) plus corpus-pinned totals, calibration,
+  vocab crosscheck and per-image counts.
+* `docs/four-b-five-c-slot-crosscheck-study.md` (new): the study note, with the
+  trimmed tool output pasted verbatim (owner direction of 2026-11-13).
+* `local/four-b-five-c-run11.json` (ignored local storage): the run's tool
+  output the tests read back.
+
+Verified this run (commands and outputs in the transcript):
+
+* Tool exits 0: `PYTHONPATH=local/fantom-python:tools BMC_CORPUS_DIR="$PWD/local"
+  python tools/four_b_five_c_crosscheck.py` — 38,441 fitted count-4 packets
+  (27,138 strictly decoded, 11,303 unsupported, 0 framing-rejected), 2,257
+  `4b`/`5c` packets of which 1,520 carry exactly one window control in slot 3
+  and 737 none; 276 `5a` packets with zero window controls; the only window
+  control outside a transfer-predicted slot corpus-wide is the known
+  `6209 6fe4 ...` slot-0 trap (28 occurrences, all one control shape);
+  count-1 calibration 43,939 controls with 7,579 window uses, all in class
+  `0c` (16 distinct window words), `08/09/0a/0b` zero.
+* Long/short vocabulary discrimination: count-1 `08` and `09` control
+  vocabularies overlap in only 6 words; `4b` slot 0 contains 4 long-only and 0
+  short-only words, `5c` slots 0..1 contain 22 short-only and 5 long-only —
+  both directions agree with the fitted assignment.
+* The 737 non-window `4b`/`5c` slot-3 controls (`b9b3` class, 16 distinct)
+  never appear as any count-1 `08..0c` control.
+* All six image hashes re-pinned before use; per-image fitted counts equal run
+  4's recorded totals (scan base unchanged).
+* `python -m unittest discover -s tests -p test_four_b_five_c_crosscheck.py`:
+  13 tests, OK (with `BMC_CORPUS_DIR` at the prepared corpus). Neighboring
+  suites unchanged: `test_header_family_crosscheck.py` 7 OK,
+  `test_header_study.py` 9 OK, `test_five_e09_inventory.py` 9 OK,
+  `test_gassdly_62_trap.py` 7 OK, `test_rvsdly_22b_23c_crosscheck.py` 7 OK.
+* Every pinned number in the note re-checked against the tool JSON before
+  commit; the one arithmetic slip (count-1 total written 43,739, actual 43,939)
+  was fixed in the note before commit. No earlier note needed correction.
+
+Established: the fitted rule's slot ordering — not just its multiset — is now
+consistent with every transfer-marker statistic the corpus exposes; nothing in
+six images puts a transfer-looking control outside a transfer-predicted slot,
+and the one exception is the known `62` trap, which now carries a sharpened
+statement: `6fe4` looks transfer-like while the fit calls slot 0 of `62` short,
+so either the marker does not extend to unadmitted syntax or the fitted `62`
+ordering is wrong. Unknown: what `4b`/`5c` slot 2 and the `b9b3` class do,
+whether the window marker is causal across unadmitted syntaxes, `5a`/`62` slot
+semantics, other builds. No opcode, family or interpreter admission.
+
+Best next item: unchanged — the native `5d52` cutpoint binding
+(GASSDLY/GASSPH/GAMPSIM chains or the `6209` packet's `9450/ded4/8fe2` roles)
+through `native_callback_fixture`, now with this run's positional evidence in
+hand; if native execution exceeds one run again, the next static fallback is
+profiling the `b9b3`-class controls' co-occurrence contexts to bound what the
+fitted miscellaneous slot can be doing.
