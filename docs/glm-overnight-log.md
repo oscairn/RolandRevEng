@@ -517,3 +517,114 @@ binding (GASSDLY/GASSPH/GAMPSIM chains or the `6209` packet's `9450/ded4/8fe2`
 roles) through `native_callback_fixture`; if native execution exceeds one run,
 the next static fallback is profiling the `b9b3`-class controls' co-occurrence
 contexts to bound what the fitted miscellaneous slot can be doing.
+
+## Run 13 — 2026-11-13: program-RAM read path mapped; ReadDspProg exists but has no static caller
+
+Item chosen: lane A1, the load route — the first open item in the owner's
+2026-11-13 feasibility order ("load a foreign program and read it back"). The
+instruction-semantics lane's preferred next step (the native `5d52` cutpoint
+binding, first choice of runs 8/10/11/12) needs native-execution fixtures, which
+this run's static-only rules exclude, and runs 2-12 already covered that lane.
+The write half of the load route was already mapped (`program_write_study.py`,
+`kernel-audio-abi-study.md`); this run mapped the read half and its coupling.
+
+Files:
+
+* `tools/program_read_study.py` (new): models `CBmcDspDrv::ReadDspProg`
+  (0x0112f74c) — raw_head/full_word_tail/bulk step order, shared DMA list,
+  4095-word descriptors, synchronous completion wait — and `ReadLiteralRaw`
+  (0x0112f6e8) widths 2/3/4 with the alignment shift; pins 10 function entries,
+  27 instruction anchors, the aperture table (0x113a954), the raw/fixed/float
+  port tables (0x113aa74/58/3c), the data-memory kind table (0x113aac0) and the
+  capacity pointer table (0x113aaf0), and the four direct `ReadLiteralRaw` call
+  sites; `--dsp/--address/--count` emit a sample geometry. Zero decoder changes.
+* `tests/test_program_read_study.py` (new): 10 tests — synthetic fail-closed
+  geometry (odd/unaligned/oversize inputs, bulk-at-word+2 rejection, threshold
+  after edges, widths 0/1/5 rejected via the unsigned comparison) plus
+  corpus-pinned anchors, shared aperture table, exactly-four call sites, the
+  `ReadDspProg` no-caller negative and a one-bit-flip fail-closed check.
+* `docs/program-read-path-study.md` (new): the study note, with the trimmed tool
+  output pasted verbatim (owner direction of 2026-11-13).
+
+Verified this run (commands and outputs in the transcript):
+
+* Tool exits 0:
+  `PYTHONPATH=local/fantom-python:tools BMC_CORPUS_DIR="$PWD/local"
+  /Users/jacob/Projects/Open Synth Platform/bmc-research/.venv/bin/python
+  tools/program_read_study.py local/b0c1a.bin --dsp 4 --address 0x4020 --count 510`
+  — 510-byte read at 0x4020 = full word at 0x422c first, then 508 queued bytes /
+  127 words, 128 words returned; port command 0x20004020; literal sample
+  (width 2, no shift) command 0x20004021.
+* Read ordering established from the disassembly (`tools/core1.py` listings in
+  the transcript): the leading raw halfword fires on the *address* bit 1
+  (`tst.w r6, #2` at 0x0112f7a0), the trailing **full** word on the *remaining
+  count* bit 1 (`tst.w r5, #2` at 0x0112f7da) and is stored unshifted
+  (`str r0, [r8, r4, lsl #2]` at 0x0112f872 — the `lsr` at 0x0112f7ce belongs to
+  the leading path); the leading halfword shifts right 16
+  (`rsb.w/lsl/lsrs` at 0x0112f7c6..ce). Write-path contrast: `bfc r3, #0, #0x10`
+  at 0x0112f620 clears the low half so writes never disturb bytes past the count,
+  while reads return the whole final word.
+* The bulk path shares the write machinery: threshold `cmp r5, #0x40` at
+  0x0112f878 applies to the remainder after the edges; `DSP_listed_memcpy`
+  (0x0112f290) requires all three arguments 4-aligned (`tst r3, #3` at
+  0x0112f298), so a bulk read from a word+2 address would assert — the model
+  rejects it. The copy is byte-count-preserving (0x0112f8a4 passes r2=r5, r1=r6).
+  Sub-64 remainders take the sequential CPU word loop at 0x0112f8ea..f26.
+* Synchronous completion: after queueing, the reader polls state 2/event bit 4
+  (0x0112f8d6..e4) before resetting state 0; idle state 0 also starts the list
+  through 0x0112f3ba and waits. Same completion callback 0x0112f42d and state
+  byte 0x200847f0 as the write path (pool words 0x112fc74/78).
+* `ReadLiteralRaw`: unsigned `(width-2) < 3` at 0x0112f702; command
+  `(width<<28)|(addr&0x7ffff)` via `ubfx/orr` at 0x0112f71a..26; busy-wait on
+  0x41100008 bit 31; align_right false returns unshifted for every width
+  (`cmp r3, #0; it eq; popeq` at 0x0112f73c..40), true shifts by `(4-width)<<3`
+  (width 3 = 8 bits). Port tables word-verified: raw 0x113aa74 =
+  41104700/.../41102700, fixed 0x113aa58, float 0x113aa3c — the same ports the
+  write path uses, so bit 29 distinguishes these read commands from the write
+  commands on the same ports; bounded to these two families (live-slot
+  `WriteDspCoefFloatWithEnv` commands clear bit 29).
+* Data-memory readers mapped: kind table 0x113aac0 = six port tables
+  (0x113acb8/d60/e08/e40/be0/c10), bases 414/415/.../412-series with kind 3 =
+  0x4113c000; capacity pointers 0x113acd4/ad7c/e24/e5c/bf8/c2c = 2048/2048/1536/
+  256/512/1024 per DSP; kinds 2/4 have a 0 DSP-6 row; kind 4's table at
+  0x113abf8 reads 512 x6 then two float-bit words (not capacities). Kinds 0/1
+  branch before the general dispatch (0x011302a2..a8).
+* Exactly four direct BL callers of `ReadLiteralRaw` (halfword scan):
+  0x01133bb4/0x01133bda in `SetMuteMode` (0x01133b38), 0x01133220 in the
+  program-literal method starting 0x011330ae (assertion
+  `CBmcDspMgr::ChangeDspMemoryAdrs` 0x610ba092; helper `GetDspProgByteAdrs`
+  0x610b98f3), 0x01133698 in the DRAM-IO address-change method starting
+  0x0113353c (assertion `CBmcDspMgr::ChangeDramIO_RW_Adrs` 0x610ba163; helper
+  `GetDramioProgByteAdrs` 0x610b9943).
+* `ReadDspProg` has no direct BL/B, no MOVW/MOVT/BX veneer and no thumb-pointer
+  word anywhere (`tools/core1_xrefs.py local/b0c1a.bin 0x0112f74c` — all three
+  candidate lists empty; halfword scan for 0x0112f74d empty).
+* Every address in the note re-checked against image bytes before commit:
+  10 function entries' bytes, pool words 0x112fc74/78, 0x112f854/4c, 0x1130130/38,
+  shift/bfc instruction bytes, kind/capacity pointer words, capacity values,
+  port first words, listed-memcpy caps 0xffe/0xfff, bulk threshold 0x40 — all
+  verified by the two `python - <<'PY'` sweeps in the transcript.
+* `python -m unittest discover -s tests -p test_program_read_study.py`: 10
+  tests, OK (with `BMC_CORPUS_DIR` at the prepared corpus). Neighboring suites
+  unchanged: `test_program_write_study.py` 8 OK, `test_kernel_abi.py` 5 OK.
+
+Established: the stock driver can read program RAM back through the same
+apertures and ports it writes, synchronously, with geometry that mirrors the
+write path's edge rules; `SetMuteMode` proves in-the-manager program-window
+reads return loaded program content. The route is missing exactly two edges:
+no static caller invokes `ReadDspProg` in this image (so no manager/service
+readback flow is named), and no host route reaches it (the missing external
+peer). Unknown: silicon behavior of the read ports, the real size of the
+program-RAM window beyond the modeled 0x80000, the kind-0/1 2048 driver bound
+versus the envelope study's per-DSP 1024-word bank sizes (unreconciled, stated
+as unreconciled in the note), whether any caller uses width-3 align_right, and
+other builds. No opcode, family or interpreter admission.
+
+Best next item: lane A1's remaining gap is now precise — find the
+manager/service caller of `ReadDspProg` by xrefing its computed-call paths
+(vtable scan of ERAM pools for 0x0112f74d found nothing, so the next step is
+scanning the initializer/scatter tables), or advance to A5 (wave memory and
+interpolation instructions), the owner's least-mapped and highest-value lane;
+A2 (program reservations/unused slots) is also open. The static-analysis
+fallback from the instruction-semantics lane remains the `b9b3`-class context
+profile.
