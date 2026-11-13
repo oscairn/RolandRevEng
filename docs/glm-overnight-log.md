@@ -287,3 +287,82 @@ Best next item: unchanged from run 7 — the native `5d52` cutpoint binding
 through `native_callback_fixture`; it has now survived two structural
 cross-checks. If one run is still too small, the next static fallback is naming
 the writers of the other `0x60`/`0x71`/`0x22b`/`0x23c` declaring groups.
+
+## Run 10 — 2026-11-13: adopted and finished the uncommitted 5e09 cross-image inventory; three draft claims corrected
+
+Item chosen: the instruction-semantics lane — the worktree held uncommitted
+drafts (`tools/five_e09_inventory.py`, `tests/test_five_e09_inventory.py`,
+`docs/five-e09-inventory-study.md`) resolving the standing unknown from
+`negative-short-add-study.md`: the four `5d52` uses under unresolved header
+`5e09`. Following the run-2 pattern, this run verified, corrected, tested and
+committed them rather than starting a new item; the drafts were not yet
+evidence because nothing in them had been run or recorded.
+
+Files:
+
+* `tools/five_e09_inventory.py` (new): fail-closed inventory of every `5e09`
+  packet across the pinned ZENOLOGY arm64 image, both Fantom CORE1 payloads and
+  the three cross-model QSPI containers via the existing `analyze.core_lists()`/
+  `qspi_c1.read_c1()` framing; four known control shapes, unknown shapes fatal;
+  GASS-type per-packet invariants (gain 1.75, bias -0.25, resource offsets 4/6).
+* `tests/test_five_e09_inventory.py` (new): 8 tests — synthetic fail-closed
+  shape/framing/literal checks plus corpus-pinned totals, per-image counts,
+  b0c1a stride `0x5f0`, dsp6 diagnostic payload/offset floor and byte-exact
+  GASS anchor payload.
+* `docs/five-e09-inventory-study.md` (new): the study note, with a run-10
+  verification transcript pasted verbatim (owner direction of 2026-11-13).
+
+Verified this run (commands and outputs in the transcript):
+
+* Tool exits 0: `PYTHONPATH=local/fantom-python:tools BMC_CORPUS_DIR="$PWD/local"
+  python tools/five_e09_inventory.py` — totals 117 `5e09` packets over 2,535
+  strictly framed segments (135 more counted unframeable, not fatal): GASS-type
+  28, SBF325-type 56, STTMDLY-type 28, dsp6 diagnostic 5; per image zen 8,
+  b0c1a 17, b1c1a 1, MI077 45, RPG69 1, DD013 45; 26 distinct GASS resource
+  pairs over 28 observations.
+* Draft corrections (each re-checked with a fresh command before editing):
+  (1) "117 framed scans" — the tool frames 2,535 segments, of which 117 contain
+  the packets; note now states 2,535/135. (2) the zen anchor segment was
+  described as "segment `0x817988`" — that is the stored source offset; the
+  program base is `0x4020` with length `0x5ec`; note now names both. (3) "best
+  header-sequence agreement: GASSDLY 45/80" — verified same-position header
+  counts are GASSDLY `0x9de948` 3 of 80 and next best `0xa2cc28` 5 of 80, so
+  no number near 45/80 exists; note now carries the measured counts.
+* Neighborhood claim re-verified: the zen `0xa41220` 4-packet window and the
+  JUPITER-X MI077 placement (base `0x2020`, source `0x17621c`) are
+  packet-for-packet identical in controls (`b04b ... b08d ... 5e09 ... 2308`)
+  with differing resource words, hexdumps pasted into the note.
+* b0c1a GASS placements: bases `0x4020/0x8040/0x9040/0xa040`, sources
+  `0x1334c8+0x5f0*k`, resources `(0xd,0x13f) (3,0x35f) (0x25,0x3f5) (0x47,0x48b)`
+  — the note's stride and pair claims hold.
+* dsp6 diagnostic: one packet each in b0c1a/b1c1a/MI077/RPG69/DD013, payload
+  `0004d000002de000` constant, offsets `0x1964/0x1776/0x16e0/0x1324/0x1788`;
+  b1c1a and MC-101 have no other `5e09` — as the note claims.
+* `header_study.families(0x5e09)` raises `UnsupportedLayout`; `families(0x4709)`
+  returns `(0,0,4,4)` — decoder unchanged, fail-closed confirmed.
+* `6698528` (`0xa41220`) absent from `local/pairs.json` and `labels` — the
+  desktop-identity negative holds.
+* Fail-closed mutation check: single-bit flips at the stored gain/bias literal
+  bytes (`0x817988+0x290/0x291/0x297`) each raise
+  `ValueError: 0x288: gain/bias literal ... is not ...`.
+* `python -m unittest discover -s tests -p test_five_e09_inventory.py`: 8
+  tests, OK (with `BMC_CORPUS_DIR` at the prepared corpus). Neighboring suites
+  unchanged: `test_header_family_crosscheck.py` 7 OK, `test_header_study.py`
+  9 OK.
+
+Established: complete `5e09` coverage across six images (117 packets, four
+shapes, no unknown combination); the GASS-type invariants per packet and image;
+the count-formula and 9-word length pinned; the `5d52` control coexists with
+`1e50` selecting 1.75 exactly as in the admitted `2e07` chains, across 28 uses
+in four independent images. Unknown: the operand syntax of `4014`/`4010`
+(presumed kind-3 slot), whether `5d52` adds in these contexts, the fitted
+`(1,1,3,4)` prediction for `0x5e` (consistent but not discriminated), the GASS-
+type program's desktop identity, other builds. No opcode, family or interpreter
+admission.
+
+Best next item: the structural ground for the `62`/`5e` families is now as
+complete as static analysis gets without native execution; the next run should
+attempt the native `5d52` cutpoint binding (GASSDLY/GASSPH/GAMPSIM chains, or
+the `6209` packet's `9450/ded4/8fe2` roles) through the existing
+`native_callback_fixture` style, or, if that still exceeds one run, the bounded
+4b/5c miscellaneous-slot cross-check named in the review follow-ups.
