@@ -628,3 +628,98 @@ interpolation instructions), the owner's least-mapped and highest-value lane;
 A2 (program reservations/unused slots) is also open. The static-analysis
 fallback from the instruction-semantics lane remains the `b9b3`-class context
 profile.
+
+## Run 14 — 2026-11-13: ReadDspProg caller census exhausted; both CORE1 images carry an unreferenced program-read twin
+
+Item chosen: lane A1 continuation, the precise gap run 13 named — find the
+manager/service caller of `ReadDspProg` by scanning the remaining computed-call
+paths (initializer/scatter tables). Taken as the only bounded static step left
+in the owner's first-priority lane (load route + readback); either outcome was
+provable: a found caller names the stock readback flow, an exhausted search is
+a verified negative. The instruction-semantics lane's preferred native
+`5d52` cutpoint binding still needs native-execution fixtures, excluded by this
+series' rules.
+
+Files:
+
+* `tools/read_dspprog_caller_census.py` (new): locates the ReadDspProg twin in
+  either pinned CORE1 payload by build-independent prologue shape (push
+  {r4-r8,lr} / mov r8,r3 / cmp r0,#7 / orr.w r3,r1,r2 / tst.w r3,#1), asserts
+  value-identical aperture and raw-port tables per image, asserts each twin's
+  own DMA-state-byte pool word, and exhausts seven static reference forms:
+  direct BL/B, MOVW/MOVT/BX veneer, aligned Thumb pointer words, MOVW/MOVT
+  constructor pairs, PC-relative ADR (add/add.w/addw/sub/sub.w/subw with pc
+  operand), stored words equal to target or target|1 anywhere in the payload,
+  and words inside the *expanded* compressed initial-data image (reusing
+  `core1_wait_study.expand_initial_data` unchanged). Per-image scanner liveness
+  anchors make an empty result meaningful; any hit or anchor failure exits 2.
+* `tests/test_read_dspprog_caller_census.py` (new): 10 tests — synthetic
+  fail-closed fixtures built from real image bytes this run (prologue bytes
+  dumped at 0x0112f74c; MOVW/MOVT pair bytes from 0x1134380; add.w bytes from
+  0x112e74e), planted-pointer detection in stored and expanded regions with
+  one-bit-mutation negatives, plus corpus-pinned twin location in both images,
+  table identity, exhaustively-empty census, report pass/fail-closed and pinned
+  expansion sizes.
+* `docs/read-dspprog-caller-census-study.md` (new): the study note, with both
+  tools' full outputs pasted verbatim (owner direction of 2026-11-13).
+
+Verified this run (commands and outputs in the transcript):
+
+* Tool exits 0 on both images:
+  `PYTHONPATH=local/fantom-python:tools BMC_CORPUS_DIR="$PWD/local"
+  .venv/bin/python tools/read_dspprog_caller_census.py b0c1a` — twin at
+  `0x0112f74c` (equals run 13's pin), all seven scanner families `[]`,
+  expanded `0x478c` bytes / `0x1f43` consumed; `... b1c1a` — twin at
+  `0x0112f394`, all seven `[]`, expanded `0x4710` / `0x1c47`.
+* b1c1a twin identity: prologue-identical (disassembled this run), aperture
+  words `41480000 41580000 41680000 41780000 41880000 41980000 41260000` and
+  raw-port words `41104700 ... 41102700` value-identical to b0c1a's at its own
+  addresses `0x113b1b4`/`0x113b2d4`, own pool word `0x112f8bc` =
+  `0x20084774`.
+* State-byte sharing: in each image exactly one distinct DMA state byte
+  (`0x200847f0` b0c1a / `0x20084774` b1c1a) is referenced by 18 literal-pool
+  loads spanning the DMA driver family around the twins; for b0c1a the write
+  path is inside that referenced range (run 13's write study) and the b1c1a
+  range mirrors it positionally, but this run did not name each b1c1a
+  referencing function individually.
+* Scanner-liveness process note: the first tool version's ADR scanner was
+  dead — Capstone names the PC-relative T3 form `addw`, not `add.w` — and its
+  MOVW/MOVT pair scanner read the MOVT halfword at +2 instead of +4 (found 0
+  candidate pairs; 323 exist in b0c1a's low region). Both bugs were found by
+  the synthetic tests, fixed, and the committed tool asserts per-image liveness
+  anchors (b0c1a: `add.w r6, pc, #0x204` at `0x112e74e` -> `0x0112e954`; pair
+  at `0x1134380` -> `0x61015b77`; b1c1a: `addw` at `0x110165e` ->
+  `0x01101a14`; pair at `0x1133ffc` -> `0x61070181`), so the final empty
+  results come from proven-live scanners.
+* Every address in the note re-checked against live image bytes and the tests'
+  anchors before commit (prologue bytes, pool words, anchor instruction bytes
+  and sums, reset-entry Thumb bits, xref emptiness): all pass.
+* `python -m unittest discover -s tests -p test_read_dspprog_caller_census.py`:
+  10 tests, OK (with `BMC_CORPUS_DIR` at the prepared corpus). Neighboring
+  suites unchanged: `test_program_read_study.py` 10 OK,
+  `test_program_write_study.py` 8 OK, `test_core1_wait_study.py` 5 OK. (The
+  repo's pinned venv has no pytest; unittest discover per the README.)
+
+Established: the stock bmc0 and bmc1 CORE1 images each contain a sound
+program-RAM read primitive and in neither image does any enumerable static
+reference name it. Run 13's "no static caller found" is strengthened to "no
+reference of any scannable kind, in either image, with scanner liveness proven
+per image and per form". For A1's "read it back", the remaining unknowns are
+exactly: (1) how execution reaches `ReadDspProg` — only a computed call whose
+address is assembled by arithmetic on data (e.g. base + 4*index) could invoke
+it, and this census proves no static materialization exists; (2) the missing
+external peer to carry a readback request. Readback-for-verification in the
+first custom-voice milestone therefore depends on a resident CORE1 bridge
+calling the driver directly, or hardware observation; the write route alone is
+fully mapped. Unknown: derived-address invocation (not statically
+excludable), the byte-level difference between the two twins (structural
+identity only — prologue, tables, pool), other builds.
+
+Best next item: lane A1 is now closed to the static limit; per the owner's
+order advance to A5 (wave memory and interpolation — which instructions read
+sample/wave memory and DRAM-IO, their formats, and how stock sample playback
+interpolates), the least-mapped and highest-value lane for the sample-playback
+target. If A5 needs a scoping run first, A2 (program reservations: which
+program slots/contexts exist, who owns each, whether any is unused in the
+stock image) is the next bounded static item. The instruction-semantics
+fallback remains the `b9b3`-class context profile.
