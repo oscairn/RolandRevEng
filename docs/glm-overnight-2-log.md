@@ -690,3 +690,85 @@
   foreign program can load without disturbing stock state. Static.
   Alternative: A5 (wave memory and interpolation), least mapped and most
   important for the first sample-playback target, but a bigger bite.
+
+## Run 15 — 2026-11-13
+
+(This log's previous entry is run 13; no run 14 entry was committed in this
+series — the sibling series' log carries its own run 14.)
+
+- **Item chosen:** lane A2 (program reservations), the item run 13's log
+  queued as next ("a census of all seven per-DSP list-slot objects to say
+  which slots are free in the stock image") and the sibling series' run 14
+  pointed at after closing lane A1 to its static limit. Bounded: the five
+  stock upload objects run 13 pinned sit 8 bytes apart, so the reservation
+  table can be enumerated and cross-checked against the boot walk's
+  dispatch. Static only, pinned `b0c1a.bin`, no keys/encryption/device
+  access.
+- **Files added:** `docs/core1-program-reservations-study.md`,
+  `tools/core1_reservations_study.py`,
+  `tests/test_core1_reservations_study.py`.
+- **Verified** (tool exits 0, `ok: true`, 24/24 byte-exact anchors, SHA-256
+  `6d954…263154`; real JSON and key disassembly pasted into the note): the
+  boot verify routine walks 7 reservation slots per phase (bound
+  `cmp r4,#6; bls` at `0x6100111c`; loop tail `0x61001278`/`0x6100127c`
+  phase 1, `0x61001390` phase 2), r4 = 0..6 = DSP0..DSP5 + MDSP. Phase-1
+  TBB `0x610010e2` (table bytes `04 1a 06 1a 1a 1a 08 00` at `0x610010e6`)
+  dispatches only r4 ∈ {0,2,6} to object loads `0x61085dc4`/`0x61085dd4`/
+  `0x61085de4` (pools `0x610014d4/d8/dc`); phase-2 TBB uploads only
+  `0x61085dcc`/`0x61085ddc` + SRAM `0x20084bb4` — so **DSP1/3/4/5 carry no
+  static reservation entry and are skipped by both phases**. Entry format
+  pinned end to end: header u32 = (count<<16)|(dsp<<8)|phase (count is byte
+  +2, read `ldrb r0,[r6,#2]` at `0x6100117e`, gated `ble`), list at +4,
+  16-byte records (word0 aperture offset, word1 length, word2 length repeat,
+  word3 source). The five stock entries are all count 1, word0 = 0:
+  DSP0 program 0x13e4 bytes at `0x41480000`, DSP0 DRAM-IO 16-byte stub at
+  `0x41440000`, DSP2 program 0xce6 at `0x41680000`, DSP2 DRAM-IO stub at
+  `0x41640000`, MDSP program 0xc956 at `0x41260000` (apertures from
+  `GetDspProgAdrs`' 7-word table `0x0113a954` = `0x41480000+dsp*0x100000`
+  plus `0x41260000`, checked against the closed form; DRAM-IO bases from
+  run 13's closed form). No sixth entry: words `0x61085dec..0x61085e33`
+  (18 words) all zero. Whole-image census: each of the five objects has
+  exactly ONE word reference — its verify-routine pool — so the boot verify
+  routine is the only static consumer of the stock table. The dispatch
+  dereferences manager cells `0x20084b8c/ba0/bb4` (IT-blocks from pools
+  `0x610014e0/e4/e8`, `cbz` skip, `[vtable+0x18]` phase 1 / `+0x1c` phase 2)
+  — all three are zero in BOTH scatter records, i.e. runtime-constructed;
+  constructor `0x6100177c` writes the manager vtable address point
+  `0x6117647c` into all three (0x14 stride, `[+4]=0x2009be2c`,
+  `[+8]=0x61085dec/0x61085e34/0x61085e7c`, `[+0x10]=0`, helpers through
+  veneers `0x61076ab4`→`0x1131bb7` and `0x61076abe`→`0x112ca7d`) but has NO
+  direct BL/veneer/word reference (same unresolved-entry class as the verify
+  routine, run 12). Whole-image scan for other header-form words
+  (`0x00010000|(dsp<<8)|phase` followed by a plausible list pointer): the
+  five plus 113 others, mostly incidental `0x00010000` words; two structured
+  clusters — the MDSP program's own DRAM-IO region records at
+  `0x61093578..0x61093650` and a same-shape run at `0x610a1ef8..0x610a1f74`
+  (count bytes up to 5, pool-referenced at `0x6102956c`/`0x6102a750..c`,
+  consumers untraced) — none consumed by the boot walk.
+- **Tests:** with corpus: 15 passed (0.5 s, `BMC_CORPUS_DIR=<main>/local
+  …/.venv/bin/python -m unittest discover -s tests -p
+  test_core1_reservations_study.py -v`); without corpus 4 pass, 11 skip
+  cleanly (pinned-image guard). Tool run exits 0 with `ok: true`. Sibling
+  suites re-run before commit: `test_core1_dramio_apertures_study.py`,
+  `test_core1_boot_entry_study.py`, `test_bmc_ipc.py` — all OK; the
+  `test_core1_*study.py` wildcard and `test_core1_load_route_study.py`
+  (10 passed, 222 s) OK.
+- **Remains unknown:** whether DSP1/3/4/5 stay free at runtime (run 11's
+  upload-site census shows other callers of the same manager upload bytes,
+  and the `0x610a1ef8..` lookalike run belongs to an untraced consumer —
+  needs the unit or a deeper caller trace); the constructor `0x6100177c`'s
+  caller (no static reference; entry built at runtime or in an unrecovered
+  table); the bodies of its helpers `0x1131bb7` (only the `strb` zero-store
+  read) and `0x112ca7d`; per-slot capacity (the 1 MiB aperture stride bounds
+  the layout; no capacity check found in the walk — count byte and lengths
+  are the only bounds it reads; silicon capacity unknown); bmc1 mirrors none
+  of this.
+- **Best next item for run 16:** A2 closure — trace the `0x610a1ef8..`
+  lookalike run's consumers (`0x6102956c`/`0x6102a750..c` pools) to say
+  whether DSP1/3/4/5 receive runtime program loads through it, which would
+  bound where a foreign program can safely live; or take A3 (entry, return
+  and the mute gate: what starts a program each sample, how it returns,
+  what gates its output), the next feasibility item, which runs 8–10's
+  routing/mute-gate work partially opened on the native side. Both static.
+  Alternative: A5 (wave memory and interpolation) remains least mapped and
+  most important for the first sample-playback target, but is a bigger bite.
