@@ -820,3 +820,109 @@ sample-playback target; a scoping census of which render packets read the
 DRAM-IO/wave apertures the read study mapped (0x411/0x412/0x414/0x415 ports)
 is the bounded first step. If A5 stalls, trace the b1c1a pointer runs to
 name slot owners (A2 completion).
+
+## Run 21 — 2026-11-13: render indexed-transfer census; 529,931 operand reads across six images, tag space bounded to 11 tags
+
+Item chosen: lane A5 (wave memory and interpolation) — specifically the
+bounded scoping step run 19 named as the lane's first step: a census of which
+render programs address which memory spaces through the admitted
+indexed-transfer control form. The instruction-semantics lane's preferred
+native `5d52` cutpoint binding still needs native-execution fixtures, excluded
+by this series' rules. The worktree held an untracked draft
+`tools/render_transfer_census.py` from an earlier session; this run verified,
+corrected, finished, tested and committed it (run 2/10/19 adoption pattern).
+
+Item taken and why: A5 scoping, because run 19 left it as the best next item,
+it is the owner's least-mapped and highest-value lane, and the draft already
+existed. The b1c1a pointer-run trace (A2 completion) is deferred as the
+fallback.
+
+Files:
+
+* `tools/render_transfer_census.py` (new, from the draft): fail-closed census
+  of every indexed-transfer control in all framed render programs of six
+  hash-pinned images (zen_arm64 via `zenology_inventory.json`, b0c1a/b1c1a via
+  `program_slot_census.frame_lists`, three cross-model QSPI images via
+  `qspi_c1.read_c1` + the same framing); counts unknown shapes instead of
+  guessing (`unframeable_segments`, `pool_index_overflow`,
+  `odd_form_controls`); records every access to rare tags 1/3/f verbatim;
+  reports per-tag accesses/loads/stores/distinct-addresses/programs/DSPs and
+  per-port counts; zero decoder changes.
+* `tests/test_render_transfer_census.py` (new): 18 tests — 10 pure synthetic
+  fail-closed checks (admitted/rejected control forms, load/store counting,
+  tag = pool-word top nibble, odd-form counting, pool-index overflow on a
+  length-6 packet, unframeable counting, rare-context field capture,
+  program/DSP attribution, trap-word form) plus 8 corpus-pinned tests (totals,
+  per-tag counts, per-image counts, singleton tags, singleton addresses,
+  native-majority share, run-19 framing cross-check).
+* `docs/render-transfer-census-study.md` (new): the study note, with this
+  run's tool command and trimmed JSON output pasted verbatim (owner direction
+  of 2026-11-13).
+* `local/render-transfer-census.json` (ignored local storage): this run's full
+  tool output, read back by the corpus tests.
+
+Verified this run (commands and outputs in the transcript):
+
+* Tool exits 0: `PYTHONPATH=local/fantom-python:tools BMC_CORPUS_DIR="$PWD/local"
+  .venv/bin/python tools/render_transfer_census.py` — totals
+  `transfer_controls` 529,931 over `framed_segments` 5,635 / `framed_packets`
+  473,989; `unframeable_segments` 136 (128 desktop, 6 MC-101, 1 b1c1a data
+  segment, 1 SH-4d), `odd_form_controls` 88, `pool_index_overflow` 0.
+* Every indexed transfer in every framed stock program resolves inside its own
+  packet (0 overflows across 529,931) — the whole-census extension of
+  `analyze.py`'s per-image operand-boundary assertions.
+* Tag space bounded: 11 of 16 top-nibble tags occur; tags 5/7/9/b/d never do.
+  Tags 0/2/4/c carry 510,941 transfers (96.4%) and are exactly the natively
+  provenanced tags of `transfer-spaces-study.md`; the other 18,990 (3.6%) use
+  unprovenanced tags 1/3/6/8/a/e/f.
+* Tags 1 and 3 are corpus singletons: one address each (`0x1999`/`0x369f`),
+  134 load-only accesses each, all as pool words of the GASS-type `5e09`
+  neighborhoods run 10 mapped — tag 3 by the `6209`/`2508` packets at program
+  offsets `0x22e`/`0x29c` (the run-6/11 trap and its companion), tag 1 by the
+  `2e08` packets at offsets `0x1a`/`0x5e`, in dsp4/dsp5 programs (dsp0 on the
+  desktop image).
+* Tag f: 117 accesses at only `f000`/`f801`, 93 stores — the rare-tag home of
+  the run-11 `6fe4` slot-0 trap.
+* Draft corrections during adoption: the draft used `analyze.core_lists`
+  framing, which caps count at 16 and drops b1c1a's long dsp0..3 base-0 lists
+  (34 segments vs run 19's accepted 1,633-geometry framing); switched to
+  `program_slot_census.frame_lists` and added the desktop inventory path;
+  also fixed a draft arithmetic slip (`counts['pool_index_overflow'] =
+  counts['pool_index_overflow']` no-op) and dead code in `per_program_rows`
+  (removed as unused).
+* Every address/offset/count in the note re-checked before commit against the
+  fresh JSON and the tests' anchors by a `python - <<PY` sweep (totals table,
+  per-image tables, per-tag table incl. load/store sums recomputed
+  independently, native share 510,941/18,990 = 96.4%, singleton low-12
+  addresses 0x999/0x69f, tag-f 93 stores, hash first-16 prefixes
+  `b8ba7f41e26bef91`/`6d95449ae2a2df48`/`c8d150b9cfe13d8e`, singleton offsets
+  0x22e/0x29c/0x1a/0x5e): all pass.
+* `python -m unittest discover -s tests -p test_render_transfer_census.py`:
+  18 tests, OK (with `BMC_CORPUS_DIR` at the prepared corpus). Neighboring
+  suites unchanged: `test_program_slot_census.py` 14 OK,
+  `test_four_b_five_c_crosscheck.py` 13 OK, `test_program_read_study.py` 10
+  OK, `test_header_study.py` 9 OK, `test_transfer_study.py` 6 OK,
+  `test_bmc_emulator.py` 13 OK.
+
+Established: the complete A5 scoping map — which memory spaces stock render
+programs address through the admitted transfer form, with counts, directions,
+and program coverage per image; the transfer-form operand pool is always
+in-packet; four tags hold 96.4% of traffic and match the natively provenanced
+set; tags 1/3 are fully enumerated singletons inside the already-mapped GASS
+`5e09` contexts. Unknown: native provenance of tags 1/3/6/8/a/e/f (1/3 are
+the cheapest next native targets — 134 occurrences, one address, all in
+already-mapped contexts); which tag/instruction reaches the wave/DRAM-IO
+apertures (none of the six images' render programs show a wave-memory-looking
+tag under current unproved assumptions — the answer needs either native
+provenance for the minority tags or the DRAM-IO instruction study); the 136
+unframeable segments' contents. No opcode, family or interpreter admission.
+
+Best next item: lane A5 continues — native provenance of the singleton tags
+1/3 is now the smallest bounded step (134 occurrences, one address each, all
+inside run 10's mapped `5e09` contexts, so the native tracer of
+`transfer_study.py` style can resolve them), or, if native execution exceeds
+one run, study which DRAM-IO/wave aperture ports (`0x411/0x412/0x414/0x415`)
+appear in the render transfer pool addresses at all (this census shows no tag
+above `e`; if wave memory is reached, it is via a non-transfer-form
+instruction, which itself would be new evidence). A2 completion (b1c1a pointer
+runs) remains the static fallback.
