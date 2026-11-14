@@ -843,3 +843,64 @@ series — the sibling series' log carries its own run 14.)
   programmer `SetExeMode 0x1130b6d` from run 11). Static. Alternative: A5
   (wave memory and interpolation) remains least mapped and most important for
   the first sample-playback target, but is a bigger bite.
+
+## Run 17 — 2026-11-13
+
+- **Item chosen:** lane A3 (entry, return and the mute gate), the item run 16's
+  log queued: bind the BMC-side flag/enable register surface beside the
+  already-censused `SetExeMode 0x1130b6d`, whose sibling
+  `CBmcDspDrv::SetDspFlag 0x112f4ba` no earlier note traced (its port table was
+  named but not decoded in run 13). Static only, pinned `b0c1a.bin` (read from
+  the main checkout's `local/`; this worktree has no `local/`), no
+  keys/encryption/device access.
+- **Files added:** `docs/core1-dsp-flag-study.md`,
+  `tools/core1_dsp_flag_study.py`, `tests/test_core1_dsp_flag_study.py`; full
+  tool JSON in ignored `local/core1-dsp-flag-report.json` (main-checkout
+  local). Run 13's note `docs/core1-dramio-apertures-study.md` NOT edited: its
+  `0x4110{2..9}318` prose form is compatible with this run's decode (see the
+  new note's correction paragraph); no committed claim in it changed.
+- **Verified** (tool exits 0, `ok: true`, 40/40 byte-exact anchors, SHA-256
+  `6d954…263154`; real JSON and key disassembly pasted into the note): the
+  driver `CBmcDspDrv::SetDspFlag(int, unsigned char, eDSP_EVENT_REF_TYPE)
+  0x112f4ba` (string `0x610b8cfc`) is the image's only writer of the per-DSP
+  flag ports `0x4110{4..9}318` + MDSP `0x41102318` (table at literal
+  `0x113a9d0`, all 7 words verified; stride 0x1000). It packs
+  `event<<28 | flag&0x7f` with bounds dsp<7, flag<=0x7f, event<9. Its only
+  callers are the two manager wrappers `0x1131bc7` (`CBmcDspMgr::SetDspFlag`)
+  and `0x1131bfd` (`CBmcDspMgr::SetDspFlagBit`), both reached ONLY through
+  manager vtable bytes 0x10/0x14 (address point `0x6117647c`; zero direct
+  BL/veneer/word callers — same virtual-only shape as run 11's `SetExeMode`).
+  The wrappers pass event 2 (bool true) or 8 (bool false) and keep a shadow
+  byte at manager+0xc. A global-mask pair (`0x112f4a6` OR-set,
+  `0x112f4b4` read) over `0x200847f0+0xc` and global port `0x41100004` is
+  reached only through vtable bytes 0x8/0xc and one veneer `0x61076aa0` with
+  exactly four direct BL callers: the boot verify routine at `0x610016c2`
+  (`r0=0x45c5`, immediately before the five `SetExeMode` tuples, all five
+  now byte-pinned) and three single-bit call sites in the unresolved-entry
+  debug family `0x6102d2e6`. The mask word's initial value is 0 (scatter
+  initial-data expansion). No readback of the flag ports exists (no getter).
+- **Tests:** with corpus: 8 passed (3.7 s, `BMC_CORPUS_DIR=<main>/local
+  …/.venv/bin/python -m unittest discover -s tests -p
+  test_core1_dsp_flag_study.py -v`); without corpus 4 pass, 4 skip cleanly.
+  Tool run exits 0 with `ok: true`. Sibling suites re-run before commit:
+  `test_core1_dramio_apertures_study.py`, `test_core1_boot_entry_study.py`,
+  `test_bmc_ipc.py`, `test_core1_lookalike_consumers_study.py` — all OK.
+- **Remains unknown:** which of the recovered virtual-call sites at vtable
+  bytes 0x10/0x14 actually dispatch on the `CBmcDspMgr` object (the byte-0x10
+  site list: `0x11021c0, 0x1102760, 0x110e03e, 0x110e06a, 0x110e274,
+  0x1128ca0, 0x1128f20, 0x1128fa4, 0x1128fae, 0x1128fde, 0x1128fe8,
+  0x1128ff2, 0x112a666, 0x112a848, 0x113126a, 0x6101ef68, 0x6102f648,
+  0x6102fb78, 0x61030578, 0x61030584, 0x61030acc, 0x61034f7c, 0x610839e6,
+  0x61083d1e`; byte-0x14 list in the note — the byte-0x10 load pattern is a
+  generic vtable layout, so attribution needs the enclosing objects' vtables);
+  what the flag register contents do on silicon (needs the unit); when the
+  debug family `0x6102d2e6` runs and whether the `0x45c5` mask survives
+  ordinary operation; bmc1 mirrors none of this.
+- **Best next item for run 18:** A3 closure — trace which virtual-call sites
+  at manager bytes 0x10/0x14 dispatch on the real `CBmcDspMgr` object (start
+  from the ERAM sites `0x61030560/6c/78/84` and `0x61034cb8`, whose enclosing
+  functions `0x6103050c`/`0x61034c52` run 11 already tied to effect
+  lifecycle), which would name the stock code path that raises/clears the
+  per-DSP flags at effect open/close. Static. Alternative: A5 (wave memory
+  and interpolation), least mapped and most important for the first
+  sample-playback target, but a bigger bite.
