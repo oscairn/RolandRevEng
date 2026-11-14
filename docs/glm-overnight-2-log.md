@@ -772,3 +772,74 @@ series — the sibling series' log carries its own run 14.)
   routing/mute-gate work partially opened on the native side. Both static.
   Alternative: A5 (wave memory and interpolation) remains least mapped and
   most important for the first sample-playback target, but is a bigger bite.
+
+## Run 16 — 2026-11-13
+
+- **Item chosen:** lane A2 closure, the item run 15's log queued first: trace
+  the lookalike run's consumers (`0x6102956c`/`0x6102a750..c` pools) to say
+  whether DSP1/3/4/5 receive runtime program loads through it. Static only,
+  pinned `b0c1a.bin` (read from the main checkout's `local/`; this worktree
+  has no `local/`), no keys/encryption/device access.
+- **Files added:** `docs/core1-lookalike-consumers-study.md`,
+  `tools/core1_lookalike_consumers_study.py`,
+  `tests/test_core1_lookalike_consumers_study.py`. Run 15's note
+  `docs/core1-program-reservations-study.md` edited: the lookalike run's end
+  corrected to `0x610a1f78` (the last pair is `0x610a1f70..0x610a1f78`; run 15
+  said `0x610a1f74`), the "what is it / who consumes it" open question marked
+  resolved with a pointer to this run's note, and the DSP1/3/4/5
+  free-at-runtime boundary restated (diagnostic path bound; ordinary-operation
+  freedom still needs the unit).
+- **Verified** (tool exits 0, `ok: true`, 48/48 byte-exact anchors, SHA-256
+  `6d954…263154`; real JSON, full 16-entry decode and key disassembly pasted
+  into the note): the run-15 lookalikes are a complete second reservation
+  table in the boot entry format — 16 pairs spanning `0x610a1ef8..0x610a1f78`,
+  static in ERAM data, covering DSP1/3/4/5 in both phases (phase-0 program
+  seeds: DSP1 634 bytes at `0x41580020`, DSP3 390 at `0x41780020`, DSP4
+  13,750 at `0x41880020`, DSP5 13,678 at `0x41980020`, each plus small
+  6-byte/0xc6-byte records; phase-1 DRAM-IO lists at bank-0 apertures
+  `0x41540000/0x41740000/0x41840000/0x41940000`). Its consumers: **seed
+  consumer `0x610293b2`** (uploads the four phase-0 seed lists through manager
+  vtable byte 0x18 after a 0x3a00 wait through vtable byte 0x8) and
+  **`0x6102a608`** (stub pairs through byte 0x18, phase-1 lists through byte
+  0x1c, tail-calling `0x610293b2` at `0x6102a662`; also BL `0x6102a478`).
+  Both are driven from the diagnostic dispatcher `0x1126a6c` (no static entry;
+  same unresolved-entry class as runs 7/11/15) through veneers `0x1134c7c` →
+  `CFspDspTest::TestEram 0x6103f4b2` (string `CFspDspTest::EResult
+  CFspDspTest::TestEram()` at `0x610c59e8` logged by its error path — this is
+  the V-STAGE note's "diagnostic TestEram-associated dispatch") and
+  `0x1134cea` → `0x6102a609`. TestEram is called by the qctest state machine
+  `0x61080fe0..` (`0x6108104e bl`, `0x61081062 bl 0x6103f49c`), which itself
+  has no direct caller, only pointer-table word `0x6117b0f0 = 0x61080fe1`.
+  The runtime uploader `0x6102a230` (entered only by `0x6102a48c b`) selects
+  vtable byte 0x1c for the phase-1 lists. Manager cells
+  `0x20084b8c/ba0/bb4` remain zero in the stock image (scatter), consistent
+  with run 15. So **DSP1/3/4/5 do receive program loads outside the boot
+  route, but through a diagnostic (qctest/TestEram) path**, not the ordinary
+  boot; the boot verify routine remains the only boot-time user of the stock
+  table.
+- **Tests:** with corpus: 12 passed (6.8 s, `BMC_CORPUS_DIR=<main>/local
+  …/.venv/bin/python -m unittest discover -s tests -p
+  test_core1_lookalike_consumers_study.py -v`); without corpus 3 pass, 1
+  class skips (12 total, 8 pinned-image tests skip cleanly). Tool run exits 0
+  with `ok: true`. Sibling suites re-run before commit:
+  `test_core1_reservations_study.py` 15 passed, `test_bmc_ipc.py` 4 passed,
+  `test_core1_dramio_apertures_study.py` 9 passed,
+  `test_core1_boot_entry_study.py` 8 passed.
+- **Remains unknown:** whether the diagnostic dispatcher `0x1126a6c` or its
+  poll helper `0x11269ba` ever runs during normal operation (no static entry
+  for either; the qctest activation question from earlier passes stays open —
+  needs the unit); whether the uploads succeed on hardware (call structure and
+  argument values pinned; NG paths and the 0x3a00 wait's units unmeasured);
+  the meaning of record word2 (`rep`) and word3 (`src`) beyond pinned values
+  (run 15's boot-table interpretation reused without independent proof the
+  diagnostic path reads them identically); the 6-byte/0xc6-byte small records'
+  semantics; bmc1 mirrors none of this.
+- **Best next item for run 17:** A3 (entry, return and the mute gate: what
+  starts a program each sample, how it returns, what gates its output) — runs
+  8–10 bound the native-side routing/mute gates (`+0x628`/`+0x678`), and this
+  run's second-table work shows DSP1/3/4/5 program RAM is only touched by a
+  diagnostic path, so the remaining A3 question is the BMC-side per-sample
+  start/return contract (core1 side of `ff70/ff71` mute state and the mode
+  programmer `SetExeMode 0x1130b6d` from run 11). Static. Alternative: A5
+  (wave memory and interpolation) remains least mapped and most important for
+  the first sample-playback target, but is a bigger bite.

@@ -93,7 +93,8 @@ program, no device access, no key/ciphertext material.
   common in program code), but two structured clusters use the same 8-byte
   header shape: the MDSP program's own DRAM-IO region records at
   `0x61093578..0x61093650` and a separately consumed run of same-shape
-  (header, list) pairs at `0x610a1ef8..0x610a1f74` — including
+  (header, list) pairs at `0x610a1ef8..0x610a1f78` (16 pairs; end corrected
+  run 16 — the last pair is `0x610a1f70..0x610a1f78`) — including
   `0x610a1f08` header `0x00010300` list `0x610a556c` and
   `0x610a1f58/f60/f68/f70` with DSP1/3/4/5 class headers, pool-referenced at
   `0x6102956c`/`0x6102a750..c`; some neighbors there carry count bytes of 2
@@ -288,9 +289,11 @@ which zeroes `[r0,#0xc]`; `0x61076abe` → `0x112ca7d`, body not analyzed.)
 
 - Whether DSP1/3/4/5 stay free at runtime: run 11's upload-site census shows
   other callers of the same manager upload bytes, and the lookalike headers
-  at `0x610a1f58/f60/f68/f70` (DSP1/3/4/5 class) belong to a second,
-  untraced consumer — a runtime effect change could load programs there
-  (needs the unit or a deeper caller trace to bind).
+  at `0x610a1f58/f60/f68/f70` (DSP1/3/4/5 class) belong to a second consumer —
+  bound run 16 (`core1-lookalike-consumers-study.md`): a diagnostic
+  (`CFspDspTest::TestEram`) path, so they stay free outside qctest/diagnostic
+  operation as far as static evidence goes; ordinary-operation freedom still
+  needs the unit to confirm.
 - The constructor `0x6100177c`'s caller (no BL/veneer/word reference found;
   same unresolved-entry class as the verify routine and bmc1's ASGN task).
 - The bodies of the constructor's helper callees `0x1131bb7` (only its
@@ -299,7 +302,10 @@ which zeroes `[r0,#0xc]`; `0x61076abe` → `0x112ca7d`, body not analyzed.)
   run-11 runtime upload sites use (both go through vtable address point
   `0x6117647c`, so they share the vtable — the object identity behind each
   cell is inferred, not proved).
-- What the lookalike structure at `0x610a1ee8..` is and who consumes it.
+- What the lookalike structure at `0x610a1ef8..0x610a1f78` is and who consumes
+  it (resolved run 16: a second reservation table covering DSP1/3/4/5, consumed
+  by `0x610293b2`/`0x6102a608` behind `CFspDspTest::TestEram` — see
+  core1-lookalike-consumers-study.md).
 - Per-slot capacity: the 1 MiB stride of the aperture tables bounds the slot
   layout, but no capacity check was found in the upload dispatch (the count
   byte and lengths are the only bounds the walk reads); actual silicon
