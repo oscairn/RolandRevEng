@@ -723,3 +723,100 @@ target. If A5 needs a scoping run first, A2 (program reservations: which
 program slots/contexts exist, who owns each, whether any is unused in the
 stock image) is the next bounded static item. The instruction-semantics
 fallback remains the `b9b3`-class context profile.
+
+## Run 19 — 2026-11-13: program-slot census adopted and finished; every stub-only slot backed by exactly one boot-stub segment record
+
+Item chosen: lane A2 (program reservations), the next open item in the
+owner's 2026-11-13 feasibility order after run 14 closed A1 — which program
+slots/contexts the stock image declares and fills, who owns each at the list
+level, and whether any receives only the boot stub. The worktree held
+uncommitted drafts of the census tool and two stored JSON outputs but no
+test, no note and no recorded run, so nothing in them was yet evidence; this
+run verified, extended, tested and committed them (run 2/run 10 pattern).
+The instruction-semantics lane's preferred native `5d52` cutpoint binding
+still needs native-execution fixtures, excluded by this series' rules.
+
+Files:
+
+* `tools/program_slot_census.py` (new, from the draft): frames every render
+  program list with the `analyze.core_lists()` predicates (count bound
+  relaxed to 64, checked to frame identically at 16), classifies each framed
+  segment's stored bytes as `stub`/`packet`/`data` via the admitted packet
+  subset, checks the framing-liveness invariant (exactly one stored u32
+  reference per framed list), cross-checks the five pinned b0c1a MFX
+  reservations, reads the pinned b1c1a 20-row table at `0x610a4f20`, and
+  enforces the new invariant: every stub-only slot's `{base, 6, capacity}`
+  segment record appears exactly once and its source holds the pinned
+  boot-stub record `f800020b00000100`.
+* `tests/test_program_slot_census.py` (new): 14 tests — synthetic fail-closed
+  checks (stub record byte pins, classify shapes, framing predicates,
+  record-census raise paths, kernel-abi reservation pins) plus corpus-pinned
+  censuses for both images, pinned record addresses, table rows, and a
+  duplicate-record mutation that must raise.
+* `docs/program-slot-census-study.md` (new): the study note, with both
+  tools' trimmed outputs pasted verbatim (owner direction of 2026-11-13).
+
+Verified this run (commands and outputs in the transcript):
+
+* Tool exits 0 on both re-hashed payloads
+  (`PYTHONPATH=local/fantom-python:tools BMC_CORPUS_DIR="$PWD/local"
+  .venv/bin/python tools/program_slot_census.py {b0c1a,b1c1a}`):
+  b0c1a 103 lists / 32 slots / stub 16 + packet 361 + data 0 / 6 stub-only
+  slots (dsp4 0x4020/0x5020/0x6020/0x6420, dsp5 0xe840/0xfc40); b1c1a 104
+  lists / 51 slots / stub 26 + packet 1606 + data 1 / 19 stub-only slots
+  (17 dsp4 at 0x700 capacity, dsp5 0xe000/0xe800).
+* Every stub-only slot is backed by exactly one 6-byte segment record
+  `{base, 6, capacity, source}` whose source holds the pinned record:
+  b0c1a records `0x610a8bfc/0c/1c/2c` + `0x610b0d40/d50` with sources in the
+  5-record array `0x610a8bc4..0x610a8be8` and the 11-record array
+  `0x610b0c58..0x610b0cac`; b1c1a 17 dsp-4 records at
+  `0x610a9000..0x610a9100` (stride 16) plus dsp5 `0x610afcec/fc`. All 25
+  records re-verified field-for-field against image bytes this run.
+* The `{base, 6, capacity}` shape is the framed segment record format itself;
+  the fourth word is the segment's stored source.
+* b1c1a's pinned 20-row table at `0x610a4f20` was compared raw with
+  `struct.iter_unpack`: 20 distinct `{base, 0x700}` pairs; 16 of the 20 bases
+  are the stub-only dsp4 slots (the 17th, `0xb120` at `0x1000`, is not in
+  the table), the other 4 (`0xa000/0xa700/0xae00/0xb500`) are dsp5 slots with
+  both a stub and real packet content.
+* The four FETDRIVE-family reservations of the kernel-audio-abi study are
+  also boot-stubbed (1 stub + 76 packet segments each); the LINEDRIVE
+  reservation dsp1 `0x3020/0x1800` carries 12 packet segments and no stub.
+* Fail-closed checks: overwriting the second b0c1a stub record's base
+  `0x5020` with `0x4020` (verified one-bit change at `0x610a8c0c`) makes
+  `study()` raise `... has 2 {base, 6, capacity} segment records, expected
+  exactly one`; record-removal/corruption and framing/capacity/length
+  predicate changes are covered by synthetic tests.
+* The single b1c1a data segment (dsp4 `0x1bda`, 64 bytes at source `0xe8ef4`)
+  sits inside a stub-record array; stored tail ends `...c0f8fdd1 c0f8020c
+  f800020b` and the region continues with two full stub records.
+* Process note: the draft had an incomplete `stub_only` comprehension that
+  only compiled by luck; it was rewritten during adoption. Also, a first
+  fail-closed mutation attempt (flipping a bit in a stored record's bytes)
+  was measured to produce NO raise across all 64 single-bit flips because the
+  census is self-consistent under reclassification; the committed raise
+  paths are the record-count and source-bytes invariants.
+* `python -m unittest discover -s tests -p test_program_slot_census.py`:
+  14 tests, OK (with `BMC_CORPUS_DIR` at the prepared corpus). Neighboring
+  suites unchanged: `test_read_dspprog_caller_census.py` 10 OK,
+  `test_program_read_study.py` 10 OK, `test_program_write_study.py` 8 OK,
+  `test_kernel_abi.py` 5 OK.
+
+Established: both stock images declare their render slot usage purely through
+framed program lists plus boot-stub segment records, with no slot lacking a
+backing record; the b1c1a `0x700` table's composition is pinned. A2's "is
+any slot unused" is now bounded to: a stub is a written program, but whether
+any stub-only slot ever executes is open. Unknown: runtime owners of the
+slots (pointer runs at `0x610014d4/0x61029568/0x6102a750` b0c1a and
+`0x610029b4/0x61024348/0x61024800` b1c1a located but not traced), whether
+code reads the `0x610a4f20` table (no xref taken), the 60 lead bytes of the
+b1c1a data segment, other builds. No opcode, family or interpreter
+admission.
+
+Best next item: lane A5 (wave memory and interpolation — which instructions
+read sample/wave memory and DRAM-IO, their formats, and how stock sample
+playback interpolates), the least-mapped and highest-value lane for the
+sample-playback target; a scoping census of which render packets read the
+DRAM-IO/wave apertures the read study mapped (0x411/0x412/0x414/0x415 ports)
+is the bounded first step. If A5 stalls, trace the b1c1a pointer runs to
+name slot owners (A2 completion).
