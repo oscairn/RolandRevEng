@@ -26,7 +26,7 @@ constant program `0b0200f80001`. Both constants are pinned in the tool:
 
 ```
 $ PYTHONPATH=local/fantom-python:tools BMC_CORPUS_DIR="$PWD/local" \
-  /Users/jacob/Projects/Open Synth Platform/bmc-research/.venv/bin/python \
+  <repo>/.venv/bin/python \
   tools/program_slot_census.py b0c1a
 {
   "lists": 103,
@@ -120,7 +120,7 @@ $ ... tools/program_slot_census.py b1c1a
 ## Verified evidence
 
 All commands run in this worktree with the pinned interpreter
-`/Users/jacob/Projects/Open Synth Platform/bmc-research/.venv/bin/python`,
+`<repo>/.venv/bin/python`,
 `PYTHONPATH=local/fantom-python:tools BMC_CORPUS_DIR="$PWD/local"`.
 
 1. Both payloads re-hash to the run 14 pins before use (`b0c1a`
@@ -196,12 +196,12 @@ All commands run in this worktree with the pinned interpreter
 
 ```
 PYTHONPATH=local/fantom-python:tools BMC_CORPUS_DIR="$PWD/local" \
-  /Users/jacob/Projects/Open Synth Platform/bmc-research/.venv/bin/python \
+  <repo>/.venv/bin/python \
   tools/program_slot_census.py b0c1a
 PYTHONPATH=local/fantom-python:tools BMC_CORPUS_DIR="$PWD/local" \
-  /Users/jacob/Projects/Open Synth Platform/bmc-research/.venv/bin/python \
+  <repo>/.venv/bin/python \
   tools/program_slot_census.py b1c1a
 BMC_CORPUS_DIR="$PWD/local" PYTHONPATH=local/fantom-python:tools:tests \
-  /Users/jacob/Projects/Open Synth Platform/bmc-research/.venv/bin/python \
+  <repo>/.venv/bin/python \
   -m unittest discover -s tests -p test_program_slot_census.py
 ```

@@ -42,9 +42,9 @@ questions stay inspectable without a rerun.
 ## Exact evidence (this run's command, trimmed output)
 
 ```sh
-cd "/Users/jacob/Projects/Open Synth Platform/bmc-research/local/worktrees/glm-overnight"
+cd "<repo>/local/worktrees/glm-overnight"
 PYTHONPATH=local/fantom-python:tools BMC_CORPUS_DIR="$PWD/local" \
-  /Users/jacob/Projects/Open Synth Platform/bmc-research/.venv/bin/python \
+  <repo>/.venv/bin/python \
   tools/render_transfer_census.py > local/render-transfer-census.json
 # exit=0
 ```
@@ -127,7 +127,7 @@ Reproduce the pinned numbers:
 
 ```sh
 BMC_CORPUS_DIR="$PWD/local" PYTHONPATH=local/fantom-python:tools:tests \
-  /Users/jacob/Projects/Open Synth Platform/bmc-research/.venv/bin/python \
+  <repo>/.venv/bin/python \
   -m unittest discover -s tests -p test_render_transfer_census.py -v
 # Ran 18 tests in 25.6s — OK (8 corpus-pinned, 10 pure)
 ```

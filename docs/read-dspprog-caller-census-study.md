@@ -38,7 +38,7 @@ Command producing the evidence below:
 
 ```sh
 PYTHONPATH=local/fantom-python:tools BMC_CORPUS_DIR="$PWD/local" \
-  /Users/jacob/Projects/Open\ Synth\ Platform/bmc-research/.venv/bin/python \
+  <repo>/.venv/bin/python \
   tools/read_dspprog_caller_census.py b0c1a
 ```
 
@@ -73,7 +73,7 @@ The b1c1a run:
 
 ```sh
 PYTHONPATH=local/fantom-python:tools BMC_CORPUS_DIR="$PWD/local" \
-  /Users/jacob/Projects/Open\ Synth\ Platform/bmc-research/.venv/bin/python \
+  <repo>/.venv/bin/python \
   tools/read_dspprog_caller_census.py b1c1a
 ```
 

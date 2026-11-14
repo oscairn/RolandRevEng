@@ -21,7 +21,7 @@ Command producing the evidence below:
 
 ```sh
 PYTHONPATH=local/fantom-python:tools BMC_CORPUS_DIR="$PWD/local" \
-  /Users/jacob/Projects/Open\ Synth\ Platform/bmc-research/.venv/bin/python \
+  <repo>/.venv/bin/python \
   tools/program_read_study.py local/b0c1a.bin --dsp 4 --address 0x4020 --count 510
 ```
 

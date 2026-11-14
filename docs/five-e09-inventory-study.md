@@ -164,7 +164,7 @@ pin the synthetic fail-closed behavior and the corpus totals above.
 ## Verification transcript (run 10, 2026-11-13)
 
 Real commands and their real output (relevant lines) on this worktree,
-interpreter `/Users/jacob/Projects/Open Synth Platform/bmc-research/.venv/bin/python`:
+interpreter `<repo>/.venv/bin/python`:
 
 `PYTHONPATH=local/fantom-python:tools BMC_CORPUS_DIR="$PWD/local" python tools/five_e09_inventory.py > local/five-e09-run10.json` — exit 0; `totals`:
 

@@ -452,7 +452,7 @@ study notes on this branch are `docs/four-b-five-c-slot-crosscheck-study.md`
 (run 11), `docs/five-e09-inventory-study.md` (run 10) and
 `docs/rvsdly-60-71-pair-crosscheck-study.md` (run 8). Every stated command in
 each note was re-run in this worktree with the pinned interpreter
-`/Users/jacob/Projects/Open Synth Platform/bmc-research/.venv/bin/python`, and
+`<repo>/.venv/bin/python`, and
 every address/offset in each note was re-checked against the tools' fresh JSON
 and the tests' anchors. No note's analytical content changed; one earlier log
 entry's test count was corrected.
@@ -550,7 +550,7 @@ Verified this run (commands and outputs in the transcript):
 
 * Tool exits 0:
   `PYTHONPATH=local/fantom-python:tools BMC_CORPUS_DIR="$PWD/local"
-  /Users/jacob/Projects/Open Synth Platform/bmc-research/.venv/bin/python
+  <repo>/.venv/bin/python
   tools/program_read_study.py local/b0c1a.bin --dsp 4 --address 0x4020 --count 510`
   — 510-byte read at 0x4020 = full word at 0x422c first, then 508 queued bytes /
   127 words, 128 words returned; port command 0x20004020; literal sample
