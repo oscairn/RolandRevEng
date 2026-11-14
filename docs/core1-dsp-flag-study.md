@@ -269,16 +269,20 @@ Manager vtable words around the address point (tool-verified):
 - Who calls the manager vtable bytes 0x10/0x14 at runtime: the strict
   virtual-call scan (this tool plus `core1_load_route_study.virtual_slot_sites`)
   finds sites at `+0x10`: `0x11021c0, 0x1102760, 0x110e03e, 0x110e06a,
-  0x110e274, 0x1128ca0, 0x1128f20, 0x1128fa4, 0x1128fae, 0x1128fde, 0x1128fe8,
-  0x1128ff2, 0x112a666, 0x112a848, 0x113126a, 0x6101ef68, 0x6102f648,
-  0x6102fb78, 0x61030578, 0x61030584, 0x61030acc, 0x61034f7c, 0x610839e6,
-  0x61083d1e` and at `+0x14`: `0x11021f0, 0x1102794, 0x110e060, 0x110e06a,
-  0x1129064, 0x11312b8, 0x61030560, 0x6103056c, 0x61034cb8, 0x6103ce96,
-  0x611b74c2, 0x611b7562, 0x611c9e38, 0x611ca2ca` — but byte-0x10/0x14 loads
-  are a generic vtable layout shared by many classes (the byte-0x8 scan alone
-  hits 3,268 sites), so which of these sites actually dispatch on the
-  `CBmcDspMgr` object is NOT proven; attributing them needs the enclosing
-  objects' vtables traced (deferred; the boot call sites are the proven ones).
+  0x110e274, 0x1128ca0, 0x1128f20, 0x1128fa4, 0x1128fde, 0x112a666,
+  0x112a848, 0x113126a, 0x6101ef68, 0x6102f648, 0x6102fb78, 0x61030578,
+  0x61030acc, 0x610839e6, 0x61083d1e` and at `+0x14`: `0x11021f0, 0x1102794,
+  0x110e060, 0x1129064, 0x11312b8, 0x61030560, 0x61034cb8, 0x6103ce96,
+  0x611b74c2, 0x611b7562, 0x611ca2ca` (run 18's corrected census — the
+  original list here included stale-register matches
+  `0x1128fae/0x1128fe8/0x1128ff2/0x61034f7c` under +0x10 and
+  `0x110e06a/0x6103056c/0x61030594/0x611c9e38` under +0x14; see
+  [core1-mgr-vtable-sites-study](core1-mgr-vtable-sites-study.md)) — and
+  byte-0x10/0x14 loads are a generic vtable layout shared by many classes (the
+  byte-0x8 scan alone hits 3,268 sites), so which of these sites actually
+  dispatch on the `CBmcDspMgr` object is NOT proven; attributing them needs the
+  enclosing objects' vtables traced (partially bounded by run 18; the boot call
+  sites are the proven ones).
 - The three debug-family callers' enclosing context (the function
   `0x6102d2e6` family has no static entry — same unresolved-entry class as runs
   7/11/15/16; only `0x6102d602 b 0x6102d2e6` reaches it) and when they run.

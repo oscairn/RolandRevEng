@@ -74,17 +74,22 @@ Real tool output (command above), trimmed to the relevant keys:
   "anchor_problems": [],
   "upload18": ["0x1102220", "0x11027c8", "0x110ddd8", "0x110e43a",
                "0x1131306", "0x61001118", "0x61013afa", "0x6101ef8c",
-               "0x61026a64", "0x6103056c", "0x61030578", "0x61034980",
+               "0x61026a64", "0x6103056c", "0x61034980",
                "0x61034cf6"],
   "upload1c": ["0x1102250", "0x11027fc", "0x1131336", "0x61001156",
-               "0x61026652", "0x61030584", "0x61030594", "0x6103bede",
-               "0x6103bee8"],
+               "0x61026652", "0x61030584", "0x6103bede"],
   "upload20": ["0x1102280", "0x1129a04", "0x1131366", "0x6101efb0",
                "0x61030594", "0x610836f8"],
   "coef70": ["0x1131734"],
   "coef74": ["0x1131764"]
 }
 ```
+
+(Run 18's `docs/core1-mgr-vtable-sites-study.md` corrected this JSON: the
+original scan here double-counted `0x61030578` under 0x18 and
+`0x61030594`/`0x6103bee8` under 0x1c — its strict scanner accepted stale
+register loads; `0x61030578`'s actual load is `#0x10` (a flag dispatch) and
+`0x61030594`'s is `#0x20`.)
 
 ### The boot verify routine (`0x610010d0`)
 
@@ -135,7 +140,7 @@ routine itself, immediately after its upload+verify passes.
 | `0x61013afa` | effect-lifecycle writer `0x61013aa0` (per-instance loop, list count from `[r5,#0x10]`) |
 | `0x6101ef8c/0x6101efb0` | `0x6101ef2e` (both a 0x18 and a 0x20 call) |
 | `0x61026a64` / `0x61026652` | `0x61026612` (event-style, guarded by `[r6,r4,lsl#2]` object slots and `0x411003xx` register writes) |
-| `0x6103056c/0x61030578/0x61030584/0x61030594` | `0x6103050c` — calls slot 0x18 twice, then 0x1c, then 0x20 (the only function calling three different upload slots) |
+| `0x6103056c/0x61030578/0x61030584/0x61030594` | `0x6103050c` — calls slot 0x14 once, then 0x18, then 0x10 (flag), then 0x1c, then 0x20 (the only function calling three different upload slots plus the flag byte) |
 | `0x61034980/0x61034cf6` | `0x61034954` / `0x61034c52` |
 | `0x610836f8` | inside `0x610835d0` (boot-region helper; the old note's `0x610836f0` is the `ldr r1,[r1,#0x20]` right before the `blx`, not a function start) |
 | `0x1129a04` | inside `0x0112999e` (effect replacement region; the old note's `0x01129a00` is the instruction right before the `blx`, not a function start) |
