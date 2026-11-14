@@ -12,7 +12,7 @@ analysis. No BMC command, GPIO change, raw bus/memory probe or firmware write
 was performed.
 
 Later same-day follow-up: the [CORE1 marker flash trial](fantom-core1-flash-trial.md)
-proved custom bmc0 CORE1 execution and a USB MIDI request/reply path on Jacob's
+proved custom bmc0 CORE1 execution and a USB MIDI request/reply path on the owner's
 Fantom-07. It did not read ROM or recover a key. The inventory/UART observations
 below describe the earlier read-only pass.
 

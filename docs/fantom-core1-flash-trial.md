@@ -1,6 +1,6 @@
 # Fantom-07 1.08 first CORE1 marker flash trial
 
-2026-11-12. **The marker flash and USB MIDI round trip succeeded on Jacob's
+2026-11-12. **The marker flash and USB MIDI round trip succeeded on the owner's
 Fantom-07.** Normal startup and persistent root SSH were retained, and the patched
 bmc0 CORE1 helper returned the exact constant marker through external USB MIDI.
 The complete two-stage kit targets v1.08 with persistent SSH. This supersedes the earlier
@@ -62,7 +62,7 @@ Detailed reports remain local in the kit's `live-gpg-validation.json` and
 
 ## Hardware result
 
-Jacob reported flashing complete, rebooted and confirmed the normal screen with
+The owner reported flashing complete, rebooted and confirmed the normal screen with
 USB Ethernet reconnected. The Mac authenticated root SSH with the same pinned
 host key, found the SSH service active and mi078 running. Application SHA256
 remained `90515931ab039e926fea9cd1b237e341d4097002dcb119674eed7df00f3d9bb7`;

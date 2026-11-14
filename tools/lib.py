@@ -1,6 +1,6 @@
 """Local artifact access for the preserved SIM constructor and native operand readers.
 
-parse.py and lift.py originated in Jacob's 2026-11-09 analysis scratchpad.
+parse.py and lift.py originated in the owner's 2026-11-09 analysis scratchpad.
 They are heuristics, not complete ARM emulators. Validate their output against bytes.
 """
 import bisect

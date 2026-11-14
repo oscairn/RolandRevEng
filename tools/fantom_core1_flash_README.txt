@@ -1,6 +1,6 @@
 FANTOM-07 v1.08 — FIRST BMC CORE1 MARKER FLASH TRIAL
 
-This is a complete two-stage test layout for Jacob's already-rooted Fantom-07.
+This is a complete two-stage test layout for the owner's already-rooted Fantom-07.
 It requires the verified v1.08 application and previously installed persistent
 SSH. It does not install SSH, replace keys, update Linux or extract _DATA_FNTM0.
 No public/private SSH key or separate Dropbear file needs to be added.

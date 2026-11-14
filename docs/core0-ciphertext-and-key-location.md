@@ -1,6 +1,6 @@
 # CORE0 ciphertext comparison and the reported ROM key location
 
-2026-11-10. Offline follow-up to Jacob's request to find a CORE0 key, its location
+2026-11-10. Offline follow-up to the owner's request to find a CORE0 key, its location
 or another route into the Fantom. No key bytes were recovered by this comparison.
 No encrypted image was decrypted and no target memory or device was accessed.
 

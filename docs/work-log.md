@@ -1,7 +1,7 @@
 # Unattended research checkpoint
 
 2026-11-09, continuing into the overnight session. User-selected remote:
-`https://github.com/jbschooley/RolandRevEng.git`.
+`https://github.com/oscairn/RolandRevEng.git`.
 
 ## Repository and publication
 
@@ -204,7 +204,7 @@ to a runnable engine, not completed hardware experiments.
 
 ## Network and local-model verification after reopening
 
-Jacob applied the network config patch and reopened Codex. Ordinary command networking
+The owner applied the network config patch and reopened Codex. Ordinary command networking
 is still restricted, while the new automatic-review execution path permits bounded
 approved network calls. GitHub DNS/HTTP succeeds through that path, and the configured
 Mac Studio returns an actual authenticated `BMC_RUNNER_OK` through OMP with tools
@@ -269,7 +269,7 @@ complete state reset, physical audio routing and hardware precision remain unver
 
 ## DRAM-IO, parent control flow and official cross-model firmware
 
-Continued from `ef39d1b` and incorporated Jacob's suggestion to download other
+Continued from `ef39d1b` and incorporated the owner's suggestion to download other
 Roland BMC firmware. All comparisons are offline; no updater, target or device ran.
 
 - `0e0a79f`: actual CORE1 wait chunk/final-completion behavior, register arithmetic
@@ -392,7 +392,7 @@ numerics remain unverified; there is still no runnable custom BMC engine.
 
 ## Outbound flow, clear IRQ identity, factory dispatch and stereo tap semantics
 
-Continued from `9ea3262` at Jacob's request. Three isolated workers returned
+Continued from `9ea3262` at the owner's request. Three isolated workers returned
 commits; the main checkout reviewed their code, ran focused tests and inspected
 the relevant native/firmware windows independently:
 
@@ -581,7 +581,7 @@ package was executed or modified.
 
 ## Roland vault organization — 2026-11-10
 
-At Jacob's request, moved all 52 Roland research and related planning Markdown
+At the owner's request, moved all 52 Roland research and related planning Markdown
 notes from `Projects/Oscairn` into `Projects/Oscairn/Roland`. This includes the
 49 previously managed notes, the engine overview and two related planning/draft
 notes. All prior managed hashes matched; every source was backed up and all 52
@@ -1563,7 +1563,7 @@ notes. No firmware package, live device, output wrapper or silicon-precision cla
 
 ## Completed tonight's input-to-first-filter milestone (2026-11-11)
 
-Resumed only the bounded stage after Jacob explicitly requested continuation.
+Resumed only the bounded stage after the owner explicitly requested continuation.
 The saved draft's failed binding was corrected to the actual constructor aliases:
 right history uses relative24, raw stores22/26, and mixed stores reuse1e/24.
 The physical mixed-store operands at5a/5c are also checked; validation was not
@@ -1591,7 +1591,7 @@ saved. Local270-byte logical/272-byte stored bodies have logical hash
 9912f101df3714156894a3b9bb7feb3c6225c468e33e3179fc68ebcd783637bb.
 
 The immediate milestone is complete. Broader research pauses after this verified
-commit and note sync, per Jacob's requested stopping point. No full-FDRV,
+commit and note sync, per the owner's requested stopping point. No full-FDRV,
 physical-precision, live-loading or entry/return claim is made, and no device
 was accessed. Saved earlier WIP is historical and is superseded by this checkpoint.
 
@@ -2661,7 +2661,7 @@ whole-engine execution, entry/return and safe loading remain open.
 
 ## Low-token handoff checkpoint (2026-11-11)
 
-Jacob requested the next priorities and a good stopping point for another agent.
+The owner requested the next priorities and a good stopping point for another agent.
 Added agent-handoff.md with the verified179ebee research state, ordered ISA and
 transport/loading work, reproducible commands, artifact identities and note-sync
 constraints. No implementation or decoder change was made in this pass.

@@ -1,6 +1,6 @@
 # Additional official firmware: SH-4d and TR-8S
 
-2026-11-10. Offline file/Capstone analysis following Jacob's request to acquire
+2026-11-10. Offline file/Capstone analysis following the owner's request to acquire
 other BMC firmware when it can resolve engine-loading or ISA questions. These two
 updates add a different readable CORE1 image and a concrete encrypted-only limit.
 No updater, target program, device or probe was executed.

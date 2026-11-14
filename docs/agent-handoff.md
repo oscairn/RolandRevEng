@@ -1,9 +1,9 @@
 # Roland BMC research handoff
 
-Prepared 2026-11-11 for a fresh agent after Jacob requested a low-token stopping
+Prepared 2026-11-11 for a fresh agent after the owner requested a low-token stopping
 point. The full objective remains incomplete: offline BMC ISA/emulation/custom
 engine tooling for Fantom-07, firmware-supported unknowns, and documented hardware
-requirements. Jacob plans to obtain a Fantom-07, not a Jupiter-X.
+requirements. The owner plans to obtain a Fantom-07, not a Jupiter-X.
 
 ## Verified checkpoint
 
@@ -84,8 +84,8 @@ represent a functional port value.
 
 ## Local environment and continuation commands
 
-Project: `/Users/jacob/Projects/Open Synth Platform/bmc-research`.
-Use `/Users/jacob/.pyenv/versions/3.13.7/bin/python` and
+Project: `<repo>`.
+Use `~/.pyenv/versions/3.13.7/bin/python` and
 `PYTHONPATH=local/fantom-python:tools:tests`.
 
 ```sh
@@ -107,7 +107,7 @@ Pinned Fantom `local/b0c1a.bin` stripped payload SHA-256:
 `6d95449ae2a2df48fb60f8b69da6bf8c7198611255b63d59081ba5bdf5263154`.
 Vendor artifacts, raw disassembly and worker output stay in ignored `local/`.
 
-Jacob authorizes Qwen through the existing Mac Studio OMP setup to save tokens;
+The owner authorizes Qwen through the existing Mac Studio OMP setup to save tokens;
 independently verify every result. Reuse the bounded no-tools runner at
 `local/negative-short-add/run-qwen.py` with a new scratch output directory and
 the existing `local/omp-qwen.lock`. Its last opcode review was rejected for
@@ -115,13 +115,13 @@ confusing native temporaries with DSP ports. All subprocesses launched in this
 handoff pass have exited; do not assume old workers are alive from state files.
 
 Code belongs in the project. Obsidian receives Markdown only under
-`/Users/jacob/Documents/ObsidianVault/Projects/Oscairn/Roland`. The current note
+`~/Documents/ObsidianVault/Projects/Oscairn/Roland`. The current note
 manifest is located by `local/obsidian-location.json`; preserve user edits with
 expected-hash guards, backups and atomic writes. Git pushes are normal, non-force,
 to the existing origin; verify `git ls-remote` directly afterward.
 
 Before any question/input/approval prompt run
-`/Users/jacob/.codex/bin/prompt-ding`. It currently fails with
+`~/.codex/bin/prompt-ding`. It currently fails with
 `AudioQueueStart(-66680)`; report the failure. REA was unavailable in the earlier
 work; existing Capstone/native/Unicorn fallbacks are reproducible evidence, not
 REA Evidence records. Do not repeat completed setup diagnostics unnecessarily.

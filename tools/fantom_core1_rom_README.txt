@@ -8,7 +8,7 @@ reader. The candidate entry still needs independent decryption validation.
 
 REQUIREMENTS AND SCOPE
 
-Use Jacob's Fantom-07 running the verified v1.08 application with persistent
+Use the owner's Fantom-07 running the verified v1.08 application with persistent
 SSH already installed. No key file, Dropbear binary or _DATA_FNTM0 is needed.
 The board1 step only checks the existing installation and this kit's UPA hash.
 It does not change Linux, SSH keys, startup files, user data or partitions.

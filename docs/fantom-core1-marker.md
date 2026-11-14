@@ -1,7 +1,7 @@
 # Fantom-07 1.08 CORE1 marker experiment
 
 2026-11-12. Built locally, checked in isolated ARM emulation, then **flashed and
-observed returning the exact marker over external USB MIDI on Jacob's Fantom-07**.
+observed returning the exact marker over external USB MIDI on the owner's Fantom-07**.
 See the [hardware trial and two-stage kit](fantom-core1-flash-trial.md).
 The original folder below is payload-only. This is a
 small step toward [CORE0 key recovery](fantom-rom-dumper-plan.md): prove a

@@ -10,9 +10,9 @@ its unverified USB-console and recovery assumptions.
 
 ## User-reported installation and error
 
-Jacob copied `fantom-07-update-shell` onto USB storage and started with WRITE held.
-Board 1 reached its End / move-memory-to-external-board-2 screen. Jacob then
-performed the second update stage. Jacob subsequently confirmed that “Update (board2) End…” appeared before
+The owner copied `fantom-07-update-shell` onto USB storage and started with WRITE held.
+Board 1 reached its End / move-memory-to-external-board-2 screen. The owner then
+performed the second update stage. The owner subsequently confirmed that “Update (board2) End…” appeared before
 power-off. On ordinary startup, the setlist appeared with a
 “Program Version Error” popup. USB TO COMPUTER was connected to the Mac after the
 first update stage, rather than before it.
@@ -41,10 +41,10 @@ procedure.
 
 ## Direct display/keyboard console
 
-Jacob connected a USB computer keyboard to USB MEMORY and pressed Ctrl+Alt+F2.
+The owner connected a USB computer keyboard to USB MEMORY and pressed Ctrl+Alt+F2.
 He reported a login prompt or shell, then confirmed that entering root requested
 a password. A single empty-password submission returned “login incorrect”.
-Jacob subsequently reported that F1–F6 show login consoles, F7 shows the app,
+The owner subsequently reported that F1–F6 show login consoles, F7 shows the app,
 and F8–F9 show only a top-left cursor and accept no input. Those blank displays
 are not evidence of interactive shells. Console reachability is established by the user report; authenticated
 shell access, root UID, kernel version and installed startup contents are not yet
@@ -70,10 +70,10 @@ Verified stock files are stored separately alongside it. This establishes build
 identity, not updater acceptance, root execution, keyboard input under X or
 successful recovery on hardware. After the direct-console and desktop-shortcut
 checks yielded no shell, this candidate was selected as the next attempt in
-response to Jacob's request for which files to put on the flash drive. All three
-current file hashes and shell syntax were rechecked. Jacob subsequently reported
+response to the owner's request for which files to put on the flash drive. All three
+current file hashes and shell syntax were rechecked. The owner subsequently reported
 “ok it works” and requested a shell accessible from the Mac over USB. This is
-user-reported success of the on-screen shell route. Jacob subsequently transcribed
+user-reported success of the on-screen shell route. The owner subsequently transcribed
 id output establishing UID 0/root (see below); uname output is still absent.
 No successful stock rollback has been observed.
 
@@ -87,7 +87,7 @@ The upstream NXP-family [Weston 3 desktop shell source](https://coral.googlesour
 registers modifier+Shift+F to toggle the focused window's fullscreen state. It
 does not establish Roland's installed shell or shortcut configuration. A single
 Windows/Super+Shift+F check on F7 was requested to see whether a desktop panel or
-terminal launcher becomes visible. Jacob reported that the shortcut did nothing.
+terminal launcher becomes visible. The owner reported that the shortcut did nothing.
 No terminal-launch shortcut
 has been established for this device. The stock application tar contains
 `_DATA/bin/weston-image`, but no member name matching weston configuration,
@@ -95,7 +95,7 @@ getty, systemd, shadow or rootfs; this is not an inventory of the installed OS.
 
 ## Review of the separately supplied GS1 package
 
-Jacob requested inspection of `fantom-07-vtshell-update`, built by another agent.
+The owner requested inspection of `fantom-07-vtshell-update`, built by another agent.
 Despite its name, it does not start a virtual-console shell: its script requests
 `modprobe g_serial n_ports=2`, then runs a background interactive shell loop on
 `/dev/ttyGS1`. It leaves the normal application launch in place and contains no
@@ -156,7 +156,7 @@ by the normal app. No additional firmware was flashed during this review.
 
 ## Transition from display shell to remote access
 
-After Jacob's success report, the Mac still had no cu.usbmodem device. A fresh
+After the owner's success report, the Mac still had no cu.usbmodem device. A fresh
 read-only USB inventory showed the Fantom as `0582:0221`, with no additional
 serial gadget listed. The Mac's RTL8156 internet adapter remained on en14; it
 was not reconfigured. Fantom-side id, net-interface names, UDC names, GS device
@@ -166,7 +166,7 @@ driver and SSH availability; it is not yet a working connection. No gadget was
 unbound, serial module unloaded, network listener started or root login policy
 changed by the agent.
 
-Jacob subsequently transcribed these live results:
+The owner subsequently transcribed these live results:
 
 * id: UID 0/root, group 0/root. His text spelled the gid label as git; the UID
   and root group values are unambiguous.
@@ -181,7 +181,7 @@ lsusb output, BusyBox telnetd availability and hub availability were requested
 next. The agent has not started a remote listener. A read-only local Docker
 inventory attempt hit sandbox socket restrictions; no container/build was started.
 
-Jacob then reported lsusb listing only a Linux Foundation USB 2.0 root hub and
+The owner then reported lsusb listing only a Linux Foundation USB 2.0 root hub and
 the Logitech Unifying keyboard receiver. `busybox telnetd --help` returned
 `telnetd: applet not found`. No USB Ethernet adapter or network shell is yet
 established. Next minimal check: `busybox nc --help`; its presence and options
@@ -189,7 +189,7 @@ are unknown. If unavailable or lacking execution/listen support, prepare a
 verified ARM64 Linux SSH server for transfer via USB storage. Prefer a temporary
 isolated Ethernet link; do not reconfigure the BMC gadget to obtain connectivity.
 
-Jacob reported nc usage beginning `nc [IPADDR PORT`, consistent with client-only
+The owner reported nc usage beginning `nc [IPADDR PORT`, consistent with client-only
 nc. This still permits an outbound connection with a named-pipe shell bridge;
 neither nc -e nor a target-side listener is required. That bridge has not been
 run. Next dependency is attaching a supported USB Ethernet adapter through a
@@ -203,7 +203,7 @@ temporary and unencrypted; no listener is running yet.
 2026-11-12: the RTL8153 USB Ethernet adapter acquired `192.168.0.100`.
 The Mac's existing en14 address was read as `192.168.0.200`; its route to the
 Fantom used en14, with no network configuration change. A single Mac listener
-was started on `192.168.0.200:2323`. Jacob ran:
+was started on `192.168.0.200:2323`. The owner ran:
 
 ```sh
 mkfifo /tmp/oshell && sh -i </tmp/oshell 2>&1 | busybox nc 192.168.0.200 2323 >/tmp/oshell
@@ -222,7 +222,7 @@ The agent then directly executed read-only commands through that connection:
 This establishes working remote root over the USB Ethernet adapter/LAN route,
 not serial access through USB TO COMPUTER. The gadget is configured with a peer,
 but the peer's identity has not been measured. The agent made no target changes
-through the connection during verification. Jacob's bridge creates the temporary
+through the connection during verification. The owner's bridge creates the temporary
 FIFO and processes; no startup persistence, SSH credentials or BMC modification
 was added. Keep the on-screen session and Ethernet connection open for continued
 access. The live Mac exec session is 32936 in this conversation; future agents

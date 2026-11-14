@@ -1,6 +1,6 @@
 # Offline research queue
 
-Queued 2026-11-10 at Jacob's request. Starting research checkpoint: `80b740b`.
+Queued 2026-11-10 at the owner's request. Starting research checkpoint: `80b740b`.
 The practical target is a small custom engine running on the BMC render DSPs, with
 the i.MX8M handling UI/control. Current emitters produce verified fragments only.
 
@@ -224,7 +224,7 @@ Tonight's bounded input-stage milestone is complete (2026-11-11): the 86-byte
 stereo prefilter and 184-byte first filter execute entirely from packet bytes.
 The independent persistent model ring matches 120,000 native values through five
 wraps. Tests, original example and reproduction command are saved. Pause broader
-research after committing/syncing this checkpoint, as Jacob requested; require
+research after committing/syncing this checkpoint, as the owner requested; require
 resumption before pursuing another block or hardware-loading gap.
 
 Latest emulator result (2026-11-11): exact clipped-half interpolation now executes
@@ -436,7 +436,7 @@ The next useful offline questions, in order:
 
 ## Further pass: clearing, parent controls and other factory firmware
 
-From `ef39d1b`, continued the first three questions above and added Jacob's request
+From `ef39d1b`, continued the first three questions above and added the owner's request
 to inspect other Roland BMC products. The official MC-101 v1.82 and JUPITER-X
 v3.03 archives were downloaded, identified and compared offline. Original files,
 download pages, manifests and extracted members remain ignored/local.

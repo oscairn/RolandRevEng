@@ -137,7 +137,7 @@ be attempted. The client is `tools/fantom_core1_rom_probe.py`, using the existin
 Python 3.13 environment with mido/python-rtmidi. For example, from the repo:
 
 ```sh
-/Users/jacob/.pyenv/versions/3.13.7/bin/python3 tools/fantom_core1_rom_probe.py \
+~/.pyenv/versions/3.13.7/bin/python3 tools/fantom_core1_rom_probe.py \
   marker --out local/fantom-live-recovery/rom-reader-marker.json
 ```
 

@@ -1,6 +1,6 @@
 # Fantom-07 CORE0 key recovery and validated decryption
 
-2026-11-12 local date. **B6 ROM table material recovered from Jacob's Fantom-07
+2026-11-12 local date. **B6 ROM table material recovered from the owner's Fantom-07
 successfully decrypts both v1.08 BMC CORE0 payloads.** Each complete plaintext
 CRC32 exactly matches its update header. This note contains no key bytes.
 
@@ -23,7 +23,7 @@ as in the preceding marker trial; the duplication's cause remains unknown.
 This establishes the tested path and small ROM windows, without a full ROM
 dump. It does not establish a cross-core ownership lock or arbitrary memory
 access. No modified CORE0 image was flashed. Initial Ethernet SSH attempts timed
-out because the adapter was unplugged. After Jacob reconnected it, root SSH
+out because the adapter was unplugged. After the owner reconnected it, root SSH
 authenticated with the same pinned host key, the service was active, mi078 was
 running and the application/startup/Dropbear hashes were unchanged. The saved
 installer log confirmed `ROM DIAGNOSTIC bmc0 CORE1` CHECK OK.
@@ -66,7 +66,7 @@ before creating output. It never overwrites existing files. For an original
 extracted C0A member, from the repo:
 
 ```sh
-/Users/jacob/.pyenv/versions/3.13.7/bin/python3 tools/fantom_c0a_decrypt.py \
+~/.pyenv/versions/3.13.7/bin/python3 tools/fantom_c0a_decrypt.py \
   --input local/bmc0_MI078_C0A_up.bin \
   --key-file local/fantom-live-recovery/fantom-bmc0-b6-entry.bin \
   --output local/fantom-live-recovery/bmc0-core0-analysis.bin
